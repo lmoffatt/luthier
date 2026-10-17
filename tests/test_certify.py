@@ -296,6 +296,16 @@ def entry(law="L", cone="sha256:1", seed=0, outcome="Passed", grade="Sampled", b
             "date": "2026-10-14T00:00:00+00:00", "interpreter": "abc", "hosts": []}
 
 
+def test_a_store_under_a_directory_of_the_library_is_kept_apart_by_the_suite(monkeypatch, tmp_path):
+    # the core's bite 1 moved core.lut to lib/core/: its store, and any under lib/core/, goes to the
+    # suite's copy at its path under lib/, never to the library's own
+    monkeypatch.setenv(certify.LIBRARY_STORES, str(tmp_path))
+    core = certify.LIBRARY / "core" / "core.lut"
+    assert certify.store_path(core) == tmp_path / "core" / "core.cert.json"
+    assert certify.store_path(certify.LIBRARY / "numbers.lth") == tmp_path / "numbers.cert.json"
+    assert certify.store_path(tmp_path / "x" / "y.lut") == tmp_path / "x" / "y.cert.json"
+
+
 def test_a_store_round_trip(tmp_path):
     path = tmp_path / "x.lut"
     es = certify.record([], entry())

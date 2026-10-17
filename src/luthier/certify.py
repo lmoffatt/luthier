@@ -368,12 +368,13 @@ def store_path(path):
     prompt-tail.md] When the environment names a directory in `LUTHIER_LIBRARY_STORES`, the store
     of a file of the library (src/luthier/lib) is that directory's of the same name: the test suite
     reads and writes a copy of the library's stores there (tests/conftest.py), so that a run of it
-    beside `luthier certify` neither reverts nor sees what certify writes."""
+    beside `luthier certify` neither reverts nor sees what certify writes. A file under a directory
+    of the library (lib/core/core.lut, the core's bite 1) keeps its path under lib/ there."""
     path = Path(path)
     where = path.with_name(path.stem + ".cert.json")
     elsewhere = os.environ.get(LIBRARY_STORES)
-    if elsewhere and where.parent.resolve() == LIBRARY:
-        return Path(elsewhere) / where.name
+    if elsewhere and where.parent.resolve().is_relative_to(LIBRARY):
+        return Path(elsewhere) / where.parent.resolve().relative_to(LIBRARY) / where.name
     return where
 
 
@@ -526,6 +527,7 @@ def write_store(path, entries):
     if errors:
         raise StoreError(f"{store_path(path)}: " + "; ".join(errors))
     where = store_path(path)
+    where.parent.mkdir(parents=True, exist_ok=True)  # a directory of the library in the suite's copy
     tmp = where.with_name(where.name + ".tmp")
     tmp.write_text(json.dumps(entries, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     tmp.replace(where)
@@ -626,6 +628,7 @@ def add_entry(path, entry):
     write under a lock, since several test programs may add to one store at once."""
     import fcntl
     where = store_path(path)
+    where.parent.mkdir(parents=True, exist_ok=True)
     with open(where.with_name(where.name + ".lock"), "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         entries = read_store(path)

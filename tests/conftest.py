@@ -26,8 +26,9 @@ def library_stores_apart():
     written to while inside; the library's own are not touched, and the copy is removed after."""
     before = os.environ.get(certify.LIBRARY_STORES)
     with tempfile.TemporaryDirectory(prefix="library-stores-") as copy:
-        for store in LIBRARY.glob("*.cert.json"):
-            shutil.copyfile(store, Path(copy) / store.name)
+        for store in LIBRARY.rglob("*.cert.json"):  # lib/core/'s too, at their path under lib/
+            (Path(copy) / store.relative_to(LIBRARY)).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(store, Path(copy) / store.relative_to(LIBRARY))
         os.environ[certify.LIBRARY_STORES] = copy
         try:
             yield Path(copy)
