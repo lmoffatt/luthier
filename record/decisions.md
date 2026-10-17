@@ -2954,3 +2954,15 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-17; the line 
 Kind:       core (properties.lth, structures.lth, core.lut's list library), every theory's laws and
             helpers, their stores
 Status:     current
+
+D-2026-10-17-e  No version tags yet (v0.3 and v0.4 included, though v0.4's criteria were verified at
+                3470c54): the names are about to change at large (D-2026-10-17-b to -d), and Luthier
+                does not yet follow the discipline he wants. Item 40's tag waits for the core's
+                abstraction step.
+Author:     Luciano
+Quote:      "todavía no hagamos versionado ya que estamos haciendo cambios grandes en los nombres.
+            Luthier todavía no sigue la disciplina que yo quiero."
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-17; the line unknown until the
+            export)
+Kind:       tags and pushes; the plan's milestones
+Status:     current
