@@ -691,8 +691,10 @@ def regioned(entries, law, current, binding, base, combine=COMBINATION):
     each the binding's grade where it has cases under the binding and at most sampled where it has
     none (`regionGrade`); with no region, `base`. With the empty regions that capped it."""
     comb = COMBINATIONS[combine]
-    counts = binding_evidence(entries, law, current, binding)
     rs = law_regions([e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current])
+    if not rs:  # `NoRegionsLeaveTheGrade`, and no stretch is read (a demand's entries may be built in part)
+        return base, []
+    counts = binding_evidence(entries, law, current, binding)
     g, empty = base, []
     for r in reversed(rs):
         if counts.get(_key(r), 0):
