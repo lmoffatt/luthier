@@ -1,5 +1,285 @@
 [
  {
+  "law": "LoweringLosesNothing",
+  "cone": "sha256:5bcc5170e13ac73700edb74d9d6a6af075d790b462f73e4fb575546a3640a5ca",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "exactlyModels (Listed)",
+    "fingerprint": "sha256:60ce37fda5a9f6effd57896bf98db6ffcf560464c7b4f424bc9a41cac9ebb270"
+   },
+   {
+    "parameter": "d",
+    "generator": "demands (Listed)",
+    "fingerprint": "sha256:30badb8d03e1236bdf55af0c8b538e515584ea61862f937e6e554d3b7a287e6b,sha256:f517461b9fb25ce68f2fbf7ced027ef09e4253f2bc486239b9ab84cec954b0ad,sha256:6cd36c16858041256c919d1b6801fbcc2c70b4d6374ddad46433c283a846ade6"
+   },
+   {
+    "parameter": "law",
+    "generator": "laws (Listed)",
+    "fingerprint": "sha256:c734a7f696567b361c2a76561f4844b7990f1a0f65b09feb82b101b26ecd8949"
+   },
+   {
+    "parameter": "cone",
+    "generator": "cones (Listed)",
+    "fingerprint": "sha256:8bba6bc411f4e2e4419b83dee20207110502ba3a99ccc9e808084fc3a009d243"
+   },
+   {
+    "parameter": "e",
+    "generator": "entriesFor (Listed)",
+    "fingerprint": "sha256:7d5af882f6b4bc2cca2e06cc66be6b92a6eb0d1c9c0628f4e240cefdea4b13a6,sha256:f9cb1fd9ea0264013c6f31bb095d796ebd70a3fc90252a3246f8a6c4cbfd2f9f,sha256:92eeecb078b30e1566ac9604eacffa6464e8f86e259ca93f8eaaf8fdf4dcb5a1,sha256:96f4803f4f76babb310d87c5ec2d9e0bbc3e9ebfc7e44614e6c349be06d602f3"
+   },
+   {
+    "parameter": "g",
+    "generator": "ExhaustiveMode over Grade",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "servesAtExactly"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "sampledDemand"
+      },
+      {
+       "Printed": "assumedDemand"
+      },
+      {
+       "Printed": "casesDemand"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "law",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"L\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "cone",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:cccc\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "assumedPass"
+      },
+      {
+       "Printed": "sampledPass"
+      },
+      {
+       "Printed": "provedPass"
+      },
+      {
+       "Printed": "failed"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 60,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "k = servesAtExactly, d = sampledDemand, law = \"L\", cone = \"sha256:cccc\", e = sampledPass, g = AssumedGrade"
+  },
+  "date": "2026-10-17T19:37:19+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "e boundary"
+    },
+    "n": 60
+   }
+  ]
+ },
+ {
+  "law": "NoPriceRefusesAssumed",
+  "cone": "sha256:866d862f4e92c1fc3b215e3962ef07eef025d4473b2cc1c877d1a304332900ee",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "anyPassModels (Listed)",
+    "fingerprint": "sha256:5f5ee2e8ec1442d611b8626bc8b6189d86e1870ad93ac4d800d367227d99c7e5"
+   },
+   {
+    "parameter": "d",
+    "generator": "demands (Listed)",
+    "fingerprint": "sha256:30badb8d03e1236bdf55af0c8b538e515584ea61862f937e6e554d3b7a287e6b,sha256:f517461b9fb25ce68f2fbf7ced027ef09e4253f2bc486239b9ab84cec954b0ad,sha256:6cd36c16858041256c919d1b6801fbcc2c70b4d6374ddad46433c283a846ade6"
+   },
+   {
+    "parameter": "law",
+    "generator": "laws (Listed)",
+    "fingerprint": "sha256:c734a7f696567b361c2a76561f4844b7990f1a0f65b09feb82b101b26ecd8949"
+   },
+   {
+    "parameter": "cone",
+    "generator": "cones (Listed)",
+    "fingerprint": "sha256:8bba6bc411f4e2e4419b83dee20207110502ba3a99ccc9e808084fc3a009d243"
+   },
+   {
+    "parameter": "e",
+    "generator": "anyEntries (Listed)",
+    "fingerprint": "sha256:7d5af882f6b4bc2cca2e06cc66be6b92a6eb0d1c9c0628f4e240cefdea4b13a6,sha256:f9cb1fd9ea0264013c6f31bb095d796ebd70a3fc90252a3246f8a6c4cbfd2f9f,sha256:92eeecb078b30e1566ac9604eacffa6464e8f86e259ca93f8eaaf8fdf4dcb5a1,sha256:96f4803f4f76babb310d87c5ec2d9e0bbc3e9ebfc7e44614e6c349be06d602f3,sha256:33b90c232cc54ee64a0aff1554ba185d540c32df5181c27f533a654417e69c80"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "servesAnyPass"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "sampledDemand"
+      },
+      {
+       "Printed": "assumedDemand"
+      },
+      {
+       "Printed": "casesDemand"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "law",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"L\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "cone",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:cccc\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "assumedPass"
+      },
+      {
+       "Printed": "sampledPass"
+      },
+      {
+       "Printed": "provedPass"
+      },
+      {
+       "Printed": "failed"
+      },
+      {
+       "Printed": "assumedElsewhere"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 15,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "k = servesAnyPass, d = sampledDemand, law = \"L\", cone = \"sha256:cccc\", e = assumedPass"
+  },
+  "date": "2026-10-17T19:37:18+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
   "law": "RanIsASpecimenOfTheAsked",
   "cone": "sha256:67156851405585302c34968a4cb4161b8133c92502dbef81a83583d1823d0565",
   "binding": [
@@ -190,284 +470,6 @@
   "grade": null,
   "outcome": {
    "ControlRefuted": "r = swappedRun"
-  },
-  "date": "2026-10-17T16:49:13+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "LoweringLosesNothing",
-  "cone": "sha256:e80d6c27de884cb8d9cabe57277cfad6f1e0e4daff9e5582b97ace506aea0ace",
-  "binding": [
-   {
-    "parameter": "k",
-    "generator": "exactlyModels (Listed)",
-    "fingerprint": "sha256:7a4b8a710bc2142e2d66cc92d13ce4647281d0b9b655f93f230a248d3f4dbd7b"
-   },
-   {
-    "parameter": "d",
-    "generator": "demands (Listed)",
-    "fingerprint": "sha256:30badb8d03e1236bdf55af0c8b538e515584ea61862f937e6e554d3b7a287e6b,sha256:f517461b9fb25ce68f2fbf7ced027ef09e4253f2bc486239b9ab84cec954b0ad,sha256:6cd36c16858041256c919d1b6801fbcc2c70b4d6374ddad46433c283a846ade6"
-   },
-   {
-    "parameter": "law",
-    "generator": "laws (Listed)",
-    "fingerprint": "sha256:c734a7f696567b361c2a76561f4844b7990f1a0f65b09feb82b101b26ecd8949"
-   },
-   {
-    "parameter": "cone",
-    "generator": "cones (Listed)",
-    "fingerprint": "sha256:8bba6bc411f4e2e4419b83dee20207110502ba3a99ccc9e808084fc3a009d243"
-   },
-   {
-    "parameter": "e",
-    "generator": "entriesFor (Listed)",
-    "fingerprint": "sha256:a9be1653838187d134558dc57465cf71aadbbb499cf9e563e9a5eebea1866c63,sha256:2826a3aef710b0f4744e4775d9642cebb72aae2ef10e9fc5bd3ca0b4b01c1333,sha256:79897db4330c609e61461de6f57947d836e45b965216255b9376de6d0df56146,sha256:5e3e1983b748b11683bb0ee0b73b403f36700fd16c7bc2c7ec7e78fc79a60fe2"
-   },
-   {
-    "parameter": "g",
-    "generator": "ExhaustiveMode over Grade",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "k",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "servesAtExactly"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "sampledDemand"
-      },
-      {
-       "Printed": "assumedDemand"
-      },
-      {
-       "Printed": "casesDemand"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "law",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"L\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "cone",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"sha256:cccc\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "assumedPass"
-      },
-      {
-       "Printed": "sampledPass"
-      },
-      {
-       "Printed": "provedPass"
-      },
-      {
-       "Printed": "failed"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "g",
-    "reach": "Support"
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 60,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "k = servesAtExactly, d = sampledDemand, law = \"L\", cone = \"sha256:cccc\", e = sampledPass, g = AssumedGrade"
-  },
-  "date": "2026-10-17T16:49:13+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "e boundary"
-    },
-    "n": 60
-   }
-  ]
- },
- {
-  "law": "NoPriceRefusesAssumed",
-  "cone": "sha256:d5a4fcfbc5d6fbf8d3ab3bdbd30e4d96f45516550816d83d6a6fe5a2b4af8df0",
-  "binding": [
-   {
-    "parameter": "k",
-    "generator": "anyPassModels (Listed)",
-    "fingerprint": "sha256:f8af0b5a567cbc9941d9adf664204bd5dc28a48bc55768c689e75c85b4504959"
-   },
-   {
-    "parameter": "d",
-    "generator": "demands (Listed)",
-    "fingerprint": "sha256:30badb8d03e1236bdf55af0c8b538e515584ea61862f937e6e554d3b7a287e6b,sha256:f517461b9fb25ce68f2fbf7ced027ef09e4253f2bc486239b9ab84cec954b0ad,sha256:6cd36c16858041256c919d1b6801fbcc2c70b4d6374ddad46433c283a846ade6"
-   },
-   {
-    "parameter": "law",
-    "generator": "laws (Listed)",
-    "fingerprint": "sha256:c734a7f696567b361c2a76561f4844b7990f1a0f65b09feb82b101b26ecd8949"
-   },
-   {
-    "parameter": "cone",
-    "generator": "cones (Listed)",
-    "fingerprint": "sha256:8bba6bc411f4e2e4419b83dee20207110502ba3a99ccc9e808084fc3a009d243"
-   },
-   {
-    "parameter": "e",
-    "generator": "anyEntries (Listed)",
-    "fingerprint": "sha256:a9be1653838187d134558dc57465cf71aadbbb499cf9e563e9a5eebea1866c63,sha256:2826a3aef710b0f4744e4775d9642cebb72aae2ef10e9fc5bd3ca0b4b01c1333,sha256:79897db4330c609e61461de6f57947d836e45b965216255b9376de6d0df56146,sha256:5e3e1983b748b11683bb0ee0b73b403f36700fd16c7bc2c7ec7e78fc79a60fe2,sha256:0ae36903bb8d93b206a5a9866a45b2090b08857442b8cb2cfbc95efa0789bebe"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "k",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "servesAnyPass"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "sampledDemand"
-      },
-      {
-       "Printed": "assumedDemand"
-      },
-      {
-       "Printed": "casesDemand"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "law",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"L\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "cone",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"sha256:cccc\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "assumedPass"
-      },
-      {
-       "Printed": "sampledPass"
-      },
-      {
-       "Printed": "provedPass"
-      },
-      {
-       "Printed": "failed"
-      },
-      {
-       "Printed": "assumedElsewhere"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 15,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "k = servesAnyPass, d = sampledDemand, law = \"L\", cone = \"sha256:cccc\", e = assumedPass"
   },
   "date": "2026-10-17T16:49:13+00:00",
   "interpreter": "v0.2",
