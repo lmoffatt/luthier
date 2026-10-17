@@ -293,8 +293,10 @@ def test_a_changed_definition_makes_the_entry_stale(laws, capsys):
 def test_the_entry_holds_what_certification_lth_names(laws):
     tester.run_tests(laws, store=True)
     e = next(e for e in certify.read_store(laws) if e["law"] == "PlusCommutes" and e["seed"] == 7)
+    # 7.S9 (3j j2a): the entry records its regions, here none of a type, a cutoff or a premise
     assert set(e) == {"law", "cone", "binding", "seed", "cases", "budgets", "reach", "evidence", "grade",
-                      "outcome", "date", "interpreter", "hosts"}
+                      "outcome", "date", "interpreter", "hosts", "regions"}
+    assert e["regions"] == []
     assert e["cases"] == 200 and e["grade"] == "Sampled" and e["outcome"] == "Passed"
     assert [d["parameter"] for d in e["binding"]] == ["x", "y"]
     assert e["reach"][0] == {"parameter": "x", "reach": {"Interval": [-10.0, 10.0]}}
