@@ -97,7 +97,7 @@ A member of a census may be a family, `from f`, where `f` builds a value from it
 
 ## §8 Budgets
 
-**7.S8. Every budget is an argument of the test, recorded in the entry.** [implemented] This is L5.18 applied to tests (D-2026-10-06-ab): the interpreter holds no fixed number for any of these. The budgets are the tries per value of a filter; the redraws of a dependent record; the probes of a quantified law inside a type; the draws per evaluated case, as a multiple of `n`; the largest size, with a schedule that reaches it within the `n` cases; the product of finite parameters above which a covering array chooses the cases; the total probability of special values, and of the atom at 0 of a `log` metric; the runs that estimate a level (spec 7.S17), and the seeds per control that measure power (spec 7.S19); the count of draws that certifies the distribution of a generator (spec 7.S1); and the fuel, the reduction steps a case or a draw may take before the line is cut. Each is a field of `Budgets` (generators.lth §6) with its default in test.lth's `defaultBudgets` (2000 tries, 20000 cases before a covering array, a fuel of 3,000,000); the size and `n` are the spec's own fields. A test line gives its own budgets as the argument `budgets` of `test` (`withFuel f defaultBudgets` changes the fuel alone), and `luthier test` and `luthier certify` take `--fuel`, which replaces the fuel of every line for that run (the coordinator's answer in record/plan/core-2026-10-17/prompt-budgets.md). Every entry records the budgets it ran with, the fuel given included, and none is in its identity (spec 7.S9): fuel only cuts a run (D-2026-10-15-g). The tester reads the tries, the covering's bound, the fuel and the two masses; the redraws, the probes and the draws per case have nothing to bound in today's code, which held 50 redraws and 5 probes when this clause was decided and holds neither now.
+**7.S8. Every budget is an argument of the test, recorded in the entry.** [implemented] This is L5.18 applied to tests (D-2026-10-06-ab): the interpreter holds no fixed number for any of these. The budgets are the tries per value of a filter; the redraws of a dependent record; the probes of a quantified law inside a type; the draws per evaluated case, as a multiple of `n`; the largest size, with a schedule that reaches it within the `n` cases; the product of finite parameters above which a covering array chooses the cases; the total probability of special values, and of the atom at 0 of a `log` metric; the runs that estimate a level (spec 7.S17), and the seeds per control that measure power (spec 7.S19); the count of draws that certifies the distribution of a generator (spec 7.S1); and the fuel, the reduction steps a case or a draw may take before the line is cut; and the two bounds of what the region classifier reads from a case, the doubles of one value (`regionNumbers`, 4000) and the entries of a matrix written as a function, read one by one (`regionEntries`, 400; a larger one gives the classifier no numbers), constants of `tester.py` until the core's bite 4b (2026-10-18, P11). Each is a field of `Budgets` (generators.lth §6) with its default in test.lth's `defaultBudgets` (2000 tries, 20000 cases before a covering array, a fuel of 3,000,000); the size and `n` are the spec's own fields. A test line gives its own budgets as the argument `budgets` of `test` (`withFuel f defaultBudgets` changes the fuel alone), and `luthier test` and `luthier certify` take `--fuel`, which replaces the fuel of every line for that run (the coordinator's answer in record/plan/core-2026-10-17/prompt-budgets.md). Every entry records the budgets it ran with, the fuel given included, and none is in its identity (spec 7.S9): fuel only cuts a run (D-2026-10-15-g). The tester reads the tries, the covering's bound, the fuel, the two masses and the classifier's two bounds; the redraws, the probes and the draws per case have nothing to bound in today's code, which held 50 redraws and 5 probes when this clause was decided and holds neither now.
 
 ## §9 Certificates of definitions
 
@@ -151,6 +151,25 @@ it is never imported, so the cases a law and its controls share are written in a
 import. Its entries go to the stores of the claims (7.S13, spec 12.S10), and `luthier certify`
 refuses a file of another kind. The suites of `tests/tester/` are `*_laws.test.lut` and
 `*_controls.test.lut` (D-2026-10-16-e).
+
+**7.S22. A conjunction of laws is tested conjunct by conjunct.** [implemented] A law whose body is a
+conjunction `&` of partially applied laws, `Equivalence (A : U) (r : A -> A -> Bool) := Reflexive A r
+& Symmetric A r & Transitive A r`, means the conjunction of each conjunct quantified over the
+variables it leaves missing, (∀ x. Reflexive A r x) ∧ (∀ p. Symmetric A r p) ∧ (∀ c. Transitive A r
+c) (D-2026-10-18-f). The kernel does not reduce such a `&`, so the tester splits it: each conjunct is
+tested as a law of its own, its parameters the law's and then its missing variables, each drawn by
+the generators of its type and bound by name as any parameter (spec 7.R1); a conjunct whose law is
+itself a conjunction (`Preorder A r` in `PartialOrder`) is split in turn. A line on the law gives
+each conjunct its entry, in the store of the law's claim, under the law's name and the hash of its
+cone, with the conjunct named in its identity (spec 7.S9) and the conjuncts listed. The law's grade
+is the demand's combination of its conjuncts' grades, the weakest by default (spec 5.S8), and it has
+none while one conjunct has none or is refuted; a run's demand of the law is served only when each
+conjunct is. A control of the law passes when it refutes one conjunct: the conjuncts run in order
+until one is refuted, and the line writes one control entry, the law's, with the conjunct it refuted.
+A binding by name binds every conjunct's variable of that name, so two conjuncts whose variables
+share a name and differ in type are bound apart by type. [implemented] In `tester.py`
+(`conjunction_parts`, `_run_conjunction`) and `certify.py` (`certificate_grade_and_empty`,
+`served`), the core's bite 4b (record/plan/core-2026-10-17/prompt-bite-4b.md).
 
 ## Open
 
