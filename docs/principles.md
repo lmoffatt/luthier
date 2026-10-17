@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 eb615c12ec56, commit 71e4f9e) by `scripts/project_principles.py` (project_principles v2) on 2026-10-16; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 1b1a1d68ab2d, commit dd69450) by `scripts/project_principles.py` (project_principles v2) on 2026-10-17; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -532,6 +532,13 @@ its type).
   are the demand's cutoffs (L5.18, D-2026-10-14-c), and the verdict carries its error rates in the
   certificate as the price of a sampled grade, operated on when the cost types come (G2, L12.6). A law
   universal over seeds is not a statistical law (D-2026-10-15-b). [settled]
+- L9.16 Sampling bounds the failure fraction under its distribution and says nothing of its null
+  sets. The cases a law turns on come from three finite sources: the degenerate cases its type's
+  theory declares once, the two sides of each cutoff and the boundary of each premise of the law, and
+  each branch of the code in its cone; the generator gives them mass or they are listed, and the
+  evidence is kept per region, each with its n and its bound, the demand combining the grades, the
+  weakest by default. A label an author adds is informative and enters no grade (D-2026-10-16-i,
+  D-2026-10-16-j). [proposed]
 References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d,
 D-2026-10-13-ad.
 Rests on: O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r).
