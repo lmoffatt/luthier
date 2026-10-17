@@ -12,8 +12,8 @@ import "test.lth" test ExhaustiveMode Grade Proved Cases defaultBudgets
 import "generators.lth" Binding
 import "laws.lth" Listed Cited
 import "certification.lth" Certifying Recording Entry Certificate Demand ConeName Refusal Outcome Passed Failed NotRunFor
-  fuelSpent outOfFuel known recordEntry anyServes appendRefusals failureAt Current
-  ADisagreeingReplayIsKept AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused
+  fuelSpent outOfFuel known recordEntry anyServes appendRefusals failureAt Current agree disputedAt
+  ANewIdentityGoesInFront AnAgreeingReplayAddsNothing AnAgreeingPairSettles ADisagreeingReplayIsKept AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused
 import "certification_model.lut" certifying anyFailure passes weakestOfBests serves stateOf
 
 entry (l : String) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
@@ -38,6 +38,27 @@ absorbing : Recording certifying := { record := absorb }
 -- a store that writes a not-run for lack of fuel
 keepFuel (e : Entry) (es : List Entry) : List Entry := if outOfFuel e.outcome then cons e es else recordEntry certifying e es
 keepingFuel : Recording certifying := { record := keepFuel }
+-- a store that drops an identity it has not seen
+dropNew (e : Entry) (es : List Entry) : List Entry :=
+  match known certifying (certifying.identity e) es { just f -> recordEntry certifying e es ; nothing -> es }
+droppingNew : Recording certifying := { record := dropNew }
+-- a store that writes an exact replay that agrees, where no disagreement stands
+writeAgreeing (e : Entry) (es : List Entry) : List Entry :=
+  match known certifying (certifying.identity e) es {
+    just f -> if agree e f and not (disputedAt certifying.identity (certifying.identity e) es) then cons e es
+              else recordEntry certifying e es ;
+    nothing -> cons e es }
+writingAgreeing : Recording certifying := { record := writeAgreeing }
+-- a store that leaves a disagreement standing when an agreeing replay comes
+keepDispute (e : Entry) (es : List Entry) : List Entry :=
+  match known certifying (certifying.identity e) es {
+    just f -> if agree e f and disputedAt certifying.identity (certifying.identity e) es then es
+              else recordEntry certifying e es ;
+    nothing -> cons e es }
+keepingDispute : Recording certifying := { record := keepDispute }
+droppingModels : List (Recording certifying) := [droppingNew]
+agreeingModels : List (Recording certifying) := [writingAgreeing]
+disputeModels : List (Recording certifying) := [keepingDispute]
 absorbingModels : List (Recording certifying) := [absorbing]
 fuelModels : List (Recording certifying) := [keepingFuel]
 
@@ -79,3 +100,9 @@ test "ADisagreementRefutes" ExhaustiveMode (seed <- 20261016) (whereBindings <- 
 test "ADisagreementIsRefused" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "blindModels",
   bind "n" "names", bind "d" "demands", bind "e" "ofTheLaw", bind "o" "outcomes", bind "g" "grades",
   bind "es" "behindStores"]) (control <- true)
+test "ANewIdentityGoesInFront" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
+  bind "r" "droppingModels", bind "e" "entries", bind "es" "stores"]) (control <- true)
+test "AnAgreeingReplayAddsNothing" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
+  bind "r" "agreeingModels", bind "e" "entries", bind "es" "stores"]) (control <- true)
+test "AnAgreeingPairSettles" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
+  bind "r" "disputeModels", bind "e" "entries", bind "es" "stores"]) (control <- true)
