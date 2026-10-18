@@ -1,4 +1,5 @@
 """Hand-written domains for program.lth laws (519bdf3/a73fa4f), brief v2, no seed."""
+from pathlib import Path
 import pytest
 from luthier.parse import parse
 from luthier.surface import Parsed
@@ -443,12 +444,13 @@ def test_a_match_binder_shadows_an_imported_definition(tmp_path):
     # is a fresh name; 12.S22: an unlisted name is not in scope)
     (tmp_path / 'a.lut').write_text('kept (r : Int) : Bool := r < 1\nother : Real := 1.0\n')
     b = tmp_path / 'b.lut'
-    b.write_text('import "a.lut" other\nf (x : Real) : Real := match x * 2.0 { kept -> kept + 1.0 }\n'
-                 'h (r : Real) : Real := r\ng (x : Real) : Real := h (match x * 2.0 { kept -> kept })\n')
+    # (bite 4: on `Float64`, since `Real`, the ideal, names no model of `*`)
+    b.write_text('import "a.lut" other\nf (x : Float64) : Float64 := match x * 2.0 { kept -> kept + 1.0 }\n'
+                 'h (r : Float64) : Float64 := r\ng (x : Float64) : Float64 := h (match x * 2.0 { kept -> kept })\n')
     assert not c.check(program(b.read_text()), b)
     # and a definition of the file itself: the binder shadows it too
-    p = program('kept (r : Int) : Bool := r < 1\nf (x : Real) : Real := match x * 2.0 { kept -> kept + 1.0 }\n'
-                'h (r : Real) : Real := r\ng (x : Real) : Real := h (match x * 2.0 { kept -> kept })\n')
+    p = program('kept (r : Int) : Bool := r < 1\nf (x : Float64) : Float64 := match x * 2.0 { kept -> kept + 1.0 }\n'
+                'h (r : Float64) : Float64 := r\ng (x : Float64) : Float64 := h (match x * 2.0 { kept -> kept })\n')
     assert not [x for x in c.check(p) if x.rule == '4.R9']
 
 
@@ -475,15 +477,20 @@ def test_an_unlisted_imported_name_never_resolves_a_name_of_the_importer(tmp_pat
 
 def test_typing_rules_run_act_by_act_when_the_file_does_not_elaborate_whole():
     # check bite 6: a record refinement (elaborate.py: "record refinements require check.py") left
-    # the whole file untyped, so 4.R9 answered "no violation" on every act
+    # the whole file untyped, so 4.R9 answered "no violation" on every act; since the core's bite 4
+    # a record refinement is the subtype of its record (as the tester reads it) and every act is
+    # typed in the whole file's context, one act left out alone
     src = 'Pair : U := { x y : Int | x < y }\nf (x : Int) : Int := x\nbad := f "s"\nok := f 1\n'
     p = program(src)
     assert [(x.rule, x.name) for x in c.check(p)] == [('4.R9', 'bad')]
     line = c.report(p)[0]
-    assert (line.kind, line.name) == ('typed', '3 of 4 acts')
-    assert line.message == 'not typed: Pair (record refinements require check.py)'
-    # a rule on an untyped act answers nothing (its verdict is not covered), as before
-    assert not any(x.name == 'Pair' for x in c.check(p))
+    assert (line.kind, line.name) == ('typed', '4 of 4 acts')
+    p = program('Pair : U := { x y : Int | x < y }\nf (x : Int) : Int := x + "s"\nok := f 1\n')
+    line = c.report(p)[0]
+    assert (line.kind, line.name) == ('typed', '2 of 3 acts') and line.message.startswith('not typed: f (')
+    # a rule on an untyped act answers nothing (its verdict is not covered), as before, and the
+    # typing's refusal is reported on it
+    assert [(x.rule, x.name) for x in c.check(p)] == [('4.R9', 'f')]
 
 
 def test_acts_read_alone_but_not_together_are_kept_one_by_one():
@@ -494,20 +501,21 @@ def test_acts_read_alone_but_not_together_are_kept_one_by_one():
     assert any(x.rule == '4.R9' and x.name == 'bad' for x in c.check(p))
 
 
-def test_an_alias_with_a_record_refinement_is_untyped():
-    # read only where it is used; there it is left out and the user typed with `P` as a bare name
+def test_an_alias_with_a_record_refinement_is_typed():
+    # read only where it is used; since the core's bite 4 a record refinement is the subtype of its
+    # record, so `p.x` reads the record's field
     p = program('P = { x y : Int | x < y }\nf (x : Int) : Int := x\n')
     assert c.report(p)[0].message == 'the whole file elaborates.'
     p = program('P = { x y : Int | x < y }\nf (p : P) : Int := p.x\ng (x : Int) : Int := x\nbad := g "s"\n')
-    assert c.report(p)[0] == c.Report('typed', '3 of 4 acts', 'not typed: P (record refinements require check.py)')
+    assert c.report(p)[0] == c.Report('typed', '4 of 4 acts', 'the whole file elaborates.')
     assert any(x.rule == '4.R9' and x.name == 'bad' for x in c.check(p))
 
 
 def test_cli_verbose_says_how_many_acts_are_typed(tmp_path, capsys):
     path = tmp_path / 'case.lut'
-    path.write_text('Pair : U := { x y : Int | x < y }\nf (x : Int) : Int := x\n')
-    assert main(['check', '-v', str(path)]) == 0
-    assert f'{path}:1: typed 1 of 2 acts: not typed: Pair (record refinements require check.py)' in capsys.readouterr().out
+    path.write_text('Pair : U := { x y : Int | x < y }\nf (x : Int) : Int := x\ng : Int := 1 + "s"\n')
+    assert main(['check', '-v', str(path)]) == 1
+    assert f'{path}:1: typed 2 of 3 acts: not typed: g (' in capsys.readouterr().out
     path.write_text('x : Int := 1\n')
     assert main(['check', '-v', str(path)]) == 0
     assert f'{path}:1: typed 1 of 1 acts: the whole file elaborates.' in capsys.readouterr().out
@@ -551,3 +559,12 @@ def test_Law_is_a_verdict():
     # 4.R6, 5.S6: a body typed `(F : U) -> Law` fits a declared Law
     p = program(open('src/luthier/lib/algebra.lth').read())
     assert not any(x.rule == '4.R6' for x in c.check(p))
+
+
+def test_a_shared_field_name_is_resolved_once_qualified():
+    # the core's bite 4 (rule 2.2.3): r13_structure_ambiguous.reject.lut refuses `d 1.0 2.0`, a field
+    # of two structures with models at `Float64`; qualified, each resolves
+    src = (Path(__file__).parent / 'spec' / 'r13_structure_ambiguous.reject.lut').read_text()
+    assert [(x.rule, x.name) for x in c.check(program(src))] == [('4.R13', 'far')]
+    for qualified in ('Metric.d', 'Ultrametric.d'):
+        assert not c.check(program(src.replace('far : Float64 := d 1.0 2.0', f'far : Float64 := {qualified} 1.0 2.0')))

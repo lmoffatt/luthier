@@ -11,7 +11,7 @@ import pytest
 from luthier import term as t
 from luthier.surface import Parsed, TermBody
 from luthier.parse import parse
-from luthier.elaborate import ElaborationError, elaborate_program, elaborate_term, apps
+from luthier.elaborate import ElaborationError, TypingError, elaborate_program, elaborate_term, apps
 from luthier.kernel import alpha_equal
 
 
@@ -110,9 +110,13 @@ def test_lambda_block_item_expected_type():
              t.Let('b', t.Pi('y', I, I), t.Lam('y', I, V('y')), V('b'))))
 
 
-def test_lambda_without_expected_type_keeps_hole():
-    eq('fn x { x }', t.Lam('x', t.Hole('type'), V('x')))
-    eq('unknown (fn x { x })', t.App(V('unknown'), t.Lam('x', t.Hole('type'), V('x'))))
+def test_lambda_without_expected_type_has_a_named_unknown():
+    # the core's bite 4: the parameter's type is the principal type's variable, `?x1`, never the
+    # old `Hole('type')`; the annotation is erased in the hash (D-2026-10-15-e)
+    for text in ['fn x { x }', 'unknown (fn x { x })']:
+        e = term(text, SCOPE)
+        lam = e if isinstance(e, t.Lam) else e.argument
+        assert isinstance(lam.type, t.Hole) and lam.type.name.startswith('?x')
 
 
 def test_lambda_expected_type_renames_dependent_binders():
@@ -386,13 +390,17 @@ def test_a_primitive_refining_a_type_is_a_type_and_its_arrow_is_the_arrow():
     from luthier.elaborate import context_of
     c = context_of(program(CORE.read_text()))
     f = V('Float64')
+    # (the core's bite 4: a binding the core makes elaborates to the kernel's symbol, which is what a
+    # run reduces, and a value whose type names no model is refused, never the bare symbol)
     for name, op in (('floatPlus', '+'), ('floatMinus', '-'), ('floatTimes', '*'), ('floatDivide', '/')):
         assert c.types[name] == t.Pi('_', f, t.Pi('_', f, f))
-        assert c.operators[(op, f)] == V(name)
-    assert c.operators[('+', V('Int'))] == V('intPlus')
-    eq('x + y', apps(V('floatPlus'), [V('x'), V('y')]), CORE.read_text() + '\nx : Float64\ny : Float64')
-    # a value declared at a type is not a type: `r + s` on `Real` stays the operator
-    eq('r + s', apps(V('+'), [V('r'), V('s')]), 'Real : U := primitive "real"\nr : Real\ns : Real')
+        assert c.operators[(op, f)] == V(op)
+        assert any(b.name == name and b.domain == f for b in c.bindings[op])
+    assert c.operators[('+', V('Int'))] == V('+')
+    eq('x + y', apps(V('+'), [V('x'), V('y')]), CORE.read_text() + '\nx : Float64\ny : Float64')
+    # a value declared at a type is not a type, and `Real`, the ideal, has no `+`
+    with pytest.raises(TypingError, match='Real names no model of'):
+        term('r + s', 'Real : U := primitive "real"\nr : Real\ns : Real')
 
 
 def test_an_implication_in_type_position_is_the_arrow():
@@ -433,3 +441,100 @@ def test_applied_label_is_an_application_not_an_injection():
     assert len(p) == 1 and isinstance(p[0], t.Define)
     assert isinstance(p[0].type, t.Sum)
     assert p[0].body == t.App(V('int'), t.Lit(t.IntConst(1)))
+
+
+# ---------------------------------------------------------------------- the core's bite 4
+
+def test_operator_resolved_under_instantiation_and_through_a_subtype():
+    # 4.R13: `+` at `Nat` and at `Fin n` is `Int`'s (a subtype's base); a binding at `List A`
+    # matches `List Int`, its type parameter applied
+    eq('i + 1', bin('+', V('i'), num(1)), 'n : Int\ni : Fin n')
+    eq('xs + ys', apps(V('appendList'), [I, V('xs'), V('ys')]),
+       'appendList (A : U) (xs ys : List A) : List A\noperator + := appendList\nxs : List Int\nys : List Int')
+
+
+def test_operator_refusals_name_the_type_and_the_candidates():
+    with pytest.raises(TypingError, match='takes Int, but "a" has type String'):
+        term('x + "a"', 'x : Int')
+    with pytest.raises(TypingError, match='the type of the left operand is not known'):
+        term('fn x { x + 1 }', '')
+
+
+def test_a_claim_binds_a_model_and_a_field_resolves_by_type():
+    ctx = ('Sized (C : U) : { size : C -> Int }\nlen (A : U) (xs : List A) : Int\n'
+           'ListIsSized (A : U) : Bool := Sized (List A) { size := fn xs { len A xs } }\nxs : List String')
+    e = term('size xs', ctx)
+    assert isinstance(e, t.App) and isinstance(e.function, t.Proj) and e.function.label == 'size'
+    # the model is the claim's, at `A := String`
+    assert alpha_equal(e.function.record, t.RecordValue((('size', t.Lam('xs', t.App(V('List'), V('String')),
+                                                                      apps(V('len'), [V('String'), V('xs')]))),)))
+    # qualified, and with its model written: the same projection
+    assert alpha_equal(term('Sized.size xs', ctx), e)
+    m = term('Sized.size m xs', ctx + '\nm : Sized (List String)')
+    assert m == t.App(t.Proj(V('m'), 'size'), V('xs'))
+    with pytest.raises(TypingError, match='no model of Sized at Int'):
+        term('size 3', ctx)
+
+
+def test_an_omitted_structure_parameter_is_filled_from_the_type():
+    # rule 2.2.2 (D-2026-10-18-g): `(o : Object A)` omitted is the model `A` names; passed by name it
+    # is the author's
+    ctx = ('Object (A : U) : { eq : A -> A -> Bool }\nIntIsAnObject : Bool := Object Int { eq := fn a b { a == b } }\n'
+           'member (A : U) (o : Object A) (x : A) (xs : List A) : Bool\nparity : Object Int\nxs : List Int')
+    filled = term('member Int 3 xs', ctx)
+    _, args = filled, []
+    while isinstance(_, t.App): args.append(_.argument); _ = _.function
+    assert isinstance(args[2], t.RecordValue)
+    assert term('member Int parity 3 xs', ctx) == apps(V('member'), [I, V('parity'), num(3), V('xs')])
+    assert term('member Int 3 xs (o <- parity)', ctx) == apps(V('member'), [I, V('parity'), num(3), V('xs')])
+
+
+def test_a_bare_conjunction_of_laws_is_a_verdict():
+    # D-2026-10-18-f: each conjunct a law over its own variables; bite 4b's tester splits it
+    p = program(open(Path(__file__).parent / 'spec' / 'k_bare_conjunction.accept.lut').read())
+    from luthier.elaborate import context_of, infer
+    c = context_of(p)
+    for d in elaborate_program(p, c):
+        if isinstance(d, t.Define) and d.name == 'Equivalence':
+            assert law_value_of(infer(d.body, c)) == V('Bool')
+
+
+def law_value_of(ty):
+    while isinstance(ty, t.Pi): ty = ty.codomain
+    return ty
+
+
+def library_files():
+    root = Path(__file__).resolve().parents[1]
+    for d in ('src/luthier/lib', 'examples', 'tests/tester'):
+        yield from sorted([*(root / d).rglob('*.lth'), *(root / d).rglob('*.lut')])
+
+
+def test_infer_is_total_on_the_library():
+    # execution.md §6, bite 4 (a): every definition of every file of the library, the examples and
+    # the test programs elaborates in its file's context (its imports and core's) and `infer` gives
+    # its body a type with no `Hole('type')`, the old "not inferred"
+    from luthier.check import load_imports, hidden_constructors
+    from luthier.elaborate import context_of, elaborate_act, infer, has_hole
+    from luthier import surface as s
+    defects = []
+    for path in library_files():
+        r = parse(path.read_text(encoding='utf-8'))
+        assert isinstance(r, Parsed), path
+        own = tuple(a for a in r.program if not isinstance(a, s.ImportAct))
+        imported = tuple(load_imports(r.program, path))
+        names = {a.name for a in own if hasattr(a, 'name')}
+        c = context_of(tuple(a for a in imported if getattr(a, 'name', None) not in names) + own)
+        c.constructors -= set(hidden_constructors(r.program, imported))
+        for act in own:
+            if not isinstance(act, s.Define) or isinstance(act.body, s.DataBody):
+                continue
+            try:
+                if act in c.errors:
+                    raise c.errors[act]
+                ty = infer(elaborate_act(act, c).body, c)
+                if has_hole(ty):
+                    defects.append(f'{path.name} {act.name}: {ty}')
+            except ElaborationError as e:
+                defects.append(f'{path.name} {act.name}: {e}')
+    assert not defects, '\n'.join(defects[:20])
