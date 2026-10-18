@@ -14,7 +14,7 @@
 -- data, `test "x.lut"` the action); laws.lth; generators.lth. Pattern of ebnf.lth.
 --
 -- What this file states. `test` builds a `TestSpec`, a value the module keeps (D9): what law to
--- test, under which mode (every value, or a sample with its metric), how many cases, at what
+-- test, under which mode (every value, or a sample with its placement), how many cases, at what
 -- size, from which seed, with which bindings and budgets. Running it is an action, the module's
 -- `test "x.lut"` or `luthier test`; a model of `Tester` runs a spec and gives the evidence of
 -- laws.lth: the points of the law's domain with their evidence and the coverage the run reached,
@@ -29,17 +29,17 @@
 --      cases asked or not run (7.S10, 7.S12, 7.S13).                                        done
 --   §3 Grades: read from the verdict and the coverage, ordered (7.S10, L10.2).              done
 
-import "generators.lth" Seed Binding Budgets Metric
+import "generators.lth" Seed Binding Budgets Placement
 import "laws.lth" Evidence Points At NotRun Cited Assumed Coverage Exhaustive Bounded Listed Drawn Verdict Confirmed Refuted
   Supported Unsettled Cites Assumes rankOf weaker
 
 -- ---------------------------------------------------------------- §1 The spec
 
 -- How the cases of a test are chosen (7.R1): every value of the parameters' types, or a sample
--- with a metric; a census is a binding of a parameter, not a mode. Roles: `CoverageIsTheWeakest`.
+-- with a placement; a census is a binding of a parameter, not a mode. Roles: `CoverageIsTheWeakest`.
 Mode : U := data {
   ExhaustiveMode : Mode ;
-  SampledMode : Metric -> Mode ;
+  SampledMode : Placement -> Mode ;
 }
 
 -- what to test and how (D9: a value the module keeps): the law, the mode, the cases asked, the

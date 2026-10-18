@@ -1,7 +1,7 @@
 -- generators_model.lut: the models of generators.lth.
 --
 -- Draft 1, 2026-10-13, by Claude Fable 5.1 in the session (layer 2; draft 0 at 8570a0d). The two
--- metrics of numbers (7.S2, 7.S4), the reference support, filter and resolution of bindings, from
+-- placements of numbers (7.S2, 7.S4), the reference support, filter and resolution of bindings, from
 -- the definitions of generators.lth; the core's instances of the forms of a type wait for core.
 -- [proposed, 2026-10-15, record/IA/tester-2026-10-14/prompt-3.md] The families a test binds a
 -- parameter to (7.R1, 7.S5), host generators with their routes and the law each must meet.
@@ -10,16 +10,16 @@
 -- laws.lth §4 (7.S17, L9.15, D-2026-10-15-b), with its control `skewedSample`; the controls of
 -- `Random`'s statistical laws, sources broken on purpose (L9.14).
 
-import "generators.lth" Metric LinearMetric LogMetric Support Filter Resolution Gen power pick resolve filtered Seed
+import "generators.lth" Placement LinearPlacement LogPlacement Support Filter Resolution Gen power pick resolve filtered Seed
   Random DrawsAreUniform DrawsAreIndependent nextSeed
 import "laws.lth" Law Sequential
 
 -- `linear`: uniform between the bounds, for a quantity whose meaning does not change when shifted
-linear : Metric := { place := fn lo hi v { lo + v * (hi - lo) } }
-linearMetric : LinearMetric := { metric := linear }
+linear : Placement := { place := fn lo hi v { lo + v * (hi - lo) } }
+linearPlacement : LinearPlacement := { placement := linear }
 -- `log`: uniform in the logarithm, for a quantity whose meaning does not change when scaled
-logarithmic : Metric := { place := fn lo hi v { lo * power (hi / lo) v } }
-logMetric : LogMetric := { metric := logarithmic }
+logarithmic : Placement := { place := fn lo hi v { lo * power (hi / lo) v } }
+logPlacement : LogPlacement := { placement := logarithmic }
 
 -- a support drawn by the reference inversion
 supportOf (T : Concrete) (ws : List (T * Float64)) : Support T := { weights := ws, pick := fn u { pick T ws u } }

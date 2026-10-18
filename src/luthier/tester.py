@@ -15,7 +15,7 @@ finite; under `SampledMode` `n` cases are drawn from the seed. The evidence is l
 points evaluated with the coverage reached, or `NotRun` with the reason. The verdict over the
 points is laws.lth's `ForallOnPoints`, and the grade is test.lth's `grade`, reduced by the Runner.
 
-Not in this bite (each says so where it applies): the metric of `SampledMode` (draws are uniform
+Not in this bite (each says so where it applies): the placement of `SampledMode` (draws are uniform
 between the bounds, 7.S4's special values and atom at 0 too); the sized generators of recursive
 data other than `List` (7.S3's [proposed] row); enumeration of lists under `ExhaustiveMode`;
 covering arrays (7.R3: above `coveringAbove` cases the test is not run); a size schedule (every
@@ -174,7 +174,7 @@ class Spec:
     """test.lth's `TestSpec`, read from the value the `test` line reduces to."""
     law: str
     sampled: bool
-    metric: t.Term | None
+    placement: t.Term | None
     cases: int
     size: int
     seed: int
@@ -367,9 +367,9 @@ def read_spec(runner, value):
     record = dict(runner.value(value).fields)
     mode = record["mode"]
     if _base(mode) == "ExhaustiveMode":
-        sampled, metric = False, None
+        sampled, placement = False, None
     elif isinstance(mode, t.App) and _base(mode) == "SampledMode":
-        sampled, metric = True, mode.argument
+        sampled, placement = True, mode.argument
     else:
         raise RunError(f"not a Mode: {_show(mode)}")
     def bindings(v):
@@ -381,7 +381,7 @@ def read_spec(runner, value):
         return out
     budgets = {label: v.constant.value for label, v in record["budgets"].fields}
     control = runner.whnf(record["control"]) == TRUE if "control" in record else False
-    return Spec(_text(record["law"]), sampled, metric, _int(record["cases"]), _int(record["size"]),
+    return Spec(_text(record["law"]), sampled, placement, _int(record["cases"]), _int(record["size"]),
                 _int(record["seed"]), bindings(record["whereBindings"]), bindings(record["profile"]), budgets,
                 control)
 
@@ -1779,7 +1779,7 @@ def line(outcome):
     spec = outcome.spec
     if outcome.parts is not None and not spec.control:
         return _conjunction_line(outcome)
-    mode = f"sampled (seed {spec.seed}, size {spec.size}, metric ignored)" if spec.sampled else "exhaustive"
+    mode = f"sampled (seed {spec.seed}, size {spec.size}, placement ignored)" if spec.sampled else "exhaustive"
     counted = f"{outcome.evaluated} cases"
     if isinstance(outcome.evidence, Tested) or "Tested" in (outcome.evidence if isinstance(outcome.evidence, dict) else {}):
         mode, counted = f"sequential (seed {spec.seed % SEEDS})", f"{outcome.evaluated} samples"
@@ -2213,7 +2213,7 @@ def new_entry(runner, loaded, spec, cones, fuel, conjunct=None):
     (bite 3), printed with the parameters it reads and the size, its fingerprint the hash of its
     cone and the hash of the code that drives it (`drawing_revision`) (7.S9: a name with its
     fingerprint), no reach (a draw lists no values); otherwise the mode's functor over the
-    parameter's type, printed with the metric and the size, its fingerprint the hash of the drawing
+    parameter's type, printed with the placement and the size, its fingerprint the hash of the drawing
     code under SampledMode and empty under ExhaustiveMode. The reach: a census's members; the support of the
     type under ExhaustiveMode; under SampledMode, for an `Int` or a `Float64` (refined or not, not
     dependent on an earlier parameter), the interval it is drawn from; no reach otherwise, which
@@ -2260,7 +2260,7 @@ def new_entry(runner, loaded, spec, cones, fuel, conjunct=None):
                 continue
             reach.append({"parameter": name, "reach": {"Members": [_value(runner, v) for v in members]}})
             continue
-        mode = f"SampledMode {_show(spec.metric)} (size {spec.size})" if spec.sampled else "ExhaustiveMode"
+        mode = f"SampledMode {_show(spec.placement)} (size {spec.size})" if spec.sampled else "ExhaustiveMode"
         binding.append({"parameter": name, "generator": f"{mode} over {_show(ty)}",
                         "fingerprint": drawing_revision() if spec.sampled else ""})
         if not spec.sampled:
