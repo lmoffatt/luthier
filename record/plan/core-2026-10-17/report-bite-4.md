@@ -159,3 +159,37 @@ Correct findings 1 and 2 (the product written as `*` applied under a `Concrete` 
 alias parameter capturing a record field), at the cost of re-certifying the generators, world and
 sonolocalizacion lines whose cones reach those definitions, or leave them until bite 12 touches
 those files? Recommended: in bite 12, where those files are rewritten anyway.
+
+## Addendum, 2026-10-18: the coordinator's answer
+
+Findings 1 and 2 go to bite 12, as recommended: written into execution.md's bite 12 (789d1d1) and
+marked as known defects in the clauses they break (20431ef): 2.S8 for the product written as `*`
+applied under a `Concrete` parameter, 4.R7 for the alias parameter capturing a record's field. A
+third defect of the same kind, found while typing tuples, is marked in 3.S4 and given to bite 12
+too: product types nest to the left (`(A * B) * C`), tuples to the right, where 3.S4 says both go
+right; the typing compares products flattened.
+
+Finding 3 is fixed (e6cabf2, af14c42, f905902): a pattern variable is a binder, never another
+file's constructor. The loader (run.py's `Loaded.pattern`) already knew which names of a pattern a
+file sees as constructors (its own, its listed imports', core's); the elaborator reads a pattern
+against the constructors of every file in the slice, so a variable named as a constructor the file
+does not see was read as that constructor. The loader now renames such a variable (`name` to
+`name%var`) with its uses in the arm, and the elaborator's typing workaround is gone. Two
+definitions were read wrongly: distance_graph.lut's `describe` (`schema name ->`, grammar.lth's
+constructor `name`), whose arm never matched, so describing a schema violation stuck, and
+term_model.lut's `stepApplication` (`App (Primitive name) i ->`), whose arm never matched, so the
+model's step of an applied primitive fell to `Done`. The test (tests/test_run.py,
+`test_a_pattern_variable_is_never_another_files_constructor`, two files, a run printing the
+variable's value) fails with the loader before the fix. It is a pytest and not a tests/spec
+program: the spec runner checks one file with no imports, and the defect needs two files.
+
+Lines re-certified: none. No law's or test line's cone moves (2704 cone hashes of the 38 test
+programs compared under the loader before and after, the interpreter's revision held fixed): no
+certified cone reaches `describe` or `stepApplication`, so no certified behavior changed and no law
+passed by the wrong reading. The examples' runs reproduce their records in the suite: 848 passed, 6
+skipped, 9 xfailed.
+
+Check failures left for the closing bite (13): distances.lut's `pairI` and `pairJ`, and
+plot_cases.lut's `perms` (4.R9: functions into `Int` where `Fin 3 -> Fin 3`, or `Fin nodes`, is
+asked; a literal crossing into a subtype in a codomain); experiment_zero.run.lut's three 4.R2
+(`main`, `priorWidened`, `sigmaKnown`).
