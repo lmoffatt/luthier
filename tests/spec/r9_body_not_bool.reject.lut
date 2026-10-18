@@ -1,0 +1,6 @@
+-- spec 4.R9: a body's type fits the type written for it. An `Int` is not a `Bool` (item 39's audit,
+-- record/plan/core-2026-10-17/execution.md §2.3: `check` ran program.lth's predicates and typed no
+-- body against its annotation).
+-- expect: does not fit the type written for it
+
+asBad (x : Int) : Bool := x

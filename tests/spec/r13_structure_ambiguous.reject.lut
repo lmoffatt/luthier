@@ -1,0 +1,20 @@
+-- spec 4.R13 (D-2026-10-18-b; record/plan/core-2026-10-17/execution.md §2.2, rules 2.2.3 and 2.2.5):
+-- `d` is a field of `Metric` and of `Ultrametric`, and `Float64` has a model of each, so `d 1.0
+-- 2.0` names no one model and is refused with both; written `Metric.d 1.0 2.0` it resolves
+-- (tests/test_check.py, `test_a_shared_field_name_is_resolved_once_qualified`).
+-- expect: write Metric.d or Ultrametric.d
+
+Metric (A : U) : { d : A -> A -> Float64 }
+DistanceToItself (A : U) (m : Metric A) (x : A) : Bool := m.d x x == 0.0
+Metric (A : U) := DistanceToItself A
+
+Ultrametric (A : U) : { d : A -> A -> Float64 }
+UltraToItself (A : U) (m : Ultrametric A) (x : A) : Bool := m.d x x == 0.0
+Ultrametric (A : U) := UltraToItself A
+
+gap (a b : Float64) : Float64 := if a < b then b - a else a - b
+FloatIsAMetric : Bool := Metric Float64 { d := gap }
+FloatIsAnUltrametric : Bool := Ultrametric Float64 { d := fn a b { if a == b then 0.0 else 1.0 } }
+Claims := FloatIsAMetric & FloatIsAnUltrametric
+
+far : Float64 := d 1.0 2.0

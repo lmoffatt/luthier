@@ -1,0 +1,6 @@
+-- spec 4.R9: a body's type fits the type written for it. `r x` is a relation applied to one
+-- argument, a predicate `A -> Bool`, not the `Bool` the definition says (the core's bite 4, bite 2's
+-- first probe; record/plan/core-2026-10-17/execution.md §6, bite 4).
+-- expect: does not fit the type written for it
+
+apart (A : U) (r : A -> A -> Bool) (x : A) : Bool := r x

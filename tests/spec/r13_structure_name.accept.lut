@@ -1,0 +1,37 @@
+-- spec 4.R13 (D-2026-10-18-b; record/plan/core-2026-10-17/execution.md §2.2, rule 2.2): a name of
+-- a structure is resolved by the type of its argument, the model that type names. A claim `X : Bool
+-- := S T m` binds the model `m` of `S` at `T`. `size`, `map` and `eq` resolve at two types each:
+-- `size` and `map` at `List Int` and at `Maybe Int`, `eq` at `Int` and at `String`.
+
+Object (A : U) : { eq : A -> A -> Bool }
+EqReflexive (A : U) (o : Object A) (x : A) : Bool := o.eq x x
+Object (A : U) := EqReflexive A
+
+Sized (C : U) : { size : C -> Int }
+SizeNotNegative (C : U) (m : Sized C) (c : C) : Bool := 0 <= m.size c
+Sized (C : U) := SizeNotNegative C
+
+Functor (F : U -> U) : { map : (A B : U) -> (A -> B) -> F A -> F B }
+MapKeepsSize (F : U -> U) (m : Functor F) (s : Sized (F Int)) (x : F Int) : Bool :=
+  s.size (m.map Int Int (fn k { k + 1 }) x) == s.size x
+Functor (F : U -> U) := MapKeepsSize F
+
+lengthOf (A : U) (xs : List A) : Int := match xs { nil -> 0 ; cons x rest -> 1 + lengthOf A rest }
+mapList (A B : U) (f : A -> B) (xs : List A) : List B :=
+  match xs { nil -> nil ; cons x rest -> cons (f x) (mapList A B f rest) }
+mapMaybe (A B : U) (f : A -> B) (m : Maybe A) : Maybe B := match m { nothing -> nothing ; just a -> just (f a) }
+
+IntIsAnObject : Bool := Object Int { eq := fn a b { a == b } }
+StringIsAnObject : Bool := Object String { eq := fn a b { a == b } }
+ListIsSized (A : U) : Bool := Sized (List A) { size := fn xs { lengthOf A xs } }
+MaybeIsSized (A : U) : Bool := Sized (Maybe A) { size := fn m { match m { nothing -> 0 ; just a -> 1 } } }
+ListIsAFunctor : Bool := Functor List { map := mapList }
+MaybeIsAFunctor : Bool := Functor Maybe { map := mapMaybe }
+Claims := IntIsAnObject & StringIsAnObject & ListIsSized & MaybeIsSized & ListIsAFunctor & MaybeIsAFunctor
+
+numbers : List Int := [1, 2, 3]
+four : Maybe Int := just 4
+sizes : Int := size numbers + size four
+doubled : List Int := map (fn x { 2 * x }) numbers
+shifted : Maybe Int := map (fn x { x + 1 }) four
+same : Bool := eq 3 3 and eq "a" "a"

@@ -1,0 +1,6 @@
+-- spec 4.R9: a projection reads a field the record has. `Point` has `x` and `y`; `p.z` names no
+-- field (the core's bite 4, bite 2's second probe; record/plan/core-2026-10-17/execution.md §6, bite 4).
+-- expect: it has no field z
+
+Point = { x : Float64, y : Float64 }
+height (p : Point) : Float64 := p.z

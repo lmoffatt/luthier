@@ -1,0 +1,6 @@
+-- spec 4.R9, spec 4.R13: an operator is resolved by the type of its left operand and its right
+-- operand fits the domain of that model; `+` at `Int` takes an `Int`, and "a" is a `String` (the
+-- core's bite 4, bite 2's third probe; before it, the operator fell back to the bare symbol).
+-- expect: but "a" has type String
+
+shout (x : Int) : Int := x + "a"
