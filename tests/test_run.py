@@ -1342,3 +1342,25 @@ def test_the_example_plans_linearize_and_agree():
     assert _evaluate(model, "agree") == "true"
     a_b_c_d = 'cons "a" (cons "b" (cons "c" (cons "d" nil)))'
     assert _evaluate(model, "needPlan", "schedule") == _evaluate(model, "forwardPlan", "schedule") == a_b_c_d
+
+
+def test_a_pattern_variable_is_never_another_files_constructor(tmp_path, capsys):
+    # the core's bite 4, finding 3 (2.S12: a pattern variable is a binder): a.lut's data has the
+    # constructor `name`, which b.run.lut does not list; in b's `schema name ->` it is a variable.
+    # The elaborator's constructors are every file's, so before the loader renamed the variable the
+    # arm read the constructor, never matched, and `describe` stuck on every `schema` violation.
+    (tmp_path / "a.lut").write_text(
+        'Shape : U := data { name : String -> Shape }\n'
+        'label : String := match name "a" { name s -> s }\n', encoding="utf-8")
+    path = tmp_path / "b.run.lut"
+    path.write_text(
+        'import "a.lut" label\n'
+        'Violation = { schema : String || other : Unit }\n'
+        'describe (v : Violation) : String := match v { schema name -> name ; other u -> "other" }\n'
+        'say (w : W) (x : String) : W * Unit := extern "python:luthier.host.print_line" w x\n'
+        'main (w : W) : W * Unit := say w (describe (schema label))\n', encoding="utf-8")
+    loaded = Loaded(path)
+    arms = next(a for a in loaded.acts if getattr(a, "name", None) == "describe").body.term.arms
+    assert arms[0][0] == s.PApp("schema", (s.PApp("name%var", ()),)) and arms[0][1] == s.Name("name%var")
+    assert main(["run", str(path)]) == 0
+    assert capsys.readouterr().out == "a\n"
