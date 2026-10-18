@@ -1223,6 +1223,14 @@ def application(v, c, expected=None):
         for n, arg in zip(ns, arguments):
             inner.names[n] = walk(arg, c)
         return apply(walk(alias.value, inner), arguments[len(ns):])
+    if isinstance(head, s.Lambda) and arguments and not any(isinstance(x, s.NamedArg) for x in arguments):
+        # a lambda applied where it is written, `(fn k { k + 1 }) x`: its parameters take the types
+        # of its arguments (a `let` in disguise)
+        values = [walk(x, c) for x in arguments]
+        want = c.meta('r')
+        for value in reversed(values):
+            want = t.Pi('_', _lenient(value, c), want)
+        return apps(walk(head, c, want), values)
     q = qualified(head, c)
     if q is not None:
         return qualified_application(q[0], q[1], arguments, c, expected)
