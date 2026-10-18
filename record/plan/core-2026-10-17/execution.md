@@ -30,6 +30,11 @@ partially applied laws into its conjuncts, each with its entry, the grade their 
 7.S22), so bite 6 can write the structures and composites bare; the classifier's two bounds are
 fields of `Budgets` (`regionNumbers`, `regionEntries`). core_metrics unchanged (96, 112, 427, 137,
 1974).
+Bite 4 landed 2026-10-18 (report-bite-4.md): `infer` total on the library (3285 definitions, no
+`Hole('type')`), the core the elaborator's prelude, operators and the fields of a structure resolved
+by type with claims as bindings, omitted structure parameters filled, the bare fallback gone; check
+types each act in its file's context and refuses what the typing refuses (4.R9, 4.R13); no cone
+moved; suite 847 passed; core_metrics unchanged (96, 112, 427, 137, 1974).
 
 ## 0. The core's end (D-2026-10-18-a)
 
