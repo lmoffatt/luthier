@@ -320,3 +320,17 @@ it should run once, after the core's last re-certification and not before it.
 - Not read, named from memory, to be checked before leaning on them: Hofmann and Reis,
   "Probabilistic metric spaces as enriched categories" (2013), which would be the paper that puts the
   three bases under one definition; Flagg, "Quantales and continuity spaces" (1997).
+
+## Addendum (coordinator, 2026-10-18): Q1 answered otherwise, D-2026-10-18-j
+
+Not the report's version. A numerical law relates an input tolerance delta to an output tolerance
+epsilon, and that relation is its content: the fixed `tol` matched exactly goes, replaced by the
+theory's bound function, not by a demand epsilon inside the law. Each agreement law becomes two
+theorem-bound laws, stability at exact inputs (for dot, |dot(x, y) - x.y| <= gamma_n sum |x_k y_k|,
+Higham ch. 3) and sensitivity of the function (Lipschitz, D-2026-10-18-i), together epsilon <=
+sensitivity times delta plus the algorithm's error; the demand fixes delta or epsilon (pulled back,
+L6.8) and the law gives the other; the certificate records the largest ratio of error to bound, the
+law passing at ratio <= 1; every such law states its range of validity as a premise (nu < 1, the
+Moderate domain; first-order sensitivity below an input-dependent radius, as pinv's perturbation
+below the smallest retained singular value), the radius a region sampled on both sides (D-2026-10-
+16-j). Q2 open.
