@@ -568,3 +568,50 @@ def test_a_shared_field_name_is_resolved_once_qualified():
     assert [(x.rule, x.name) for x in c.check(program(src))] == [('4.R13', 'far')]
     for qualified in ('Metric.d', 'Ultrametric.d'):
         assert not c.check(program(src.replace('far : Float64 := d 1.0 2.0', f'far : Float64 := {qualified} 1.0 2.0')))
+
+
+# ---------------------------------------------------------------- the core is the prelude
+# (the core's bite 5: record/plan/core-2026-10-17/execution.md §1, D-2026-10-18-b, 12.S22)
+
+def test_the_core_names_are_read_from_its_files():
+    names = c.core_names()
+    # core.lut's, a property's and a structure's, none imported by core.lut until bite 5
+    assert {'Bool', 'not', 'compose', 'Equivalence', 'Object', 'Monoid'} <= names
+    # a name two core files define is imported from one (run.py's CORE_COLLISIONS)
+    assert 'Reflexive' not in names and 'Associative' not in names
+
+
+def test_a_file_that_defines_a_core_name_is_refused_with_the_core_file(tmp_path, capsys):
+    path = tmp_path / 'mine.lut'
+    path.write_text('not (b : Bool) : Bool := b\n', encoding='utf-8')
+    assert main(['check', str(path)]) == 1
+    out = capsys.readouterr().out
+    assert '12.S22 not: mine.lut defines not, which the core defines in core/core.lut' in out
+
+
+def test_a_known_collision_is_not_refused_until_its_bite():
+    lib = Path(__file__).resolve().parents[1] / 'src' / 'luthier' / 'lib'
+    numbers = lib / 'numbers.lth'
+    assert not c.core_refusals(program(numbers.read_text(encoding='utf-8')), numbers)
+
+
+def test_a_core_name_is_seen_without_an_import(tmp_path, capsys):
+    path = tmp_path / 'composed.lut'
+    path.write_text('succ (x : Int) : Int := x + 1\nplusTwo : Int -> Int := compose Int Int Int succ succ\n', encoding='utf-8')
+    assert main(['check', str(path)]) == 0
+    # without the core, `compose` is no name the file has (12.S4, 12.S14)
+    assert main(['check', '--no-core', str(path)]) == 1
+    assert '4.R2 plusTwo' in capsys.readouterr().out
+
+
+def test_an_import_of_a_core_name_by_its_path_is_redundant(tmp_path, capsys):
+    path = tmp_path / 'importer.lut'
+    path.write_text('import "core/structures/equality.lth" Concrete\n'
+                    'import "core/properties/relations.lth" Reflexive\n'
+                    'r (x : Int) : Bool := Reflexive Int (fn a b { a == b }) x\n'
+                    'ints : List Concrete := [Int]\n', encoding='utf-8')
+    assert main(['check', '-v', str(path)]) == 0
+    out = capsys.readouterr().out
+    assert 'redundant Concrete: imported from core/structures/equality.lth' in out
+    # `Reflexive` is two core files' until bite 6: the import says which, so it is no notice
+    assert 'redundant Reflexive' not in out
