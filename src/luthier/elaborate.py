@@ -12,8 +12,8 @@ a type, as the parameter of a lambda with no expected type or the element of `ni
 named unknown, `Hole('?x')`, the principal type's variable; `Hole('type')`, the old "not inferred",
 is never a result.
 
-The core encloses every file (12.S22): `core.lut` and the files it imports are read once and seed
-every context, their operator bindings elaborating to the kernel's symbol (3.S17: the kernel
+The core encloses every file (12.S22): every file under `lib/core/` is read once and seeds every
+context (the core's bite 5, D-2026-10-18-b), their operator bindings elaborating to the kernel's symbol (3.S17: the kernel
 computes `+ - * / mod` on constants and the connectives `and`, `or`), as a run has always reduced
 them. An operator (2.S9's bindable `+ - * / mod and or`) is resolved by the type of its left operand,
 matched under instantiation and through a subtype to its base (4.R13); no binding at that type is an
@@ -1564,12 +1564,22 @@ def refined_record(v):
 
 # ---------------------------------------------------------------------- the context
 
+def core_paths():
+    """The files of the core, every `.lth` and `.lut` under lib/core/, core.lut first and then by
+    path (run.py's `core_files`; the core's bite 5)."""
+    root = PRELUDE.parent.resolve()
+    found = [p.resolve() for p in root.rglob('*') if p.is_file() and p.suffix in ('.lth', '.lut')]
+    return tuple(sorted(found, key=lambda p: (p != PRELUDE.resolve(), p.relative_to(root).as_posix())))
+
+
 def _prelude_acts():
-    """core.lut and the files it imports, imports first (12.S22: the core encloses every file), and
-    the names core.lut itself defines, the ones a file sees (run.py's `Loaded`)."""
+    """Every file of the core, each after its imports (12.S22: the core, lib/core/, encloses every
+    file; D-2026-10-18-b), and the names a file sees: every name a core file defines, but a name
+    two core files define (run.py's CORE_COLLISIONS, until bite 6), which a file imports from one."""
     from .parse import parse
     seen, acts = set(), []
     own = set()
+    definers = {}
 
     def visit(path):
         path = path.resolve()
@@ -1587,11 +1597,13 @@ def _prelude_acts():
                 if target.exists():
                     visit(target)
         acts.extend(a for a in r.program if not isinstance(a, s.ImportAct))
-        if path == PRELUDE.resolve():
-            own.update(a.name for a in r.program if isinstance(a, (s.Declare, s.Define, s.Alias)))
+        for a in r.program:
+            if isinstance(a, (s.Declare, s.Define, s.Alias)):
+                definers.setdefault(a.name, set()).add(path)
 
-    if PRELUDE.exists():
-        visit(PRELUDE)
+    for path in core_paths():
+        visit(path)
+    own = {n for n, files in definers.items() if len(files) == 1}
     return tuple(acts), frozenset(own)
 
 
@@ -1603,8 +1615,8 @@ def prelude():
     acts, own = _prelude_acts()
     read(c, acts, core=True)
     c.errors = {}
-    # a file sees core.lut's own names; what core.lut imports types them and stays out of sight
-    # (its aliases are inlined in the types already read)
+    # a file sees the core's names; a name two core files define stays out of sight (its aliases
+    # are inlined in the types already read)
     c.aliases = {n: a for n, a in c.aliases.items() if n in own}
     c.signatures = {n: b for n, b in c.signatures.items() if n in own}
     c.defined = {n for n in c.defined if n in own}

@@ -495,7 +495,7 @@ def test_a_bare_conjunction_of_laws_is_a_verdict():
     from luthier.elaborate import context_of, infer
     c = context_of(p)
     for d in elaborate_program(p, c):
-        if isinstance(d, t.Define) and d.name == 'Equivalence':
+        if isinstance(d, t.Define) and d.name == 'IsEquivalence':
             assert law_value_of(infer(d.body, c)) == V('Bool')
 
 
