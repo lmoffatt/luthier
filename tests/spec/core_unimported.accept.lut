@@ -1,0 +1,13 @@
+-- spec 12.S22 (the core's bite 5, D-2026-10-18-b; record/plan/core-2026-10-17/execution.md §1): the
+-- core, every file of lib/core/, encloses the top-level scope of every file, so its names are seen
+-- without an import: core/properties/functions.lth's `compose`, relations.lth's `Total`, and
+-- equality.lth's structure `Object`, whose field `eq` is resolved by the type of its argument (rule
+-- 2.2). `size` becomes a name of the core when bite 6 writes core/structures/containers.lth; this
+-- program then uses it too.
+
+succ (x : Int) : Int := x + 1
+plusTwo : Int -> Int := compose Int Int Int succ succ
+IntIsAnObject : Bool := Object Int { eq := fn a b { a == b } }
+LeqIsTotal (x y : Int) : Bool := Total Int (fn a b { a <= b }) x y
+Claims := IntIsAnObject & LeqIsTotal
+same : Bool := eq (plusTwo 1) 3

@@ -2,9 +2,11 @@
 -- expect (v0.1): label mul of Semi is touched by no law
 -- Source: tests/spec/v0.1/r3_dangling_label.reject.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
 -- sha256: 03dc6a5b912d78a29d24409124874aab6a0717456cf08ca3b44b2db7efc69d5f. Migration: spec-programs v1 (see README.md).
+-- `Associative` is `AssociativeOp` since the core's bite 5, which refuses a file that redefines a
+-- core name (12.S22, D-2026-10-18-b).
 
-Associative (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (x y z : A) : Bool := eq (f (f x y) z) (f x (f y z))
+AssociativeOp (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (x y z : A) : Bool := eq (f (f x y) z) (f x (f y z))
 RightIdentity (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (e : A) (x : A) : Bool := eq (f x e) x
 RightInverse (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (e : A) (inv : A -> A) (x : A) : Bool := eq (f x (inv x)) e
 
-Semi (A : U) : U := { eq : A -> A -> Bool, add : A -> A -> A, mul : A -> A -> A | Associative A eq add }
+Semi (A : U) : U := { eq : A -> A -> Bool, add : A -> A -> A, mul : A -> A -> A | AssociativeOp A eq add }

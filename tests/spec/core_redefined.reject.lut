@@ -1,0 +1,6 @@
+-- spec 12.S22 (the core's bite 5, D-2026-10-18-b): a file does not redefine a core name; the
+-- checker and the loader refuse it, naming the core file. `map` is refused the same way once bite 6
+-- writes core/structures/containers.lth.
+-- expect: defines compose, which the core defines in core/properties/functions.lth
+
+compose (f g : Int -> Int) : Int -> Int := fn x { f (g x) }

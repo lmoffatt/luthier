@@ -106,6 +106,8 @@ EXPECTED_RULE = {
     'r12_toplevel_arrow.reject.lut': 'syntax',
     'r13_two_models.reject.lut': '4.R13',
     'r4_data_nonrecursive.reject.lut': '4.R3',
+    # the core is the prelude, and a file does not redefine its names (the core's bite 5)
+    'core_redefined.reject.lut': '12.S22',
     # the three kinds of file (spec 12.R2, D-2026-10-16-e)
     **{p.name: '12.R2' for p in SPEC.glob('kind_*.reject.*')},
 }

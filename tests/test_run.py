@@ -759,7 +759,8 @@ def test_a_name_several_libraries_define_does_not_collide(numbers_laws, name):
 def test_the_numbers_laws_import_resolves_in_numbers_lth(numbers_laws):
     # the test file imports numbers.lth's PlusCommutes; core/structures/algebraic.lth's is another definition
     assert numbers_laws.name(numbers_laws.top, "PlusCommutes") == "PlusCommutes@numbers"
-    assert numbers_laws.name(numbers_laws.top, "LeqPair") is None
+    # a name the file does not import is the core's, every core file being seen (the core's bite 5)
+    assert numbers_laws.see(numbers_laws.top, "LeqPair") == ((LIB / "core/structures/algebraic.lth").resolve(), "LeqPair")
 
 
 # ---------------------------------------------------------------- an extern's arity from its type

@@ -17,6 +17,8 @@ def main(argv: list[str] | None = None) -> int:
     p_parse.add_argument("files", nargs="+")
     p_check = sub.add_parser("check", help="check static semantics")
     p_check.add_argument("-v", "--verbose", action="store_true")
+    p_check.add_argument("--no-core", action="store_true",
+                         help="read the files without the core, lib/core/ (12.S4, 12.S14)")
     p_check.add_argument("files", nargs="+")
     p_eval = sub.add_parser("eval", help="evaluate a term in the context of the files, their imports and "
                                           "core, printing its value, its type and the states of its cone; "
@@ -174,12 +176,12 @@ def main(argv: list[str] | None = None) -> int:
             def line_of(name):
                 return next((i for i, line in enumerate(text.splitlines(), 1)
                              if re.match(r"^" + re.escape(name) + r"(?:\s|:|=|$)", line)), 1)
-            failures = check(result.program, path)
+            failures = check(result.program, path, core=not ns.no_core)
             failed |= bool(failures)
             for failure in failures:
                 print(f"{path}:{line_of(failure.name)}: {failure.rule} {failure.name}: {failure.message}")
             if ns.verbose:
-                for item in report(result.program):
+                for item in report(result.program, path):
                     print(f"{path}:{line_of(item.name)}: {item.kind} {item.name}: {item.message}")
                 failed |= _standings(path, line_of, ns.files)
         elif ns.tree and isinstance(result, Parsed):

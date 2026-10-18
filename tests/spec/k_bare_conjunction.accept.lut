@@ -1,13 +1,15 @@
 -- spec 5.S6, D-2026-10-18-f: a conjunction of laws partially applied, each over its own variables,
 -- is a law; bite 2's `Equivalence` written bare (record/plan/core-2026-10-17/execution.md §2.4,
 -- the core's bite 4: `infer` types it as a verdict, so a bare structure has a type).
+-- Its names differ from core/properties/relations.lth's since the core's bite 5: a file does not
+-- redefine a core name (12.S22, D-2026-10-18-b).
 
-Related (A : U) (r : A -> A -> Bool) : U := { x y : A | r x y }
-Chain (A : U) (r : A -> A -> Bool) : U := { x y z : A | r x y and r y z }
-Reflexive (A : U) (r : A -> A -> Bool) (x : A) : Bool := r x x
-Symmetric (A : U) (r : A -> A -> Bool) (p : Related A r) : Bool := r p.y p.x
-Transitive (A : U) (r : A -> A -> Bool) (c : Chain A r) : Bool := r c.x c.z
-Equivalence (A : U) (r : A -> A -> Bool) := Reflexive A r & Symmetric A r & Transitive A r
+Rel (A : U) (r : A -> A -> Bool) : U := { x y : A | r x y }
+RelChain (A : U) (r : A -> A -> Bool) : U := { x y z : A | r x y and r y z }
+IsReflexive (A : U) (r : A -> A -> Bool) (x : A) : Bool := r x x
+IsSymmetric (A : U) (r : A -> A -> Bool) (p : Rel A r) : Bool := r p.y p.x
+IsTransitive (A : U) (r : A -> A -> Bool) (c : RelChain A r) : Bool := r c.x c.z
+IsEquivalence (A : U) (r : A -> A -> Bool) := IsReflexive A r & IsSymmetric A r & IsTransitive A r
 
 sameParity (a b : Int) : Bool := a mod 2 == b mod 2
-ParityIsAnEquivalence := Equivalence Int sameParity
+ParityIsAnEquivalence := IsEquivalence Int sameParity

@@ -26,9 +26,62 @@ class Report:
     message: str
 
 
-# Chosen chapter 3/11 vocabulary, including their constructors and directives;
-# library interfaces (Law, Failures, cite) must be imported or declared.
-coreNames = frozenset('Int Real Float64 Rational String Nat Fin Bool Unit Empty List Maybe true false unit nil cons just nothing left right not and or implies extern primitive axiom toFloat64 fromInt'.split())
+# The names every file sees without an import (12.S22): the kernel's words that no file defines
+# (the directives, the labels of `A + B`, the connectives), and the names defined at the top level
+# of the core's files, read from them (the core's bite 5, D-2026-10-18-b), but a name two core files
+# define (run.py's CORE_COLLISIONS), which a file imports from one; library interfaces (Law,
+# Failures, cite) must be imported or declared. `--no-core` (12.S4, 12.S14) leaves the first part.
+KERNEL_NAMES = frozenset('left right and or extern primitive axiom'.split())
+
+
+@lru_cache(maxsize=1)
+def core_definitions():
+    """Each name a core file defines -> the core files that define it (run.py's `core_definitions`)."""
+    from .run import core_definitions as read
+    return read()
+
+
+# whether the core encloses the file checked (`check`'s `core`, cli's `--no-core`)
+_with_core = [True]
+
+
+def core_names():
+    if not _with_core[0]:
+        return KERNEL_NAMES
+    return KERNEL_NAMES | frozenset(n for n, files in core_definitions().items() if len(files) == 1)
+
+
+def core_refusals(program, path):
+    """D-2026-10-18-b: a name the file defines that a core file defines is refused, naming the core
+    file (run.py's `redefinitions`; a core file checked against the other core files)."""
+    from pathlib import Path
+    from .run import redefinitions, _defines
+    if not _with_core[0]:
+        return []
+    defined = {n for a in program for n in _defines(a)}
+    where = Path(path) if path is not None else Path('<file>')
+    return [Failure('12.S22', m.split(' defines ', 1)[1].split(',', 1)[0], m)
+            for m in redefinitions(where, defined, core_definitions())]
+
+
+def redundant_imports(program, path):
+    """The `redundant` notices of `-v`: a name a file outside the core imports by a core file's path,
+    which it sees without the import (12.S22, the core's bite 5) [proposed: a notice, not a refusal,
+    so the migration lands one file at a time]; a name two core files define is no notice, since the
+    import says which."""
+    from pathlib import Path
+    from .run import CORE
+    if path is None or not _with_core[0] or Path(path).resolve().is_relative_to(CORE.resolve()):
+        return []
+    out = []
+    for act in program:
+        if not isinstance(act, s.ImportAct): continue
+        target = resolve(path, act.path)
+        if target is None or not target.is_relative_to(CORE.resolve()): continue
+        for i in act.names:
+            if len(core_definitions().get(i.name, ())) == 1 and (i.asName is None or i.asName == i.name):
+                out.append(Report('redundant', i.name, f'imported from {act.path}, a file of the core, which every file sees without an import (12.S22).'))
+    return out
 
 
 def namePrefix(n):
@@ -149,7 +202,7 @@ def acts(p, n, cls=None):
 
 
 def unknown(p, ns):
-    known = coreNames | constructors(p) | {a.name for a in p if hasattr(a, 'name')} | {i.asName or i.name for a in p if isinstance(a, s.ImportAct) for i in a.names}
+    known = core_names() | constructors(p) | {a.name for a in p if hasattr(a, 'name')} | {i.asName or i.name for a in p if isinstance(a, s.ImportAct) for i in a.names}
     missing = {x for x in ns if x not in known and namePrefix(x) not in known}
     # a field of a structure is a name resolved by the type of its argument (rule 2.2, the core's
     # bite 4); whether it resolves is the typing's to say (4.R13)
@@ -161,7 +214,7 @@ def structure_fields(p):
     at a record with parameters (rule 2.2)."""
     from .elaborate import prelude
     acts = tuple(p) + tuple(getattr(p, 'imported', ()))
-    out = {n for st in prelude().structures.values() for n, _ in st.record.fields}
+    out = {n for st in prelude().structures.values() for n, _ in st.record.fields} if _with_core[0] else set()
     for a in acts:
         if isinstance(a, s.Declare) and a.binders and isinstance(a.type, s.Record):
             out.update(n for f in a.type.fields for n in f.names)
@@ -338,7 +391,7 @@ def violatesR5(p, n):
     for a in acts(p, n, s.Define):
         if not isinstance(a.body, s.TermBody) or head(a.body.term) != s.Name('extern') or provisional(a.body.term): continue
         ty = type_of_act(p, a)
-        known = coreNames | constructors(p) | {a.name for a in p if isinstance(a, (s.Define, s.Alias))}
+        known = core_names() | constructors(p) | {a.name for a in p if isinstance(a, (s.Define, s.Alias))}
         if ty == s.Universe() or names(ty, constructors(p)) - known: return True
     return False
 
@@ -372,7 +425,7 @@ class Typing:
     does not elaborate is left out, its error in `errors` (the core's bite 4)."""
     untyped = {}; untyped_names = frozenset(); acts = (); failures = {}  # set by `typed`
     def __init__(self, p, hidden=frozenset()):
-        self.context = context_of(p)
+        self.context = context_of(p, core=_with_core[0])
         # the constructors of an imported file the file does not list are not its (run.py's
         # `Loaded`): a pattern variable of that name is a variable
         self.context.constructors -= set(hidden)
@@ -483,7 +536,7 @@ def up_to_unknowns(a, b):
 
 
 @lru_cache(maxsize=8)
-def _typing(p):
+def _typing(p, core=True):
     return typed(Typing, (), p)
 
 
@@ -711,7 +764,7 @@ def typed(make, imported, own, hidden=frozenset()):
 def typing_of(p):
     """The typing of a file read with its imports (12.S22, so that `base` sees an imported
     subtype's definition); see `typed`."""
-    if not isinstance(p, Program) or not p.imported: return _typing(tuple(p))
+    if not isinstance(p, Program) or not p.imported: return _typing(tuple(p), _with_core[0])
     if p.typing is None:
         own = {a.name for a in p if hasattr(a, 'name')}
         imported = tuple(a for a in p.imported if a.name not in own)
@@ -1049,10 +1102,13 @@ def kinds(program, path) -> list[Failure]:
     return out
 
 
-def check(program, path=None) -> list[Failure]:
+def check(program, path=None, core=True) -> list[Failure]:
     """Report each implemented program.lth predicate on each introduced name; with the file's
-    `path`, its imports are read for typing (12.S22) and its kind is verified (12.R2, `kinds`)."""
-    result = []
+    `path`, its imports are read for typing (12.S22) and its kind is verified (12.R2, `kinds`).
+    A name the core defines is refused (`core_refusals`); with `core` False (`--no-core`), the
+    file is read without the core."""
+    _with_core[0] = core
+    result = core_refusals(program, path)
     if path is not None:
         result += kinds(program, path)
         program = Program(program); program.imported = load_imports(program, path)
@@ -1081,11 +1137,12 @@ def check(program, path=None) -> list[Failure]:
 _checked = [None, None]
 
 
-def report(program) -> list[Report]:
+def report(program, path=None) -> list[Report]:
     """The `-v` reports: the typing's coverage of the file (as `check` read it, with its imports,
-    when it was the last file checked), then each name's reports."""
+    when it was the last file checked), each import of a core name (`redundant_imports`, with the
+    file's `path`), then each name's reports."""
     q = _checked[1] if _checked[0] == tuple(program) else typing_of(program)
-    result = [coverage(q)]
+    result = [coverage(q)] + redundant_imports(program, path)
     for n in dict.fromkeys(a.name for a in program if isinstance(a, (s.Declare, s.Define, s.Alias))):
         for kind, pred, message in [('unclaimed', violatesS14, 'No other definition claims this Bool law.'), ('provisional', provisionalExtern, 'Provisional extern.'), ('loose', looseFunction, 'Top-level function; reported pending local definitions.')]:
             if pred(program, n):
