@@ -226,7 +226,7 @@ class FileScope:
             return replace(value, left_type=r(value.left_type), right_type=r(value.right_type, bound | {value.left_name}))
         if isinstance(value, s.Subtype):
             pattern, binds = self.pattern(path, value.pattern, missing)
-            return s.Subtype(pattern, r(value.type), r(value.law, bound | binds))
+            return s.Subtype(pattern, r(value.type), _renamed(r(value.law, bound | binds), _variables(value.pattern, pattern)))
         if isinstance(value, s.Record):
             inner, out = set(bound), []
             for fl in value.fields:
@@ -236,6 +236,7 @@ class FileScope:
         if isinstance(value, (s.Block, s.Lambda)):
             inner = set(bound)
             params = []
+            renames = {}
             if isinstance(value, s.Lambda):
                 for q in value.params:
                     if isinstance(q, s.TypedParam):
@@ -246,37 +247,43 @@ class FileScope:
                     else:
                         patterns = []
                         for p in q.patterns:
-                            p, binds = self.pattern(path, p, missing)
-                            patterns.append(p)
+                            scoped, binds = self.pattern(path, p, missing)
+                            patterns.append(scoped)
+                            renames.update(_variables(p, scoped))
                             inner |= binds
                         q = s.ShapeParam(tuple(patterns))
                     params.append(q)
             items = []
             for it in value.items:
-                v = r(it.value, set(inner))
+                v = _renamed(r(it.value, set(inner)), renames)
                 if isinstance(it, s.Bind):
                     items.append(s.Bind(it.name, v))
                     inner.add(it.name)
+                    renames.pop(it.name, None)
                 else:
                     p, binds = self.pattern(path, it.pattern, missing)
+                    for n in binds:
+                        renames.pop(n, None)
+                    renames.update(_variables(it.pattern, p))
                     items.append(s.Rebind(p, v))
                     inner |= binds
             if isinstance(value, s.Block):
-                return s.Block(tuple(items), r(value.value, inner))
-            return s.Lambda(tuple(params), tuple(items), r(value.body, inner))
+                return s.Block(tuple(items), _renamed(r(value.value, inner), renames))
+            return s.Lambda(tuple(params), tuple(items), _renamed(r(value.body, inner), renames))
         if isinstance(value, s.MatchOf):
             arms = []
             for p, body in value.arms:
-                p, binds = self.pattern(path, p, missing)
-                arms.append((p, r(body, bound | binds)))
+                scoped, binds = self.pattern(path, p, missing)
+                arms.append((scoped, _renamed(r(body, bound | binds), _variables(p, scoped))))
             return s.MatchOf(r(value.value), tuple(arms))
         if isinstance(value, s.Clause):
-            patterns, binds = [], set()
+            patterns, binds, renames = [], set(), {}
             for p in value.patterns:
-                p, b = self.pattern(path, p, missing)
-                patterns.append(p)
+                scoped, b = self.pattern(path, p, missing)
+                patterns.append(scoped)
+                renames.update(_variables(p, scoped))
                 binds |= b
-            return s.Clause(tuple(patterns), r(value.body, bound | binds))
+            return s.Clause(tuple(patterns), _renamed(r(value.body, bound | binds), renames))
         if isinstance(value, s.RecordValue):
             return s.RecordValue(tuple((label, r(v)) for label, v in value.fields))
         if isinstance(value, s.Sum):
@@ -289,6 +296,58 @@ class FileScope:
             return replace(value, **{fl.name: r(getattr(value, fl.name)) for fl in fields(value)
                                      if not isinstance(getattr(value, fl.name), str)})
         return value
+
+
+def _variables(written, scoped):
+    """The pattern variables a file's scoping renamed (`name` -> `name%var`): written name -> new."""
+    out = {}
+    if isinstance(written, s.PApp) and isinstance(scoped, s.PApp):
+        if not written.patterns and written.name != scoped.name and scoped.name.endswith("%var"):
+            out[written.name] = scoped.name
+        for a, b in zip(written.patterns, scoped.patterns):
+            out.update(_variables(a, b))
+    elif isinstance(written, s.PTuple) and isinstance(scoped, s.PTuple):
+        for a, b in zip(written.patterns, scoped.patterns):
+            out.update(_variables(a, b))
+    return out
+
+
+def _renamed(value, renames):
+    """`value` with each free use of a renamed pattern variable under its new name; a binder of the
+    same name inside stops it."""
+    if not renames or value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, tuple):
+        return tuple(_renamed(v, renames) for v in value)
+    if isinstance(value, s.Name):
+        root, dot, rest = value.name.partition(".")
+        return s.Name(renames[root] + dot + rest) if root in renames else value
+    if isinstance(value, s.Lambda):
+        shadowed = {n for q in value.params for n in (q.names if isinstance(q, s.TypedParam) else
+                                                      [q.name] if isinstance(q, s.PlainParam) else [])}
+        inner = {k: v for k, v in renames.items() if k not in shadowed}
+        return replace(value, items=_renamed(value.items, inner), body=_renamed(value.body, inner))
+    if isinstance(value, s.MatchOf):
+        arms = tuple((p, _renamed(b, {k: v for k, v in renames.items() if k not in _pattern_names(p)}))
+                     for p, b in value.arms)
+        return s.MatchOf(_renamed(value.value, renames), arms)
+    if isinstance(value, (s.Pi, s.Sigma)):
+        inner = {k: v for k, v in renames.items() if k not in value.names}
+        return replace(value, domain=_renamed(value.domain, renames), codomain=_renamed(value.codomain, inner))
+    if isinstance(value, s.PApp):
+        return value
+    if is_dataclass(value) and not isinstance(value, type):
+        return replace(value, **{fl.name: _renamed(getattr(value, fl.name), renames) for fl in fields(value)
+                                 if not isinstance(getattr(value, fl.name), str)})
+    return value
+
+
+def _pattern_names(p):
+    if isinstance(p, s.PApp):
+        return {p.name} | set().union(*(_pattern_names(q) for q in p.patterns)) if not p.patterns else set().union(*(_pattern_names(q) for q in p.patterns))
+    if isinstance(p, s.PTuple):
+        return set().union(*(_pattern_names(q) for q in p.patterns))
+    return set()
 
 
 @dataclass
@@ -338,6 +397,9 @@ class Loaded(FileScope):
                 if len(fs) == 1:
                     self.plain[n] = fs[0]
         self.labels = _sum_labels(tuple(a for f in self.files.values() for a in f.acts), set())
+        # the constructors of every file's data: the elaborator reads a pattern's name against them
+        # all, so a file's pattern variable of such a name is renamed (`pattern`)
+        self.everywhere = {n for f in self.files.values() for n in f.constructors}
         # a definition that is not a constructor never keeps the name of a constructor or a label
         reserved = self.labels | _BUILTIN_CONSTRUCTORS | {n for f in self.files.values() for n in f.constructors}
         for n in reserved & set(self.plain):
@@ -458,6 +520,11 @@ class Loaded(FileScope):
                     out.append(q)
                     binds |= b
                 return s.PApp(self.constructor(path, p.name, missing), tuple(out)), binds
+            if p.name in self.everywhere:
+                # a pattern variable is a binder (2.S12): a name another file's data or sum takes,
+                # which this file does not see, is renamed so the elaborator, whose constructors
+                # are global, does not read the constructor (the core's bite 4, finding 3)
+                return s.PApp(p.name + "%var", ()), {p.name}
             return p, {p.name}
         if isinstance(p, s.PTuple):
             out, binds = [], set()
