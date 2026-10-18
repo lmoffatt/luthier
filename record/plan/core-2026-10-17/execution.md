@@ -790,6 +790,15 @@ Accepted when: the examples' stores re-certified; `experiment_zero.run.lut` and
 names prints every old name as MISSING; core_metrics' counts (1) to (3) are 0.
 May break: the fit's records (`*.run.json`): a changed cone is a changed key, so the runs are
 redone and compared with the recorded values.
+Also (D-2026-10-18, the coordinator on report-bite-4.md's question): correct the elaborations bite 4
+kept for the hash. (1) `T * Float64` with `T : Concrete` is written `*` applied, not the product
+(generators.lth's `weightOf`, `before`, `occurs`, `firstWeightOf`, `allNonNegative`;
+generators_model.lut's `supportOf`; world.lth's `stateAfter`, `resultOf`): elaborate.py's `walk` of
+`Binop` takes a type whose type is a subtype of `U` as a type. (2) An alias parameter captures a
+record field of the same name (experiment_zero.lut's `fit` and `transformOf`): the field names of a
+record type are bound in its later fields' types. (3) Product types nest to the left (`(A * B) *
+C`) where 3.S4 says right, as tuples do. Each moves the cones that reach those definitions; the
+stores re-certified once with this bite's. The spec marks each as a known defect (2.S8, 4.R7, 3.S4).
 
 ### Bite 13. Closing (Sonnet; after 12)
 
