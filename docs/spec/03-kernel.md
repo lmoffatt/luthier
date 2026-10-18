@@ -68,7 +68,9 @@ Files: r4_recursive_data.accept.lut.
 
 **3.S4. Anonymous sums and products.** [implemented] `A + B` is `{ left : A || right : B }`.
 Sums and products of more than two components associate to the right, so `A * B * C` is
-`A * (B * C)` and `(a, b, c)` is `(a, (b, c))`. An alternative of type `Unit` is injected by its
+`A * (B * C)` and `(a, b, c)` is `(a, (b, c))`. Bite 12 of the core corrects a known
+defect (report-bite-4.md): the elaborator nests a product type to the left, `(A * B) * C`, while tuples
+nest to the right; the typing compares products flattened, and the types stay for the hash. An alternative of type `Unit` is injected by its
 label alone: in `{ true : Unit || false : Unit }`, `true` is `true unit`. Examples: `k_sum.accept.lut`,
 `k_union.accept.lut`.
 

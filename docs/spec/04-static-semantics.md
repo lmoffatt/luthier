@@ -196,7 +196,10 @@ Files: r6_predicate_body.accept.lut, r6_body_type.reject.lut.
 **4.R7. An alias is written with `=` and has no state.** [implemented] `AB = A * B` makes `AB`
 stand for the term on the right everywhere; the checker expands it before anything else, so an
 alias is never declared, defined or certified. A name that is an alias and is also declared or
-defined is an error. A generator given to an alias is the generator of the type the alias stands
+defined is an error. A defect found by the core's bite 4 (its report, finding 2), corrected in
+bite 12: the expansion substitutes the alias's parameters inside a record type without regard to the record's
+own field names, so inside an alias with a parameter `n`, `Vec`'s `f : Fin n -> A` reads the
+parameter (experiment_zero.lut's `fit`, `transformOf`). A generator given to an alias is the generator of the type the alias stands
 for (2026-10-05; how it is given is `spec 7`): a generator of `FullCoords = VecOf (freeDim + 1)` draws every `VecOf 16`,
 and two aliases of one type cannot both have one. A distribution that means something (a broken
 graph, a complete one) is a type with a law, `{ g : DistanceGraph | not (ValidGraph g) }`, and
