@@ -1532,9 +1532,11 @@ def operator_use(op, a, left, right, ty, c):
         types = ', '.join(dict.fromkeys(show(b.domain) for b in c.bindings.get(op, ()))) or 'none'
         raise TypingError(f'{show_term(left)} {op} {show_term(right)}: {show(ty)} names no model of {op}; the types that have one: {types}', '4.R13')
     binding, sigma = found
-    fty = instantiate(binding.type, sigma) if sigma else binding.type
+    fty = binding.type
     for name in binding.vars:
-        fty = fty.codomain if isinstance(fty, t.Pi) else fty
+        # the type parameters of the bound function, at the left operand's instance
+        if isinstance(fty, t.Pi):
+            fty = substitute(fty.name, sigma.get(name, t.Var(name)), fty.codomain)
     if isinstance(fty, t.Pi) and isinstance(fty.codomain, t.Pi):
         second = fty.codomain.domain if fty.codomain.name == '_' or fty.name == '_' else substitute(fty.name, left, fty.codomain).domain
         try:
