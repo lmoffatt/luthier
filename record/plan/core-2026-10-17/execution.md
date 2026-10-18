@@ -647,6 +647,16 @@ convolution; evidence [0, 1] with + or max; resources + in sequence and max in p
 functions group gains NonExpansive and Lipschitz, the generalization of Monotone (L6.8; Fuzz).
 Declarations only; the recording bites belong to the three-levels plan after the core.
 
+After bite 5 (coordinator, 2026-10-18): the present collisions with core names stay listed in
+run.py's `CORE_COLLISIONS`, each with the bite that empties it (numbers and algebra in 8, laws in 9,
+arrays in 11, term and translation in 10, the seven names two core files define in 6), so nothing is
+re-certified twice; any other collision is refused. Bite 13 checks the list is empty. Chapter 7 still
+says "metric" for placement outside 7.S2, 7.S4 and 7.R1 (the opening list, the table of modes, three
+rows of the generators table, 7.S20): bite 6 rewords them. Correction to report-bite-4.md's
+addendum: ErasureKeepsTheStep's cone did move with e6cabf2; bite 5's wave re-certified it. From here,
+while the Anthropic quota is low, bites go to Codex (code) and Argon (theory, off a VPN), one at a
+time (record/notes/agent-costs-2026-10-18.md).
+
 ### Bite 3. The metrics script (Sonnet; first, alone)
 
 Files: new `scripts/core_metrics.py` and `tests/test_core_metrics.py`. The script prints the four
