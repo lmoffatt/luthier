@@ -1,5 +1,173 @@
 [
  {
+  "law": "ErasureKeepsTheStep",
+  "cone": "sha256:b744007509870946b79fe5f56a3d89f4fe0502da055eed9184d5096fc6c369b8",
+  "binding": [
+   {
+    "parameter": "a",
+    "generator": "alphas (Listed)",
+    "fingerprint": "sha256:96dc574c43644bc2b33f0962f117b68e1b710236149377735c73af8e96abcb33"
+   },
+   {
+    "parameter": "sb",
+    "generator": "substitutions (Listed)",
+    "fingerprint": "sha256:26388dc29d612182cf25ace005ecdecae6674bd77d2181ecc9387de2d4439bdb"
+   },
+   {
+    "parameter": "m",
+    "generator": "steppers (Listed)",
+    "fingerprint": "sha256:b7091fd834eaf65868799abb20a2489e93a9ef3c1394a4ba15b7fdb51d6b07e5"
+   },
+   {
+    "parameter": "e",
+    "generator": "erasures (Listed)",
+    "fingerprint": "sha256:9a794f84e5648db6176c4bcfa18f4b2572d46085bcee07d2985e1242c473064a"
+   },
+   {
+    "parameter": "p",
+    "generator": "erasurePrograms (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:edc85767ca07b1dcd48f5d08777fdf4a5c8147e4d965740eb336a122fe6166ab"
+   },
+   {
+    "parameter": "t",
+    "generator": "erasureTerms (Listed)",
+    "fingerprint": "sha256:833f83cd62d980f0169d5dc6f302475f5e136452757559c69cf333097e2a0628,sha256:60632e1ed98c8cf900343aaf508427cf051dc7c582628f22b8c5b6740dfe6571"
+   }
+  ],
+  "seed": 20261018,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "a",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "alpha"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "sb",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "substitute"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "stepper"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "erasure"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons (((Define \"inc\") (((Pi \"_\") (Var \"Int\")) (Var \"Int\"))) incBody)) nil)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((App (((Lam \"x\") (Var \"Int\")) (Var \"x\"))) one)"
+      },
+      {
+       "Printed": "((((Let \"y\") (Var \"Int\")) one) ((Pair (Var \"y\")) (Var \"y\")))"
+      },
+      {
+       "Printed": "((App (Var \"inc\")) one)"
+      },
+      {
+       "Printed": "(Var \"inc\")"
+      },
+      {
+       "Printed": "((App (((Lam \"x\") (Var \"Int\")) (((Lam \"y\") (Var \"x\")) (Var \"x\")))) (Var \"z\"))"
+      },
+      {
+       "Printed": "((Match ((Pair one) one)) ((cons (((PPair (PVar \"a\")) (PVar \"b\")), ((((Let \"c\") (Var \"Int\")) (Var \"a\")) (Var \"c\")))) nil))"
+      },
+      {
+       "Printed": "(((Lam \"x\") (Var \"Int\")) (Var \"x\"))"
+      },
+      {
+       "Printed": "one"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-18T08:08:41+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "empty"
+    },
+    "n": 8
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "one element"
+    },
+    "n": 8
+   }
+  ]
+ },
+ {
   "law": "CombineNeverRaises",
   "cone": "sha256:9f0a6c52675444e13edf35537298250f53ff4d315681260de6c298f2b0b8d441",
   "binding": [
@@ -6416,171 +6584,6 @@
      "name": "one element"
     },
     "n": 16
-   }
-  ]
- },
- {
-  "law": "ErasureKeepsTheStep",
-  "cone": "sha256:b744007509870946b79fe5f56a3d89f4fe0502da055eed9184d5096fc6c369b8",
-  "binding": [
-   {
-    "parameter": "a",
-    "generator": "alphas (Listed)",
-    "fingerprint": "sha256:96dc574c43644bc2b33f0962f117b68e1b710236149377735c73af8e96abcb33"
-   },
-   {
-    "parameter": "sb",
-    "generator": "substitutions (Listed)",
-    "fingerprint": "sha256:26388dc29d612182cf25ace005ecdecae6674bd77d2181ecc9387de2d4439bdb"
-   },
-   {
-    "parameter": "m",
-    "generator": "steppers (Listed)",
-    "fingerprint": "sha256:612afc7d543d3a5dafae200d2560a18ddb47022f3610ef1c1f50b52d631cf5a4"
-   },
-   {
-    "parameter": "e",
-    "generator": "erasures (Listed)",
-    "fingerprint": "sha256:9802b103413b4df8da0fe4e7a6ccacfb449a9663a487e80f975dc58b2851f020"
-   },
-   {
-    "parameter": "p",
-    "generator": "erasurePrograms (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:edc85767ca07b1dcd48f5d08777fdf4a5c8147e4d965740eb336a122fe6166ab"
-   },
-   {
-    "parameter": "t",
-    "generator": "erasureTerms (Listed)",
-    "fingerprint": "sha256:833f83cd62d980f0169d5dc6f302475f5e136452757559c69cf333097e2a0628,sha256:60632e1ed98c8cf900343aaf508427cf051dc7c582628f22b8c5b6740dfe6571"
-   }
-  ],
-  "seed": 20261018,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "a",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "alpha"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "sb",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "substitute"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "stepper"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "erasure"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons (((Define \"inc\") (((Pi \"_\") (Var \"Int\")) (Var \"Int\"))) incBody)) nil)"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "t",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "((App (((Lam \"x\") (Var \"Int\")) (Var \"x\"))) one)"
-      },
-      {
-       "Printed": "((((Let \"y\") (Var \"Int\")) one) ((Pair (Var \"y\")) (Var \"y\")))"
-      },
-      {
-       "Printed": "((App (Var \"inc\")) one)"
-      },
-      {
-       "Printed": "(Var \"inc\")"
-      },
-      {
-       "Printed": "((App (((Lam \"x\") (Var \"Int\")) (((Lam \"y\") (Var \"x\")) (Var \"x\")))) (Var \"z\"))"
-      },
-      {
-       "Printed": "((Match ((Pair one) one)) ((cons (((PPair (PVar \"a\")) (PVar \"b\")), ((((Let \"c\") (Var \"Int\")) (Var \"a\")) (Var \"c\")))) nil))"
-      },
-      {
-       "Printed": "(((Lam \"x\") (Var \"Int\")) (Var \"x\"))"
-      },
-      {
-       "Printed": "one"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 16,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-17T16:48:53+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "regions": [
-   {
-    "region": {
-     "source": "FromType",
-     "name": "empty"
-    },
-    "n": 8
-   },
-   {
-    "region": {
-     "source": "FromType",
-     "name": "one element"
-    },
-    "n": 8
    }
   ]
  }
