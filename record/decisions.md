@@ -3288,3 +3288,33 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line
 Kind:       principles (L12.6, L6.2, O1; the words of the record); the core (structures: Quantale;
             functions: Lipschitz); the decorations (L5.4)
 Status:     current
+
+D-2026-10-18-j  Q1 of the three levels' exploration (record/plan/three-levels-2026-10-18/report.md),
+                reformulated: a numerical law relates an input tolerance δ to an output tolerance ε,
+                and that relation is the law's content. The fixed `tol` matched exactly leaves (as the
+                report proposed), but it is replaced by the theory's bound function, not by a demand's
+                ε inside the law. Every agreement law (`…Agrees`, the `approx…` comparisons with
+                `tol`, `Elementary`'s identities) becomes two laws with theorems' bounds: stability
+                of the algorithm at exact inputs (the dot product: |dot(x, y) − x·y| ≤ γₙ·Σ|xₖyₖ|,
+                γₙ = nu/(1 − nu), Higham ch. 3) and sensitivity of the function to its inputs (|(x +
+                dx)·y − x·y| ≤ ‖dx‖·‖y‖, the Lipschitz law of D-2026-10-18-i); together ε ≤
+                sensitivity·δ + the algorithm's own error. The demand fixes one end (δ from its data,
+                or the ε it needs, pulled back by the sensitivity, L6.8) and the law gives the other;
+                the demand stays outside the law. The certificate records how tight the bound is (the
+                largest ratio seen of error to bound; the law passes at ratio ≤ 1). And every such law
+                states the range where it holds, as its premise: the bounds hold for small
+                tolerances only (γₙ needs nu < 1; no overflow, the `Moderate` domain; a first-order
+                sensitivity holds for δ below a radius that depends on the input, as the
+                pseudo-inverse's bound needs ‖ΔA‖ below the smallest retained singular value, past
+                which the rank changes and the function jumps); outside it the law claims nothing.
+                The radius of validity is a region of the law (D-2026-10-16-j: the boundary of its
+                premise), sampled on both sides. LAPACK's form (D-2026-10-18-d).
+Author:     Luciano ("en realidad tenemos un tol de entrada y uno de salida, ¿no? El tol es parte de
+            la ley"), on the decision assistant's reformulation
+Quote:      "Sí, reformulalo así. Ojo que las leyes suelen valer para epsilon pequeños, eso tiene que
+            estar en la ley también: ¿a partir de qué valor de epsilon vale?"
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line unknown until the
+            export)
+Kind:       arrays.lth, numbers.lth (`Elementary`), probability.lth, the slice's laws with `tol`;
+            the tester (ratio recorded, the validity radius as a region); the stores re-certified
+Status:     current
