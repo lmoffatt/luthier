@@ -722,12 +722,6 @@ def bind_pattern(q, ty, c):
             if ctype is None:
                 for p in ps: bind_pattern(p, c.meta(name), c)
                 return
-            if not ps and isinstance(ctype, t.Pi):
-                # a constructor with arguments written bare is the variable the author meant (a
-                # name another file's data takes, `name` of grammar.lth in `schema name ->`); the
-                # term keeps the constructor, as the elaborator has always written it
-                c.types[name] = c.meta(name)
-                return
             if name in c.datas and c.datas[name]:
                 ctype = instantiate(ctype, {p: c.meta(p) for p in c.datas[name]})
             domains = []
