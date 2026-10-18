@@ -512,7 +512,13 @@ class Typing:
                 yield from self.applications(b, {**ctx, **{n: t.Hole('type') for n in pattern_names(q)}})
 
     def body(self, n):
-        return next((a.body for a in self.program if isinstance(a, t.Define) and a.name == n), None)
+        found = next((a.body for a in self.program if isinstance(a, t.Define) and a.name == n), None)
+        if found is None and not any(getattr(a, 'name', None) == n for a in self.program):
+            # a type the core defines without parameters (`Concrete`, a subtype of `U`), seen with
+            # no import since the core's bite 5: its definition is the prelude's
+            params, body = self.context.bodies.get(n, ((), None))
+            found = None if params else body
+        return found
 
 
 def up_to_unknowns(a, b):

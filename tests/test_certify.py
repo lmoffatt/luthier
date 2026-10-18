@@ -428,7 +428,7 @@ def test_a_changed_definition_makes_the_entry_stale(laws, capsys):
 
 def test_the_entry_holds_what_certification_lth_names(laws):
     tester.run_tests(laws, store=True)
-    e = next(e for e in certify.read_store(laws) if e["law"] == "PlusCommutes" and e["seed"] == 7)
+    e = next(e for e in certify.read_store(laws) if e["law"] == "IntPlusCommutes" and e["seed"] == 7)
     # 7.S9 (3j j2a): the entry records its regions, here none of a type, a cutoff or a premise
     assert set(e) == {"law", "cone", "binding", "seed", "cases", "budgets", "reach", "evidence", "grade",
                       "outcome", "date", "interpreter", "hosts", "regions"}
@@ -464,7 +464,7 @@ def test_certify_several_files(tmp_path, capsys):
     assert out[0] == f"{paths[0]}: 4 laws, 6 lines ran, 0 known"
     # each law with its control status (7.S19): none of these has a control
     out = [line.replace("; uncontrolled: untested against any wrong model (7.S19)", "") for line in out]
-    assert "  NotInvolutive: exhaustive" in out and "  PlusCommutes: sampled" in out
+    assert "  NotInvolutive: exhaustive" in out and "  IntPlusCommutes: sampled" in out
     assert "  Small: refuted at x = 552" in out and "  AndIsOr: refuted at a = true, b = false" in out
     # weakest.test.lut: one law under two bindings, the weakest
     assert out[out.index(f"{paths[1]}: 1 laws, 2 lines ran, 0 known") + 1] == "  NotInvolutive: cases"
@@ -1168,9 +1168,9 @@ def _written(path, text):
 
 POOLED = '''import "test.lth" test SampledMode
 import "generators_model.lut" linear
-PlusCommutes (x y : Int) : Bool := x + y == y + x
-test "PlusCommutes" (SampledMode linear) (seed <- 1)
-test "PlusCommutes" (SampledMode linear) (seed <- 2)
+IntPlusCommutes (x y : Int) : Bool := x + y == y + x
+test "IntPlusCommutes" (SampledMode linear) (seed <- 1)
+test "IntPlusCommutes" (SampledMode linear) (seed <- 2)
 '''
 
 
@@ -1185,17 +1185,17 @@ def test_two_stretches_of_100_cases_with_different_seeds_give_a_grade_over_200(t
     path, (one, two), entries = _pooled_law(tmp_path)
     assert [e["cases"] for e in entries] == [100, 100] and {e["seed"] for e in entries} == {1, 2}
     binding = entries[0]["binding"]
-    assert certify.pooled(entries, "PlusCommutes", one.cone, binding) == 200
-    assert certify.certificate_grade(entries, "PlusCommutes", one.cone) == "Sampled"
-    assert dict(certify.standings(path))["PlusCommutes"] == "sampled; pooled over seeds 1, 2: 200 cases in all"
+    assert certify.pooled(entries, "IntPlusCommutes", one.cone, binding) == 200
+    assert certify.certificate_grade(entries, "IntPlusCommutes", one.cone) == "Sampled"
+    assert dict(certify.standings(path))["IntPlusCommutes"] == "sampled; pooled over seeds 1, 2: 200 cases in all"
     # one stretch is the line's own n, and the standing reads as before
-    assert certify.pooled(entries[1:], "PlusCommutes", one.cone, binding) == 100
-    assert certify.standing(entries[1:], "PlusCommutes", one.cone) == "sampled"
+    assert certify.pooled(entries[1:], "IntPlusCommutes", one.cone, binding) == 100
+    assert certify.standing(entries[1:], "IntPlusCommutes", one.cone) == "sampled"
 
 
 def test_a_replayed_seed_does_not_double_n(tmp_path):
     path, (one, _), entries = _pooled_law(tmp_path)
-    law, binding = "PlusCommutes", entries[0]["binding"]
+    law, binding = "IntPlusCommutes", entries[0]["binding"]
     stored = certify.store_path(path).read_text()
     # an agreeing replay is absorbed by the store (Recording), and counted once if it were kept
     tester.run_tests(path, store=True, deep=True)

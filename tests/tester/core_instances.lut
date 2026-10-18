@@ -21,15 +21,11 @@
 -- draws. The equalities are the structural `==` of each concrete type, as a value of `Object`
 -- (kernel_laws.lth; `structural A` in bite 3).
 
-import "core/structures/equality.lth" Object
-import "core/properties/relations.lth" Related Chain Both Reflexive Irreflexive Symmetric Antisymmetric
-  Asymmetric Transitive Total Equivalence Preorder PartialOrder TotalOrder StrictOrder
-import "core/properties/operations.lth" Associative Commutative Idempotent LeftNeutral RightNeutral Neutral
-  Absorbing Cancellative Invertible Distributive Absorptive Complemented Distinct
-  AssociativeWithin CommutativeWithin NeutralWithin DistributiveWithin InvertibleWithin
-import "core/properties/functions.lth" id compose flip const Pointwise Pointwise2 Injective Surjective Inverse
-  Isomorphism Bijective Idempotent as IdempotentFunction Involutive Monotone Preserving Congruent LandsIn
-  IdempotentWithin InvolutiveWithin PointwiseWithin
+-- The core is seen without an import (12.S22, the core's bite 5); the names imported here are the
+-- ones two core files define until bite 6 (run.py's CORE_COLLISIONS), so the import says which.
+import "core/properties/relations.lth" Reflexive Symmetric Transitive
+import "core/properties/operations.lth" Associative Idempotent LeftNeutral RightNeutral
+import "core/properties/functions.lth" Idempotent as IdempotentFunction
 
 -- ---------------------------------------------------------------- the equalities
 

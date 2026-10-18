@@ -10,7 +10,6 @@
 import "test.lth" test ExhaustiveMode Grade Proved Cases Sampled AssumedGrade
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "core/structures/equality.lth" Concrete
 import "term.lth" Term Var App
 import "world.lth" Console PrintAppendsALine PrintChangesOnlyStdout ReadGivesThePlace ReadChangesNothing
   World Described OwnIsIdempotent ChangesOnlyDeclared printDescription readFileDescription observeDescription
@@ -143,17 +142,19 @@ bridges : List (Crossing Int Int) := [bridge]
 ints : List Concrete := [Int]
 double (x : Int) : Int := 2 * x
 succ (x : Int) : Int := x + 1
-flip (x : Int) : Int := 0 - x
-functions : List (Int -> Int) := [double, succ, flip]
+-- `opposite` and `intFunctions` were `flip` and `functions` until the core's bite 5 (core/properties/
+-- functions.lth's names; a file does not redefine a core name, 12.S22, D-2026-10-18-b)
+opposite (x : Int) : Int := 0 - x
+intFunctions : List (Int -> Int) := [double, succ, opposite]
 arguments : List (List Int) := [nil, [1], [1, 2, 3], [0 - 4, 0, 7]]
 befores : List (List (String * (Int -> Int))) := [nil, [("g", succ)], [("f", double)]]
-afters : List (List (String * (Int -> Int))) := [nil, [("f", flip)], [("h", succ)]]
+afters : List (List (String * (Int -> Int))) := [nil, [("f", opposite)], [("h", succ)]]
 labels : List String := ["f", "g"]
-onCallback : List Binding := [bind "A" "ints", bind "B" "ints", bind "b" "bridges", bind "f" "functions", bind "xs" "arguments"]
+onCallback : List Binding := [bind "A" "ints", bind "B" "ints", bind "b" "bridges", bind "f" "intFunctions", bind "xs" "arguments"]
 test "CallbackGivesTheFunction" ExhaustiveMode (seed <- 20261015) (whereBindings <- onCallback)
 test "CallsAreCounted" ExhaustiveMode (seed <- 20261015) (whereBindings <- onCallback)
 test "RecordCrossesByField" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "ints", bind "B" "ints",
-  bind "b" "bridges", bind "before" "befores", bind "after" "afters", bind "l" "labels", bind "f" "functions",
+  bind "b" "bridges", bind "before" "befores", bind "after" "afters", bind "l" "labels", bind "f" "intFunctions",
   bind "xs" "arguments"])
 
 -- §5 the host, over the cases a faithful host gathers along one chain of tokens

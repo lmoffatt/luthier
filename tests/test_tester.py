@@ -25,10 +25,10 @@ def test_the_five_kinds_of_outcome(capsys):
     assert lines == [
         "NotInvolutive: exhaustive, 2 cases, exhaustive (ran)",
         "AndIsOr: exhaustive, 4 cases, refuted at a = true, b = false (ran)",
-        "PlusCommutes: sampled (seed 7, size 10, metric ignored), 200 cases, sampled (ran)",
+        "IntPlusCommutes: sampled (seed 7, size 10, metric ignored), 200 cases, sampled (ran)",
         "Small: sampled (seed 0, size 10, metric ignored), 100 cases, sampled (ran)",
         "Small: sampled (seed 0, size 1000, metric ignored), 100 cases, refuted at x = 552 (ran)",
-        "PlusCommutes: exhaustive, 0 cases, not run: x : Int: Int is infinite: "
+        "IntPlusCommutes: exhaustive, 0 cases, not run: x : Int: Int is infinite: "
         "ExhaustiveMode needs its bounds or a census (7.R3) (ran)",
     ]
 

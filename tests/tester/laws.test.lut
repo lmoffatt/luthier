@@ -1,18 +1,20 @@
 -- tests/tester/laws.test.lut: the smallest test lines of `luthier test` (record/IA/tester-2026-10-14/prompt.md):
 -- an exhaustive law on Bool that holds and one that is refuted, a sampled law on Int that holds
 -- and one refuted at a size, and an infinite type under ExhaustiveMode, which is not run.
+-- `IntPlusCommutes` was `PlusCommutes` until the core's bite 5 (a file does not redefine a core name,
+-- 12.S22, D-2026-10-18-b).
 
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear
 
 NotInvolutive (b : Bool) : Bool := not (not b) == b
 AndIsOr (a b : Bool) : Bool := (a and b) == (a or b)
-PlusCommutes (x y : Int) : Bool := x + y == y + x
+IntPlusCommutes (x y : Int) : Bool := x + y == y + x
 Small (x : Int) : Bool := x < 50
 
 test "NotInvolutive" ExhaustiveMode
 test "AndIsOr" ExhaustiveMode
-test "PlusCommutes" (SampledMode linear) (cases <- 200) (seed <- 7)
+test "IntPlusCommutes" (SampledMode linear) (cases <- 200) (seed <- 7)
 test "Small" (SampledMode linear) (size <- 10)
 test "Small" (SampledMode linear) (size <- 1000)
-test "PlusCommutes" ExhaustiveMode
+test "IntPlusCommutes" ExhaustiveMode

@@ -1235,7 +1235,6 @@ FIRST_ACTION_LAWS = """\
 import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "core/structures/equality.lth" Concrete
 import "world.lth" Host Observed HostAgreesPrint
 import "world_model.lut" State
 import "first_action_models.lut" honest
