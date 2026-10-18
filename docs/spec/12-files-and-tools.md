@@ -12,7 +12,7 @@ Chapter 12 of the specification, draft 0, 2026-10-12. Sources: `docs/spec/03-lib
 
 **12.S3. The two forms of import.** [implemented] `import "x.lut"` brings the definitions of `x.lut` into the importer's namespace; `import "x.lut" as m` reaches them as `m.f`, with no collision between files. The extension `.lut` may be omitted. In the language designed `import` is the function of 12.S22.
 
-**12.S4. Where a file is looked for.** [implemented] Next to the importing file, then in each directory of the environment variable `LUTHIER_PATH`, then in the `lib/` directory of the interpreter's package. `core.lut` is imported implicitly, unless the command is given `--no-core`.
+**12.S4. Where a file is looked for.** [implemented] Next to the importing file, then in each directory of the environment variable `LUTHIER_PATH`, then in the `lib/` directory of the interpreter's package. The core, every file under `lib/core/` (`core.lut` and the files beside it), is imported implicitly, unless the command is given `--no-core` (`luthier check` takes it, 12.S14; D-2026-10-18-b, the core's bite 5).
 
 **12.S5. Importing twice, and cycles.** [implemented] Importing a file twice under one prefix does nothing; one file may be loaded under two prefixes. A cycle of imports is an error.
 
@@ -73,9 +73,13 @@ file; when a demand first needs the model (12.S21), the file is read and the che
 it defines that name as a model of that theory, an error otherwise; and the importer sees only what
 the theory names, which is the private part (L6.12, L6.14). There is no import without names, no
 `la := import "x.lut"` (which D-2026-10-12-ad had, retired), no import of every name and no `open`
-(D-2026-10-12-ae); the file carries no name of its own. `core.lut` encloses the top-level scope of
-every file (a scope, not a block: spec 2.S17), so its names (`Int`, `Bool`, `List` and the rest) are
-visible unqualified; a name with no import is local or core's.
+(D-2026-10-12-ae); the file carries no name of its own. The core, `lib/core/` (`core.lut` and the
+files beside it), encloses the top-level scope of every file (a scope, not a block: spec 2.S17), so
+its names (`Int`, `Bool`, `List`, `compose`, `Object` and the rest) are visible unqualified; a name
+with no import is local or core's (D-2026-10-18-b). A file does not define a name the core defines:
+the checker and the loader refuse it, naming the core file; an import of a core name by its path is
+redundant, a notice of `check -v`.
+Files: core_unimported.accept.lut, core_redefined.reject.lut.
 
 **12.S23. Theory files and model files.** [decided D-2026-10-13-n] A theory file, extension `.lth`,
 holds types, declarations and laws; the checker rejects an `extern`, an action or a model value in
