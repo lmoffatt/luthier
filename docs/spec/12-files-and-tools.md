@@ -79,7 +79,6 @@ its names (`Int`, `Bool`, `List`, `compose`, `Object` and the rest) are visible 
 with no import is local or core's (D-2026-10-18-b). A file does not define a name the core defines:
 the checker and the loader refuse it, naming the core file; an import of a core name by its path is
 redundant, a notice of `check -v`.
-Files: core_unimported.accept.lut, core_redefined.reject.lut.
 
 **12.S23. Theory files and model files.** [decided D-2026-10-13-n] A theory file, extension `.lth`,
 holds types, declarations and laws; the checker rejects an `extern`, an action or a model value in
