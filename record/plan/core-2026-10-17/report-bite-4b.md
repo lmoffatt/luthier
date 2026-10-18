@@ -119,3 +119,31 @@ non-fixture program. The fixtures' stores beside them were removed after each wa
 Should certification.lth's `Entry` and `identity` state the `conjunct` field now, which changes
 the cone of certification's laws and re-runs about fifteen lines once, or wait until bite 6 writes
 the first structure bare?
+
+## Addendum: the conjunct field in the theory (the coordinator's answer to the question)
+
+- a75b220 certification.lth: `Identity` gains `conjunct : Maybe String` and `Entry` gains `conjunct :
+  Maybe String` and `conjuncts : List String` (nothing and nil for a law's own entry and a control's;
+  the store omits both then). `IdentityIsTheKey` and certification_model.lut's `identity` read the
+  conjunct; `under` and `reshape` carry both fields; the entries the test programs build
+  (certification, cutoff, demand, pooling, regions) give `conjunct := nothing, conjuncts := nil`.
+  `luthier check` on the two library files and the eight test programs touched: clean.
+- ff84a28 the stores: certification.cert.json, certification_model.cert.json, demand.cert.json.
+
+The wave, `luthier certify tests/tester/*.test.lut --jobs 4` at a75b220, 8 min 48 s, no `--deep`:
+44 non-fixture lines ran, the same set as the first wave (certification_controls 7,
+certification_laws 8, cutoff_controls 1, demand 2 and 2, pooling 2 and 2, regions 10 and 10); no
+law refuted, every control refuted, every other program `0 lines ran`. No test line names
+`IdentityIsTheKey` today, so the identity law itself is not run by this wave.
+
+What went wrong in the confirmation wave. Bite 4's commits (05360df to 84b327c at 07:45, 1fda944 to
+eaab3f7 at 08:00 local) landed while I ran it, and its elaborator changes move the cones of most
+library laws, so it started re-running the library (arrays, belief, numbers, optimization,
+probability, generators_model, sonolocalizacion). That is bite 4's re-certification, not this
+bite's: I stopped it after about 20 minutes and killed its workers. The entries it wrote are left
+uncommitted in 14 stores (examples/sonolocalizacion/{distances, positions, session_a}.cert.json,
+src/luthier/lib/{arrays, arrays_model, belief, belief_model, generators_model, numbers,
+numbers_model, optimization, optimization_model, probability, probability_model}.cert.json), every
+one dated after 23:53 UTC and none in the three stores committed above. Each is a valid entry at
+the cone it ran against; restoring the files to HEAD was refused by the permission system, so they
+are for bite 4's agent or the coordinator to keep (its wave then finds them known) or discard.
