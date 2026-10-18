@@ -817,30 +817,30 @@ def test_certify_lists_the_laws_of_tables_with_their_controls(capsys):
 
 # the laws and the functions live in a library (a test program is never imported, 12.R2), whose
 # store holds the entries and the controls of the laws it states (L10.12)
-PAIR = '''Idempotent (f : Bool -> Bool) (b : Bool) : Bool := f (f b) == f b
-Reflexive (a : Bool) : Bool := a == a
+PAIR = '''Stable (f : Bool -> Bool) (b : Bool) : Bool := f (f b) == f b
+SelfEqual (a : Bool) : Bool := a == a
 keep (x : Bool) : Bool := x
-flip (x : Bool) : Bool := if x then false else true
+toggle (x : Bool) : Bool := if x then false else true
 always (x : Bool) : Bool := true
 '''
 PAIR_LAWS = '''import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "pair.lut" Idempotent Reflexive keep always
+import "pair.lut" Stable SelfEqual keep always
 goods : List (Bool -> Bool) := [keep, always]
 onGoods : List Binding := [ { parameter := just "f", type := nothing, generator := "goods", coverage := Listed } ]
-test "Idempotent" ExhaustiveMode (whereBindings <- onGoods)
-test "Reflexive" ExhaustiveMode
+test "Stable" ExhaustiveMode (whereBindings <- onGoods)
+test "SelfEqual" ExhaustiveMode
 '''
 PAIR_CONTROLS = '''import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "pair.lut" Idempotent flip always
-flips : List (Bool -> Bool) := [flip]
+import "pair.lut" Stable toggle always
+toggles : List (Bool -> Bool) := [toggle]
 alwayss : List (Bool -> Bool) := [always]
-onFlip : List Binding := [ { parameter := just "f", type := nothing, generator := "flips", coverage := Listed } ]
+onFlip : List Binding := [ { parameter := just "f", type := nothing, generator := "toggles", coverage := Listed } ]
 onAlways : List Binding := [ { parameter := just "f", type := nothing, generator := "alwayss", coverage := Listed } ]
-test "Idempotent" ExhaustiveMode (whereBindings <- onFlip) (control <- true)
+test "Stable" ExhaustiveMode (whereBindings <- onFlip) (control <- true)
 '''
 
 
@@ -851,29 +851,29 @@ def test_controls_through_the_stores_in_certify_and_check(tmp_path, capsys):
     controls.write_text(PAIR_CONTROLS, encoding="utf-8")
     assert main(["certify", str(laws), str(controls)]) == 0
     out = capsys.readouterr().out.splitlines()
-    assert "  Idempotent: cases; controlled (refuted on its control at f = flip, b = true)" in out
-    assert "  Reflexive: exhaustive; uncontrolled: untested against any wrong model (7.S19)" in out
+    assert "  Stable: cases; controlled (refuted on its control at f = toggle, b = true)" in out
+    assert "  SelfEqual: exhaustive; uncontrolled: untested against any wrong model (7.S19)" in out
     # the control lives beside the claim it controls, the file that states the law (L10.12): no
     # test program keeps a store
     assert not certify.store_path(laws).exists()
     stored = [e for e in certify.read_store(pair) if certify.is_control(e)]
     assert [(e["kind"], e["outcome"], e["grade"]) for e in stored] == \
-        [("Control", {"ControlRefuted": "f = flip, b = true"}, None)]
+        [("Control", {"ControlRefuted": "f = toggle, b = true"}, None)]
     assert not certify.store_path(controls).exists()
     # check -v reads the controls from the stores of the claims of the files it is given
     main(["check", "-v", str(laws), str(controls)])
     out = capsys.readouterr().out
-    assert "certificate Idempotent: cases; controlled (refuted on its control at f = flip, b = true)" in out
-    assert "certificate control of Idempotent: refuted at f = flip, b = true: the control passed" in out
+    assert "certificate Stable: cases; controlled (refuted on its control at f = toggle, b = true)" in out
+    assert "certificate control of Stable: refuted at f = toggle, b = true: the control passed" in out
     main(["check", "-v", str(laws)])  # the law's store holds its control: controlled without the file
-    assert "certificate Idempotent: cases; controlled" in capsys.readouterr().out
+    assert "certificate Stable: cases; controlled" in capsys.readouterr().out
     # a control the law holds on fails, loudly, and certify fails; the grade is unchanged
-    controls.write_text(PAIR_CONTROLS + 'test "Idempotent" ExhaustiveMode (whereBindings <- onAlways) '
+    controls.write_text(PAIR_CONTROLS + 'test "Stable" ExhaustiveMode (whereBindings <- onAlways) '
                         '(control <- true)\n', encoding="utf-8")
     assert main(["certify", str(laws), str(controls)]) == 1
     out = capsys.readouterr().out.splitlines()
-    assert any(line.startswith("  Idempotent: cases; CONTROL FAILED") and "alwayss" in line for line in out)
-    assert any(line.startswith("  control of Idempotent on alwayss (Listed), ExhaustiveMode over Bool: "
+    assert any(line.startswith("  Stable: cases; CONTROL FAILED") and "alwayss" in line for line in out)
+    assert any(line.startswith("  control of Stable on alwayss (Listed), ExhaustiveMode over Bool: "
                                "CONTROL FAILED") for line in out)
 
 

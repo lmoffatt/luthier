@@ -164,13 +164,13 @@ wide : Gen Int := fn n s { (s mod 70, (s + 1) mod 2147483648) }
 Seven : U := { x : Int | 0 <= x and x < 7 }
 InSeven (x : Seven) : Bool := x < 7
 Rotated (k : Dim) (q : MatOf k k) (s : SymmetricOf k) : Bool := q.m == k and s.m == k
-Unit (vs : UnitList) : Bool := allUnit vs
+AllUnit (vs : UnitList) : Bool := allUnit vs
 IsSquare (s : Symmetric) : Bool := s.m == s.n
 test "InSeven" (SampledMode linear) (whereBindings <- [byParameter "x" "counter"])
 test "InSeven" (SampledMode linear) (whereBindings <- [byParameter "x" "wide"])
 test "InSeven" ExhaustiveMode (whereBindings <- [byParameter "x" "counter"])
 test "Rotated" (SampledMode linear) (cases <- 10) (whereBindings <- [byParameter "q" "orthogonal", byParameter "s" "symmetricOf"])
-test "Unit" (SampledMode linear) (cases <- 10) (whereBindings <- [byParameter "vs" "unitList"])
+test "AllUnit" (SampledMode linear) (cases <- 10) (whereBindings <- [byParameter "vs" "unitList"])
 test "IsSquare" (SampledMode linear) (cases <- 10) (whereBindings <- [byParameter "s" "orthogonal"])
 '''
 
@@ -188,7 +188,7 @@ def test_a_binding_names_a_generator(tmp_path, capsys):
     assert "not run: x : Seven: the generator wide gave a value outside Seven at seed 7 (7.S1)" in invalid
     assert "not run: x is bound to the generator counter: ExhaustiveMode lists values" in exhaustive
     assert family == "Rotated: sampled (seed 0, size 10, placement ignored), 10 cases, sampled (ran)"
-    assert host == "Unit: sampled (seed 0, size 10, placement ignored), 10 cases, sampled (ran)"
+    assert host == "AllUnit: sampled (seed 0, size 10, placement ignored), 10 cases, sampled (ran)"
     assert "the generator orthogonal reads k, which the law does not quantify before this parameter" in unread
 
 
