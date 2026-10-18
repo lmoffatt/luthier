@@ -35,6 +35,13 @@ Bite 4 landed 2026-10-18 (report-bite-4.md): `infer` total on the library (3285 
 by type with claims as bindings, omitted structure parameters filled, the bare fallback gone; check
 types each act in its file's context and refuses what the typing refuses (4.R9, 4.R13); no cone
 moved; suite 847 passed; core_metrics unchanged (96, 112, 427, 137, 1974).
+Bite 5 landed 2026-10-18 (report-bite-5.md): the whole lib/core/ is the prelude of the loader, the
+elaborator and check; a file that defines a core name is refused naming the core file, but for the
+present collisions run.py's CORE_COLLISIONS lists with the bite that removes each (6, 8, 9, 10,
+11); a name two core files define is imported from one until bite 6; the `import "core/..."` lines
+outside lib/core/ gone but those; generators.lth's `Metric` is `Placement` (D-2026-10-18-e); spec
+12.S4, 12.S22, 7.S2, 7.S4, 7.R1; one wave of 8 lines (ErasureKeepsTheStep, moved by bite 4's
+finding-3 fix, and three world laws with their controls); core_metrics 96, 107, 427, 137, 1974.
 
 ## 0. The core's end (D-2026-10-18-a)
 
