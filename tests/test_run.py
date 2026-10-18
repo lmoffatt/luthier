@@ -600,7 +600,7 @@ LIB = ROOT / "src" / "luthier" / "lib"
 
 
 def test_each_file_resolves_its_own_names():
-    # left.lut and right.lut both define `helper`; left.lut's `not` is not core's elsewhere
+    # left.lut and right.lut both define `helper`; left.lut's `keep` is seen nowhere else
     assert run_file(SCOPE / "main.run.lut") == "3 10 false true\n"
 
 
@@ -620,8 +620,81 @@ def test_the_loader_reads_no_more_than_the_import_lists(tmp_path):
     assert loaded.name(top, "twice") == "twice" and loaded.name(top, "ten") == "tenfold"
     assert loaded.name(top, "helper") is None and loaded.name(top, "tenfold") is None
     assert loaded.name(top, "not") == "not"  # core's
-    assert loaded.name(SCOPE / "left.lut", "not") == "not@left"
+    assert loaded.name(SCOPE / "left.lut", "not") == "not" and loaded.name(SCOPE / "left.lut", "keep") == "keep"
     assert {loaded.name(SCOPE / f, "helper") for f in ("left.lut", "right.lut")} == {"helper@left", "helper@right"}
+
+
+# ---------------------------------------------------------------- the core is the prelude
+# (the core's bite 5: record/plan/core-2026-10-17/execution.md §1, D-2026-10-18-b, 12.S22)
+
+def test_every_core_file_is_seen_without_an_import(tmp_path):
+    # `compose` is core/properties/functions.lth's, which core.lut does not import
+    path = tmp_path / "composed.run.lut"
+    path.write_text("import \"world_model.lut\" HostConsole host : HostConsole\n"
+                    "showInt (x : Int) : String := extern \"python:builtins.repr\" x\n"
+                    "succ (x : Int) : Int := x + 1\n"
+                    "main (w : W) : W * Unit := host.print w (showInt (compose Int Int Int succ succ 1))\n",
+                    encoding="utf-8")
+    loaded = Loaded(path)
+    assert loaded.name(loaded.top, "compose") == "compose" and loaded.see(loaded.top, "compose")[0] == LIB / "core" / "properties" / "functions.lth"
+    assert run_file(path) == "3\n"
+
+
+@pytest.mark.parametrize("name, where", [("not", "core/core.lut"), ("compose", "core/properties/functions.lth"),
+                                          ("Object", "core/structures/equality.lth")])
+def test_a_file_that_redefines_a_core_name_is_refused(tmp_path, name, where):
+    path = tmp_path / "redefines.run.lut"
+    path.write_text(f"{name} (b : Bool) : Bool := b\nmain (w : W) : W * Unit := (w, unit)\n", encoding="utf-8")
+    with pytest.raises(RunError) as error:
+        Loaded(path)
+    assert f"redefines.run.lut defines {name}, which the core defines in {where}" in str(error.value)
+
+
+def test_a_name_two_core_files_define_is_imported_from_one(tmp_path):
+    # until bite 6, core/structures/equality.lth and core/properties/relations.lth both define
+    # `Reflexive` (run.py's CORE_COLLISIONS): a file that writes it without an import is told so
+    path = tmp_path / "ambiguous.lut"
+    path.write_text("r (x : Int) : Bool := Reflexive Int (fn a b { a == b }) x\n", encoding="utf-8")
+    loaded = Loaded(path)
+    with pytest.raises(RunError, match="Reflexive is defined by core/structures/equality.lth and "
+                                       "core/properties/relations.lth, so it is imported from one of them"):
+        loaded.see(loaded.top, "Reflexive")
+
+
+def _core_of(tmp_path, files):
+    core = tmp_path / "core"
+    for name, text in files.items():
+        (core / name).parent.mkdir(parents=True, exist_ok=True)
+        (core / name).write_text(text, encoding="utf-8")
+    return core
+
+
+def test_a_cycle_of_core_files_is_allowed_when_no_name_reaches_itself(tmp_path):
+    # a.lth reads `b` from b.lth and b.lth reads `a` from a.lth (relations.lth's note: `Object`'s
+    # law written over `Equivalence`, a cycle of files and not of names)
+    core = _core_of(tmp_path, {
+        "core.lut": "Bool : U := data { true : Bool ; false : Bool }\n",
+        "a.lth": "import \"b.lth\" b\na (x : Bool) : Bool := x\naThenB (x : Bool) : Bool := b (a x)\n",
+        "b.lth": "import \"a.lth\" a\nb (x : Bool) : Bool := x\nbThenA (x : Bool) : Bool := a (b x)\n"})
+    user = tmp_path / "user.lut"
+    user.write_text("both (x : Bool) : Bool := aThenB (bThenA x)\n", encoding="utf-8")
+    loaded = Loaded(user, core=core)
+    assert loaded.see(loaded.top, "aThenB") == (core / "a.lth", "aThenB")
+    assert loaded.see(core / "a.lth", "b") == (core / "b.lth", "b")
+    assert not loaded.errors
+
+
+def test_a_name_that_reaches_itself_through_two_core_files_is_an_error_with_its_path(tmp_path):
+    core = _core_of(tmp_path, {
+        "core.lut": "Bool : U := data { true : Bool ; false : Bool }\n",
+        "a.lth": "import \"b.lth\" x\ny (v : Bool) : Bool := x v\n",
+        "b.lth": "import \"a.lth\" x\nz (v : Bool) : Bool := x v\n"})
+    user = tmp_path / "user.lut"
+    user.write_text("w (v : Bool) : Bool := v\n", encoding="utf-8")
+    loaded = Loaded(user, core=core)
+    with pytest.raises(RunError) as error:
+        loaded.see(core / "a.lth", "x")
+    assert str(error.value) == "a.lth: x is imported in a cycle: a.lth x -> b.lth x -> a.lth x"
 
 
 def test_a_label_and_another_files_definition_of_its_name_are_kept_apart():

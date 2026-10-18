@@ -139,8 +139,86 @@ def require_kind(path, kind, command=None):
                    f"{Path(path).name} is {what}")
 
 
-# the core encloses the top-level scope of every file (12.S22); its data and `not` are read here
-CORE = Path(__file__).parent / "lib" / "core" / "core.lut"
+# the core encloses the top-level scope of every file (12.S22): every file under lib/core/ is loaded
+# before any other file and its names are visible in every file without an import (D-2026-10-18-b,
+# the core's bite 5); core.lut's data roots every run's slice (`core_data`)
+CORE = Path(__file__).parent / "lib" / "core"
+CORE_FILE = "core.lut"
+
+# [proposed, the core's bite 5] The names a file outside the core defined that a core file defines
+# too when the refusal came (D-2026-10-18-b: a file does not redefine a core name), with the bite of
+# record/plan/core-2026-10-17/execution.md §6 that rewrites the file and so removes them; and the
+# names two core files define, until bite 6 writes the structures over core/properties/. Each is
+# a parameter (P11) with its reason; a name not listed here is refused. Keys are paths under lib/.
+CORE_COLLISIONS = {
+    "algebra.lth": ("LeqAntisymmetric LeqBoth LeqChain LeqPair LeqTotal LeqTransitive OneIsNotZero "
+                    "PlusMonotone TimesCommutes", "bite 8 claims core/structures/algebraic.lth's structure"),
+    "numbers.lth": ("LeqAntisymmetric LeqChain LeqPair LeqTotal LeqTransitive PlusCommutes PlusMonotone "
+                    "PlusZero TimesCommutes TimesOne TimesZero", "bite 8 claims core/structures/algebraic.lth's structure"),
+    "laws.lth": ("Both flip", "bite 9, the machinery"),
+    "arrays.lth": ("Symmetric", "bite 11, arrays and tables"),
+    "term.lth": ("Beta", "bite 10, Luthier's self-description"),
+    "translation.lth": ("Lists", "bite 10, Luthier's self-description"),
+    "core/structures/equality.lth": ("Reflexive Symmetric Transitive", "bite 6 writes Object over core/properties/relations.lth"),
+    "core/structures/algebraic.lth": ("Associative LeftNeutral RightNeutral", "bite 6 writes Monoid over core/properties/operations.lth"),
+    "core/properties/functions.lth": ("Idempotent", "bite 6: operations.lth's Idempotent is another property"),
+}
+
+
+def core_files(core=CORE):
+    """The files of the core, every `.lth` and `.lut` under its directory: core.lut first, then the
+    rest by path, so that a run's order of files does not depend on the file system."""
+    core = Path(core).resolve()
+    found = [p.resolve() for p in core.rglob("*") if p.is_file() and p.suffix in (".lth", ".lut")]
+    return tuple(sorted(found, key=lambda p: (p != core / CORE_FILE, p.relative_to(core).as_posix())))
+
+
+def known_collision(path, name):
+    """Whether `name`, defined by the file at `path` and by a core file, is one of CORE_COLLISIONS."""
+    lib = Path(__file__).parent / "lib"
+    try:
+        key = Path(path).resolve().relative_to(lib.resolve()).as_posix()
+    except ValueError:
+        return False
+    return name in CORE_COLLISIONS.get(key, ("", ""))[0].split()
+
+
+def core_definitions(core=CORE):
+    """Each name a core file defines at its top level (a declaration, a definition, an alias, a data's
+    constructor) -> the core files that define it, read from the files (12.S22)."""
+    out = {}
+    for path in core_files(core):
+        result = parse(path.read_text(encoding="utf-8"))
+        if isinstance(result, s.ParseFailed):
+            continue
+        for act in result.program:
+            for n in _defines(act):
+                if path not in out.setdefault(n, []):
+                    out[n].append(path)
+    return out
+
+
+def redefinitions(path, defined, definitions, core=CORE):
+    """The refusals of D-2026-10-18-b for the file at `path` that defines the names `defined`: a name
+    a core file defines, other than the file itself, and not a known collision (CORE_COLLISIONS),
+    each message naming the core file."""
+    path = Path(path).resolve()
+    root = Path(core).resolve()
+    out = []
+    for n in sorted(defined):
+        others = [p for p in definitions.get(n, ()) if p != path]
+        if others and not known_collision(path, n) and not any(known_collision(p, n) for p in others):
+            where = ", ".join(_core_name(p, root) for p in others)
+            out.append(f"{path.name} defines {n}, which the core defines in {where}: a file does not "
+                       f"redefine a core name (12.S22, D-2026-10-18-b); rename it")
+    return out
+
+
+def _core_name(path, root):
+    try:
+        return "core/" + Path(path).relative_to(root).as_posix()
+    except ValueError:
+        return Path(path).name
 
 
 _FREE = {"extern", "primitive", "axiom", "quote"}
@@ -379,17 +457,31 @@ class Loaded(FileScope):
     def __init__(self, path, core=True):
         self.files = {}
         self.top = Path(path).resolve()
-        self.core = CORE.resolve() if core else None
-        if core:
-            self.visit(self.core, set())
+        # the core: every file under its directory (12.S22, the core's bite 5); `core` is True for
+        # lib/core/, False for none (`--no-core`), or another directory (a test's)
+        root = (CORE if core is True else Path(core)).resolve() if core else None
+        self.core_files = core_files(root) if root else ()
+        self.core = root / CORE_FILE if root and (root / CORE_FILE) in self.core_files else None
+        self.core_root = root
+        for f in self.core_files:
+            self.visit(f, set())
         self.visit(self.top, set())
         definers = {}
         for f in self.files.values():
             for n in f.defined:
                 definers.setdefault(n, []).append(f.path)
+        # the names the core defines -> the core files that define them; a file outside the core
+        # that defines one is refused, naming the core file (D-2026-10-18-b), and so is a core file
+        # that defines a name another core file defines, but for CORE_COLLISIONS
+        self.core_defined = {n: [p for p in fs if p in self.core_files] for n, fs in definers.items()
+                             if any(p in self.core_files for p in fs)}
+        refusals = [m for f in self.files.values()
+                    for m in redefinitions(f.path, f.defined, self.core_defined, root)] if root else []
+        if refusals:
+            raise RunError("; ".join(refusals))
         self.plain = {}
         for n, fs in definers.items():
-            for owner in (self.top, self.core):
+            for owner in (self.top, *self.core_files):
                 if owner in fs:
                     self.plain[n] = owner
                     break
@@ -411,6 +503,7 @@ class Loaded(FileScope):
             stems[f.path.stem] = k + 1
             f.tag = f.path.stem if k == 0 else f"{f.path.stem}~{k}"
         self.memo = {}
+        self.seeing = []   # the (file, name) pairs `see` is resolving, outermost first
         self.errors = {}   # the internal name of an act -> what it cannot resolve
         # each file's acts in the program's names, imports before importers, core first
         self.by_file = {path: tuple(self.scoped(f, a) for a in f.acts) for path, f in self.files.items()}
@@ -419,6 +512,10 @@ class Loaded(FileScope):
     def visit(self, path, active):
         path = path.resolve()
         if path in active:
+            # a cycle of files is allowed inside the core when no name reaches itself (`see` says
+            # when one does, with the path); outside it, a cycle of imports is an error
+            if path in self.core_files and all(p in self.core_files for p in active):
+                return
             raise RunError(f"cyclic import: {path}")
         if path in self.files:
             return
@@ -467,9 +564,13 @@ class Loaded(FileScope):
         key = (path, name)
         if key in self.memo:
             if self.memo[key] is _VISITING:
-                raise RunError(f"{path.name}: {name} is imported in a cycle")
+                # the path of the cycle, from the first time this name was asked for
+                chain = self.seeing[self.seeing.index(key):] + [key]
+                raise RunError(f"{path.name}: {name} is imported in a cycle: "
+                               + " -> ".join(f"{p.name} {n}" for p, n in chain))
             return self.memo[key]
         self.memo[key] = _VISITING
+        self.seeing.append(key)
         f = self.files[path]
         try:
             if name in f.defined or name in f.labels:
@@ -480,13 +581,21 @@ class Loaded(FileScope):
                 found = self.see(target, there)
                 if found is None:
                     raise RunError(f"{path.name} imports {there} from {target.name}, which does not define it")
-            elif self.core is not None and path != self.core and name in self.files[self.core].defined:
-                found = (self.core, name)
+            elif name in getattr(self, "core_defined", {}):
+                # the core as a whole, from every file (12.S22, D-2026-10-18-b)
+                owners = [p for p in self.core_defined[name] if p != path]
+                if len(owners) > 1:
+                    raise RunError(f"{path.name}: {name} is defined by "
+                                   + " and ".join(_core_name(p, self.core_root) for p in owners)
+                                   + ", so it is imported from one of them")
+                found = (owners[0], name) if owners else None
             else:
                 found = None
         except RunError:
             del self.memo[key]
             raise
+        finally:
+            self.seeing.pop()
         self.memo[key] = found
         return found
 

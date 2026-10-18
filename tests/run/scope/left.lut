@@ -1,8 +1,9 @@
 -- tests/run/scope/left.lut: a library of the loader's fixture (record/IA/run-2026-10-13/prompt-6.md,
--- 12.S22). It defines `helper`, which right.lut defines too, and its own `not`, which shadows
--- core's here and nowhere else.
+-- 12.S22). It defines `helper`, which right.lut defines too. It defined its own `not`, which
+-- shadowed core's here and nowhere else, until the core's bite 5 (D-2026-10-18-b: a file does not
+-- redefine a core name); that function is `keep` now.
 
 helper (x : Int) : Int := x + 1
 twice (x : Int) : Int := helper (helper x)
-not (b : Bool) : Bool := b
-leftNot (b : Bool) : Bool := not b
+keep (b : Bool) : Bool := b
+leftNot (b : Bool) : Bool := keep b
