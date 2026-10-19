@@ -61,3 +61,17 @@ roughly ten times the small task (bite 4's Opus subagent used about 570k tokens)
 Code bites of the core to Codex, one at a time, in the repository, the coordinator reviewing the diff
 and running the suite on the machine (no quota). Theory bites (the core's bite 6, the structures) to
 Argon when off the VPN. Claude only coordinates, in short turns.
+
+## A core bite, 2026-10-19
+
+- Codex, gpt-6.1-sol, reasoning high, core bite 6 (brief record/plan/core-2026-10-17/prompt-bite-6.md):
+  started 17:52 with the VPN off, worked until the VPN came back on (it then waited for the network
+  about three hours, stopped by the coordinator); nothing landed on disk, no `turn.completed`, so no
+  token count. Quota read by Luciano: 5 h from 100% to 83% remaining, weekly from 99% to 97%, for
+  the part done before the cut (reading the plan and the core, a minimal structure passing check).
+  Rough reading: a whole bite about 4 to 7% of Codex's weekly and 40 to 60% of a 5 h window.
+- Claude Code subagent, Sonnet, naive review of core bite 5 (66b4bd8, read-only plus a 64-line
+  report): 69,867 tokens, 19 tool calls, 124 s. Anthropic quota before: weekly 84%, Fable 67%,
+  session 1% used; after: pending his reading.
+- Codex and Antigravity's Gemini both fail behind the VPN (Codex: "workspace routing discovery
+  failed"); a run must have the VPN off for its whole length.
