@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 dfd66e519c91, commit daabef2 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-18; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 1ac3a2711a26, commit 0a8c70d) by `scripts/project_principles.py` (project_principles v2) on 2026-10-20; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -382,6 +382,16 @@ clause).
 - L6.14 An import line names what enters with its theory, `import "x.lut" M : T`, so the importer is
   checked against `T` without reading `x.lut`, and the ascription of clause 12 happens there (Z5 of
   the plan from zero; the theory itself imported from a theory file first, D-2026-10-13-n). [settled]
+- L6.15 (His words) What was called cost is four things: the error, a value's propagated bound, the
+  metric level; the uncertainty, a value as a distribution, the probabilistic level; the evidence,
+  what a certificate knows with a finite budget, a bound at a confidence; and the resources, the
+  budget, which scales with the bound demanded (L9.17). Error and uncertainty are data, decorations
+  computed in the third plane (L5.4); a law is a Boolean claim at a bound about them, the tester
+  recording the quantity and the demand collapsing it. Each is a model of one structure, a quantale,
+  the base of the levels of equivalence (L3.5): error over [0, ∞] with +, uncertainty over
+  distribution functions with a t-norm, evidence over [0, 1] with + or max, resources with + in
+  sequence and max in parallel; and a function propagates them when it is non-expansive or Lipschitz
+  (clause 8) (D-2026-10-18-i). [proposed]
 Example: γ_n needs n·u < 1, false for float32 over an hour at 48 kHz, so the cited bound is void
 there (clause 9).
 References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q, D-2026-10-12-u; W5; P5.
@@ -575,6 +585,15 @@ its type).
   for each operation; it is tested by measuring the resource at several bounds, the slope in log scale
   part of the law, and read by the planner to predict a specimen's resources before running (L6.3)
   (D-2026-10-16-m, D-2026-10-18-d). [proposed]
+- L9.18 (His words) A numerical law relates an input tolerance to an output tolerance, and that
+  relation is its content: an agreement between a specimen and its definition is two laws bounded by
+  theorems, the algorithm's stability at exact inputs (for a dot product, |dot(x, y) − x·y| ≤ γₙ
+  Σ|xₖyₖ|) and the function's sensitivity (|(x + dx)·y − x·y| ≤ ‖dx‖‖y‖), so that the output's error
+  is at most the sensitivity times the input's plus the algorithm's error. The demand fixes one
+  tolerance and the law gives the other (L6.8); the certificate records the largest ratio of error to
+  bound, the law holding at a ratio of at most one; and every such law states as a premise its range
+  of validity, a region sampled on both sides (L9.16), since the bounds hold for small tolerances only
+  (D-2026-10-18-j). [proposed]
 References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d,
 D-2026-10-13-ad.
 Rests on: O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r).
