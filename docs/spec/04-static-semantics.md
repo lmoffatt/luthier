@@ -219,7 +219,14 @@ Files: r8_equality_parameter.accept.lut, r8_equality_function.reject.lut.
 **4.R9. Function types are contravariant in the domain and covariant in the codomain.** [implemented]
 (`spec 3`). [implemented] A function `A -> B` passes where `A' -> B'` is expected when `A'`
 refines `A` and `B` refines `B'`.
-Files: r9_variance.accept.lut, r9_variance.reject.lut.
+A definition's body fits the type written for it, an operator's right operand fits
+its binding's domain, and a projection names a field its record has. A type fits through its
+definition and a subtype at its base (a value crossing into a subtype is checked where it crosses,
+4.R5, or owes its predicate, 4.R11); a sum by its shape (3.R2); a record as the named product of
+its fields, and one written with its labels by them. An argument refines its domain one way through
+a type: a list of a subtype passes for a list of its base, not the other way.
+Files: r9_variance.accept.lut, r9_variance.reject.lut, r9_partial_application.reject.lut,
+r9_missing_field.reject.lut, r9_operand.reject.lut, r9_body_not_bool.reject.lut.
 
 **4.R10. A law characterizes; a second implementation is not a law.** [decided D-2026-10-05-a]
 The laws of a theory are the
@@ -282,7 +289,17 @@ through a homomorphism stated and certified as a law: a value of `Z7` uses `Int`
 does not fix the role of an operator (a function over a bare `Monoid` applied at `Int`, which
 carries two), the model is named in the call. The subtype is the wrong relation for a quotient:
 `Z7` is a type of its own, with its ring as its model.
-Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut.
+A name of a structure is resolved as an operator is (D-2026-10-18-b). A structure is
+a name declared at a record with parameters; a claim `X : Bool := S T m` binds the model `m` of `S`
+at `T`. A field written unqualified is resolved by the type of its first argument whose type is
+headed by a parameter of the structure, under instantiation and through a subtype to its base;
+`S.f` names the structure, `S.f m` the model. A parameter typed by a structure applied to types,
+omitted at a call, is the model its types name; another is passed by name (D-2026-10-18-g). No
+model, models of two structures at the type, or two models of one structure at it, are errors that
+name the field, the type and the models claimed. An operator with no binding at its left operand's
+type is an error; core's bindings elaborate to the kernel's operation of the symbol (3.S17).
+Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut, r13_structure_name.accept.lut,
+r13_structure_ambiguous.reject.lut.
 
 ## §7 Statements added to the rules
 
