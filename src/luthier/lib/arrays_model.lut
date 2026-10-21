@@ -50,15 +50,18 @@ trace : Mat Float64 -> Float64 := numpy.trace
 pinvSym : RankFloor -> Mat Float64 -> Mat Float64 := numpy.pinvSym
 
 -- The arithmetic of vectors and matrices written with `+ - *`, each resolved by the types of its
--- operands (4.R13, 2.R2; v0.1 array.lut:357-364): `Vec + Vec`, `Mat + Mat`, `Float64 * Vec`,
--- `Float64 * Mat`, `Mat * Vec`, `Mat * Mat`. [proposed] Bound here, beside the model, since the
+-- operands (4.R13, 2.R2; v0.1 array.lut:357-364): `Vec + Vec`, `Mat + Mat`,
+-- `Mat * Vec`, `Mat * Mat`. [proposed] Bound here, beside the model, since the
 -- type names its model; whether an importer sees an imported file's `operator` acts is not
 -- stated by the specification.
+-- [core bite 11, 2026-10-21] `Float64 * Vec` and `Float64 * Mat` are not bound: the elaborator
+-- keys a binding on its left operand's type (4.R13; record/plan/core-2026-10-17/
+-- report-refusal-holes.md), where `Float64` already has the core's `floatTimes`, so `c * v` was
+-- refused as `floatTimes` on a vector and the two bindings were never reached; write `scale c v`
+-- and `mscale c a`. `2.0 * 3.0` is 6.0 with this file loaded.
 operator + := add
 operator - := sub
-operator * := scale
 operator + := madd
 operator - := msub
-operator * := mscale
 operator * := matVec
 operator * := matMul
