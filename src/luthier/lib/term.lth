@@ -117,20 +117,14 @@ Program = List Act
 
 -- definitions the laws need: names as lists, the free variables of a term, and the swap of two
 -- names everywhere in a term (binders included), the nominal way to rename without capture
-termMember (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or termMember x rest }
-removeTermName (x : String) (xs : List String) : List String :=
-  match xs { nil -> nil ; cons y rest -> if x == y then removeTermName x rest else cons y (removeTermName x rest) }
-concatTermNames (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (concatTermNames rest ys) }
-removeTermNames (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> removeTermNames rest (removeTermName x ys) }
 
 patternVars (p : Pattern) : List String := match p {
   PVar x -> [x] ; PWild -> nil ; PLit c -> nil ;
   PCon c ps -> patternsVars ps ;
-  PPair a b -> concatTermNames (patternVars a) (patternVars b) ;
+  PPair a b -> (patternVars a <> patternVars b) ;
   PInj l q -> patternVars q ;
 }
-patternsVars (ps : List Pattern) : List String :=
-  match ps { nil -> nil ; cons p rest -> concatTermNames (patternVars p) (patternsVars rest) }
+patternsVars (ps : List Pattern) : List String := concat String (map patternVars ps)
 
 -- spec 3.S9, 3.S31: the variables a term mentions and does not bind. A `Hole` names a declaration,
 -- not a variable; a `Data` binds its own name in its constructors' types.
@@ -138,29 +132,29 @@ freeVars (t : Term) : List String := match t {
   Var x -> [x] ;
   Lit c -> nil ; Universe -> nil ; World -> nil ; Extern r -> nil ; Primitive r -> nil ; Axiom r -> nil ;
   Hole x -> nil ;
-  Lam x a b -> concatTermNames (freeVars a) (removeTermName x (freeVars b)) ;
-  Pi x a b -> concatTermNames (freeVars a) (removeTermName x (freeVars b)) ;
-  Sigma x a b -> concatTermNames (freeVars a) (removeTermName x (freeVars b)) ;
-  Subtype x a b -> concatTermNames (freeVars a) (removeTermName x (freeVars b)) ;
-  App f a -> concatTermNames (freeVars f) (freeVars a) ;
-  Pair a b -> concatTermNames (freeVars a) (freeVars b) ;
+  Lam x a b -> (freeVars a <> remove String x (freeVars b)) ;
+  Pi x a b -> (freeVars a <> remove String x (freeVars b)) ;
+  Sigma x a b -> (freeVars a <> remove String x (freeVars b)) ;
+  Subtype x a b -> (freeVars a <> remove String x (freeVars b)) ;
+  App f a -> (freeVars f <> freeVars a) ;
+  Pair a b -> (freeVars a <> freeVars b) ;
   Inj l a -> freeVars a ;
-  Match s arms -> concatTermNames (freeVars s) (armsFree arms) ;
+  Match s arms -> (freeVars s <> armsFree arms) ;
   Sum kvs -> pairsFree kvs ;
-  Data n cs -> removeTermName n (pairsFree cs) ;
+  Data n cs -> remove String n (pairsFree cs) ;
   Record kvs -> telescopeFree kvs ; RecordValue kvs -> pairsFree kvs ;
   Proj r x -> freeVars r ;
-  Let x ty v b -> concatTermNames (freeVars ty) (concatTermNames (freeVars v) (removeTermName x (freeVars b))) ;
+  Let x ty v b -> (freeVars ty <> (freeVars v <> remove String x (freeVars b))) ;
 }
-armsFree (arms : List (Pattern * Term)) : List String := match arms { nil -> nil ;
-  cons (p, b) rest -> concatTermNames (removeTermNames (patternVars p) (freeVars b)) (armsFree rest) }
+armsFree (arms : List (Pattern * Term)) : List String :=
+  concat String (map (fn (arm : Pattern * Term) { match arm { (p, b) -> removeAll String (patternVars p) (freeVars b) } }) arms)
 pairsFree (kvs : List (String * Term)) : List String :=
-  match kvs { nil -> nil ; cons (k, v) rest -> concatTermNames (freeVars v) (pairsFree rest) }
+  concat String (map (fn (kv : String * Term) { match kv { (k, v) -> freeVars v } }) kvs)
 -- a record type is a telescope (7.S7's dependent records, 12.S1, arrays.lth's `Mat`): a label binds
 -- in the types of the later fields, never in its own or in an earlier one; a `RecordValue`'s labels
 -- bind nothing (kernel.py bite 11, aa198f2, by a Sonnet agent; stated here by luthier-03)
 telescopeFree (kvs : List (String * Term)) : List String :=
-  match kvs { nil -> nil ; cons (k, v) rest -> concatTermNames (freeVars v) (removeTermName k (telescopeFree rest)) }
+  match kvs { nil -> nil ; cons (k, v) rest -> (freeVars v <> remove String k (telescopeFree rest)) }
 
 swapName (x y n : String) : String := if n == x then y else if n == y then x else n
 swapPattern (x y : String) (p : Pattern) : Pattern := match p {
@@ -169,8 +163,7 @@ swapPattern (x y : String) (p : Pattern) : Pattern := match p {
   PPair a b -> PPair (swapPattern x y a) (swapPattern x y b) ;
   PInj l q -> PInj l (swapPattern x y q) ;
 }
-swapPatterns (x y : String) (ps : List Pattern) : List Pattern :=
-  match ps { nil -> nil ; cons p rest -> cons (swapPattern x y p) (swapPatterns x y rest) }
+swapPatterns (x y : String) (ps : List Pattern) : List Pattern := map (swapPattern x y) ps
 swap (x y : String) (t : Term) : Term := match t {
   Var n -> Var (swapName x y n) ;
   Lam n a b -> Lam (swapName x y n) (swap x y a) (swap x y b) ;
@@ -188,10 +181,10 @@ swap (x y : String) (t : Term) : Term := match t {
   Let n ty v b -> Let (swapName x y n) (swap x y ty) (swap x y v) (swap x y b) ;
   _ -> t ;
 }
-swapArms (x y : String) (arms : List (Pattern * Term)) : List (Pattern * Term) := match arms { nil -> nil ;
-  cons (p, b) rest -> cons (swapPattern x y p, swap x y b) (swapArms x y rest) }
+swapArms (x y : String) (arms : List (Pattern * Term)) : List (Pattern * Term) :=
+  map (fn (arm : Pattern * Term) { match arm { (p, b) -> (swapPattern x y p, swap x y b) } }) arms
 swapPairs (x y : String) (kvs : List (String * Term)) : List (String * Term) :=
-  match kvs { nil -> nil ; cons (k, v) rest -> cons (k, swap x y v) (swapPairs x y rest) }
+  map (fn (kv : String * Term) { match kv { (k, v) -> (k, swap x y v) } }) kvs
 
 -- Alpha-equivalence (3.S31, L3.3): two terms equal up to the names of their bound variables. A
 -- model says when; its laws: it is an object (kernel_laws.lth §1), reflexive, symmetric and
@@ -209,11 +202,11 @@ head (t : Term) : String := match t {
   Subtype x a b -> "Subtype" ; Extern r -> "Extern" ; Primitive r -> "Primitive" ; Axiom r -> "Axiom" ;
   Hole x -> "Hole" ; Record kvs -> "Record" ; RecordValue kvs -> "RecordValue" ; Proj r x -> "Proj" ; Let x ty v b -> "Let" ;
 }
-sameNames (xs ys : List String) : Bool := removeTermNames xs ys == nil and removeTermNames ys xs == nil
+sameNames (xs ys : List String) : Bool := removeAll String xs ys == nil and removeAll String ys xs == nil
 
 -- a name and a term in which it is not free: the fresh names a binder may be renamed to; random
 -- names are almost always fresh, so drawing them is cheap
-Fresh : U := { y : String, t : Term | not (termMember y (freeVars t)) }
+Fresh : U := { y : String, t : Term | not (member List String y (freeVars t)) }
 AlphaPair (a : Alpha) : U := { s t : Term | a.alphaEq s t }
 
 FreeVariablesAreNames (a : Alpha) (x y : String) : Bool := a.alphaEq (Var x) (Var y) == (x == y)
@@ -247,14 +240,14 @@ AlphaCongruent (a : Alpha) (p q : AlphaPair a) (x l : String) : Bool :=
 -- below, stated up to alpha, weakens with it (Fable, review of layers 0-1).
 renamedTo (x y : String) (t : Term) : Term := if x == y then t else swap x y t
 underBinder (a : Alpha) (x y : String) (b c : Term) : Bool :=
-  (x == y and a.alphaEq b c) or (not (termMember x (freeVars c)) and a.alphaEq b (renamedTo y x c))
+  (x == y and a.alphaEq b c) or (not (member List String x (freeVars c)) and a.alphaEq b (renamedTo y x c))
 -- a `data` binds its own name in its constructors' types (`freeVars`, `swap`), so its name is
 -- compared as a binder (Codex, writing kernel.py: `RenameBound` renamed it and `AlphaPartsAgree`
 -- asked it fixed)
 underBinderPairs (a : Alpha) (x y : String) (cs ds : List (String * Term)) : Bool :=
-  (x == y and pairsAgree a cs ds) or (not (termMember x (pairsFree ds)) and pairsAgree a cs (renamePairs y x ds))
+  (x == y and pairsAgree a cs ds) or (not (member List String x (pairsFree ds)) and pairsAgree a cs (renamePairs y x ds))
 renamePairs (y x : String) (kvs : List (String * Term)) : List (String * Term) :=
-  match kvs { nil -> nil ; cons (k, v) rest -> cons (k, renamedTo y x v) (renamePairs y x rest) }
+  map (fn (kv : String * Term) { match kv { (k, v) -> (k, renamedTo y x v) } }) kvs
 pairsAgree (a : Alpha) (xs ys : List (String * Term)) : Bool := match xs {
   nil -> (match ys { nil -> true ; cons y rest -> false }) ;
   cons (k, u) rest -> match ys { nil -> false ; cons (j, v) more -> k == j and a.alphaEq u v and pairsAgree a rest more } }
@@ -264,7 +257,7 @@ patternShape (q : Pattern) : Pattern := match q {
   PVar x -> PVar "_" ; PWild -> PWild ; PLit c -> PLit c ;
   PCon c qs -> PCon c (shapes qs) ; PPair l r -> PPair (patternShape l) (patternShape r) ;
   PInj l r -> PInj l (patternShape r) }
-shapes (qs : List Pattern) : List Pattern := match qs { nil -> nil ; cons q rest -> cons (patternShape q) (shapes rest) }
+shapes (qs : List Pattern) : List Pattern := map patternShape qs
 -- renaming `ys` to `xs` position by position, at once: each swap is applied to the term and to the
 -- names still to rename, so a later pair sees the names the earlier swaps left (a permutation as a
 -- product of transpositions; Codex, writing kernel.py: one swap after another without this turned
@@ -272,8 +265,7 @@ shapes (qs : List Pattern) : List Pattern := match qs { nil -> nil ; cons q rest
 renameAll (xs ys : List String) (t : Term) : Term := match xs { nil -> t ;
   cons x rest -> match ys { nil -> t ;
     cons y more -> renameAll rest (swapNames y x more) (renamedTo y x t) } }
-swapNames (y x : String) (ns : List String) : List String :=
-  match ns { nil -> nil ; cons n rest -> cons (swapName y x n) (swapNames y x rest) }
+swapNames (y x : String) (ns : List String) : List String := map (swapName y x) ns
 armsAgree (a : Alpha) (xs ys : List (Pattern * Term)) : Bool := match xs {
   nil -> (match ys { nil -> true ; cons y rest -> false }) ;
   cons (p, b) rest -> match ys { nil -> false ;
@@ -309,7 +301,7 @@ Alpha := FreeVariablesAreNames & RenameBound & AlphaKeepsHead & AlphaKeepsFree &
 Substitution (a : Alpha) : { subst : String -> Term -> Term -> Term }
 
 -- a name and a term in which it is not free, for the binder that substitution passes under
-NotFreeIn : U := { y : String, s : Term | not (termMember y (freeVars s)) }
+NotFreeIn : U := { y : String, s : Term | not (member List String y (freeVars s)) }
 
 SubstHits (a : Alpha) (m : Substitution a) (x : String) (s : Term) : Bool := a.alphaEq (m.subst x s (Var x)) s
 SubstMisses (a : Alpha) (m : Substitution a) (x y : String) (s : Term) : Bool :=
@@ -352,7 +344,7 @@ SubstPassesBinder (a : Alpha) (m : Substitution a) (x : String) (f : NotFreeIn) 
 -- over its constructors; that changes 3.S29's `Record`, and is Luciano's (asked through the
 -- coordinator, 2026-10-14).
 capturable (y z : String) (s b : Term) : Bool :=
-  termMember y (freeVars s) and not (termMember z (freeVars s)) and not (termMember z (freeVars b)) and not (y == z)
+  member List String y (freeVars s) and not (member List String z (freeVars s)) and not (member List String z (freeVars b)) and not (y == z)
 CaptureCase : U := { y z : String, s b : Term | capturable y z s b }
 SubstAvoidsCapture (a : Alpha) (m : Substitution a) (x : String) (c : CaptureCase) (ty : Term) : Bool :=
   x == c.y or x == c.z
@@ -377,22 +369,23 @@ CanonicalForm (a : Alpha) : { canon : Term -> Term, unqualify : String -> String
 
 -- one form for alpha-equal terms, compared by structural equality: that is what makes it canonical
 CanonOfAlpha (a : Alpha) (m : CanonicalForm a) (p : AlphaPair a) : Bool := m.canon p.s == m.canon p.t
-CanonIdempotent (a : Alpha) (m : CanonicalForm a) (t : Term) : Bool := m.canon (m.canon t) == m.canon t
 -- a name loses its module prefix, once
 CanonOfName (a : Alpha) (m : CanonicalForm a) (x : String) : Bool := m.canon (Var x) == Var (m.unqualify x)
-UnqualifyIdempotent (a : Alpha) (m : CanonicalForm a) (x : String) : Bool :=
-  m.unqualify (m.unqualify x) == m.unqualify x
 -- and it does remove a prefix: without this, `unqualify` the identity passed (review of layers 0-1,
 -- A); stated on names of each shape
 UnqualifyRemoves (a : Alpha) (m : CanonicalForm a) : Bool :=
   m.unqualify "m.f" == "f" and m.unqualify "a.b.c" == "c" and m.unqualify "f" == "f"
 -- the canonical form of a term without module prefixes means the same term: alpha-equal to it
 CanonKeepsTerm (a : Alpha) (m : CanonicalForm a) (t : Term) : Bool :=
-  not (allUnqualified m.unqualify (freeVars t)) or a.alphaEq (m.canon t) t
-allUnqualified (u : String -> String) (xs : List String) : Bool :=
-  match xs { nil -> true ; cons x rest -> u x == x and allUnqualified u rest }
+  not (all List String (fn (x : String) { m.unqualify x == x }) (freeVars t)) or a.alphaEq (m.canon t) t
 
-CanonicalForm (a : Alpha) := CanonOfAlpha a & CanonIdempotent a & CanonOfName a & UnqualifyIdempotent a
+-- The form is canonical when it is idempotent (core's `Pointwise` of the function composed with itself
+-- against itself, D-2026-10-18-f: the property bare, no wrapper) and so is `unqualify`.
+CanonicalForm (a : Alpha) (m : CanonicalForm a) :=
+  CanonOfAlpha a m
+  & Pointwise Term Term (structural Term) (compose Term Term Term m.canon m.canon) m.canon
+  & CanonOfName a m
+  & Pointwise String String (structural String) (compose String String String m.unqualify m.unqualify) m.unqualify
   & CanonKeepsTerm a & UnqualifyRemoves a
 
 -- ---------------------------------------------------------------- §5 Reduction
@@ -419,8 +412,8 @@ definition (p : Program) (x : String) : Maybe Term := match p { nil -> nothing ;
   cons act rest -> match act { Define y t b -> if y == x then just b else definition rest x ; _ -> definition rest x } }
 -- a program that gives a name neither a definition nor a declaration: where a law uses that name
 -- as a constructor or a label, the program does not redefine it
-free (p : Program) (x : String) : Bool := match p { nil -> true ;
-  cons act rest -> (match act { Declare y t -> not (y == x) ; Define y t b -> not (y == x) ; Datum t -> true }) and free rest x }
+free (p : Program) (x : String) : Bool :=
+  all List Act (fn (act : Act) { match act { Declare y t -> not (y == x) ; Define y t b -> not (y == x) ; Datum t -> true } }) p
 
 -- 3.S14, beta: a lambda applied steps to its body with the argument for its variable
 Beta (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (x : String) (ty body arg : Term) : Bool :=
@@ -477,7 +470,7 @@ IotaSkips (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (
 -- constructor that differed from an arm's was read as a name the program might define, and a match
 -- on a `data` stayed stuck)
 IotaConstructors (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (t c k f g y : String) (v b d : Term) : Bool :=
-  not (distinctNames [t, c, k, f, g]) or not (allFree p [t, c, k, f, g])
+  not (distinct String [t, c, k, f, g]) or not (all List String (free p) [t, c, k, f, g])
   or (stepsTo a (m.step (withData t c k f g p) (Match (Var c) [(PCon c [], b)])) b
       and stepsTo a (m.step (withData t c k f g p) (Match (Var c) [(PCon k [], b), (PCon c [], d)])) d
       and stepsTo a (m.step (withData t c k f g p) (Match (Var k) [(PCon c [], b), (PWild, d)])) d
@@ -486,8 +479,6 @@ IotaConstructors (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Pro
 -- the program with a `data` `t` whose constructors are `c`, `k` (nullary) and `f`, `g` (unary)
 withData (t c k f g : String) (p : Program) : Program :=
   cons (Define t Universe (Data t [(c, Var t), (k, Var t), (f, Pi "_" (Var t) (Var t)), (g, Pi "_" (Var t) (Var t))])) p
-distinctNames (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> not (termMember x rest) and distinctNames rest }
-allFree (p : Program) (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> free p x and allFree p rest }
 
 -- a local definition steps to its body with the value for its name (zeta; D-2026-10-13-aa, Q1)
 Zeta (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (x : String) (ty v b : Term) : Bool :=
@@ -559,7 +550,7 @@ PrimStructural (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Progr
 -- constructors of a `data` of the program compare by constructor, then part by part (lists among
 -- them: `cons`, `nil` of core); stated on the data of `IotaConstructors`
 PrimConstructors (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (t c k f g : String) (i j : Int) : Bool :=
-  not (distinctNames [t, c, k, f, g]) or not (allFree p [t, c, k, f, g])
+  not (distinct String [t, c, k, f, g]) or not (all List String (free p) [t, c, k, f, g])
   or (stepsTo a (m.step (withData t c k f g p) (bin "==" (Var c) (Var c))) (truth true)
       and stepsTo a (m.step (withData t c k f g p) (bin "==" (Var c) (Var k))) (truth false)
       and stepsTo a (m.step (withData t c k f g p) (bin "==" (App (Var f) (Lit (IntConst i))) (App (Var f) (Lit (IntConst j)))))
@@ -639,9 +630,8 @@ negateAnswer (w : Term) : Term := match w {
 sameStep (a : Alpha) (r q : Maybe Term) : Bool := match (r, q) {
   (nothing, nothing) -> true ; (just u, just v) -> a.alphaEq u v ; _ -> false }
 negatesOn (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (cs : List (Term * Term)) : Bool :=
-  match cs { nil -> true ; cons (l, r) rest ->
-    sameStep a (m.step p (bin "/=" l r)) (match m.step p (bin "==" l r) { nothing -> nothing ; just w -> just (negateAnswer w) })
-    and negatesOn a sb m p rest }
+  all List (Term * Term) (fn (c : Term * Term) { match c { (l, r) ->
+    sameStep a (m.step p (bin "/=" l r)) (match m.step p (bin "==" l r) { nothing -> nothing ; just w -> just (negateAnswer w) }) } }) cs
 NotEqualNegates (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (i j : Int) (u v : ModerateDouble)
                 (s t x y : String) (ty b : Term) : Bool :=
   negatesOn a sb m p [(Lit (IntConst i), Lit (IntConst j)), (Lit (FloatConst u), Lit (FloatConst v)),

@@ -15,7 +15,7 @@
 import "term.lth" Constant Pattern Term Act Program Alpha Substitution CanonicalForm Reduction
   IntConst FloatConst StringConst PVar PWild PCon PPair PLit PInj
   Var Lit Universe World Lam App Pi Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Record RecordValue Proj Let
-  Declare Define Datum termMember removeTermName concatTermNames removeTermNames freeVars patternVars patternsVars swap swapPattern
+  Declare Define Datum freeVars patternVars patternsVars swap swapPattern
   partsAgree sameNames free negateAnswer
 
 -- Spec 11 gives String equality but no text decomposition, concatenation or Nat rendering.
@@ -24,44 +24,40 @@ import "term.lth" Constant Pattern Term Act Program Alpha Substitution Canonical
 textParts : String -> List String
 textJoin : List String -> String
 natDecimal : Nat -> String
-textAppend (x y : String) : String := textJoin (appendText (textParts x) (textParts y))
-appendText (xs ys : List String) : List String := match xs {
-  nil -> ys ; cons x rest -> cons x (appendText rest ys) }
+textAppend (x y : String) : String := textJoin (textParts x <> textParts y)
 unqualified (s : String) : String := textJoin (lastComponent (textParts s) nil)
 lastComponent (xs acc : List String) : List String := match xs {
-  nil -> acc ; cons x rest -> lastComponent rest (if x == "." then nil else appendText acc [x]) }
+  nil -> acc ; cons x rest -> lastComponent rest (if x == "." then nil else acc <> [x]) }
 freshName (x : String) (avoid : List String) : String :=
-  if termMember x avoid then freshName (textAppend x "'") avoid else x
+  if member List String x avoid then freshName (textAppend x "'") avoid else x
 
 -- All variable and binder names, including shadowed ones: nominal swapping needs more than FV.
 allNames (t : Term) : List String := match t {
   Var x -> [x] ;
-  Lam x a b -> cons x (concatTermNames (allNames a) (allNames b)) ;
-  Pi x a b -> cons x (concatTermNames (allNames a) (allNames b)) ;
-  Sigma x a b -> cons x (concatTermNames (allNames a) (allNames b)) ;
-  Subtype x a b -> cons x (concatTermNames (allNames a) (allNames b)) ;
-  Let x ty v b -> cons x (concatTermNames (allNames ty) (concatTermNames (allNames v) (allNames b))) ;
-  App a b -> concatTermNames (allNames a) (allNames b) ; Pair a b -> concatTermNames (allNames a) (allNames b) ;
-  Inj l a -> allNames a ; Match a arms -> concatTermNames (allNames a) (armNames arms) ;
+  Lam x a b -> cons x ((allNames a <> allNames b)) ;
+  Pi x a b -> cons x ((allNames a <> allNames b)) ;
+  Sigma x a b -> cons x ((allNames a <> allNames b)) ;
+  Subtype x a b -> cons x ((allNames a <> allNames b)) ;
+  Let x ty v b -> cons x ((allNames ty <> (allNames v <> allNames b))) ;
+  App a b -> (allNames a <> allNames b) ; Pair a b -> (allNames a <> allNames b) ;
+  Inj l a -> allNames a ; Match a arms -> (allNames a <> armNames arms) ;
   Sum kvs -> pairNames kvs ; Data x cs -> cons x (pairNames cs) ;
   Record kvs -> recordNames kvs ; RecordValue kvs -> pairNames kvs ; Proj r x -> allNames r ; _ -> nil ; }
-armNames (xs : List (Pattern * Term)) : List String := match xs {
-  nil -> nil ; cons (p, b) rest -> concatTermNames (patternVars p) (concatTermNames (allNames b) (armNames rest)) }
-pairNames (xs : List (String * Term)) : List String := match xs {
-  nil -> nil ; cons (k, b) rest -> concatTermNames (allNames b) (pairNames rest) }
+armNames (xs : List (Pattern * Term)) : List String :=
+  concat String (map (fn (arm : Pattern * Term) { match arm { (p, b) -> (patternVars p <> allNames b) } }) xs)
+pairNames (xs : List (String * Term)) : List String :=
+  concat String (map (fn (kv : String * Term) { match kv { (k, b) -> allNames b } }) xs)
 -- a record type's labels bind in its later fields, so a fresh name avoids them too
-recordNames (xs : List (String * Term)) : List String := match xs {
-  nil -> nil ; cons (k, b) rest -> cons k (concatTermNames (allNames b) (recordNames rest)) }
+recordNames (xs : List (String * Term)) : List String :=
+  concat String (map (fn (kv : String * Term) { match kv { (k, b) -> cons k (allNames b) } }) xs)
 
 -- Exact recursive parts, with per-arm free-name agreement to prevent capture.
 -- §2 compares Data through underBinderPairs and patterns through simultaneous renameAll.
 -- Repeated pattern names must occupy the same positions on both sides; linear patterns
 -- always pass this additional check. No pattern variable is compared literally.
-appendEnv (xs ys : List (String * String)) : List (String * String) := match xs {
-  nil -> ys ; cons x rest -> cons x (appendEnv rest ys) }
 armScopesAgree (ps qs : List (Pattern * Term)) : Bool := match (ps, qs) {
   (nil, nil) -> true ; (cons (p, b) rest, cons (q, c) more) ->
-    sameNames (removeTermNames (patternVars p) (freeVars b)) (removeTermNames (patternVars q) (freeVars c))
+    sameNames (removeAll String (patternVars p) (freeVars b)) (removeAll String (patternVars q) (freeVars c))
     and bindingPositionsAgree (patternVars p) (patternVars q) and armScopesAgree rest more ; _ -> false }
 bindingPositionsAgree (xs ys : List String) : Bool := match (xs, ys) {
   (nil, nil) -> true ; (cons x rest, cons y more) ->
@@ -76,7 +72,7 @@ alpha : Alpha := { alphaEq := alphaParts }
 
 -- Substitution short-circuits when absent; types are outside their binder's scope.
 substTerm (x : String) (s t : Term) : Term :=
-  if not (termMember x (freeVars t)) then t else match t {
+  if not (member List String x (freeVars t)) then t else match t {
   Var y -> if x == y then s else t ;
   Lam y a b -> match substBody x s y b { (z, c) -> Lam z (substTerm x s a) c } ;
   Pi y a b -> match substBody x s y b { (z, c) -> Pi z (substTerm x s a) c } ;
@@ -94,41 +90,41 @@ substTerm (x : String) (s t : Term) : Term :=
   Data y cs -> if x == y then t else match freshData x s y cs { (z, ds) -> Data z (substPairs x s ds) } ;
   _ -> t ; }
 substBody (x : String) (s : Term) (y : String) (b : Term) : String * Term :=
-  if x == y or not (termMember x (freeVars b)) then (y, b)
-  else if termMember y (freeVars s) then substRenamed x s y b (freshName y (cons x (concatTermNames (allNames s) (allNames b))))
+  if x == y or not (member List String x (freeVars b)) then (y, b)
+  else if member List String y (freeVars s) then substRenamed x s y b (freshName y (cons x ((allNames s <> allNames b))))
   else (y, substTerm x s b)
 substRenamed (x : String) (s : Term) (y : String) (b : Term) (z : String) : String * Term :=
   (z, substTerm x s (swap y z b))
 freshData (x : String) (s : Term) (y : String) (cs : List (String * Term)) : String * List (String * Term) :=
-  if termMember y (freeVars s) then renameData y cs (freshName y (cons x (concatTermNames (allNames s) (pairNames cs)))) else (y, cs)
+  if member List String y (freeVars s) then renameData y cs (freshName y (cons x ((allNames s <> pairNames cs)))) else (y, cs)
 renameData (y : String) (cs : List (String * Term)) (z : String) : String * List (String * Term) :=
   (z, swapLocalPairs y z cs)
-swapLocalPairs (y z : String) (cs : List (String * Term)) : List (String * Term) := match cs {
-  nil -> nil ; cons (k, b) rest -> cons (k, swap y z b) (swapLocalPairs y z rest) }
-substPairs (x : String) (s : Term) (cs : List (String * Term)) : List (String * Term) := match cs {
-  nil -> nil ; cons (k, b) rest -> cons (k, substTerm x s b) (substPairs x s rest) }
+swapLocalPairs (y z : String) (cs : List (String * Term)) : List (String * Term) :=
+  map (fn (kb : String * Term) { match kb { (k, b) -> (k, swap y z b) } }) cs
+substPairs (x : String) (s : Term) (cs : List (String * Term)) : List (String * Term) :=
+  map (fn (kb : String * Term) { match kb { (k, b) -> (k, substTerm x s b) } }) cs
 -- a label of the name substituted shadows it in the later fields (term.lth, `telescopeFree`)
 substTelescope (x : String) (s : Term) (cs : List (String * Term)) : List (String * Term) := match cs {
   nil -> nil ; cons (k, b) rest -> cons (k, substTerm x s b) (if k == x then rest else substTelescope x s rest) }
-substArms (x : String) (s : Term) (arms : List (Pattern * Term)) : List (Pattern * Term) := match arms {
-  nil -> nil ; cons (p, b) rest -> cons (substArm x s p b) (substArms x s rest) }
+substArms (x : String) (s : Term) (arms : List (Pattern * Term)) : List (Pattern * Term) :=
+  map (fn (arm : Pattern * Term) { match arm { (p, b) -> substArm x s p b } }) arms
 substArm (x : String) (s : Term) (p : Pattern) (b : Term) : Pattern * Term :=
-  if termMember x (patternVars p) or not (termMember x (freeVars b)) then (p, b)
+  if member List String x (patternVars p) or not (member List String x (freeVars b)) then (p, b)
   else match freshArm x s (patternVars p) p b { (q, c) -> (q, substTerm x s c) }
 freshArm (x : String) (s : Term) (vs : List String) (p : Pattern) (b : Term) : Pattern * Term := match vs {
   nil -> (p, b) ; cons y rest ->
-    if termMember y (freeVars s) then renameArm x s y rest p b
-      (freshName y (cons x (concatTermNames (allNames s) (concatTermNames (patternVars p) (allNames b)))))
+    if member List String y (freeVars s) then renameArm x s y rest p b
+      (freshName y (cons x ((allNames s <> (patternVars p <> allNames b)))))
     else freshArm x s rest p b }
 renameArm (x : String) (s : Term) (y : String) (rest : List String) (p : Pattern) (b : Term) (z : String) : Pattern * Term :=
-  freshArm x s (removeTermName y rest) (swapPattern y z p) (swap y z b)
+  freshArm x s (remove String y rest) (swapPattern y z p) (swap y z b)
 substitute : Substitution alpha := { subst := substTerm }
 
 -- A global preorder counter, skipping every unqualified free name, prevents capture.
 -- Tags/labels, extern routes and hole identities stay literal: they are not module variables.
 canonName (n : Nat) : String := textAppend "x" (natDecimal n)
 nextBinder (avoid : List String) (n : Nat) : String * Nat :=
-  if termMember (canonName n) avoid then nextBinder avoid (n + 1) else (canonName n, n + 1)
+  if member List String (canonName n) avoid then nextBinder avoid (n + 1) else (canonName n, n + 1)
 freeCanonical (xs : List String) : List String := match xs {
   nil -> nil ; cons x rest -> cons (unqualified x) (freeCanonical rest) }
 resolveName (env : List (String * String)) (x : String) : String := match env {
@@ -174,7 +170,7 @@ canonTelescope (avoid : List String) (env : List (String * String)) (n : Nat) (x
     match canonTelescope avoid (cons (k, k) env) n1 rest { (bs, n2) -> (cons (k, b) bs, n2) } } }
 canonBindings (avoid : List String) (n : Nat) (xs : List String) : List (String * String) * Nat := match xs {
   nil -> (nil, n) ; cons x rest -> match nextBinder avoid n { (y, n1) ->
-    match canonBindings avoid n1 (removeTermName x rest) { (bs, n2) -> (cons (x, y) bs, n2) } } }
+    match canonBindings avoid n1 (remove String x rest) { (bs, n2) -> (cons (x, y) bs, n2) } } }
 canonPattern (env : List (String * String)) (p : Pattern) : Pattern := match p {
   PVar x -> PVar (resolveName env x) ; PCon c ps -> PCon c (canonPatterns env ps) ;
   PPair a b -> PPair (canonPattern env a) (canonPattern env b) ;
@@ -183,7 +179,7 @@ canonPatterns (env : List (String * String)) (ps : List Pattern) : List Pattern 
   nil -> nil ; cons p rest -> cons (canonPattern env p) (canonPatterns env rest) }
 canonArms (avoid : List String) (env : List (String * String)) (n : Nat) (xs : List (Pattern * Term)) : List (Pattern * Term) * Nat := match xs {
   nil -> (nil, n) ; cons (p, a) rest -> match canonBindings avoid n (patternVars p) { (bs, n1) ->
-    match canonTerm avoid (appendEnv bs env) n1 a { (b, n2) ->
+    match canonTerm avoid (bs <> env) n1 a { (b, n2) ->
       match canonArms avoid env n2 rest { (cs, n3) -> (cons (canonPattern bs p, b) cs, n3) } } } }
 canonicalTerm (t : Term) : Term := match canonTerm (freeCanonical (freeVars t)) nil 0 t { (b, n) -> b }
 canonical : CanonicalForm alpha := { canon := canonicalTerm, unqualify := unqualified }
@@ -198,19 +194,15 @@ lookupBody (p : Program) (x : String) : Maybe Term := match p {
     Define y ty b -> if x == y then just b else lookupBody rest x ;
     _ -> lookupBody rest x } }
 Bindings = List (String * Term)
-appendBindings (xs ys : Bindings) : Bindings := match xs {
-  nil -> ys ; cons x rest -> cons x (appendBindings rest ys) }
-bindingNames (xs : Bindings) : List String := match xs {
-  nil -> nil ; cons (x, v) rest -> cons x (bindingNames rest) }
-bindingTermNames (xs : Bindings) : List String := match xs {
-  nil -> nil ; cons (x, v) rest -> concatTermNames (allNames v) (bindingTermNames rest) }
-linearBindings (xs : Bindings) : Bool := match xs {
-  nil -> true ; cons (x, v) rest -> not (termMember x (bindingNames rest)) and linearBindings rest }
+bindingNames (xs : Bindings) : List String := map (fn (xv : String * Term) { match xv { (x, v) -> x } }) xs
+bindingTermNames (xs : Bindings) : List String :=
+  concat String (map (fn (xv : String * Term) { match xv { (x, v) -> allNames v } }) xs)
+linearBindings (xs : Bindings) : Bool := distinct String (bindingNames xs)
 -- Rename every bound occurrence to a distinct temporary absent from the body and
 -- every replacement, then substitute replacements. No replacement is revisited.
 applyBindings (xs : Bindings) (b : Term) : Term := match xs {
   nil -> b ; cons (x, v) nil -> substTerm x v b ;
-  _ -> stageBindings xs b (concatTermNames (allNames b) (concatTermNames (bindingNames xs) (bindingTermNames xs))) nil }
+  _ -> stageBindings xs b ((allNames b <> (bindingNames xs <> bindingTermNames xs))) nil }
 stageBindings (xs : Bindings) (b : Term) (avoid : List String) (ready : Bindings) : Term := match xs {
   nil -> finishBindings ready b ; cons (x, v) rest ->
     stageBinding x v rest b avoid ready (freshName x avoid) }
@@ -255,7 +247,7 @@ stepUnary (p : Program) (r : String) (a : Term) : HeadStep :=
 -- Check both entire values before comparing, even when an outer label already differs.
 constructorType (env : Program) (x : String) : Maybe Term := match env {
   nil -> nothing ; cons act rest -> match act {
-    Define t ty (Data self cs) -> match lookupField cs x {
+    Define t ty (Data self cs) -> match lookup List String Term x cs {
       just a -> just a ; nothing -> constructorType rest x } ;
     _ -> constructorType rest x } }
 saturatedParts (ty : Term) (args : List Term) : Bool := match (ty, args) {
@@ -287,7 +279,7 @@ equalTerms (p : Program) (vs ws : List Term) : Bool := match (vs, ws) {
   (nil, nil) -> true ; (cons v rest, cons w more) -> equalValues p v w and equalTerms p rest more ;
   _ -> false }
 equalFields (p : Program) (fs gs : List (String * Term)) : Bool := match fs {
-  nil -> true ; cons (k, v) rest -> match lookupField gs k {
+  nil -> true ; cons (k, v) rest -> match lookup List String Term k gs {
     nothing -> false ; just w -> equalValues p v w and equalFields p rest gs } }
 -- EqualityDemandsParts: a part that is not yet a value is reduced in place, leftmost first,
 -- after the operand's head has stepped; a part that cannot become a value leaves == stuck.
@@ -325,11 +317,9 @@ stepHead (p : Program) (t : Term) : HeadStep := match t {
   App f a -> stepApplication p f a ; Match s arms -> stepMatch p s arms ;
   Proj r x -> stepProjection p r x ; _ -> Done t }
 -- Field names are literal and ordered; duplicate names select the first occurrence.
-lookupField (kvs : List (String * Term)) (x : String) : Maybe Term := match kvs {
-  nil -> nothing ; cons (y, v) rest -> if x == y then just v else lookupField rest x }
 stepProjection (p : Program) (r : Term) (x : String) : HeadStep := match stepHead p r {
   Next s -> Next (Proj s x) ; Done s -> match s {
-    RecordValue kvs -> match lookupField kvs x { just v -> Next v ; nothing -> Done (Proj r x) } ;
+    RecordValue kvs -> match lookup List String Term x kvs { just v -> Next v ; nothing -> Done (Proj r x) } ;
     _ -> Done (Proj r x) } }
 stepApplication (p : Program) (f a : Term) : HeadStep := match stepHead p f {
   Next g -> Next (App g a) ; Done g -> match g {
@@ -375,7 +365,7 @@ demandHead (env : Program) (v : Term) : PatternStep := match stepHead env v {
   Next w -> Demand w ; Done w -> if knownHead env v then Miss else Blocked }
 stepPairPattern (env : Program) (a b : Pattern) (c d : Term) : PatternStep := match stepPattern env a c {
   Miss -> Miss ; Blocked -> Blocked ; Demand e -> Demand (Pair e d) ; Hit xs -> match stepPattern env b d {
-    Miss -> Miss ; Blocked -> Blocked ; Demand e -> Demand (Pair c e) ; Hit ys -> Hit (appendBindings xs ys) } }
+    Miss -> Miss ; Blocked -> Blocked ; Demand e -> Demand (Pair c e) ; Hit ys -> Hit (xs <> ys) } }
 stepConstructorPattern (env : Program) (c : String) (ps : List Pattern) (v : Term) : PatternStep :=
   match constructorTerms env v nil { nothing -> demandHead env v ; just (d, vs) ->
     if c == d then match stepPatternList env ps vs {
@@ -388,7 +378,7 @@ stepPatternList (env : Program) (ps : List Pattern) (vs : List Term) : PatternLi
     Miss -> ListMiss ; Blocked -> ListBlocked ; Demand w -> ListDemand (cons w more) ;
     Hit xs -> match stepPatternList env rest more {
       ListMiss -> ListMiss ; ListBlocked -> ListBlocked ; ListDemand ws -> ListDemand (cons v ws) ;
-      ListHit ys -> ListHit (appendBindings xs ys) } } ; _ -> ListMiss }
+      ListHit ys -> ListHit (xs <> ys) } } ; _ -> ListMiss }
 rebuildConstructor (c : String) (args : List Term) : Term := applyArguments (Var c) args
 applyArguments (f : Term) (args : List Term) : Term := match args {
   nil -> f ; cons a rest -> applyArguments (App f a) rest }
