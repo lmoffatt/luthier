@@ -10,29 +10,11 @@
 -- generators, said once), 3.S6 (a subtype passes where its type is expected), L9.14 (a law
 -- without a refuted model is evidence of nothing).
 --
--- What this file states. A property is a Bool law over a type `A`, a relation `r : A -> A -> Bool`
--- and the datum it qualifies, with the quantified variables last, so that a structure applies it
--- to a field in one line and a theory applies it to its own relation (execution.md, section 2).
--- `Antisymmetric` alone needs the type's equality, `o : Object A`, and reads its field `eq`.
--- `Object` is kernel_laws.lth's today. [proposed] It is imported from there until bite 1 moves it
--- to core/structures/equality.lth, which repoints this line; bite 3 then defines `Object`'s law as
--- `Equivalence A o.eq`, a cycle of files and not of names (core.lut's note on kernel_laws.lth).
---
--- Who claims these laws. The structures of core/structures/ (bite 3) and the theories of the
--- libraries, each by a one-line wrapper on its own relation; until then, the wrappers of
--- tests/tester/core_instances.lut, tested on listed instances by core_laws.test.lut (`Int` with
--- `<=`, `<`, `==`) and refuted on wrong ones by core_controls.test.lut. So `luthier check -v`
--- reports each law here unclaimed within the file: the claims are the importers'.
---
--- The forms. A law whose premise is rare on drawn values is stated by its contrapositive over
--- every pair (`Antisymmetric`: equal, or not related both ways; numbers.lth's `LeqAntisymmetric`,
--- 7.S12), or over the pairs the relation relates, drawn by the subtype's generator (`Symmetric`,
--- `Asymmetric`, `Transitive`). [proposed] The composite predicates (`Equivalence`, the orders)
--- quantify every variable of their parts and conjoin the parts with `and`: a conjunction `&` of
--- partially applied laws whose quantified variables differ is a term the kernel does not reduce
--- (no rule for `&` on functions; `luthier eval` shows it stuck), so it is no Bool a test can
--- grade. The parts are drawn independently, each on its own generator; a part that fails names
--- itself when tested alone, which core_laws.test.lut does.
+-- Bite 6 revision, Codex, 2026-10-21, prompt-bite-6.md at 2859815:
+-- Object now lives in structures/equality.lth. The cycle is between files, not definitions.
+-- Structures and core.lut's kernel instances claim these generic properties across files.
+-- D-2026-10-18-f makes composites bare conjunctions; the tester expands their independently
+-- quantified parts (7.S22). Related and Chain supply witnesses for laws with premises (7.S12).
 
 import "core/structures/equality.lth" Object
 
@@ -59,16 +41,10 @@ Total (A : U) (r : A -> A -> Bool) (x y : A) : Bool := r x y or r y x
 
 -- ---------------------------------------------------------------- the composites
 
--- Each conjoins its parts on independently drawn variables (the note above): `x` for the laws
--- over one value, `p` a related pair, `c` a chain, `y` the second value of the laws over every
--- pair.
-Equivalence (A : U) (r : A -> A -> Bool) (x : A) (p : Related A r) (c : Chain A r) : Bool :=
-  Reflexive A r x and Symmetric A r p and Transitive A r c
-Preorder (A : U) (r : A -> A -> Bool) (x : A) (c : Chain A r) : Bool :=
-  Reflexive A r x and Transitive A r c
-PartialOrder (A : U) (o : Object A) (r : A -> A -> Bool) (x y : A) (c : Chain A r) : Bool :=
-  Preorder A r x c and Antisymmetric A o r x y
-TotalOrder (A : U) (o : Object A) (r : A -> A -> Bool) (x y : A) (c : Chain A r) : Bool :=
-  PartialOrder A o r x y c and Total A r x y
-StrictOrder (A : U) (r : A -> A -> Bool) (x : A) (p : Related A r) (c : Chain A r) : Bool :=
-  Irreflexive A r x and Asymmetric A r p and Transitive A r c
+-- D-2026-10-18-f: each partially applied conjunct quantifies its missing variables separately
+-- (7.S22); these are statements, not Boolean computations on functions.
+Equivalence (A : U) (r : A -> A -> Bool) := Reflexive A r & Symmetric A r & Transitive A r
+Preorder (A : U) (r : A -> A -> Bool) := Reflexive A r & Transitive A r
+PartialOrder (A : U) (o : Object A) (r : A -> A -> Bool) := Preorder A r & Antisymmetric A o r
+TotalOrder (A : U) (o : Object A) (r : A -> A -> Bool) := PartialOrder A o r & Total A r
+StrictOrder (A : U) (r : A -> A -> Bool) := Irreflexive A r & Asymmetric A r & Transitive A r

@@ -10,42 +10,18 @@
 -- D-2026-10-17-f (the within-bound versions, the bound a function of the arguments, P11), 7.S12
 -- (a rare premise by its contrapositive), L9.14.
 --
--- What this file states. `id`, `compose`, `flip` and `const` are the combinators a commuting
--- diagram is written with. `Pointwise` is the equality of two functions at a sampled argument,
--- `Pointwise2` of two functions of two arguments. `functions` is the function type's `Object`
--- for a claimant that needs one as a value (an `Indexed` container's entries are a function);
--- [proposed] it is declared and not defined: an `eq` over an infinite domain has no body a test
--- could run, and what is tested is `Pointwise`; a container's equality as a value is
--- core/structures/containers.lth's `pointwise`, which is finite (bite 3). `Object` is
--- kernel_laws.lth's today (relations.lth's note).
---
--- The forms. `Injective` is stated by its contrapositive over every pair (equal arguments, or
--- unequal images); `Surjective` by a witness, a section `s` with `f (s y) == y`, since a search
--- for a preimage is no law; `Inverse` says `g` undoes `f`; `Monotone` relates two relations over
--- the pairs the first relates; `Preserving` is a homomorphism of binary operations (`SizeAppend`
--- is one from `append` to `+`); `Congruent` is respect for an equivalence, Substitutive for one
--- function; `LandsIn` is membership of the result in a subtype given by its predicate.
--- [proposed] `Isomorphism` and `Bijective` quantify every variable of their parts and conjoin
--- them with `and`, as relations.lth's composites do and for the same reason: `&` on partially
--- applied laws with different quantified variables is a term the kernel does not reduce.
---
--- This file and operations.lth each have an `Idempotent`, one on a function, one on an
--- operation; they live in different files and an importer names the one it needs (`as` renames
--- the other, 12.S22).
---
--- Who claims these laws: the structures (bite 3) and the libraries' theories by one-line
--- wrappers; until then tests/tester/core_instances.lut's wrappers, tested on functions of `Int`
--- and `Bool` by core_laws.test.lut and refuted by core_controls.test.lut.
+-- Bite 6 revision, Codex, 2026-10-21, prompt-bite-6.md at 2859815:
+-- D-2026-10-18-c puts the combinator bodies in core.lut (plane 3); this file states
+-- their properties. D-2026-10-18-f makes Isomorphism and Bijective bare conjunctions.
+-- Function idempotence is Pointwise between self-composition and the function itself;
+-- the single Idempotent predicate in operations.lth qualifies binary operations.
+-- Pointwise samples the argument; functions declares equality on a whole function space
+-- without pretending that an infinite domain has a decidable executable equality.
+-- Structures and core.lut's kernel instances claim these properties. The tester expands
+-- each conjunct with its own missing parameters (7.S22); the kernel need not reduce & on functions.
 
 import "core/structures/equality.lth" Object
 import "core/properties/relations.lth" Related
-
--- ---------------------------------------------------------------- the combinators
-
-id (A : U) : A -> A := fn x { x }
-compose (A B C : U) (g : B -> C) (f : A -> B) : A -> C := fn x { g (f x) }
-flip (A B C : U) (f : A -> B -> C) : B -> A -> C := fn b a { f a b }
-const (A B : U) (b : B) : A -> B := fn a { b }
 
 -- ---------------------------------------------------------------- the equality of functions
 
@@ -63,11 +39,11 @@ Injective (A B : U) (oA : Object A) (oB : Object B) (f : A -> B) (x y : A) : Boo
 Surjective (A B : U) (o : Object B) (f : A -> B) (s : B -> A) (y : B) : Bool := o.eq (f (s y)) y
 -- `g` undoes `f`
 Inverse (A B : U) (o : Object A) (f : A -> B) (g : B -> A) (x : A) : Bool := o.eq (g (f x)) x
-Isomorphism (A B : U) (oA : Object A) (oB : Object B) (to : A -> B) (from : B -> A) (x : A) (y : B) : Bool :=
-  Inverse A B oA to from x and Inverse B A oB from to y
-Bijective (A B : U) (oA : Object A) (oB : Object B) (f : A -> B) (s : B -> A) (x y : A) (z : B) : Bool :=
-  Injective A B oA oB f x y and Surjective A B oB f s z
-Idempotent (A : U) (o : Object A) (f : A -> A) (x : A) : Bool := o.eq (f (f x)) (f x)
+Isomorphism (A B : U) (oA : Object A) (oB : Object B) (to : A -> B) (from : B -> A) :=
+  Inverse A B oA to from & Inverse B A oB from to
+Bijective (A B : U) (oA : Object A) (oB : Object B) (f : A -> B) (s : B -> A) :=
+  Injective A B oA oB f & Surjective A B oB f s
+-- Function idempotence is Pointwise A A o (compose A A A f f) f.
 Involutive (A : U) (o : Object A) (f : A -> A) (x : A) : Bool := o.eq (f (f x)) x
 -- order-preserving between two relations, over the pairs the first relates
 Monotone (A B : U) (r : A -> A -> Bool) (s : B -> B -> Bool) (f : A -> B) (p : Related A r) : Bool := s (f p.x) (f p.y)
@@ -84,3 +60,14 @@ LandsIn (A B : U) (f : A -> B) (p : B -> Bool) (x : A) : Bool := p (f x)
 IdempotentWithin (A : U) (d : A -> A -> Float64) (f : A -> A) (bound : A -> Float64) (x : A) : Bool := d (f (f x)) (f x) <= bound x
 InvolutiveWithin (A : U) (d : A -> A -> Float64) (f : A -> A) (bound : A -> Float64) (x : A) : Bool := d (f (f x)) x <= bound x
 PointwiseWithin (A B : U) (d : B -> B -> Float64) (f g : A -> B) (bound : A -> Float64) (x : A) : Bool := d (f x) (g x) <= bound x
+
+-- Sensitivity between metric levels (D-2026-10-18-i, L6.8; Reed and Pierce, Distance Makes
+-- the Types Grow Stronger, ICFP 2010, Fuzz). The coefficient is a parameter, never a model's
+-- hidden constant; NonExpansive is the coefficient-one case.
+NonExpansive (A B : U) (dA : A -> A -> Float64) (dB : B -> B -> Float64) (f : A -> B) (x y : A) : Bool := dB (f x) (f y) <= dA x y
+Lipschitz (A B : U) (dA : A -> A -> Float64) (dB : B -> B -> Float64) (f : A -> B) (coefficient : NonNegativeFloat) (x y : A) : Bool := dB (f x) (f y) <= coefficient * dA x y
+
+NonExpansiveMap (A B : U) (dA : A -> A -> Float64) (dB : B -> B -> Float64) : { apply : A -> B }
+NonExpansiveMap (A B : U) (dA : A -> A -> Float64) (dB : B -> B -> Float64) (m : NonExpansiveMap A B dA dB) := NonExpansive A B dA dB m.apply
+LipschitzMap (A B : U) (dA : A -> A -> Float64) (dB : B -> B -> Float64) : { apply : A -> B, coefficient : NonNegativeFloat }
+LipschitzMap (A B : U) (dA : A -> A -> Float64) (dB : B -> B -> Float64) (m : LipschitzMap A B dA dB) := Lipschitz A B dA dB m.apply m.coefficient

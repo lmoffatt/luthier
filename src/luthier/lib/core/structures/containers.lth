@@ -1,0 +1,44 @@
+-- Container interfaces and laws, plane 1 (D-2026-10-18-c).
+-- Codex, bite 6, 2026-10-20, execution.md §3.4 at 2859815.
+-- References: Wadler (1989), Theorems for free! (functor naturality);
+-- Bird and de Moor (1997), Algebra of Programming (map/fold and tabulation).
+-- Computable finite folds and generic operations live in core.lut, not this theory.
+Functor (F : U -> U) : { map : (A B : U) -> (A -> B) -> F A -> F B }
+MapId (F : U -> U) (f : Functor F) (A : U) (o : Object (F A)) (xs : F A) : Bool := o.eq (f.map A A (id A) xs) xs
+MapCompose (F : U -> U) (f : Functor F) (A B C : U) (o : Object (F C)) (g : B -> C) (h : A -> B) (xs : F A) : Bool :=
+  o.eq (f.map B C g (f.map A B h xs)) (f.map A C (compose A B C g h) xs)
+Functor (F : U -> U) (f : Functor F) := MapId F f & MapCompose F f
+Indexed (C A : U) : { size : C -> Nat, at : (c : C) -> Fin (size c) -> A }
+Extensional (C A : U) (i : Indexed C A) (o : Object C) (a : Object A) (c d : C) : Bool :=
+  not (sameEntries C A i a c d) or o.eq c d
+Indexed (C A : U) (i : Indexed C A) := Extensional C A i
+Foldable (F : U -> U) : { fold : (A M : U) -> (M -> M -> M) -> M -> (A -> M) -> F A -> M }
+Tabulated (C A : U) : { build : (n : Nat) -> (Fin n -> A) -> C }
+SizeBuild (C A : U) (i : Indexed C A) (t : Tabulated C A) (n : Nat) (f : Fin n -> A) : Bool := i.size (t.build n f) == n
+AtBuild (C A : U) (i : Indexed C A) (t : Tabulated C A) (o : Object A) (n : Nat) (f : Fin n -> A) (k : Fin n) : Bool := o.eq (i.at (t.build n f) k) (f k)
+Tabulated (C A : U) (t : Tabulated C A) (i : Indexed C A) := SizeBuild C A i t & AtBuild C A i t
+SizeMap (F : U -> U) (A B : U) (f : Functor F) (i : Indexed (F A) A) (j : Indexed (F B) B) (g : A -> B) (xs : F A) : Bool := j.size (f.map A B g xs) == i.size xs
+AtMap (F : U -> U) (A B : U) (f : Functor F) (i : Indexed (F A) A) (j : Indexed (F B) B) (o : Object B) (g : A -> B) (xs : F A) (k : Fin (i.size xs)) : Bool := o.eq (j.at (f.map A B g xs) k) (g (i.at xs k))
+SizeAppend (C A : U) (i : Indexed C A) (combine : C -> C -> C) := Preserving C Nat (structural Nat) combine (fn (x y : Nat) { x + y }) i.size
+FoldOfBuild (F : U -> U) (A M : U) (f : Foldable F) (t : Tabulated (F A) A) (o : Object M) (op : M -> M -> M) (e : M) (g : A -> M) (n : Nat) (h : Fin n -> A) : Bool :=
+  o.eq (f.fold A M op e g (t.build n h)) (foldWith M op e n (fn k { g (h k) }))
+ContainerLaws := SizeMap & AtMap & SizeAppend & FoldOfBuild
+
+-- The finite quantifiers' duality and nesting (classical predicate calculus), independently
+-- stated on the supplied operations; the core implements this interface by its finite folds.
+FiniteQuantifiers (n : Nat) : {
+  every some : (Fin n -> Bool) -> Bool,
+  pairs : (Fin n -> Fin n -> Bool) -> Bool }
+QuantifiersDual (n : Nat) (q : FiniteQuantifiers n) (p : Fin n -> Bool) : Bool := q.some p == not (q.every (fn k { not (p k) }))
+QuantifiersPairs (n : Nat) (q : FiniteQuantifiers n) (relation : Fin n -> Fin n -> Bool) : Bool := q.pairs relation == q.every (fn i { q.every (relation i) })
+FiniteQuantifiers (n : Nat) := QuantifiersDual n & QuantifiersPairs n
+FoldableQueries (F : U -> U) (folding : Foldable F) : {
+  every : (A : U) -> (A -> Bool) -> F A -> Bool,
+  contains : (A : U) -> Object A -> A -> F A -> Bool }
+QueriesEvery (F : U -> U) (folding : Foldable F) (q : FoldableQueries F folding) (A : U) (p : A -> Bool) (xs : F A) : Bool := q.every A p xs == folding.fold A Bool conj true p xs
+QueriesContains (F : U -> U) (folding : Foldable F) (q : FoldableQueries F folding) (A : U) (o : Object A) (x : A) (xs : F A) : Bool := q.contains A o x xs == not (q.every A (fn y { not (o.eq x y) }) xs)
+FoldableQueries (F : U -> U) (folding : Foldable F) := QueriesEvery F folding & QueriesContains F folding
+EntrywiseSpecification (C A : U) (i : Indexed C A) (d : A -> A -> Float64)
+  (candidate : ((c : C) -> C -> Fin (i.size c) -> Float64) -> C -> C -> Bool)
+  (radius : (c : C) -> C -> Fin (i.size c) -> Float64) (c e : C) : Bool :=
+  candidate radius c e == (i.size c == i.size e and forallBelow (i.size c) (fn k { d (i.at c k) (i.at e k) <= radius c e k }))

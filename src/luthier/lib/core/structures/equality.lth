@@ -1,68 +1,96 @@
--- core/structures/equality.lth: an object, a type with its equality, and the structural equality
--- of the concrete types (kernel_laws.lth §1).
---
--- Moved as §1 from kernel_laws.lth in the core's bite 1 (2026-10-18, Claude Opus 5.5, on
--- record/plan/core-2026-10-17/prompt-bite-1.md; execution.md §1 and §6), without renaming any law
--- and with the text of each section unchanged; bite 3 rewrites the file over core/properties/
--- (execution.md §3.4 to §3.9). kernel_laws.lth's history is this file's under git (`git log
--- --follow src/luthier/lib/core/structures/equality.lth`), its v0.1 file at the tag v0.1-final.
---
--- kernel_laws.lth's header, for the sections here: draft 0, 2026-10-13, by Claude Opus 5.5 in the
--- session (step 2.1 of record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md).
--- Sources: spec 3.S7, 3.S8, 3.S36, 3.S37, 4.R8; D-2026-10-12-ak (an object is a type with its
--- equality, whose laws the kernel guarantees for a structural `==`); D-2026-10-13-t (the roles of
--- the core's `data`: `Unit` terminal, `Empty` initial, `Bool` a Boolean algebra, `Nat` its laws,
--- `List` the free monoid); L2.7 (every constructor has a law of its role; everything has laws,
--- found in the place the thing holds in a known structure). Each section is a known structure as a
--- theory, in the pattern of ebnf.lth: a record type of its operations, its laws over a model
--- `(m : T)`, and `T := laws`. The core's types are models of them (core/core.lut, which also holds
--- what kernel_models.lut held). Names: `and`, `or`, `not` and `mod` are operators or core names, so
--- fields are named by the structure's own words (`meet`, `join`, `complement`); `unit` is a
--- constructor of core, so a monoid's element is `neutral`.
+-- Equality and metric levels (D-2026-10-18-c), theories only.
+-- Codex, bite 6, 2026-10-20, from execution.md §3.1 at 2859815; D-2026-10-17-f,
+-- D-2026-10-18-f and the correction of D-2026-10-18-c. Mathematical references:
+-- Frechet (1906), Sur quelques points du calcul fonctionnel, §I (metric axioms);
+-- Lawvere (1973), Metric spaces, generalized logic, and closed categories;
+-- Menger (1942), Statistical metrics (the probabilistic extension below).
+import "core/properties/relations.lth" Equivalence Related Chain Reflexive Symmetric
+import "core/properties/operations.lth" Commutative
 
--- ---------------------------------------------------------------- §1 Object
-
--- An object is a type with its equality (D-2026-10-12-ak: the base theory, a setoid, O2). The
--- kernel's structural `==` is its model on every concrete type (4.R8, §7); an observational
--- equality is its author's and satisfies the same laws.
 Object (A : U) : { eq : A -> A -> Bool }
-
--- the pairs and chains an equality relates: two values drawn at random are rarely equal, so the
--- laws that need equal values quantify over these, whose generators are the model's (7.S12)
-EqualPair (A : U) (o : Object A) : U := { x y : A | o.eq x y }
-EqualChain (A : U) (o : Object A) : U := { x y z : A | o.eq x y and o.eq y z }
-
--- spec 3.S36, D-2026-10-12-ak: reflexive, symmetric, transitive, substitutive
-Reflexive (A : U) (o : Object A) (x : A) : Bool := o.eq x x
-Symmetric (A : U) (o : Object A) (p : EqualPair A o) : Bool := o.eq p.y p.x
-Transitive (A : U) (o : Object A) (c : EqualChain A o) : Bool := o.eq c.x c.z
-Object (A : U) := Reflexive A & Symmetric A & Transitive A
-
--- Substitutive: every function gives equal results on equal arguments. That holds of the kernel's
--- structural `==` (4.R8), and of no other equality: an observational one (alpha-equivalence of
--- terms, a tolerance on doubles) is told apart by some function, one that reads a binder's name or
--- the last bits. So substitution over every function is the law of the structural equality, and
--- an observational equality is respected by the functions of its own theory, each of whose
--- operations states it as a congruence (as `AlphaCongruent` in term.lth). Found by Codex writing
--- kernel.py: `Lam "x" Universe (Var "x")` and `Lam "y" Universe (Var "y")` are alpha-equal and a
--- function reading the binder separates them. Decided by D-2026-10-13-z.
---
--- `Concrete` is the types with a structural `==` (4.R8): `Int`, `Float64`, `String`, `Unit`,
--- `Empty`, and products, sums, `data` and subtypes built from them; never a function type. Which
--- type is concrete the checker decides (4.R8), so that predicate, `hasStructuralEquality`, is
--- declared here and not defined. [proposed] `Concrete` is the subtype of `U` it cuts out, so a
--- concrete type passes where a type is expected (3.S6: the forgetting is implicit; 4.R9). Spec 3
--- has one universe, `U : U` (3.S8), and no sub-universe; a subtype of `U` is the reading that
--- needs nothing new (group 3 of record/IA/check-2026-10-13/opus-3b.md, part 2). The structural
--- equality and its substitutivity range over it, codomain included (review of layers 0-1, A).
+Object (A : U) (o : Object A) := Equivalence A o.eq
+EqualPair (A : U) (o : Object A) = Related A o.eq
+EqualChain (A : U) (o : Object A) = Chain A o.eq
 hasStructuralEquality : U -> Bool
 Concrete : U := { A : U | hasStructuralEquality A }
+-- Structural models and their projections are constructed in core.lut (plane 3).
 Structural (A : Concrete) : { eq : A -> A -> Bool }
-asObject (A : Concrete) (s : Structural A) : Object A := { eq := s.eq }
--- each law of an object on its own, so that an equality that relates nothing does not pass by
--- leaving the pairs empty (reflexivity has its own cases; review of layers 0-1, A)
-StructuralReflexive (A : Concrete) (s : Structural A) (x : A) : Bool := Reflexive A (asObject A s) x
-StructuralSymmetric (A : Concrete) (s : Structural A) (p : EqualPair A (asObject A s)) : Bool := Symmetric A (asObject A s) p
-StructuralTransitive (A : Concrete) (s : Structural A) (c : EqualChain A (asObject A s)) : Bool := Transitive A (asObject A s) c
-Substitutive (A : Concrete) (s : Structural A) (B : Concrete) (f : A -> B) (p : EqualPair A (asObject A s)) : Bool := f p.x == f p.y
-Structural (A : Concrete) := StructuralReflexive A & StructuralSymmetric A & StructuralTransitive A & Substitutive A
+Substitutive (A : Concrete) (s : Structural A) (B : Concrete) (f : A -> B) (p : Related A s.eq) : Bool := f p.x == f p.y
+Structural (A : Concrete) (s : Structural A) := Equivalence A s.eq & Substitutive A s
+
+Metric (A : U) (o : Object A) : { d : A -> A -> Float64 }
+MetricZeroOnEqual (A : U) (o : Object A) (m : Metric A o) (p : EqualPair A o) : Bool := m.d p.x p.y == 0.0
+MetricIndiscernible (A : U) (o : Object A) (m : Metric A o) (x y : A) : Bool := o.eq x y or not (m.d x y == 0.0)
+Triangular (A : U) (d : A -> A -> Float64) (x y z : A) : Bool := d x z <= d x y + d y z
+Ultratriangular (A : U) (d : A -> A -> Float64) (x y z : A) : Bool := d x z <= (if d x y <= d y z then d y z else d x y)
+-- Non-negativity follows from the diagonal, symmetry and triangle; stated for the negative control.
+MetricNonNegative (A : U) (d : A -> A -> Float64) (x y : A) : Bool := 0.0 <= d x y
+Metric (A : U) (o : Object A) (m : Metric A o) :=
+  MetricZeroOnEqual A o m & MetricIndiscernible A o m
+  & Commutative A Float64 (structural Float64) m.d & Triangular A m.d & MetricNonNegative A m.d
+Pseudometric (A : U) (o : Object A) : { d : A -> A -> Float64 }
+Pseudometric (A : U) (o : Object A) (m : Pseudometric A o) :=
+  MetricZeroOnEqual A o m & Commutative A Float64 (structural Float64) m.d & Triangular A m.d & MetricNonNegative A m.d
+Quasimetric (A : U) (o : Object A) : { d : A -> A -> Float64 }
+Quasimetric (A : U) (o : Object A) (m : Quasimetric A o) :=
+  MetricZeroOnEqual A o m & MetricIndiscernible A o m & Triangular A m.d & MetricNonNegative A m.d
+Ultrametric (A : U) (o : Object A) : { d : A -> A -> Float64 }
+Ultrametric (A : U) (o : Object A) (m : Ultrametric A o) :=
+  MetricZeroOnEqual A o m & MetricIndiscernible A o m
+  & Commutative A Float64 (structural Float64) m.d & Ultratriangular A m.d & MetricNonNegative A m.d
+NonNegativeFloat : U := { x : Float64 | 0.0 <= x }
+Extended = { finiteDistance : NonNegativeFloat || infiniteDistance : Unit }
+ExtendedMetric (A : U) (o : Object A) : { d : A -> A -> Extended }
+-- Declared only, as execution.md §3.1 requests; no extended arithmetic or model is claimed.
+
+Ball (A : U) (d : A -> A -> Float64) (radius : A -> A -> Float64) (x y : A) : Bool := d x y <= radius x y
+-- An epsilon threshold gives a tolerance, not an equivalence (D-2026-10-18-c correction).
+ToleranceRelation (A : U) : { relates : A -> A -> Bool }
+ToleranceRelation (A : U) (t : ToleranceRelation A) := Reflexive A t.relates & Symmetric A t.relates
+-- With Ultrametric's strong triangle the same threshold is also transitive.
+UltrametricThreshold (A : U) (o : Object A) (m : Ultrametric A o) (epsilon : NonNegativeFloat) :=
+  Equivalence A (MetricTolerance A m.d epsilon)
+
+MetricWithin (A : U) (o : Object A) : { d bound : A -> A -> Float64 }
+WithinZeroOnEqual (A : U) (o : Object A) (m : MetricWithin A o) (p : EqualPair A o) : Bool := Ball Float64 coreFloatDistance (fn x y { m.bound p.x p.y }) (m.d p.x p.y) 0.0
+WithinSymmetric (A : U) (o : Object A) (m : MetricWithin A o) (x y : A) : Bool :=
+  floatAbs (m.d x y - m.d y x) <= m.bound x y + m.bound y x
+WithinTriangular (A : U) (o : Object A) (m : MetricWithin A o) (x y z : A) : Bool :=
+  m.d x z <= m.d x y + m.d y z + m.bound x z + m.bound x y + m.bound y z
+MetricWithin (A : U) (o : Object A) (m : MetricWithin A o) := WithinZeroOnEqual A o m & WithinSymmetric A o m & WithinTriangular A o m
+
+-- [proposed] Menger's probabilistic level, declarations only; question 2 of
+-- record/plan/three-levels-2026-10-18/report.md is still open. No stochastic model is claimed.
+-- Source: Menger, Statistical metrics (1942); Schweizer and Sklar, Probabilistic Metric
+-- Spaces (1983), chapters 2 and 8. Definition checked against the research paper
+-- https://pmc.ncbi.nlm.nih.gov/articles/PMC4771691/ (2016), Definitions 1 and 2.
+-- Distance distributions are LEFT-continuous: F(t) = P(distance < t), with F(0) = 0.
+ProbabilityLevel : U := { p : Float64 | 0.0 <= p and p <= 1.0 }
+TNorm : { tensor : ProbabilityLevel -> ProbabilityLevel -> ProbabilityLevel }
+TNorm (t : TNorm) := Associative ProbabilityLevel (structural ProbabilityLevel) t.tensor
+  & Commutative ProbabilityLevel ProbabilityLevel (structural ProbabilityLevel) t.tensor
+  & Neutral ProbabilityLevel (structural ProbabilityLevel) t.tensor 1.0
+  & MonotoneIn ProbabilityLevel (fn x y { x <= y }) t.tensor
+DistanceDistribution : {
+  cdf : Float64 -> ProbabilityLevel,
+  tail : { p : ProbabilityLevel | p < 1.0 } -> NonNegativeFloat,
+  below : (t : Float64) -> { p : ProbabilityLevel | p < cdf t } -> Float64 }
+DistributionZero (f : DistanceDistribution) (t : { t : Float64 | t <= 0.0 }) : Bool := f.cdf t == 0.0
+DistributionMonotone (f : DistanceDistribution) := Monotone Float64 ProbabilityLevel (fn x y { x <= y }) (fn x y { x <= y }) f.cdf
+DistributionTail (f : DistanceDistribution) (p : { p : ProbabilityLevel | p < 1.0 }) (t : { t : Float64 | f.tail p <= t }) : Bool := p < f.cdf t
+DistributionLeftContinuous (f : DistanceDistribution) (t : Float64) (p : { p : ProbabilityLevel | p < f.cdf t }) : Bool := f.below t p < t and p < f.cdf (f.below t p)
+DistanceDistribution := DistributionZero & DistributionMonotone & DistributionTail & DistributionLeftContinuous
+ProbabilisticMetric (A : U) (o : Object A) (t : TNorm) : {
+  distribution : A -> A -> DistanceDistribution,
+  separates : { x y : A | not (o.eq x y) } -> { s : Float64 | 0.0 < s } }
+MengerDiagonal (A : U) (o : Object A) (t : TNorm) (m : ProbabilisticMetric A o t) (p : EqualPair A o) (s : Float64) : Bool :=
+  (m.distribution p.x p.y).cdf s == (if s <= 0.0 then 0.0 else 1.0)
+MengerSeparated (A : U) (o : Object A) (t : TNorm) (m : ProbabilisticMetric A o t) (p : { x y : A | not (o.eq x y) }) : Bool :=
+  (m.distribution p.x p.y).cdf (m.separates p) < 1.0
+MengerSymmetric (A : U) (o : Object A) (t : TNorm) (m : ProbabilisticMetric A o t) (x y : A) (s : Float64) : Bool :=
+  (m.distribution x y).cdf s == (m.distribution y x).cdf s
+MengerTriangle (A : U) (o : Object A) (t : TNorm) (m : ProbabilisticMetric A o t) (x y z : A) (s u : NonNegativeFloat) : Bool :=
+  t.tensor ((m.distribution x y).cdf s) ((m.distribution y z).cdf u) <= (m.distribution x z).cdf (s + u)
+MengerDistributions (A : U) (o : Object A) (t : TNorm) (m : ProbabilisticMetric A o t) (x y : A) := DistanceDistribution (m.distribution x y)
+ProbabilisticMetric (A : U) (o : Object A) (t : TNorm) :=
+  MengerDiagonal A o t & MengerSeparated A o t & MengerSymmetric A o t & MengerTriangle A o t & MengerDistributions A o t

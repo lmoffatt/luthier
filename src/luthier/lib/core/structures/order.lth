@@ -1,0 +1,24 @@
+-- Order, and the compatible order of the natural semiring.
+-- Codex, bite 6, 2026-10-20; input execution.md §3.2 at 2859815, D-2026-10-18-f.
+-- References: Birkhoff, Lattice Theory (1967), I; Peano's successor order (1889).
+import "core/structures/equality.lth" Object
+import "core/properties/relations.lth" TotalOrder Related
+import "core/structures/algebraic.lth" Semiring
+
+Order (A : U) (o : Object A) : { leq : A -> A -> Bool }
+Order (A : U) (o : Object A) (r : Order A o) := TotalOrder A o r.leq
+Least (A : U) (leq : A -> A -> Bool) (bottom : A) (x : A) : Bool := leq bottom x
+Greatest (A : U) (leq : A -> A -> Bool) (top : A) (x : A) : Bool := leq x top
+Discrete (A : U) (o : Object A) (leq : A -> A -> Bool) (succ : A -> A) (p : Related A leq) : Bool := o.eq p.x p.y or leq (succ p.x) p.y
+MonotoneIn (A : U) (leq : A -> A -> Bool) (op : A -> A -> A) (p : Related A leq) (z : A) : Bool := leq (op p.x z) (op p.y z)
+NonNegativePair (A : U) (leq : A -> A -> Bool) (zero : A) : U := { x y : A | leq zero x and leq zero y }
+PositiveClosed (A : U) (leq : A -> A -> Bool) (times : A -> A -> A) (zero : A) (p : NonNegativePair A leq zero) : Bool := leq zero (times p.x p.y)
+OrderedSemiring (S : U) (o : Object S) : { semiring : Semiring S o, order : Order S o }
+OrderedSemiring (S : U) (o : Object S) (s : OrderedSemiring S o) :=
+  Semiring S o s.semiring & Order S o s.order
+  & MonotoneIn S s.order.leq s.semiring.plus & Least S s.order.leq s.semiring.zero
+  & Discrete S o s.order.leq (fn x { s.semiring.plus x s.semiring.one })
+  & PositiveClosed S s.order.leq s.semiring.times s.semiring.zero
+
+BoundedOrder (A : U) (o : Object A) : { order : Order A o, bottom top : A }
+BoundedOrder (A : U) (o : Object A) (b : BoundedOrder A o) := Order A o b.order & Least A b.order.leq b.bottom & Greatest A b.order.leq b.top

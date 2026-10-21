@@ -1,145 +1,78 @@
--- core/structures/universal.lth: terminal and initial objects, the free monoid and lists, and the
--- constructions of the kernel (kernel_laws.lth §2, §4's free monoid and lists, §6).
---
--- Moved as §2, the free monoid and lists of §4 and §6, from kernel_laws.lth in the core's bite 1 (2026-10-18, Claude Opus 5.5, on
--- record/plan/core-2026-10-17/prompt-bite-1.md; execution.md §1 and §6), without renaming any law
--- and with the text of each section unchanged; bite 3 rewrites the file over core/properties/
--- (execution.md §3.4 to §3.9). kernel_laws.lth's history is this file's under git (`git log
--- --follow src/luthier/lib/core/structures/equality.lth`), its v0.1 file at the tag v0.1-final.
---
--- kernel_laws.lth's header, for the sections here: draft 0, 2026-10-13, by Claude Opus 5.5 in the
--- session (step 2.1 of record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md).
--- Sources: spec 3.S7, 3.S8, 3.S36, 3.S37, 4.R8; D-2026-10-12-ak (an object is a type with its
--- equality, whose laws the kernel guarantees for a structural `==`); D-2026-10-13-t (the roles of
--- the core's `data`: `Unit` terminal, `Empty` initial, `Bool` a Boolean algebra, `Nat` its laws,
--- `List` the free monoid); L2.7 (every constructor has a law of its role; everything has laws,
--- found in the place the thing holds in a known structure). Each section is a known structure as a
--- theory, in the pattern of ebnf.lth: a record type of its operations, its laws over a model
--- `(m : T)`, and `T := laws`. The core's types are models of them (core/core.lut, which also holds
--- what kernel_models.lut held). Names: `and`, `or`, `not` and `mod` are operators or core names, so
--- fields are named by the structure's own words (`meet`, `join`, `complement`); `unit` is a
--- constructor of core, so a monoid's element is `neutral`.
-
-import "core/structures/algebraic.lth" Monoid LeftNeutral RightNeutral Associative
-
--- ---------------------------------------------------------------- §2 Terminal and initial objects
-
--- A terminal object: one map into it from every type, so it has exactly one value, its point
--- (3.S8, D-2026-10-13-t). `Unit` is the model (§7): the role of `unit` is to be that point. That
--- the map into it is unique follows: two functions into it agree at every argument.
-Terminal (T : U) : { point : T }
-OnlyThePoint (T : U) (t : Terminal T) (x : T) : Bool := x == t.point
-Terminal (T : U) := OnlyThePoint T
-
--- An initial object: one map out of it to every type, so it has no value (3.S8, D-2026-10-13-t).
--- `Empty` is the model (§7), and its elimination `match e { }` is the map out (3.S7). The law
--- holds because no case exists: an exhaustive test finds none, and its certificate says the law
--- holds vacuously (7.S12), which here is the claim itself.
+-- Universal constructions: declarations and their universal laws (D-2026-10-17-g).
+-- Codex, bite 6, 2026-10-20, execution.md §3.5 at 2859815; bare form D-2026-10-18-f.
+-- Reference: Mac Lane, Categories for the Working Mathematician (1998), III.1, III.3, V.1.
+-- Equalities are the objects', including the codomain of each universal arrow.
+Terminal (T : U) (o : Object T) : { point : T }
+OnlyThePoint (T : U) (o : Object T) (t : Terminal T o) (x : T) : Bool := o.eq x t.point
+Terminal (T : U) (o : Object T) := OnlyThePoint T o
 Initial (T : U) : { absurd : (A : U) -> T -> A }
 NoValue (T : U) (i : Initial T) (x : T) : Bool := i.absurd Bool x and not (i.absurd Bool x)
 Initial (T : U) := NoValue T
-
--- ---------------------------------------------------------------- §4 Free monoid, lists
-
--- The free monoid on `A` (D-2026-10-13-t): a monoid `M` with `A` injected into it, such that every
--- map from `A` into a monoid `N` extends by `fold` to a map of monoids, and `M` holds nothing but
--- what the injections build (folding with itself gives each element back). `List A` is the model
--- (§7): `nil` the neutral element, `append` the operation, `cons a xs` the injection of `a`
--- combined with `xs`. That the extension is unique is not statable by tests (it quantifies over
--- maps); `FoldIsItself` stands for it, as the property that makes the extension determined.
--- The monoids `N` a test needs are bound by a census (7.R4).
-FreeMonoid (A M : U) : {
-  neutral : M, combine : M -> M -> M,
-  inject : A -> M,
-  fold : (N : U) -> Monoid N -> (A -> N) -> M -> N,
-}
-asMonoid (A M : U) (m : FreeMonoid A M) : Monoid M := { neutral := m.neutral, combine := m.combine }
-IsMonoid (A M : U) (m : FreeMonoid A M) (x y z : M) : Bool :=
-  LeftNeutral M (asMonoid A M m) x and RightNeutral M (asMonoid A M m) x and Associative M (asMonoid A M m) x y z
-FoldNeutral (A M : U) (m : FreeMonoid A M) (N : U) (n : Monoid N) (f : A -> N) : Bool :=
-  m.fold N n f m.neutral == n.neutral
-FoldInject (A M : U) (m : FreeMonoid A M) (N : U) (n : Monoid N) (f : A -> N) (a : A) : Bool :=
-  m.fold N n f (m.inject a) == f a
-FoldCombine (A M : U) (m : FreeMonoid A M) (N : U) (n : Monoid N) (f : A -> N) (x y : M) : Bool :=
-  m.fold N n f (m.combine x y) == n.combine (m.fold N n f x) (m.fold N n f y)
-FoldIsItself (A M : U) (m : FreeMonoid A M) (x : M) : Bool := m.fold M (asMonoid A M m) m.inject x == x
-FreeMonoid (A M : U) := IsMonoid A M & FoldNeutral A M & FoldInject A M & FoldCombine A M & FoldIsItself A M
-
--- `List A` is the free monoid on `A`: `nil` its neutral element and `cons a xs` the injection of
--- `a` combined with `xs`, which is the role of each; the free monoid's `fold` is the recursion
--- principle of lists (3.S36). (A theory of fold algebras, tested against its own definition of
--- the fold, stated nothing and is gone; review of layers 0-1, A.)
-Lists (A : U) : { free : FreeMonoid A (List A) }
-NilIsNeutral (A : U) (l : Lists A) : Bool := l.free.neutral == nil
-ConsIsInjectionCombined (A : U) (l : Lists A) (a : A) (xs : List A) : Bool :=
-  l.free.combine (l.free.inject a) xs == cons a xs
-Lists (A : U) := NilIsNeutral A & ConsIsInjectionCombined A
-
--- ---------------------------------------------------------------- §6 The constructions of the kernel
-
--- The kernel is a bicartesian closed category (3.S8); its constructions are the structures of one,
--- and the kernel's own application, pairing and `match` are their models (§7). The laws are those
--- 3.S36 names: `Beta` for the exponential; `PairFst`, `PairSnd`, `Pairing` for the product;
--- `CaseLeft`, `CaseRight` for the coproduct, whose instances on `Bool` (`if`) and on `Maybe` are
--- 3.S36's `IfTrue`, `IfFalse`, `CaseNothing`, `CaseJust`. Eta, `fn y { f y } == f`, is not
--- statable: equality of functions is not structural (3.S37, 4.R8); observed pointwise it is `Beta`.
-Exponential (A B : U) : { apply : (A -> B) -> A -> B }
-Beta (A B : U) (e : Exponential A B) (f : A -> B) (x : A) : Bool := e.apply (fn y { f y }) x == f x
-Exponential (A B : U) := Beta A B
-
-Product (A B P : U) : { pair : A -> B -> P, first : P -> A, second : P -> B }
-PairFst (A B P : U) (p : Product A B P) (a : A) (b : B) : Bool := p.first (p.pair a b) == a
-PairSnd (A B P : U) (p : Product A B P) (a : A) (b : B) : Bool := p.second (p.pair a b) == b
-Pairing (A B P : U) (p : Product A B P) (q : P) : Bool := p.pair (p.first q) (p.second q) == q
-Product (A B P : U) := PairFst A B P & PairSnd A B P & Pairing A B P
-
-Coproduct (A B S : U) : {
-  left : A -> S, right : B -> S,
-  cases : (C : U) -> (A -> C) -> (B -> C) -> S -> C,
-}
-CaseLeft (A B S : U) (s : Coproduct A B S) (C : U) (f : A -> C) (g : B -> C) (a : A) : Bool :=
-  s.cases C f g (s.left a) == f a
-CaseRight (A B S : U) (s : Coproduct A B S) (C : U) (f : A -> C) (g : B -> C) (b : B) : Bool :=
-  s.cases C f g (s.right b) == g b
--- every value is an injection: casing with the injections gives it back
-CasesAreAll (A B S : U) (s : Coproduct A B S) (v : S) : Bool := s.cases S s.left s.right v == v
-Coproduct (A B S : U) := CaseLeft A B S & CaseRight A B S & CasesAreAll A B S
-
--- A record is a product whose projections are named, and a labeled sum a coproduct whose
--- injections are named (D-2026-10-13-x): `.x` and `.y` are the arrows `first` and `second`, so the
--- names are part of the structure, not a decoration of it. The laws are the product's and the
--- coproduct's, with the names distinct and tied to the arrows: selecting a field by its name gives
--- that projection, and an injection is told by its name (review of layers 0-1, A: names
--- constrained only to differ could be any names). Stated for two fields; the kernel's `Record`
--- keeps any number flat (term.lth), each pair of its fields a model of this.
--- what `select` gives: the value of the field selected, injected by which of the two it is; named,
--- so that a model in another file can name its labels in an import (group 4 of
--- record/IA/check-2026-10-13/opus-3b.md, part 2)
+Exponential (A B : U) (o : Object B) : { apply : (A -> B) -> A -> B }
+Beta (A B : U) (o : Object B) (e : Exponential A B o) (f : A -> B) (x : A) : Bool := o.eq (e.apply (fn y { f y }) x) (f x)
+Exponential (A B : U) (o : Object B) := Beta A B o
+Product (A B P : U) (a : Object A) (b : Object B) (o : Object P) : { pair : A -> B -> P, first : P -> A, second : P -> B }
+PairFst (A B P : U) (a : Object A) (b : Object B) (o : Object P) (p : Product A B P a b o) (x : A) (y : B) : Bool := a.eq (p.first (p.pair x y)) x
+PairSnd (A B P : U) (a : Object A) (b : Object B) (o : Object P) (p : Product A B P a b o) (x : A) (y : B) : Bool := b.eq (p.second (p.pair x y)) y
+Pairing (A B P : U) (a : Object A) (b : Object B) (o : Object P) (p : Product A B P a b o) (q : P) : Bool := o.eq (p.pair (p.first q) (p.second q)) q
+Product (A B P : U) (a : Object A) (b : Object B) (o : Object P) := PairFst A B P a b o & PairSnd A B P a b o & Pairing A B P a b o
+Coproduct (A B S : U) (o : Object S) : { left : A -> S, right : B -> S, cases : (C : U) -> (A -> C) -> (B -> C) -> S -> C }
+CaseLeft (A B S : U) (o : Object S) (s : Coproduct A B S o) (C : U) (c : Object C) (f : A -> C) (g : B -> C) (a : A) : Bool := c.eq (s.cases C f g (s.left a)) (f a)
+CaseRight (A B S : U) (o : Object S) (s : Coproduct A B S o) (C : U) (c : Object C) (f : A -> C) (g : B -> C) (b : B) : Bool := c.eq (s.cases C f g (s.right b)) (g b)
+CasesAreAll (A B S : U) (o : Object S) (s : Coproduct A B S o) (v : S) : Bool := o.eq (s.cases S s.left s.right v) v
+Coproduct (A B S : U) (o : Object S) := CaseLeft A B S o & CaseRight A B S o & CasesAreAll A B S o
 Selected (A B : U) = { one : A || two : B }
-NamedProduct (A B P : U) : {
-  pair : A -> B -> P, first : P -> A, second : P -> B,
-  firstName : String, secondName : String,
-  select : String -> P -> Maybe (Selected A B),
-}
-asProduct (A B P : U) (r : NamedProduct A B P) : Product A B P := { pair := r.pair, first := r.first, second := r.second }
-NamedPairs (A B P : U) (r : NamedProduct A B P) (a : A) (b : B) (q : P) : Bool :=
-  PairFst A B P (asProduct A B P r) a b and PairSnd A B P (asProduct A B P r) a b and Pairing A B P (asProduct A B P r) q
-ProjectionNamesDistinct (A B P : U) (r : NamedProduct A B P) : Bool := not (r.firstName == r.secondName)
-SelectByName (A B P : U) (r : NamedProduct A B P) (a : A) (b : B) : Bool :=
-  r.select r.firstName (r.pair a b) == just (one a) and r.select r.secondName (r.pair a b) == just (two b)
-NamedProduct (A B P : U) := NamedPairs A B P & ProjectionNamesDistinct A B P & SelectByName A B P
-
-NamedCoproduct (A B S : U) : {
-  left : A -> S, right : B -> S,
-  cases : (C : U) -> (A -> C) -> (B -> C) -> S -> C,
-  leftName : String, rightName : String,
-  labelOf : S -> String,
-}
-asCoproduct (A B S : U) (s : NamedCoproduct A B S) : Coproduct A B S := { left := s.left, right := s.right, cases := s.cases }
-NamedCases (A B S : U) (s : NamedCoproduct A B S) (C : U) (f : A -> C) (g : B -> C) (a : A) (b : B) (v : S) : Bool :=
-  CaseLeft A B S (asCoproduct A B S s) C f g a and CaseRight A B S (asCoproduct A B S s) C f g b
-  and CasesAreAll A B S (asCoproduct A B S s) v
-InjectionNamesDistinct (A B S : U) (s : NamedCoproduct A B S) : Bool := not (s.leftName == s.rightName)
-LabelByName (A B S : U) (s : NamedCoproduct A B S) (a : A) (b : B) : Bool :=
+NamedProduct (A B P : Concrete) (a : Object A) (b : Object B) (o : Object P) : {
+  pair : A -> B -> P, first : P -> A, second : P -> B, firstName secondName : String,
+  select : String -> P -> Maybe (Selected A B) }
+ProjectionNamesDistinct (A B P : U) (a : Object A) (b : Object B) (o : Object P) (r : NamedProduct A B P a b o) : Bool := not (r.firstName == r.secondName)
+SelectByName (A B P : Concrete) (a : Object A) (b : Object B) (o : Object P) (r : NamedProduct A B P a b o) (x : A) (y : B) : Bool :=
+  r.select r.firstName (r.pair x y) == just (one x) and r.select r.secondName (r.pair x y) == just (two y)
+NamedProduct (A B P : Concrete) (a : Object A) (b : Object B) (o : Object P) (r : NamedProduct A B P a b o) :=
+  Product A B P a b o { pair := r.pair, first := r.first, second := r.second }
+  & ProjectionNamesDistinct A B P a b o r & SelectByName A B P a b o r
+NamedCoproduct (A B S : U) (o : Object S) : {
+  left : A -> S, right : B -> S, cases : (C : U) -> (A -> C) -> (B -> C) -> S -> C,
+  leftName rightName : String, labelOf : S -> String }
+InjectionNamesDistinct (A B S : U) (o : Object S) (s : NamedCoproduct A B S o) : Bool := not (s.leftName == s.rightName)
+LabelByName (A B S : U) (o : Object S) (s : NamedCoproduct A B S o) (a : A) (b : B) : Bool :=
   s.labelOf (s.left a) == s.leftName and s.labelOf (s.right b) == s.rightName
-NamedCoproduct (A B S : U) := NamedCases A B S & InjectionNamesDistinct A B S & LabelByName A B S
+NamedCoproduct (A B S : U) (o : Object S) (s : NamedCoproduct A B S o) :=
+  Coproduct A B S o { left := s.left, right := s.right, cases := s.cases }
+  & InjectionNamesDistinct A B S o s & LabelByName A B S o s
+
+FreeMonoid (A : U) (F : U -> U) (o : Object (F A)) : {
+  monoid : Monoid (F A) o, inject : A -> F A, foldable : Foldable F }
+FoldNeutral (A : U) (F : U -> U) (o : Object (F A)) (m : FreeMonoid A F o) (N : U) (nO : Object N) (n : Monoid N nO) (f : A -> N) : Bool := nO.eq (m.foldable.fold A N n.combine n.neutral f m.monoid.neutral) n.neutral
+FoldInject (A : U) (F : U -> U) (o : Object (F A)) (m : FreeMonoid A F o) (N : U) (nO : Object N) (n : Monoid N nO) (f : A -> N) (a : A) : Bool := nO.eq (m.foldable.fold A N n.combine n.neutral f (m.inject a)) (f a)
+FoldCombine (A : U) (F : U -> U) (o : Object (F A)) (m : FreeMonoid A F o) (N : U) (nO : Object N) (n : Monoid N nO) (f : A -> N) (x y : F A) : Bool := nO.eq (m.foldable.fold A N n.combine n.neutral f (m.monoid.combine x y)) (n.combine (m.foldable.fold A N n.combine n.neutral f x) (m.foldable.fold A N n.combine n.neutral f y))
+FoldIsItself (A : U) (F : U -> U) (o : Object (F A)) (m : FreeMonoid A F o) (x : F A) : Bool := o.eq (m.foldable.fold A (F A) m.monoid.combine m.monoid.neutral m.inject x) x
+FreeMonoid (A : U) (F : U -> U) (o : Object (F A)) (m : FreeMonoid A F o) :=
+  Monoid (F A) o m.monoid & FoldNeutral A F o m & FoldInject A F o m & FoldCombine A F o m & FoldIsItself A F o m
+Lists (A : U) (o : Object (List A)) : { free : FreeMonoid A List o }
+NilIsNeutral (A : U) (o : Object (List A)) (l : Lists A o) : Bool := o.eq l.free.monoid.neutral nil
+ConsIsInjectionCombined (A : U) (o : Object (List A)) (l : Lists A o) (a : A) (xs : List A) : Bool := o.eq (l.free.monoid.combine (l.free.inject a) xs) (cons a xs)
+Lists (A : U) (o : Object (List A)) (l : Lists A o) := FreeMonoid A List o l.free & NilIsNeutral A o l & ConsIsInjectionCombined A o l
+
+Equalizer (A B E : U) (a : Object A) (b : Object B) (e : Object E) (f g : A -> B) : {
+  include : E -> A, restrict : { x : A | b.eq (f x) (g x) } -> E }
+Equalizes (A B E : U) (a : Object A) (b : Object B) (e : Object E) (f g : A -> B) (m : Equalizer A B E a b e f g) (x : E) : Bool := b.eq (f (m.include x)) (g (m.include x))
+RestrictIncludes (A B E : U) (a : Object A) (b : Object B) (e : Object E) (f g : A -> B) (m : Equalizer A B E a b e f g) (x : { x : A | b.eq (f x) (g x) }) : Bool := a.eq (m.include (m.restrict x)) x
+IncludeRestricts (A B E : U) (a : Object A) (b : Object B) (e : Object E) (f g : A -> B) (m : Equalizer A B E a b e f g) (x : E) : Bool := e.eq (m.restrict (m.include x)) x
+Equalizer (A B E : U) (a : Object A) (b : Object B) (e : Object E) (f g : A -> B) := Equalizes A B E a b e f g & RestrictIncludes A B E a b e f g & IncludeRestricts A B E a b e f g
+agreeing (A B C : U) (o : Object C) (f : A -> C) (g : B -> C) : U := { x : A, y : B | o.eq (f x) (g y) }
+Pullback (A B C P : U) (a : Object A) (b : Object B) (c : Object C) (o : Object P) (f : A -> C) (g : B -> C) : { first : P -> A, second : P -> B, pair : agreeing A B C c f g -> P }
+PullbackCommutes (A B C P : U) (a : Object A) (b : Object B) (c : Object C) (o : Object P) (f : A -> C) (g : B -> C) (p : Pullback A B C P a b c o f g) (x : P) : Bool := c.eq (f (p.first x)) (g (p.second x))
+PullbackProjects (A B C P : U) (a : Object A) (b : Object B) (c : Object C) (o : Object P) (f : A -> C) (g : B -> C) (p : Pullback A B C P a b c o f g) (v : agreeing A B C c f g) : Bool := a.eq (p.first (p.pair v)) v.x and b.eq (p.second (p.pair v)) v.y
+PullbackUnique (A B C P : U) (a : Object A) (b : Object B) (c : Object C) (o : Object P) (f : A -> C) (g : B -> C) (p : Pullback A B C P a b c o f g) (x : P) : Bool := o.eq (p.pair { x := p.first x, y := p.second x }) x
+Pullback (A B C P : U) (a : Object A) (b : Object B) (c : Object C) (o : Object P) (f : A -> C) (g : B -> C) := PullbackCommutes A B C P a b c o f g & PullbackProjects A B C P a b c o f g & PullbackUnique A B C P a b c o f g
+
+-- The relation need not be an equivalence: the projection coequalizes its generating pairs.
+-- A respecting map is supplied with its pointwise witness; lift is unique by surjectivity.
+Coequalizer (A Q : U) (o : Object Q) (r : A -> A -> Bool) : {
+  project : A -> Q, representative : Q -> A,
+  lift : (B : U) -> (b : Object B) -> (f : A -> B) -> ((p : Related A r) -> { u : Unit | b.eq (f p.x) (f p.y) }) -> Q -> B }
+ProjectsRelated (A Q : U) (o : Object Q) (r : A -> A -> Bool) (q : Coequalizer A Q o r) (p : Related A r) : Bool := o.eq (q.project p.x) (q.project p.y)
+ProjectIsOnto (A Q : U) (o : Object Q) (r : A -> A -> Bool) (q : Coequalizer A Q o r) (x : Q) : Bool := o.eq (q.project (q.representative x)) x
+LiftProjects (A Q : U) (o : Object Q) (r : A -> A -> Bool) (q : Coequalizer A Q o r) (B : U) (b : Object B) (f : A -> B) (respect : (p : Related A r) -> { u : Unit | b.eq (f p.x) (f p.y) }) (x : A) : Bool := b.eq (q.lift B b f respect (q.project x)) (f x)
+Coequalizer (A Q : U) (o : Object Q) (r : A -> A -> Bool) := ProjectsRelated A Q o r & ProjectIsOnto A Q o r & LiftProjects A Q o r
