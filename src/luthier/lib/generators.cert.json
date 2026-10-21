@@ -1,17 +1,17 @@
 [
  {
   "law": "CaseNamesAreDistinct",
-  "cone": "sha256:f90f57e2d5525770d51396931df9341e80f75b4c5b0862bf37429a8a8b85287d",
+  "cone": "sha256:2fa6a649da4d2fc3b5821b587ddff95dc66dd89f0a0123d61a212c79866ca346",
   "binding": [
    {
     "parameter": "T",
     "generator": "symTypes (Listed)",
-    "fingerprint": "sha256:c47e6fe9eb2b35a16dd0aa630127f7fb07c7436a01426b85084881dac682f37f"
+    "fingerprint": "sha256:5407d9abd64ee0e38c849e91582bac43def99da3fe22d58ebf9d2e55e2cafaf8"
    },
    {
     "parameter": "d",
     "generator": "symDegs (Listed)",
-    "fingerprint": "sha256:46d42020d376d529bb95049e3068e24783aab2bd3234b1332c22a0a668cda523"
+    "fingerprint": "sha256:b522879001671ef69264084fe4d250edd74ec2b77735ead7283fba657d675ed9"
    }
   ],
   "seed": 20261017,
@@ -25,6 +25,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -34,7 +37,7 @@
     "reach": {
      "Members": [
       {
-       "Printed": "Symmetric"
+       "Printed": "SymmetricMatrix"
       }
      ]
     }
@@ -60,196 +63,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-17T17:12:13+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ]
-  ],
-  "regions": []
- },
- {
-  "law": "CaseNamesAreDistinct",
-  "cone": "sha256:f90f57e2d5525770d51396931df9341e80f75b4c5b0862bf37429a8a8b85287d",
-  "binding": [
-   {
-    "parameter": "T",
-    "generator": "listTypes (Listed)",
-    "fingerprint": "sha256:f0e21d9a24614947b0490b7986730eaa207869188741907f07ff5d95e12a1c86"
-   },
-   {
-    "parameter": "d",
-    "generator": "listDegs (Listed)",
-    "fingerprint": "sha256:8acfb11480fe59a7eefe330b6609cfe4f076336d89b4e16a295706dd91fed81c"
-   }
-  ],
-  "seed": 20261017,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "T",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(List Int)"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "((listDegeneracies Int) 7)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-17T17:12:13+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "regions": []
- },
- {
-  "law": "EachWitnessIsItsCase",
-  "cone": "sha256:51aa349b75dc9d1074fea89e79ea42f4b90e107ad42cede972caad09d485a60a",
-  "binding": [
-   {
-    "parameter": "T",
-    "generator": "symTypes (Listed)",
-    "fingerprint": "sha256:c47e6fe9eb2b35a16dd0aa630127f7fb07c7436a01426b85084881dac682f37f"
-   },
-   {
-    "parameter": "d",
-    "generator": "symDegs (Listed)",
-    "fingerprint": "sha256:46d42020d376d529bb95049e3068e24783aab2bd3234b1332c22a0a668cda523"
-   }
-  ],
-  "seed": 20261017,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "T",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "Symmetric"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "((symmetricDegeneracies numpy) floor)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-17T17:12:13+00:00",
+  "date": "2026-10-21T20:20:37+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -313,17 +127,17 @@
  },
  {
   "law": "EachWitnessIsItsCase",
-  "cone": "sha256:51aa349b75dc9d1074fea89e79ea42f4b90e107ad42cede972caad09d485a60a",
+  "cone": "sha256:7edfb626e81442e903bc08dc9b9ed80ab75919221f5657c7e26065d0ea36facb",
   "binding": [
    {
     "parameter": "T",
-    "generator": "listTypes (Listed)",
-    "fingerprint": "sha256:f0e21d9a24614947b0490b7986730eaa207869188741907f07ff5d95e12a1c86"
+    "generator": "symTypes (Listed)",
+    "fingerprint": "sha256:5407d9abd64ee0e38c849e91582bac43def99da3fe22d58ebf9d2e55e2cafaf8"
    },
    {
     "parameter": "d",
-    "generator": "listDegs (Listed)",
-    "fingerprint": "sha256:8acfb11480fe59a7eefe330b6609cfe4f076336d89b4e16a295706dd91fed81c"
+    "generator": "symDegs (Listed)",
+    "fingerprint": "sha256:b522879001671ef69264084fe4d250edd74ec2b77735ead7283fba657d675ed9"
    }
   ],
   "seed": 20261017,
@@ -337,6 +151,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -346,7 +163,7 @@
     "reach": {
      "Members": [
       {
-       "Printed": "(List Int)"
+       "Printed": "SymmetricMatrix"
       }
      ]
     }
@@ -356,7 +173,7 @@
     "reach": {
      "Members": [
       {
-       "Printed": "((listDegeneracies Int) 7)"
+       "Printed": "((symmetricDegeneracies numpy) floor)"
       }
      ]
     }
@@ -372,14 +189,71 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-17T17:12:13+00:00",
+  "date": "2026-10-21T20:20:37+00:00",
   "interpreter": "v0.2",
-  "hosts": [],
+  "hosts": [
+   [
+    "python:luthier.arrays.add",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.dot",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.madd",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_mul",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_vec",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mscale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.msub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.norm",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.pinv_sym_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.retained_rank_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.scale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.sub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.trace",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.transpose",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ],
   "regions": []
  },
  {
   "law": "CaseNamesAreDistinct",
-  "cone": "sha256:f90f57e2d5525770d51396931df9341e80f75b4c5b0862bf37429a8a8b85287d",
+  "cone": "sha256:2fa6a649da4d2fc3b5821b587ddff95dc66dd89f0a0123d61a212c79866ca346",
   "binding": [
    {
     "parameter": "T",
@@ -389,7 +263,7 @@
    {
     "parameter": "d",
     "generator": "twiceNameds (Listed)",
-    "fingerprint": "sha256:1487ac6651b6049cb76fa77c9132d8e97397ed3ea3217bf3a301525034b5bd3e"
+    "fingerprint": "sha256:ee35ee07235c88330a0ae2cdf5001f84d7f13a2ede0c3f20fa9a4aefd261e170"
    }
   ],
   "seed": 20261017,
@@ -403,6 +277,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -440,7 +317,7 @@
   "outcome": {
    "ControlRefuted": "T = (List Int), d = twiceNamed"
   },
-  "date": "2026-10-17T17:11:11+00:00",
+  "date": "2026-10-21T12:53:48+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
@@ -448,7 +325,7 @@
  },
  {
   "law": "EachWitnessIsItsCase",
-  "cone": "sha256:51aa349b75dc9d1074fea89e79ea42f4b90e107ad42cede972caad09d485a60a",
+  "cone": "sha256:7edfb626e81442e903bc08dc9b9ed80ab75919221f5657c7e26065d0ea36facb",
   "binding": [
    {
     "parameter": "T",
@@ -458,7 +335,7 @@
    {
     "parameter": "d",
     "generator": "wrongWitnesses (Listed)",
-    "fingerprint": "sha256:da1c96bc75502439ac013afbbd30e832b67c1b9d02812a18eedd8ca114217f6a"
+    "fingerprint": "sha256:18d48a7c358148879200a72b9f72bb69e44984ba68a8481e3141b6706a9732d3"
    }
   ],
   "seed": 20261017,
@@ -472,6 +349,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -509,10 +389,148 @@
   "outcome": {
    "ControlRefuted": "T = (List Int), d = wrongWitness"
   },
-  "date": "2026-10-17T17:11:11+00:00",
+  "date": "2026-10-21T12:53:48+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "CaseNamesAreDistinct",
+  "cone": "sha256:2fa6a649da4d2fc3b5821b587ddff95dc66dd89f0a0123d61a212c79866ca346",
+  "binding": [
+   {
+    "parameter": "T",
+    "generator": "listTypes (Listed)",
+    "fingerprint": "sha256:f0e21d9a24614947b0490b7986730eaa207869188741907f07ff5d95e12a1c86"
+   },
+   {
+    "parameter": "d",
+    "generator": "listDegs (Listed)",
+    "fingerprint": "sha256:56d27a5ccd48e7ce8e2cb32d3bb619bacdd5186afadbfefa7110b8f786b2262c"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "T",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(List Int)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((listDegeneracies Int) 7)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-21T11:37:08+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "EachWitnessIsItsCase",
+  "cone": "sha256:7edfb626e81442e903bc08dc9b9ed80ab75919221f5657c7e26065d0ea36facb",
+  "binding": [
+   {
+    "parameter": "T",
+    "generator": "listTypes (Listed)",
+    "fingerprint": "sha256:f0e21d9a24614947b0490b7986730eaa207869188741907f07ff5d95e12a1c86"
+   },
+   {
+    "parameter": "d",
+    "generator": "listDegs (Listed)",
+    "fingerprint": "sha256:56d27a5ccd48e7ce8e2cb32d3bb619bacdd5186afadbfefa7110b8f786b2262c"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "T",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(List Int)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((listDegeneracies Int) 7)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-21T11:37:08+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
   "regions": []
  }
 ]

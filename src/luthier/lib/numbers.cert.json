@@ -1,5 +1,73 @@
 [
  {
+  "law": "DivisionAlgorithm",
+  "cone": "sha256:355367ea62b2dd84370ec6f65920118b2f1b44b03e900bf9ec0e61c59dee3cf9",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over IntegerDivision",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   },
+   {
+    "parameter": "a",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   },
+   {
+    "parameter": "b",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZeroInt",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   }
+  ],
+  "seed": 0,
+  "cases": 30,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "a",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "m : IntegerDivision: a function (_ : Int) -> (_ : Int) -> Int: bind a census (7.R4)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "m : IntegerDivision: a function (_ : Int) -> (_ : Int) -> Int: bind a census (7.R4)"
+  },
+  "date": "2026-10-21T14:48:07+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
   "law": "LogMultiplies",
   "cone": "sha256:286b3a150a0e0065684d6ab6fb2f59c21b538a115c3171d235d089151acf0f08",
   "binding": [
@@ -12052,74 +12120,6 @@
     "n": 100
    }
   ]
- },
- {
-  "law": "DivisionAlgorithm",
-  "cone": "sha256:355367ea62b2dd84370ec6f65920118b2f1b44b03e900bf9ec0e61c59dee3cf9",
-  "binding": [
-   {
-    "parameter": "m",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over IntegerDivision",
-    "fingerprint": "sha256:3b1dd03bf97782270118e7a44e422bd55ac20e9bb0055f46a2e06779b63d6acb"
-   },
-   {
-    "parameter": "a",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
-    "fingerprint": "sha256:3b1dd03bf97782270118e7a44e422bd55ac20e9bb0055f46a2e06779b63d6acb"
-   },
-   {
-    "parameter": "b",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZeroInt",
-    "fingerprint": "sha256:3b1dd03bf97782270118e7a44e422bd55ac20e9bb0055f46a2e06779b63d6acb"
-   }
-  ],
-  "seed": 0,
-  "cases": 30,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "a",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "b",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "NotRun": "m : IntegerDivision: a function (_ : Int) -> (_ : Int) -> Int: bind a census (7.R4)"
-  },
-  "grade": null,
-  "outcome": {
-   "NotRunFor": "m : IntegerDivision: a function (_ : Int) -> (_ : Int) -> Int: bind a census (7.R4)"
-  },
-  "date": "2026-10-17T23:53:08+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
  },
  {
   "law": "LogMultiplies",
