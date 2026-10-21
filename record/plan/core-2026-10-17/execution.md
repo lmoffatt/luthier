@@ -869,7 +869,10 @@ finding to settle first: `luthier eval` and `luthier session` leave a top-level 
 at a182ed5, report-eval-foldlist.md). Left by the differential after it (report-bite-10.md, f53b425):
 `luthier eval` doesn't reduce `textParts` and `textJoin`, so `freshName`, `unqualified`,
 `canonName` and the renaming paths of `substTerm`, `canonicalTerm` and `applyBindings` stay
-unchecked old against new; fix and rerun the differential's script.
+unchecked old against new. Settled by report-eval-text.md (4282df8): they are holes by spec 3.S19,
+and the differential with a scratch text model on both sides gave 241 of 241 equal. Open for
+Luciano after the core: whether the kernel gets string primitives (split into scalars, join,
+decimal of a Nat), which would make those holes definitions (P10, spec 11's "String is text").
 Bite 9's question answered: `Regioning`'s commutativity graded by the core's `Commutative` at
 `Maybe Grade` is accepted (D-2026-10-18-b, D-2026-10-18-f).
 
