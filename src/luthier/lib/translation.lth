@@ -110,7 +110,7 @@ Patterns (a : Alpha) (e : Elaboration a) : Bool :=
   and gives a (e.term scope (matchOf (nm "k") [(pLit (intLit 0), nm "x"), (pWild, nm "y")]))
           (Match (Var "k") [(PLit (IntConst 0), Var "x"), (PWild, Var "y")])
 -- a list is `cons` and `nil` (2.S12)
-Lists (a : Alpha) (e : Elaboration a) : Bool :=
+ListLiterals (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term scope (list [nm "x", nm "y"])) (App (App (Var "cons") (Var "x")) (App (App (Var "cons") (Var "y")) (Var "nil")))
 -- a sum, a record type, a `data` (2.S12; 3.S4). A record type keeps its names in the kernel: it is
 -- a product whose projections are named (D-2026-10-13-x).
@@ -260,5 +260,5 @@ Shapes (a : Alpha) (e : Elaboration a) : Bool :=
 
 -- `Bool`, `Maybe` and `Failures` are definitions of core and checks.lth, not rows of elaboration;
 -- `quote` gives the `Term` of its term, the value term.lth's `Evaluation` states.
-Elaboration (a : Alpha) := ActsCurried a & ActsKept a & Atoms a & Lambdas a & Patterns a & Lists a & TypeForms a
+Elaboration (a : Alpha) := ActsCurried a & ActsKept a & Atoms a & Lambdas a & Patterns a & ListLiterals a & TypeForms a
   & OperatorsByType a & Negation a & Conditions a & OperatorOfTheModel a & Records a & Arguments a & Blocks a & Shapes a

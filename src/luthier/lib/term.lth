@@ -11,7 +11,7 @@
 -- (L14.3), as `backtrack` and the Python recognizer are of `Derives`.
 --
 -- On meaning (L2.7). The constructors of `Term` that compute get their roles from the laws of
--- `Reduction` (§5): `Lam` and `App` from `Beta`, `Var` from `Delta`, `Match`, `Inj`, `Pair` and the
+-- `Reduction` (§5): `Lam` and `App` from `BetaReduces`, `Var` from `Delta`, `Match`, `Inj`, `Pair` and the
 -- patterns from `Iota`, `RecordValue` and `Proj` from `ProjOfRecord`, `Lit` (of every kind) and
 -- `Primitive` from `Prim`, `Extern` from `ExternIsValue` (with `ExternPartialIsValue` and
 -- `HostGivesBackAValue`, D-2026-10-14-a), `Hole` and `Axiom` from `HolesStay`,
@@ -32,7 +32,7 @@
 --      law of renaming a bound variable (3.S31, L3.3; `Object` of kernel_laws.lth).     done
 --   §3 Substitution, capture-avoiding (3.S14's `t[a/x]`).                               done
 --   §4 Canonical form: alpha-invariant and idempotent; module prefixes removed (3.S34).  done
---   §5 Reduction: `Beta`, `Delta`, `Iota`, `Prim`, `ExternIsValue`, `HolesStay`,
+--   §5 Reduction: `BetaReduces`, `Delta`, `Iota`, `Prim`, `ExternIsValue`, `HolesStay`,
 --      `ValuesStay`, with fuel (3.S11, 3.S14 to 3.S20, 3.S33); an extern partially
 --      applied, an opaque host function, the host's answer (3.S23; D-2026-10-14-a).   done
 --   §6 Quote and eval (3.S32): cases on literals and closed terms.                      done
@@ -416,7 +416,7 @@ free (p : Program) (x : String) : Bool :=
   all List Act (fn (act : Act) { match act { Declare y t -> not (y == x) ; Define y t b -> not (y == x) ; Datum t -> true } }) p
 
 -- 3.S14, beta: a lambda applied steps to its body with the argument for its variable
-Beta (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (x : String) (ty body arg : Term) : Bool :=
+BetaReduces (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (x : String) (ty body arg : Term) : Bool :=
   stepsTo a (m.step p (App (Lam x ty body) arg)) (sb.subst x arg body)
 
 -- 3.S15, delta: a defined name in head position steps to its body, wherever the program defines
@@ -642,7 +642,7 @@ NotEqualNegates (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Prog
     (Pair (App (Lam x ty b) (Lit (IntConst i))) (Lit (IntConst j)), Pair (Lit (IntConst i)) (Lit (IntConst j))),
     (Lam x ty b, Lam x ty b)]
 
-Reduction (a : Alpha) (sb : Substitution a) := Beta a sb & Delta a sb & Zeta a sb & HeadFirst a sb & HolesStay a sb & Iota a sb
+Reduction (a : Alpha) (sb : Substitution a) := BetaReduces a sb & Delta a sb & Zeta a sb & HeadFirst a sb & HolesStay a sb & Iota a sb
   & IotaPair a sb & IotaSkips a sb & IotaConstructors a sb & ProjOfRecord a sb & Prim a sb & PrimInt a sb & PrimFloat a sb
   & PrimString a sb & PrimConvert a sb & PrimStructural a sb & PrimConstructors a sb & EqualityDemandsParts a sb & NotEqualNegates a sb & EqualityStuck a sb & ExternIsValue a sb & ExternPartialIsValue a sb & HostGivesBackAValue a sb & ValuesStay a sb
   & DatumIsInert a sb

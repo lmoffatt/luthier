@@ -152,8 +152,6 @@ CORE_FILE = "core.lut"
 # a parameter (P11) with its reason; a name not listed here is refused. Keys are paths under lib/.
 CORE_COLLISIONS = {
     "arrays.lth": ("Symmetric", "bite 11, arrays and tables"),
-    "term.lth": ("Beta", "bite 10, Luthier's self-description"),
-    "translation.lth": ("Lists", "bite 10, Luthier's self-description"),
 }
 
 
