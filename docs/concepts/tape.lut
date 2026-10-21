@@ -1,0 +1,17 @@
+-- tape.lut: a model of tape.lth's theory, and the claim that the marks with this reading are a
+-- metric space (the core's Metric, lib/core/structures/equality.lth). The example of
+-- docs/concepts.md, written 2026-10-21 by Claude Opus 5.5. Its certificates go to tape.cert.json
+-- beside this file, the file that makes the claims (L10.12, 12.S10).
+
+import "tape.lth" Mark Tape
+
+-- the reading of a straight tape: the larger mark minus the smaller, exact as a double
+tape : Tape := { reading := fn a b { toFloat64 (if a <= b then b - a else a - b) } }
+
+-- the marks under this reading are a metric space; the model is a defaulted parameter so that a
+-- control can put a broken model in its place (the pattern of core.lut's IntIsAMetric)
+markIsAMetricModel : Metric Mark (structural Mark) := { d := tape.reading }
+MarkIsAMetric (model : Metric Mark (structural Mark) <- { d := tape.reading }) : Bool :=
+  Metric Mark (structural Mark) model
+-- the claims of this file, gathered as numbers_model.lut's NumberModels
+TapeModels := MarkIsAMetric

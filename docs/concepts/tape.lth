@@ -1,0 +1,42 @@
+-- tape.lth: the theory of a tape measure, the instrument of sonolocalizacion's first
+-- measurements (examples/sonolocalizacion/A/graph: distances between nodes measured with a tape).
+-- The example of docs/concepts.md, written 2026-10-21 by Claude Opus 5.5 on
+-- record/plan/core-2026-10-17/prompt-concepts-doc.md. Its forms are the library's: a theory
+-- declared at a record of its operations, each law a predicate over a model, the theory the
+-- conjunction of its laws (guide section 8); a within-bound law with its range, as numbers.lth's.
+
+import "numbers.lth" Doubles absDistance
+
+-- A mark on a fifty-metre tape, in millimetres from its zero. The bounds are the instrument's, part
+-- of the type (7.S4), and keep every reading an integer below 2^53, so exact as a double (11.S5).
+Mark : U := { k : Int | 0 <= k and k <= 50000 }
+
+-- A tape is a way of reading the distance between two marks, in millimetres.
+Tape : { reading : Mark -> Mark -> Float64 }
+
+-- The laws. Together they determine the reading: for a <= b, ReadingAdds and ReadingSteps give
+-- b - a by induction on b - a (ReadingAdds at a = b = c gives reading a a = 0), and
+-- ReadingSymmetric gives the rest; so a model of Tape is |a - b| and nothing else (L9.4, the limit
+-- a definition may reach).
+ReadingSymmetric (t : Tape) (a b : Mark) : Bool := t.reading a b == t.reading b a
+InOrder : U := { a b c : Mark | a <= b and b <= c }
+ReadingAdds (t : Tape) (p : InOrder) : Bool := t.reading p.a p.c == t.reading p.a p.b + t.reading p.b p.c
+Step : U := { k : Mark | k < 50000 }
+ReadingSteps (t : Tape) (a : Step) : Bool := t.reading a (a + 1) == 1.0
+
+-- The same reading in metres, as the doubles compute it from the two marks. Each mark is divided by
+-- a thousand with one rounding and the two are subtracted with another, so the computed distance is
+-- within u (|A| + |B|) (1 + u) + 2 u |A - B| of the exact one, A and B the marks in metres and u the
+-- unit roundoff (Higham 2002, section 2.2, the standard model). The bound below, epsilon (|A| + |B| +
+-- |A - B|) with epsilon = 2 u the doubles' own (numbers.lth's `Doubles`), covers it with room. Its
+-- range of validity is the type of its variables (D-2026-10-18-j): marks of the tape, where no
+-- operation leaves the normal range.
+metres (k : Mark) : Float64 := toFloat64 k / 1000.0
+MetresWithin (t : Tape) (d : Doubles) (a b : Mark) : Bool := {
+  computed := absDistance (metres a) (metres b)
+  exact := t.reading a b / 1000.0
+  absDistance computed exact <= d.epsilon * (metres a + metres b + exact) }
+
+-- the theory: the three exact laws, which determine the reading, and the reading in metres within
+-- its bound
+Tape (t : Tape) := ReadingSymmetric t & ReadingAdds t & ReadingSteps t & MetresWithin t

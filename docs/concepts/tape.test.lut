@@ -1,0 +1,54 @@
+-- tape.test.lut: the demand that certifies tape.lut's claims, with a control for each: the same
+-- line written `(control <- true)` with a model broken on purpose bound in place of the real one,
+-- which the law must refute (L9.14). The example of docs/concepts.md, written 2026-10-21 by Claude
+-- Opus 5.5. Run with `luthier certify docs/concepts/tape.test.lut`; the entries go to
+-- tape.cert.json, beside tape.lut, which makes the claims (L10.12).
+
+import "test.lth" test SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers.lth" Doubles
+import "numbers_model.lut" doubles
+import "tape.lth" Mark Tape MetresWithin
+import "tape.lut" tape markIsAMetricModel
+
+-- the models each law runs on, a census of one bound by its type (7.R1, 7.R4)
+models : List Binding := [
+  { parameter := nothing, type := just "Tape", generator := "tape", coverage := Listed },
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed } ]
+
+-- the size bounds the integers drawn, [-size, size], filtered into the marks (7.S3, 7.S6)
+test "Tape" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- models)
+
+-- a metric's diagonal is drawn from listed equal pairs, which a uniform draw almost never gives
+equalMarks : List (Related Mark (structural Mark).eq) := [{ x := 0, y := 0 }, { x := 1234, y := 1234 }, { x := 50000, y := 50000 }]
+onMetric : List Binding := [
+  { parameter := just "model", type := nothing, generator := "markIsAMetricModel", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "equalMarks", coverage := Listed } ]
+test "MarkIsAMetric" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onMetric)
+
+-- ---------------------------------------------------------------- the controls
+
+-- a tape read from the outside of its hook, one millimetre long at every reading: ReadingAdds and
+-- the metric's diagonal refute it
+hooked : Tape := { reading := fn a b { tape.reading a b + 1.0 } }
+hookedMetric : Metric Mark (structural Mark) := { d := hooked.reading }
+onHooked : List Binding := [
+  { parameter := nothing, type := just "Tape", generator := "hooked", coverage := Listed },
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed } ]
+test "Tape" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onHooked) (control <- true)
+onHookedMetric : List Binding := [
+  { parameter := just "model", type := nothing, generator := "hookedMetric", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "equalMarks", coverage := Listed } ]
+test "MarkIsAMetric" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onHookedMetric) (control <- true)
+
+-- the doubles with no room for rounding: the bound of MetresWithin becomes zero, and the rounding
+-- of the division by a thousand refutes it
+noRoom : Doubles := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
+  divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
+  unequal := doubles.unequal, epsilon := 0.0 }
+onNoRoom : List Binding := [
+  { parameter := nothing, type := just "Tape", generator := "tape", coverage := Listed },
+  { parameter := nothing, type := just "Doubles", generator := "noRoom", coverage := Listed } ]
+test "MetresWithin" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onNoRoom) (control <- true)
