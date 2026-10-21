@@ -279,7 +279,7 @@ def law_names(p):
     """lawNames (program.lth 5f33db8): the names the claimed laws' bodies mention, and [proposed] the
     constructors named by the patterns of their own matches and clauses (group 2)."""
     claimed = claimed_laws(p); k = constructors(p)
-    return set().union(*(dependencies(p, a, True) | body_matched(a.body, k)
+    return set().union(*(dependencies(p, a, True) | dependencies(p, a) | body_matched(a.body, k)
                          for a in p if isinstance(a, s.Define) and a.name in claimed))
 
 
@@ -300,7 +300,7 @@ def law_reads(p):
     claimed = claimed_laws(p)
     result = set()
     for a in p:
-        if not isinstance(a, s.Define) or a.name not in claimed: continue
+        if not isinstance(a, s.Define) or (a.name not in claimed and not acts(p, a.name, s.Declare)): continue
         result |= binders_reads(a.binders)
         if isinstance(a.body, s.TermBody): result |= fields_read(a.body.term)
         elif isinstance(a.body, s.ClausesBody):
@@ -582,8 +582,9 @@ def load_imports(program, path, seen=None):
     `Selected (A B : U)` beside term_model.lut's label `Selected` made the imports fail to
     elaborate together, the typing fell back to the file alone, and an imported alias (`Hash`)
     became an opaque name that a literal's `String` does not refine (4.R9; report-e.md, finding 3)."""
+    from pathlib import Path
     files = {}
-    _brought(program, path, set() if seen is None else seen, files)
+    _brought(program, path, {Path(path).resolve()} if seen is None else seen, files)
     scope = _ImportScope(files, program, path)
     brought = [(target, scope.scoped(f, a)) for target, f in files.items() for a in f.acts]
     own = _constructors_of(program)
@@ -685,6 +686,11 @@ class _ImportScope(FileScope):
         return self.memo[key]
 
     def internal(self, path, name):
+        # An explicit import of a core file does not create a second identity for its globally
+        # visible types. The core/lists -> core/core cycle exposed Bool@core versus Bool.
+        owners = core_definitions().get(name, ()) if _with_core[0] else ()
+        if len(owners) == 1 and path == owners[0]:
+            return name
         hidden = (path, name) not in self.visible and name in self.written and name in self.files[path].defined
         return f'{name}@{self.files[path].tag}' if hidden else name
 
@@ -803,7 +809,10 @@ def fits(typing, ty, bt):
     if bt is None: return False
     if isinstance(ty, t.Pi) and isinstance(bt, t.Pi):
         return typing.same(ty.domain, bt.domain) and fits(typing, ty.codomain, substitute(bt.name, t.Var(ty.name), bt.codomain))
-    return typing.same(ty, bt) or isinstance(bt, t.Pi) and typing.same(ty, bt.domain) and verdict_type(bt.codomain) or isinstance(bt, t.App) and typing.same(bt, t.App(t.Var('Law'), ty))
+    domain = typing.theory_record(bt.domain) if isinstance(bt, t.Pi) else None
+    return (typing.same(ty, bt)
+            or isinstance(bt, t.Pi) and (typing.same(ty, bt.domain) or domain is not None and typing.same(ty, domain)) and verdict_type(bt.codomain)
+            or isinstance(bt, t.App) and typing.same(bt, t.App(t.Var('Law'), ty)))
 
 
 def violatesR6(p, n):
@@ -869,6 +878,13 @@ def base(q, u, fuel=None):
     # A subtype's base is read in type position (`as_type`): inside it, an alias's `Fin n -> A` is
     # elaborated as `implies (Fin n) A` (cause b of the leftovers report, as in bite 3b part 1).
     if isinstance(u, t.Subtype): return base(q, as_type(u.type), fuel)
+    if isinstance(u, (t.Var, t.App)) and fuel:
+        # Parameterized subtypes of the prelude (Related, Chain, ...), absent from q.program,
+        # are read with their arguments just like parameterized subtypes defined in the file.
+        from .elaborate import unfold
+        expanded = unfold(u, q.context)
+        if isinstance(expanded, t.Subtype):
+            return base(q, as_type(expanded.type), fuel - 1)
     if isinstance(u, t.Var) and fuel:
         body = q.body(u.name)
         if isinstance(body, t.Subtype): return base(q, as_type(body.type), fuel - 1)
@@ -967,10 +983,25 @@ def violatesR11(p, n):
     return False
 
 
+@lru_cache(maxsize=1)
+def core_claimants():
+    from .run import core_files
+    from .parse import parse
+    definitions = tuple(a for path in core_files() for a in parse(path.read_text(encoding='utf-8')).program
+                        if isinstance(a, s.Define))
+    reads = {a: dependencies(definitions, a, True) | dependencies(definitions, a) for a in definitions}
+    return definitions, reads
+
+
 def violatesS14(p, n):
     """4.S14: an explicit Bool definition mentioned by no other body's names is unclaimed."""
-    other = set().union(*(dependencies(p, a, True) for a in p if isinstance(a, s.Define) and a.name != n))
-    return any(a.type == s.Name('Bool') and n not in other for a in acts(p, n, s.Define))
+    definitions, reads = core_claimants()
+    mine = acts(p, n, s.Define)
+    if _with_core[0] and any(a in reads for a in mine):
+        other = set().union(*(names for a, names in reads.items() if a.name != n))
+    else:
+        other = set().union(*(dependencies(p, a, True) for a in p if isinstance(a, s.Define) and a.name != n))
+    return any(a.type == s.Name('Bool') and n not in other for a in mine)
 
 
 def provisionalExtern(p, n):

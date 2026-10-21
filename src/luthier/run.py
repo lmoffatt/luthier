@@ -159,9 +159,6 @@ CORE_COLLISIONS = {
     "arrays.lth": ("Symmetric", "bite 11, arrays and tables"),
     "term.lth": ("Beta", "bite 10, Luthier's self-description"),
     "translation.lth": ("Lists", "bite 10, Luthier's self-description"),
-    "core/structures/equality.lth": ("Reflexive Symmetric Transitive", "bite 6 writes Object over core/properties/relations.lth"),
-    "core/structures/algebraic.lth": ("Associative LeftNeutral RightNeutral", "bite 6 writes Monoid over core/properties/operations.lth"),
-    "core/properties/functions.lth": ("Idempotent", "bite 6: operations.lth's Idempotent is another property"),
 }
 
 
@@ -502,6 +499,9 @@ class Loaded(FileScope):
             k = stems.setdefault(f.path.stem, 0)
             stems[f.path.stem] = k + 1
             f.tag = f.path.stem if k == 0 else f"{f.path.stem}~{k}"
+        self.structure_fields = {n for f in self.files.values() for a in f.acts
+                                 if isinstance(a, s.Declare) and a.binders and isinstance(a.type, s.Record)
+                                 for field in a.type.fields for n in field.names}
         self.memo = {}
         self.seeing = []   # the (file, name) pairs `see` is resolving, outermost first
         self.errors = {}   # the internal name of an act -> what it cannot resolve
@@ -666,7 +666,7 @@ class Loaded(FileScope):
         if found is not None:
             return self.internal(*found)
         if name not in self.labels and name not in _FREE and name not in _BUILTIN_CONSTRUCTORS \
-                and name not in kernel.BOOTSTRAP_PRIMITIVES:
+                and name not in kernel.BOOTSTRAP_PRIMITIVES and name not in self.structure_fields:
             missing.append(f"{path.name}: {name} is neither defined there, nor imported, nor core's")
         return name
 
@@ -1656,9 +1656,9 @@ class Runner:
         return head
 
 
-def runtime_slice(acts, main, roots=()):
-    """Keep the entry's dependencies (and those of `roots`) and theory declarations, excluding law
-    bodies.
+def runtime_slice(acts, main, roots=(), *, theory_laws=False):
+    """Keep the entry's dependencies and theory declarations; optionally retain law predicates.
+    The tester and certification's law slice retain predicates to expand bare structures.
 
     The bootstrap elaborator cannot elaborate all imported certification theories.
     Checking/certification remains a separate responsibility.
@@ -1667,7 +1667,7 @@ def runtime_slice(acts, main, roots=()):
     by_name = {}
     for act in acts:
         if isinstance(act, (s.Declare, s.Define, s.Alias)):
-            if isinstance(act, s.Define) and act.name in declarations and act.type is None:
+            if isinstance(act, s.Define) and act.name in declarations and act.type is None and not theory_laws:
                 continue
             by_name.setdefault(act.name, []).append(act)
 
@@ -2330,7 +2330,7 @@ def certification(loaded, program, entry, demand, refuse=True):
             stating[n] = theory
     laws = sorted({law for theory in set(stating.values()) for law in theories.laws(theory)
                    if not theories.case_law(law, theory)})
-    law_cones = certify.Cones(_elaborated(runtime_slice(loaded.acts, laws[0], core_data(loaded) + tuple(laws)))) \
+    law_cones = certify.Cones(_elaborated(runtime_slice(loaded.acts, laws[0], core_data(loaded) + tuple(laws), theory_laws=True))) \
         if laws else None
     cone, firsts, axioms = [], [], {}
     for n in names:

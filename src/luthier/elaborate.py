@@ -992,7 +992,16 @@ def claim_matches(S, pattern_of, dty, extra_vars, c):
             sigma = {}
             if solve(pattern, candidate, frozenset(claim.binders) | frozenset(extra_vars), sigma, c):
                 found.append((claim, sigma)); break
-    return found
+    # A subtype's own model takes precedence over a model inherited from its base.
+    # Keep every exact match, so two models declared at the same carrier remain an error.
+    exact = []
+    for claim, sigma in found:
+        pattern = pattern_of(claim)
+        for name, value in sigma.items():
+            pattern = substitute(name, value, pattern)
+        if alpha_equal(pattern, dty):
+            exact.append((claim, sigma))
+    return exact or found
 
 
 def model_of(claim, sigma, c, where):
@@ -1064,6 +1073,17 @@ def resolve_field(fname, structure, arguments, c, expected=None):
         raise TypingError(f'{where}: no model of {" or ".join(candidates)} at {show(found_type) if found_type is not None else "the type of its argument"}'
                           f'{"; " + "; ".join(unresolved) if unresolved else ""}; the models claimed: {claimed}', '4.R13')
     structures = list(dict.fromkeys(m[0] for m in matches))
+    if len(structures) > 1 and len(structures) == len(matches):
+        # A ring includes its semiring operations. If the claims literally name the same
+        # operation, either path denotes that operation; genuinely different fields still need
+        # qualification. No search or extensional comparison of functions is performed.
+        operations = []
+        for _, candidate, solution, *_ in matches:
+            value = model_of(candidate, solution, c, where)
+            operations.append(dict(value.fields)[fname] if isinstance(value, t.RecordValue) else t.Proj(value, fname))
+        if all(alpha_equal(operations[0], value) for value in operations[1:]):
+            matches = matches[:1]
+            structures = structures[:1]
     if len(structures) > 1:
         raise TypingError(f'{where}: a field of {" and ".join(structures)}, each with a model at {show(found_type)}; '
                           f'write ' + ' or '.join(f'{S}.{fname}' for S in structures), '4.R13')
@@ -1752,6 +1772,25 @@ def read(c, program, core=False):
             S, cl = claim
             c.claims[S] = [x for x in c.claims.get(S, ()) if x.name != cl.name] + [cl]
 
+    # A caller needs the verdict signature of an imported bare composite even before its body
+    # appears in elaboration order (cyclic theory files are allowed, 12.S22).
+    declared = {a.name for a in program if isinstance(a, s.Declare)}
+    pending = [a for a in program if isinstance(a, s.Define) and a.type is None
+               and a.name not in declared and isinstance(a.body, s.TermBody)
+               and isinstance(a.body.term, s.Binop) and a.body.term.operator == '&']
+    while pending:
+        remaining = []
+        for a in pending:
+            try:
+                definition = elaborate_act(a, c)
+                if _metas(definition.type):
+                    remaining.append(a)
+            except ElaborationError:
+                remaining.append(a)
+        if len(remaining) == len(pending):
+            break
+        pending = remaining
+
 
 def _surface_labels(x):
     if isinstance(x, s.Sum):
@@ -1810,6 +1849,14 @@ def _claim(act, c):
         for (p, _), a in zip(c.structures[S].params, args):
             value = walk_type(a, inner); walked.append(value)
             record = substitute(p, value, record)
+        # A claim may expose its concrete model as a defaulted parameter so that the same law
+        # can be refuted on a control. Name resolution binds the written default, never a free
+        # test parameter (D-2026-10-18-g).
+        for binder in act.binders:
+            if isinstance(binder, s.Explicit) and binder.default is not None:
+                value = walk(binder.default, inner, walk_type(binder.type, inner))
+                for name in binder.names:
+                    inner.names[name] = value
         model = walk(args[-1], inner, record)
     except ElaborationError:
         return None
@@ -1909,7 +1956,9 @@ def elaborate_act(act, c):
             inferred = _lenient(body, c)
             # A theory's declaration supplies its record, while its body
             # supplies the laws (4.R6, 4.S9).
-            declared = expected
+            declared = annotation
+            while isinstance(declared, t.Pi):
+                declared = declared.codomain
             if not isinstance(declared, t.Record):
                 annotation = inferred
             c.types[act.name] = annotation

@@ -320,7 +320,7 @@ def load_program(path, fuel, extra=()):
         regioning = ()
     roots = (core_data(loaded) + tuple(d.name for d in specs) + named
              + tuple(loaded.name(top, n) or n for n in extra) + grading + regioning)
-    kept = runtime_slice(loaded.acts + specs, specs[0].name if specs else "main", roots)
+    kept = runtime_slice(loaded.acts + specs, specs[0].name if specs else "main", roots, theory_laws=True)
     loaded.demand(kept)
     program = tuple(_primitive_body(a) for a in elaborate_program(_refined_records(kept)))
     program += tuple(t.Define(op, t.Universe(), t.Primitive(op)) for op in kernel.BOOTSTRAP_PRIMITIVES)
@@ -450,7 +450,20 @@ class Values:
         """The type unfolded and its refinements collected: (base, [(name, predicate), ...])."""
         predicates = []
         while True:
-            ty = self.whnf(ty)
+            # A theory's record is its type view; its definition is a predicate used as a value.
+            # Retaining bare predicates for law expansion must not make model generation try
+            # to draw a conjunction of functions (IntegerDivision exposed this).
+            head, args = _spine(ty)
+            declared = self.runner.types.get(head.name) if isinstance(head, t.Var) else None
+            for arg in args:
+                if not isinstance(declared, t.Pi):
+                    declared = None
+                    break
+                declared = _instantiate(declared.name, arg, declared.codomain)
+            if isinstance(declared, t.Record):
+                ty = declared
+            else:
+                ty = self.whnf(ty)
             if isinstance(ty, t.Subtype):
                 predicates.append((ty.name, ty.predicate))
                 ty = ty.type
@@ -722,6 +735,8 @@ class Values:
         if isinstance(ty, t.Universe):
             raise NoGenerator("a parameter of type U has no generator (7.R2)")
         if isinstance(ty, t.Data):
+            if not ty.constructors:
+                raise NoGenerator(f"{ty.name} is empty: ExhaustiveMode certifies its absence of cases")
             name, cty = ty.constructors[rng.randrange(len(ty.constructors))]
             return Runner.apply(t.Var(name), [self.draw(d) for d in self.domains(ty, cty)])
         if isinstance(ty, t.Sigma):
@@ -859,26 +874,45 @@ def _is_conjunction(term):
     return isinstance(term, t.App) and isinstance(term.function, t.App) and term.function.function == t.Var("&")
 
 
-def _parts(defined, term, depth=0):
-    """The conjuncts of a term that is a conjunction or unfolds to one through definitions applied
-    to all their parameters (`BareEquivalence Int r`); None when it is neither."""
-    if depth > 64:
+def _parts(defined, term, depth=0, theories=frozenset()):
+    """Split bare laws, including a conjunction applied pointwise to its shared model.
+
+    A declared theory's record describes its models, not the missing variables of its law.
+    Unfold its predicate until the leaves name the actual properties (7.S22).
+    """
+    if depth > len(defined):
         return None
     if _is_conjunction(term):
         out = []
         for side in (term.function.argument, term.argument):
-            out += _parts(defined, side, depth + 1) or [side]
+            out += _parts(defined, side, depth + 1, theories) or [side]
         return out
     head, args = _spine(term)
+    if head == t.Var("&") and len(args) > 2:
+        out = []
+        for side in args[:2]:
+            applied = Runner.apply(side, args[2:])
+            out += _parts(defined, applied, depth + 1, theories) or [applied]
+        return out
     d = defined.get(head.name) if isinstance(head, t.Var) else None
-    if d is None or not args:
+    if d is None or (not args and isinstance(d.body, t.Lam)):
         return None
     body = d.body
-    for a in args:
-        if not isinstance(body, t.Lam):
-            return None
-        body = kernel.substitute(body.name, a, body.body)
-    return None if isinstance(body, t.Lam) else _parts(defined, body, depth + 1)
+    for k, arg in enumerate(args):
+        if isinstance(body, t.Lam):
+            body = kernel.substitute(body.name, arg, body.body)
+        elif _is_conjunction(body):
+            out = []
+            for side in (body.function.argument, body.argument):
+                applied = Runner.apply(side, args[k:])
+                out += _parts(defined, applied, depth + 1, theories) or [applied]
+            return out
+        else:
+            body = t.App(body, arg)
+    if isinstance(body, t.Lam):
+        return None
+    parts = _parts(defined, body, depth + 1, theories)
+    return parts if parts is not None else [body] if head.name in theories else None
 
 
 def _missing(defined, term, used):
@@ -920,7 +954,15 @@ def conjunction_parts(program, law):
     while isinstance(body, t.Lam):
         params.append((body.name, body.type))
         body = body.body
-    parts = _parts(defined, body)
+    theories = set()
+    for act in program:
+        if isinstance(act, t.Declare):
+            ty = act.type
+            while isinstance(ty, t.Pi):
+                ty = ty.codomain
+            if isinstance(ty, t.Record):
+                theories.add(act.name)
+    parts = _parts(defined, body, theories=theories)
     if parts is None:
         return None
     out = []
@@ -2186,7 +2228,7 @@ def _value(runner, v):
 # whole of tester.py hashed, so that a change to how a line is reported stales nothing.
 def _drawing_code():
     return (Values, _draw_case, _in_its_type, census, generator_of, resolve_binding, is_cutoff, run_spec,
-            parameters)
+            parameters, _parts, _missing, conjunction_parts)
 
 
 @functools.cache

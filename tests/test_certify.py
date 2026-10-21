@@ -787,6 +787,10 @@ def test_the_control_status_of_a_law():
     assert certify.control_status([refuted], "L", "sha256:1") == "controlled (refuted on its control at x = 1)"
     assert certify.control_status([], "L", "sha256:1") == "uncontrolled: untested against any wrong model (7.S19)"
     assert certify.control_status([refuted, held], "L", "sha256:1").startswith("CONTROL FAILED")
+    # A bare theory makes its mutually dependent laws share a cone; another law's control
+    # must never certify this one's sensitivity (bite 6: Tables' eight laws exposed this).
+    assert certify.control_status([dict(refuted, law="Other")], "L", "sha256:1").startswith("uncontrolled")
+    assert certify.control_status([refuted, dict(held, law="Other")], "L", "sha256:1").startswith("controlled")
     # a control at another hash of the law's cone controls nothing now
     stale = certify.control_status([refuted], "L", "sha256:2")
     assert stale.startswith("uncontrolled") and "another hash" in stale
@@ -1093,8 +1097,8 @@ def test_the_store_law_holds_on_the_reference_and_its_controls_refute_the_broken
 
 
 SLOW = '''import "test.lth" test ExhaustiveMode
-count (n : Int) : Int := if n <= 0 then 0 else count (n - 1)
-Slow (b : Bool) : Bool := count 200 == 0
+countDown (n : Int) : Int := if n <= 0 then 0 else countDown (n - 1)
+Slow (b : Bool) : Bool := countDown 200 == 0
 test "Slow" ExhaustiveMode
 '''
 
@@ -1123,8 +1127,8 @@ def test_a_line_out_of_fuel_leaves_no_entry_and_runs_again_with_enough(tmp_path,
 # is a budget of the line, test.lth's default unless it gives its own, recorded in its entry, and
 # `--fuel` overrides it for a run, recorded too; fuel is in no identity (D-2026-10-15-g)
 OWN_FUEL = '''import "test.lth" test ExhaustiveMode withFuel defaultBudgets
-count (n : Int) : Int := if n <= 0 then 0 else count (n - 1)
-Slow (b : Bool) : Bool := count 200 == 0
+countDown (n : Int) : Int := if n <= 0 then 0 else countDown (n - 1)
+Slow (b : Bool) : Bool := countDown 200 == 0
 test "Slow" ExhaustiveMode (budgets <- withFuel 100 defaultBudgets)
 '''
 
@@ -1292,3 +1296,28 @@ def test_the_regions_hold_on_the_references_and_their_controls_refute_the_broken
     assert all(o.verdict == "Refuted" for o in controls), [tester.line(o) for o in controls]
     empty, = (o for o in controls if o.spec.law == "AnEmptyRegionLeavesBelowCases")
     assert "q = ignoringEmpty" in tester.line(empty)
+
+
+def test_theory_type_dependencies_do_not_execute_its_predicate_or_auxiliary_models():
+    from luthier.elaborate import elaborate_program
+    from luthier.parse import parse
+    source = """T : { f : Bool -> Bool }
+aux : Bool := true
+Law (m : T) (x : Bool) : Bool := m.f x == aux
+T := Law
+model : T := { f := fn b { b } }
+Claim (x : Bool) : Bool := Law model x
+"""
+    program = elaborate_program(parse(source).program)
+    cones = certify.Cones(program)
+    assert 'aux' not in cones.names('model')
+    called = t.Define('ByTheory', t.Var('Bool'), t.App(t.Var('T'), t.Var('model')))
+    assert 'aux' in certify.Cones(program + (called,)).names('ByTheory')
+    refined = t.Define('refined', t.Subtype('m', t.Var('T'), t.App(t.App(t.Var('Law'), t.Var('m')), t.Var('true'))), t.Var('model'))
+    assert 'aux' in certify.Cones(program + (refined,)).names('refined')
+    assert 'aux' in cones.names('Claim')
+    declaration_only = tuple(a for a in program if not (isinstance(a, t.Define) and a.name == 'T'))
+    assert cones.hash('model') == certify.Cones(declaration_only).hash('model')
+    assert cones.hash('Claim') != certify.Cones(tuple(
+        t.Define(a.name, a.type, t.Var('false')) if isinstance(a, t.Define) and a.name == 'aux' else a
+        for a in program)).hash('Claim')

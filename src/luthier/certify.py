@@ -296,47 +296,83 @@ class Cones:
                         self.owner.setdefault(c, name)
         self.memo = {}
 
-    def _part(self, name):
-        """One name's code, references and routes, computed once."""
-        if name not in self.memo:
-            code, refs, routes = [], set(), set()
-            for act in self.acts.get(name, ()):
-                term = t.Pair(act.type, act.body) if isinstance(act, t.Define) else act.type
-                # the references by the names the program calls them (`apart@plot`, not `apart`), so
-                # that the cone reaches the definitions the name reaches and no other of the same
-                # plain name; the tags go only from the code that is hashed
-                out = {"constructors": set(), "routes": set()}
-                _walk(term, out)
-                refs |= set(kernel.free_names(term)) | out["constructors"]
-                routes |= out["routes"]
-                code.append((name.partition("@")[0], canon(term)))
-            self.memo[name] = (code, refs, routes)
-        return self.memo[name]
+    @staticmethod
+    def _predicate_reads(ty, bound=frozenset()):
+        """Refinement predicates are values even inside a type (P10)."""
+        if isinstance(ty, t.Subtype):
+            return (set(kernel.free_names(erase(ty.predicate))) - bound - {ty.name}
+                    | Cones._predicate_reads(ty.type, bound))
+        if isinstance(ty, (t.Pi, t.Sigma)):
+            return (Cones._predicate_reads(ty.domain, bound)
+                    | Cones._predicate_reads(ty.codomain, bound | {ty.name}))
+        if isinstance(ty, t.Lam):
+            return Cones._predicate_reads(ty.body, bound | {ty.name})
+        if isinstance(ty, tuple):
+            return set().union(*(Cones._predicate_reads(x, bound) for x in ty))
+        if is_dataclass(ty) and not isinstance(ty, type):
+            return set().union(*(Cones._predicate_reads(getattr(ty, f.name), bound) for f in fields(ty)))
+        return set()
 
-    def names(self, name):
-        """The names the cone of `name` reaches, itself included (as the program calls them)."""
-        # each reference by its exact name: a definition of the same plain name in another file (the
-        # loader's `name@file`) is another name, and the importer's names never enter the cone of a
-        # library name (6.S8, 12.S22; record/IA/certification-2026-10-14/prompt-scope.md item 2)
-        seen, pending = set(), [name]
+    def _part(self, name, bodies=True):
+        """One name's code, type references, value references and routes.
+
+        A theory used as a type denotes its declared record. Its predicate definition belongs
+        to a value dependency, not to every model's runtime cone (bite 6).
+        """
+        key = (name, bodies)
+        if key not in self.memo:
+            code, types, values, routes = [], set(), set(), set()
+            for act in self.acts.get(name, ()):
+                if not bodies and isinstance(act, t.Define):
+                    continue
+                term = t.Pair(act.type, act.body) if isinstance(act, t.Define) else act.type
+                result = act.type
+                while isinstance(result, t.Pi):
+                    result = result.codomain
+                body_type = isinstance(result, t.Universe)
+                values.update(self._predicate_reads(act.type) & set(kernel.free_names(act.type)))
+                if isinstance(act, t.Define) and body_type:
+                    values.update(self._predicate_reads(erase(act.body)) & set(kernel.free_names(erase(act.body))))
+                for value, refs in [(act.type, types)] + ([(erase(act.body), types if body_type else values)] if isinstance(act, t.Define) else []):
+                    out = {"constructors": set(), "routes": set()}
+                    _walk(value, out)
+                    refs.update(kernel.free_names(value))
+                    refs.update(out["constructors"])
+                    routes.update(out["routes"])
+                code.append((name.partition("@")[0], canon(term)))
+            self.memo[key] = (code, types, values, routes)
+        return self.memo[key]
+
+    def _reach(self, name):
+        def record(ty):
+            while isinstance(ty, t.Pi):
+                ty = ty.codomain
+            return isinstance(ty, t.Record)
+        theories = {n for n, acts in self.acts.items()
+                    if any(isinstance(a, t.Declare) and record(a.type) for a in acts)}
+        seen, pending = {}, [(name, True)]
         while pending:
-            n = pending.pop()
-            if n in seen or n not in self.acts:
+            n, bodies = pending.pop()
+            if n not in self.acts or n in seen and (seen[n] or not bodies):
                 continue
-            seen.add(n)
-            _, refs, _ = self._part(n)
-            for r in refs:
-                for m in (r, self.owner.get(r)):
-                    if m is not None and m not in seen and m in self.acts:
-                        pending.append(m)
+            seen[n] = bodies
+            _, types, values, _ = self._part(n, bodies)
+            for refs, term_position in ((types, False), (values, True)):
+                for ref in refs:
+                    for target in (ref, self.owner.get(ref)):
+                        if target is not None:
+                            pending.append((target, term_position or target not in theories))
         return seen
 
+    def names(self, name):
+        """The names reached by the value and type dependencies of `name` (12.S22)."""
+        return set(self._reach(name))
+
     def cone(self, name):
-        """certification.lth's `Cone` of `name`: the code by name (then by its text), the hosts by
-        route, the interpreter's revision."""
+        """The code by name, retaining a theory's predicate only when used as a value."""
         code, routes = [], set()
-        for n in self.names(name):
-            c, _, r = self._part(n)
+        for n, bodies in self._reach(name).items():
+            c, _, _, r = self._part(n, bodies)
             code.extend(c)
             routes |= r
         code.sort(key=lambda item: (item[0], repr(item[1])))
@@ -1004,8 +1040,8 @@ def control_status(controls, law, current):
     """A law's control status from control entries (any store's, or a run's): "control failed" when
     one at the law's current cone hash came out confirmed, else "controlled" when one there was
     refuted, else uncontrolled (with what the controls of other hashes, or not run, were). The
-    law is matched by its cone's hash, which names it; `law` names the stale ones only."""
-    at = [e for e in controls if is_control(e) and e["cone"] == current]
+    law and cone must both match: mutually dependent laws can share one cone hash."""
+    at = [e for e in controls if is_control(e) and e["law"] == law and e["cone"] == current]
     held = [e for e in at if _held(e)]
     if held:
         on = "; ".join(", ".join(d["generator"] for d in e["binding"]) for e in held) or "no binding"
