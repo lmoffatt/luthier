@@ -519,7 +519,7 @@ def test_bootstrap_primitives_and_not(tmp_path):
     path = tmp_path / "ops.run.lut"
     path.write_text('''
 print (w : W) (s : String) : W * Unit := extern "python:luthier.host.print_line" w s
-main (w : W) : W * Unit := print w (if not (0 >= 3) and 7 mod 3 /= 0 and "ab" == "a" + "b" then "ok" else "no")
+main (w : W) : W * Unit := print w (if not (0 >= 3) and 7 mod 3 /= 0 and "ab" == "a" <> "b" then "ok" else "no")
 ''')
     assert run_file(path) == "ok\n"
 
