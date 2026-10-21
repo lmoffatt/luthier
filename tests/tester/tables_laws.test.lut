@@ -15,6 +15,7 @@ import "generators.lth" Binding
 import "laws.lth" Listed
 import "tables.lth" Table Codec Perturbed BrokenText Cell int real text RoundTrip Canonical Tolerant Rejects
   SchemaWellFormed KindsKnown CellsOfTheirKind NoCellsOffSchema
+  TableIsIndexed TableIsAnObject TableOf Row rowsOf rowObject sameTable
 import "tables_model.lut" csv
 import "../../examples/sonolocalizacion/session_a.lut" nodesTextA measurementsTextA
 
@@ -103,3 +104,34 @@ test "CellsOfTheirKind" ExhaustiveMode (seed <- 20261014) (whereBindings <- tabl
 test "NoCellsOffSchema" ExhaustiveMode (seed <- 20261014) (whereBindings <- offSchema)
 -- the line expected to be refuted (CellsOfTheirKind on a table with a nothing cell) is a control, in
 -- tables_controls.test.lut
+
+-- [core bite 11, 2026-10-21] The rows of a table as containers.lth's `Indexed`, at the schema of
+-- `threeRows` (tables.lth: the rows do not see the schema, so the claim is at one), and
+-- `sameTable` as the tables' `Object`; listed, seed 20261021.
+schemaNames : List (List String) := [["k", "x", "label"]]
+schemaKinds : List (List String) := [["int", "float", "str"]]
+goodRows : List (Indexed Table Row) := [rowsOf]
+tableEquality : List (Object Table) := [{ eq := sameTable }]
+rowEquality : List (Object Row) := [rowObject ["k", "x", "label"]]
+-- threeRows with its last label changed, and with no rows
+threeRowsRelabelled : Table := { nRows := 3, names := ["k", "x", "label"], kinds := ["int", "float", "str"],
+  cell := fn c r { if c == "label" and r == 2 then just (text "changed") else threeRows.cell c r } }
+noRowsOfThree : Table := { nRows := 0, names := ["k", "x", "label"], kinds := ["int", "float", "str"], cell := fn c r { nothing } }
+ofOneSchema : List Table := [threeRows, threeRowsRelabelled, noRowsOfThree]
+tablePairs : List (Related Table sameTable) := [{ x := threeRows, y := threeRows }, { x := noRowsOfThree, y := noRowsOfThree }]
+tableChains : List (Chain Table sameTable) := [{ x := oneRow, y := oneRow, z := oneRow }]
+onTableIsIndexed : List Binding := [
+  { parameter := just "names", type := nothing, generator := "schemaNames", coverage := Listed },
+  { parameter := just "kinds", type := nothing, generator := "schemaKinds", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "goodRows", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "tableEquality", coverage := Listed },
+  { parameter := just "a", type := nothing, generator := "rowEquality", coverage := Listed },
+  { parameter := just "c", type := nothing, generator := "ofOneSchema", coverage := Listed },
+  { parameter := just "d", type := nothing, generator := "ofOneSchema", coverage := Listed } ]
+test "TableIsIndexed" ExhaustiveMode (seed <- 20261021) (whereBindings <- onTableIsIndexed)
+onTableIsAnObject : List Binding := [
+  { parameter := just "model", type := nothing, generator := "tableEquality", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "tables", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "tablePairs", coverage := Listed },
+  { parameter := just "c", type := nothing, generator := "tableChains", coverage := Listed } ]
+test "TableIsAnObject" ExhaustiveMode (seed <- 20261021) (whereBindings <- onTableIsAnObject)

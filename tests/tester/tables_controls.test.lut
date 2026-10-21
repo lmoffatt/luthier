@@ -11,6 +11,7 @@ import "generators.lth" Binding
 import "laws.lth" Listed
 import "tables.lth" Table Codec Perturbed BrokenText Cell int RoundTrip Canonical Tolerant Rejects SchemaWellFormed
   KindsKnown CellsOfTheirKind NoCellsOffSchema
+  TableIsIndexed TableIsAnObject TableOf Row rowsOf rowObject sameTable
 import "tables_model.lut" csv
 
 -- a table with a cell that is nothing where its column says int: not a table of the theory
@@ -75,3 +76,22 @@ test "Rejects" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "c" "le
 test "SchemaWellFormed" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "t" "twiceNamedList"]) (control <- true)
 test "KindsKnown" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "t" "unknownKindList"]) (control <- true)
 test "NoCellsOffSchema" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "t" "answersAllList", bind "c" "offNames", bind "r" "rowZero"]) (control <- true)
+
+-- [core bite 11, 2026-10-21] Wrong models of tables.lth's two claims, on cases like those of
+-- tables_laws.test.lut, seed 20261021: rows that are never there (every two tables of a schema
+-- would have the same rows), and an equality that holds of no two tables, not even one and itself.
+schemaNames : List (List String) := [["k"]]
+schemaKinds : List (List String) := [["int"]]
+noRows : List (Indexed Table Row) := [{ size := fn (t : Table) { 0 }, at := fn (t : Table) r { fn c { t.cell c r } } }]
+tableEquality : List (Object Table) := [{ eq := sameTable }]
+neverEqual : List (Object Table) := [{ eq := fn t u { false } }]
+rowEquality : List (Object Row) := [rowObject ["k"]]
+oneOfK : Table := { nRows := 1, names := ["k"], kinds := ["int"], cell := fn c r { if c == "k" then just (int 1) else nothing } }
+otherOfK : Table := { nRows := 1, names := ["k"], kinds := ["int"], cell := fn c r { if c == "k" then just (int 2) else nothing } }
+ofOneSchema : List Table := [oneOfK, otherOfK]
+tablePairs : List (Related Table sameTable) := [{ x := oneOfK, y := oneOfK }]
+tableChains : List (Chain Table sameTable) := [{ x := oneOfK, y := oneOfK, z := oneOfK }]
+test "TableIsIndexed" ExhaustiveMode (seed <- 20261021) (whereBindings <- [bind "names" "schemaNames", bind "kinds" "schemaKinds",
+  bind "model" "noRows", bind "o" "tableEquality", bind "a" "rowEquality", bind "c" "ofOneSchema", bind "d" "ofOneSchema"]) (control <- true)
+test "TableIsAnObject" ExhaustiveMode (seed <- 20261021) (whereBindings <- [bind "model" "neverEqual", bind "x" "ofOneSchema",
+  bind "p" "tablePairs", bind "c" "tableChains"]) (control <- true)
