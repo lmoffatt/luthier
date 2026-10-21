@@ -434,7 +434,7 @@ def test_an_imported_alias_does_not_take_a_labels_name(tmp_path):
     (tmp_path / 'h.lut').write_text('Hash = String\n')
     d = tmp_path / 'd.lut'
     d.write_text('import "a.lut" other\nimport "b.lut" pick\nimport "h.lut" Hash\n'
-                 'tag (l : String) (h : Hash) : String := l + h\ntagged : String := tag "L" "sha256:cccc"\n')
+                 'tag (l : String) (h : Hash) : String := l <> h\ntagged : String := tag "L" "sha256:cccc"\n')
     assert not c.check(program(d.read_text()), d)
 
 
@@ -591,8 +591,8 @@ def test_a_file_that_defines_a_core_name_is_refused_with_the_core_file(tmp_path,
 
 def test_a_known_collision_is_not_refused_until_its_bite():
     lib = Path(__file__).resolve().parents[1] / 'src' / 'luthier' / 'lib'
-    numbers = lib / 'numbers.lth'
-    assert not c.core_refusals(program(numbers.read_text(encoding='utf-8')), numbers)
+    laws = lib / 'laws.lth'   # numbers.lth's and algebra.lth's entries went with the core's bite 8
+    assert not c.core_refusals(program(laws.read_text(encoding='utf-8')), laws)
 
 
 def test_a_core_name_is_seen_without_an_import(tmp_path, capsys):

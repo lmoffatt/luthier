@@ -151,10 +151,6 @@ CORE_FILE = "core.lut"
 # names two core files define, until bite 6 writes the structures over core/properties/. Each is
 # a parameter (P11) with its reason; a name not listed here is refused. Keys are paths under lib/.
 CORE_COLLISIONS = {
-    "algebra.lth": ("LeqAntisymmetric LeqBoth LeqChain LeqPair LeqTotal LeqTransitive OneIsNotZero "
-                    "PlusMonotone TimesCommutes", "bite 8 claims core/structures/algebraic.lth's structure"),
-    "numbers.lth": ("LeqAntisymmetric LeqChain LeqPair LeqTotal LeqTransitive PlusCommutes PlusMonotone "
-                    "PlusZero TimesCommutes TimesOne TimesZero", "bite 8 claims core/structures/algebraic.lth's structure"),
     "laws.lth": ("Both flip", "bite 9, the machinery"),
     "arrays.lth": ("Symmetric", "bite 11, arrays and tables"),
     "term.lth": ("Beta", "bite 10, Luthier's self-description"),
@@ -1680,6 +1676,10 @@ def runtime_slice(acts, main, roots=(), *, theory_laws=False):
         if isinstance(value, s.Name):
             yield value.name
             yield value.name.split(".")[0]
+        elif isinstance(value, s.Binop) and value.operator == "<>":
+            # Like an unqualified field use, <> reaches the type's combine model.
+            yield "combine"
+            yield from names((value.left, value.right))
         elif isinstance(value, s.PApp):
             yield value.name
             yield from names(value.patterns)
