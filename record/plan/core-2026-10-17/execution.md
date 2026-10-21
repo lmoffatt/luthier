@@ -837,6 +837,13 @@ Also (2026-10-21, the coordinator on report-bite-8.md's question): give `Doubles
 `Doubles (F : U)`, claimed at `Float64`, so section 4's `DoublesHaveTheOperations` binds `plus` and
 `times` there; the examples' `doubles : Doubles` becomes `Doubles Float64` and their run records
 are redone with this bite's.
+Also (2026-10-21, the coordinator on report-bite-11.md): (1) the six summing laws of arrays.lth
+bounded by `3 gamma n` got only the wrong-model control; give each the "bound too small" control
+too (`gamma n` in place of `3 gamma n` on the real doubles), as section 4 does for numbers.lth.
+(2) arrays_model's operator bindings don't reach an importing file (`a * v`, `a * a` refused there):
+settle whether an `operator` act is exported with its file, since the examples' arithmetic on
+vectors depends on it. (3) `size` doesn't resolve at `Mat Float64` or `Table` (claims at one shape
+or schema); say in the report which uses in the examples that leaves on the old helpers.
 
 ### Bite 13. Closing (Sonnet; after 12)
 
