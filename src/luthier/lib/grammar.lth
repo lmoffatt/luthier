@@ -26,7 +26,7 @@
 -- grammar over characters, `luthierLexicon`, with its readings of 2.S1 marked proposed (step 1.1.d).
 
 import "ebnf.lth" Ebnf WellFormedEbnf Rhs TokenView Derives derives litsOf catsOf litsOfNames
-  memberString append splits eps lit cat ref seq alt opt rep
+  splits eps lit cat ref seq alt opt rep
 
 -- ---------------------------------------------------------------- tokens (spec 2 §1)
 
@@ -35,7 +35,6 @@ import "ebnf.lth" Ebnf WellFormedEbnf Rhs TokenView Derives derives litsOf catsO
 Token = { kind : String, text : String, line : Nat, column : Nat }
 
 tokenView (t : Token) : TokenView := { kind := t.kind, text := t.text }
-tokenViews (ts : List Token) : List TokenView := match ts { nil -> nil ; cons t rest -> cons (tokenView t) (tokenViews rest) }
 
 LexError = { line : Nat, column : Nat, message : String }
 
@@ -308,16 +307,15 @@ classOf (c : String) : String :=
   else if c == "\"" then "quote"
   else if c == "\\" then "backslash"
   else if isBlank c then "space"
-  else if memberString c letterChars then "letter"
-  else if memberString c digitChars then "digit"
+  else if member List String c letterChars then "letter"
+  else if member List String c digitChars then "digit"
   else "other"
 charView (c : String) : TokenView := { kind := classOf c, text := c }
-charViews (cs : List String) : List TokenView := match cs { nil -> nil ; cons c rest -> cons (charView c) (charViews rest) }
 
 -- a word or symbol as the sequence of its characters; the literals of a grammar as alternatives
-charSeq (cs : List String) : List Rhs := match cs { nil -> nil ; cons c rest -> cons (lit c) (charSeq rest) }
-literalAlternatives (ws : List String) : List Rhs := match ws { nil -> nil ;
-  cons w rest -> if w == "\n" then literalAlternatives rest else cons (seq (charSeq (characters w))) (literalAlternatives rest) }
+charSeq (cs : List String) : List Rhs := map (fn (c : String) { lit c }) cs
+literalAlternatives (ws : List String) : List Rhs :=
+  map (fn (w : String) { seq (charSeq (characters w)) }) (filter List String (fn (w : String) { not (w == "\n") }) ws)
 
 luthierLexicon : WellFormedEbnf := { start := "text", rules := [
   { lhs := "text",      rhs := rep (ref "lexeme") },
@@ -339,17 +337,16 @@ luthierLexicon : WellFormedEbnf := { start := "text", rules := [
 -- a token as the lexicon sees it: its kind and its characters (a string's with its quotes)
 Lexeme = { kind : String, chars : List String }
 lexemeOf (t : TokenView) : Lexeme := { kind := t.kind, chars := characters t.text }
-lexemesOf (ts : List TokenView) : List Lexeme := match ts { nil -> nil ; cons t rest -> cons (lexemeOf t) (lexemesOf rest) }
-textsOf (cs : List TokenView) : List String := match cs { nil -> nil ; cons c rest -> cons c.text (textsOf rest) }
+lexemesOf (ts : List TokenView) : List Lexeme := map lexemeOf ts
+textsOf (cs : List TokenView) : List String := map (fn (c : TokenView) { c.text }) cs
 
 derivesIn (d : Derives) (n : String) (cs : List TokenView) : Bool := d.derivesRhs luthierLexicon (ref n) cs
 -- the longest non-empty prefix that `n` derives, with the rest; `splits` lists prefixes shortest first
 longestPrefix (d : Derives) (n : String) (ps : List (List TokenView * List TokenView)) : Maybe (List TokenView * List TokenView) :=
   match ps { nil -> nothing ; cons (xs, ys) more -> match longestPrefix d n more {
     just p -> just p ;
-    nothing -> if nonEmpty TokenView xs and derivesIn d n xs then just (xs, ys) else nothing } }
-memberChars (cs : List String) (ws : List String) : Bool :=
-  match ws { nil -> false ; cons w rest -> characters w == cs or memberChars cs rest }
+    nothing -> if not (isEmpty TokenView xs) and derivesIn d n xs then just (xs, ys) else nothing } }
+memberChars (cs : List String) (ws : List String) : Bool := any List String (fn (w : String) { characters w == cs }) ws
 -- the kind the lexer gives a lexeme, or nothing when it drops it (a blank, a line break, a comment)
 kindOf (d : Derives) (xs : List TokenView) : Maybe String :=
   if derivesIn d "string" xs then just "string"
@@ -367,7 +364,7 @@ tokenizeWithin (d : Derives) (fuel : Nat) (cs : List TokenView) : Maybe (List Le
       match tokenizeWithin d (fuel - 1) ys { nothing -> nothing ; just ls ->
         match kindOf d xs { nothing -> just ls ; just k -> just (cons { kind := k, chars := textsOf xs } ls) } } } }
 tokenize (d : Derives) (s : String) : Maybe (List Lexeme) :=
-  tokenizeWithin d (namesLength (characters s)) (charViews (characters s))
+  tokenizeWithin d (size (characters s)) (map charView (characters s))
 
 -- ---------------------------------------------------------------- the theory
 
@@ -384,7 +381,7 @@ Grammar (d : Derives) : {
 -- ---------------------------------------------------------------- definitions the laws use
 
 viewsOf (d : Derives) (g : Grammar d) (s : String) : Maybe (List TokenView) :=
-  match g.lex s { lexed ts -> just (tokenViews ts) ; lexFailed e -> nothing }
+  match g.lex s { lexed ts -> just (map tokenView ts) ; lexFailed e -> nothing }
 layoutOf (d : Derives) (g : Grammar d) (s : String) : Maybe (List TokenView) :=
   match g.lex s { lexed ts -> just (g.layout ts) ; lexFailed e -> nothing }
 lexes (d : Derives) (g : Grammar d) (s : String) : Bool := match g.lex s { lexed ts -> true ; lexFailed e -> false }
@@ -406,7 +403,6 @@ pvar (s : String) : SurfacePattern := pApp s []
 
 lastIsNewline (ts : List TokenView) : Bool :=
   match ts { nil -> false ; cons t rest -> match rest { nil -> t.kind == "newline" ; cons u more -> lastIsNewline rest } }
-isEmptyViews (ts : List TokenView) : Bool := match ts { nil -> true ; cons t rest -> false }
 
 -- ---------------------------------------------------------------- the trees a text can give
 
@@ -415,21 +411,15 @@ isEmptyViews (ts : List TokenView) : Bool := match ts { nil -> true ; cons t res
 -- (that is a subtype). Parentheses are not in the tree, so every tree of an `if` is written by
 -- some text: `if c then (if d then y) else b` gives the tree that 2.S11 denies to the text without
 -- them (GPT, Claude, round 3), and the printer writes them back (`PrintParenthesizes`).
-nonEmpty (A : U) (xs : List A) : Bool := match xs { nil -> false ; cons x rest -> true }
-atLeastTwo (A : U) (xs : List A) : Bool := match xs { nil -> false ; cons x rest -> nonEmpty A rest }
-allNames (ok : String -> Bool) (ss : List String) : Bool := match ss { nil -> true ; cons s rest -> ok s and allNames ok rest }
-namesCount (fs : List Field) : Nat := match fs { nil -> 0 ; cons f rest -> namesLength f.names + namesCount rest }
-namesLength (ss : List String) : Nat := match ss { nil -> 0 ; cons s rest -> 1 + namesLength rest }
+namesCount (fs : List Field) : Nat := fold Field Nat (fn (a b : Nat) { a + b }) 0 (fn (f : Field) { size f.names }) fs
 
 wfPattern (ok : String -> Bool) (p : SurfacePattern) : Bool := match p {
   pWild -> true ; pLit l -> true ;
-  pApp n ps -> ok n and allPatterns ok ps ;
-  pTuple ps -> atLeastTwo SurfacePattern ps and allPatterns ok ps ;
+  pApp n ps -> ok n and all List SurfacePattern (wfPattern ok) ps ;
+  pTuple ps -> size ps >= 2 and all List SurfacePattern (wfPattern ok) ps ;
 }
-allPatterns (ok : String -> Bool) (ps : List SurfacePattern) : Bool :=
-  match ps { nil -> true ; cons p rest -> wfPattern ok p and allPatterns ok rest }
 subtypePatternOk (ok : String -> Bool) (p : SurfacePattern) : Bool := match p {
-  pApp n ps -> ok n and not (nonEmpty SurfacePattern ps) ;
+  pApp n ps -> ok n and isEmpty SurfacePattern ps ;
   _ -> wfPattern ok p ;
 }
 
@@ -437,68 +427,59 @@ wf (ok : String -> Bool) (t : Surface) : Bool := match t {
   name s -> ok s ;
   literal l -> true ; universe -> true ; world -> true ;
   app f a -> wf ok f and wf ok a ;
-  binop o a b -> memberString o binaryOperators and wf ok a and wf ok b ;
+  binop o a b -> member List String o binaryOperators and wf ok a and wf ok b ;
   neg a -> wf ok a ;
-  tuple ts -> atLeastTwo Surface ts and allWf ok ts ;
-  pi xs a b -> nonEmpty String xs and allNames ok xs and wf ok a and wf ok b ;
-  sigma xs a b -> nonEmpty String xs and allNames ok xs and wf ok a and wf ok b ;
+  tuple ts -> size ts >= 2 and all List Surface (wf ok) ts ;
+  pi xs a b -> not (isEmpty String xs) and all List String ok xs and wf ok a and wf ok b ;
+  sigma xs a b -> not (isEmpty String xs) and all List String ok xs and wf ok a and wf ok b ;
   sigmaNamed x a y b -> ok x and ok y and wf ok a and wf ok b ;
-  record fs law -> nonEmpty Field fs and allFields ok fs and maybeWf ok law
+  record fs law -> not (isEmpty Field fs) and all List Field (wfField ok) fs and maybeWf ok law
                    and (namesCount fs >= 2 or law == nothing) ;
   subtype p a law -> subtypePatternOk ok p and wf ok a and wf ok law ;
-  recordValue kvs -> nonEmpty (String * Surface) kvs and allPairs ok kvs ;
-  block items e -> allItems ok items and wf ok e ;
-  sumSurface kvs -> atLeastTwo (String * Surface) kvs and allPairs ok kvs ;
-  list ts -> allWf ok ts ;
-  lambda ps items e -> nonEmpty LambdaParam ps and allParams ok ps and allItems ok items and wf ok e ;
-  matchOf s arms -> wf ok s and allArms ok arms ;
+  recordValue kvs -> not (isEmpty (String * Surface) kvs) and all List (String * Surface) (wfPair ok) kvs ;
+  block items e -> all List Item (wfItem ok) items and wf ok e ;
+  sumSurface kvs -> size kvs >= 2 and all List (String * Surface) (wfPair ok) kvs ;
+  list ts -> all List Surface (wf ok) ts ;
+  lambda ps items e -> not (isEmpty LambdaParam ps) and all List LambdaParam (wfParam ok) ps and all List Item (wfItem ok) items and wf ok e ;
+  matchOf s arms -> wf ok s and all List (SurfacePattern * Surface) (wfArm ok) arms ;
   namedArg x a -> ok x and wf ok a ;
   ifThen c a b -> wf ok c and wf ok a and maybeWf ok b ;
   proj a x -> wf ok a and ok x ;
   quoted a -> wf ok a ;
 }
-allWf (ok : String -> Bool) (ts : List Surface) : Bool := match ts { nil -> true ; cons t rest -> wf ok t and allWf ok rest }
 maybeWf (ok : String -> Bool) (m : Maybe Surface) : Bool := match m { nothing -> true ; just t -> wf ok t }
-allFields (ok : String -> Bool) (fs : List Field) : Bool :=
-  match fs { nil -> true ; cons f rest -> nonEmpty String f.names and allNames ok f.names and wf ok f.type and allFields ok rest }
-allPairs (ok : String -> Bool) (kvs : List (String * Surface)) : Bool :=
-  match kvs { nil -> true ; cons (k, v) rest -> ok k and wf ok v and allPairs ok rest }
-allItems (ok : String -> Bool) (is : List Item) : Bool := match is { nil -> true ;
-  cons it rest -> match it { bind x t -> ok x and wf ok t ; rebind q t -> wfPattern ok q and wf ok t } and allItems ok rest }
-allParams (ok : String -> Bool) (ps : List LambdaParam) : Bool := match ps { nil -> true ;
-  cons p rest -> match p {
-    plainParam x -> ok x ;
-    typedParam xs t -> nonEmpty String xs and allNames ok xs and wf ok t ;
-    shapeParam qs -> atLeastTwo SurfacePattern qs and allPatterns ok qs } and allParams ok rest }
-allArms (ok : String -> Bool) (arms : List (SurfacePattern * Surface)) : Bool :=
-  match arms { nil -> true ; cons (p, t) rest -> wfPattern ok p and wf ok t and allArms ok rest }
+wfField (ok : String -> Bool) (f : Field) : Bool := not (isEmpty String f.names) and all List String ok f.names and wf ok f.type
+wfPair (ok : String -> Bool) (kv : String * Surface) : Bool := match kv { (k, v) -> ok k and wf ok v }
+wfItem (ok : String -> Bool) (it : Item) : Bool := match it { bind x t -> ok x and wf ok t ; rebind q t -> wfPattern ok q and wf ok t }
+wfParam (ok : String -> Bool) (p : LambdaParam) : Bool := match p {
+  plainParam x -> ok x ;
+  typedParam xs t -> not (isEmpty String xs) and all List String ok xs and wf ok t ;
+  shapeParam qs -> size qs >= 2 and all List SurfacePattern (wfPattern ok) qs }
+wfArm (ok : String -> Bool) (arm : SurfacePattern * Surface) : Bool := match arm { (p, t) -> wfPattern ok p and wf ok t }
 
 wfBinder (ok : String -> Bool) (b : Binder) : Bool := match b {
-  explicit xs t dft -> nonEmpty String xs and allNames ok xs and wf ok t and maybeWf ok dft ;
-  implicit xs t -> nonEmpty String xs and allNames ok xs and wf ok t ;
+  explicit xs t dft -> not (isEmpty String xs) and all List String ok xs and wf ok t and maybeWf ok dft ;
+  implicit xs t -> not (isEmpty String xs) and all List String ok xs and wf ok t ;
 }
-allBinders (ok : String -> Bool) (bs : List Binder) : Bool := match bs { nil -> true ; cons b rest -> wfBinder ok b and allBinders ok rest }
-allClauses (ok : String -> Bool) (cs : List Clause) : Bool := match cs { nil -> true ;
-  cons c rest -> nonEmpty SurfacePattern c.patterns and allPatterns ok c.patterns and wf ok c.body and allClauses ok rest }
+wfClause (ok : String -> Bool) (c : Clause) : Bool :=
+  not (isEmpty SurfacePattern c.patterns) and all List SurfacePattern (wfPattern ok) c.patterns and wf ok c.body
 wfBody (ok : String -> Bool) (b : Body) : Bool := match b {
   termBody t -> wf ok t ;
-  dataBody cs -> allPairs ok cs ;
-  clausesBody cs -> nonEmpty Clause cs and allClauses ok cs ;
+  dataBody cs -> all List (String * Surface) (wfPair ok) cs ;
+  clausesBody cs -> not (isEmpty Clause cs) and all List Clause (wfClause ok) cs ;
 }
-allImportNames (ok : String -> Bool) (ns : List ImportName) : Bool := match ns { nil -> true ;
-  cons n rest -> ok n.name and maybeName ok n.theory and maybeName ok n.asName and allImportNames ok rest }
+wfImportName (ok : String -> Bool) (n : ImportName) : Bool := ok n.name and maybeName ok n.theory and maybeName ok n.asName
 maybeName (ok : String -> Bool) (m : Maybe String) : Bool := match m { nothing -> true ; just s -> ok s }
 
 wfAct (ok : String -> Bool) (a : SurfaceAct) : Bool := match a {
-  declare x bs t -> ok x and allBinders ok bs and wf ok t ;
-  define x bs t b -> ok x and allBinders ok bs and maybeWf ok t and wfBody ok b ;
-  alias x bs t -> ok x and allBinders ok bs and wf ok t ;
-  importAct f ns -> nonEmpty ImportName ns and allImportNames ok ns ;
-  operatorAct o t -> memberString o boundOperators and wf ok t ;
+  declare x bs t -> ok x and all List Binder (wfBinder ok) bs and wf ok t ;
+  define x bs t b -> ok x and all List Binder (wfBinder ok) bs and maybeWf ok t and wfBody ok b ;
+  alias x bs t -> ok x and all List Binder (wfBinder ok) bs and wf ok t ;
+  importAct f ns -> not (isEmpty ImportName ns) and all List ImportName (wfImportName ok) ns ;
+  operatorAct o t -> member List String o boundOperators and wf ok t ;
   datum t -> wf ok t ;
 }
-wfProgram (ok : String -> Bool) (p : SurfaceProgram) : Bool :=
-  match p { nil -> true ; cons a rest -> wfAct ok a and wfProgram ok rest }
+wfProgram (ok : String -> Bool) (p : SurfaceProgram) : Bool := all List SurfaceAct (wfAct ok) p
 
 -- The trees a text of model `g` can give, as a type, so that a law over them is not an implication
 -- whose premise a random tree rarely meets (7.S12; Claude, round 3). A test draws them with names
@@ -527,10 +508,8 @@ ParsesWhatDerives (d : Derives) (g : Grammar d) (s : String) : Bool :=
   isParsed (g.parse s) == match g.lex s { lexed ts -> derives d luthierSyntax (g.layout ts) ; lexFailed e -> false }
 
 -- Errors say where (2.S13: the parser reports, the checker decides).
-linesPositive (es : List ParseError) : Bool :=
-  match es { nil -> true ; cons e rest -> e.line >= 1 and linesPositive rest }
 ErrorsHaveLines (d : Derives) (g : Grammar d) (s : String) : Bool :=
-  match g.parse s { parsed p -> true ; parseFailed es -> nonEmpty ParseError es and linesPositive es }
+  match g.parse s { parsed p -> true ; parseFailed es -> not (isEmpty ParseError es) and all List ParseError (fn (e : ParseError) { e.line >= 1 }) es }
 
 -- ---------------------------------------------------------------- lexical laws (spec 2 §1)
 
@@ -541,7 +520,7 @@ ErrorsHaveLines (d : Derives) (g : Grammar d) (s : String) : Bool :=
 LexedText (d : Derives) (g : Grammar d) : U := { s : String | lexes d g s }
 UnlexedText (d : Derives) (g : Grammar d) : U := { s : String | not (lexes d g s) }
 LexesWhatDerives (d : Derives) (g : Grammar d) (s : LexedText d g) : Bool :=
-  match g.lex s { lexed ts -> just (lexemesOf (tokenViews ts)) == tokenize d s ; lexFailed e -> false }
+  match g.lex s { lexed ts -> just (lexemesOf (map tokenView ts)) == tokenize d s ; lexFailed e -> false }
 LexFailsWhatDerivesNot (d : Derives) (g : Grammar d) (s : UnlexedText d g) : Bool :=
   tokenize d s == nothing
 
@@ -550,9 +529,7 @@ LexFailsWhatDerivesNot (d : Derives) (g : Grammar d) (s : UnlexedText d g) : Boo
 -- layout's. Checked on every literal of the grammar, not on random strings (Claude, round 3).
 literalLexes (d : Derives) (g : Grammar d) (w : String) : Bool :=
   w == "\n" or viewsOf d g w == just [tv "literal" w]
-allLiteralsLex (d : Derives) (g : Grammar d) (ws : List String) : Bool :=
-  match ws { nil -> true ; cons w rest -> literalLexes d g w and allLiteralsLex d g rest }
-LiteralsAreNotNames (d : Derives) (g : Grammar d) : Bool := allLiteralsLex d g (litsOf luthierSyntax)
+LiteralsAreNotNames (d : Derives) (g : Grammar d) : Bool := all List String (literalLexes d g) (litsOf luthierSyntax)
 -- and only they are reserved: a word the grammar does not take as a literal is a name, the retired
 -- keywords and the names of core that act like keywords among them (2.S21)
 OtherWordsAreNames (d : Derives) (g : Grammar d) : Bool :=
@@ -563,10 +540,9 @@ OtherWordsAreNames (d : Derives) (g : Grammar d) : Bool :=
 -- The role of a token kind: the lexer produces only the grammar's categories, literals and
 -- newlines.
 kindKnown (k : String) : Bool :=
-  memberString k (catsOf luthierSyntax) or k == "literal" or k == "newline"
-allKindsKnown (ts : List TokenView) : Bool := match ts { nil -> true ; cons t rest -> kindKnown t.kind and allKindsKnown rest }
+  member List String k (catsOf luthierSyntax) or k == "literal" or k == "newline"
 KindsAreTheGrammars (d : Derives) (g : Grammar d) (s : String) : Bool :=
-  match viewsOf d g s { just ts -> allKindsKnown ts ; nothing -> true }
+  match viewsOf d g s { just ts -> all List TokenView (fn (t : TokenView) { kindKnown t.kind }) ts ; nothing -> true }
 
 -- 2.S1, 2.S14: names, with `_` and `'`, and a dotted name as one token.
 NameTokens (d : Derives) (g : Grammar d) : Bool :=
@@ -595,7 +571,7 @@ ArrowIsOneToken (d : Derives) (g : Grammar d) : Bool :=
 
 -- A text with an act ends its layout with a newline; an empty text lays out to nothing.
 LayoutEnds (d : Derives) (g : Grammar d) (s : String) : Bool :=
-  match layoutOf d g s { just ts -> isEmptyViews ts or lastIsNewline ts ; nothing -> true }
+  match layoutOf d g s { just ts -> isEmpty TokenView ts or lastIsNewline ts ; nothing -> true }
 ColumnZeroStartsAct (d : Derives) (g : Grammar d) : Bool :=
   g.parse "x := a\n-b" == parsed [define "x" [] nothing (termBody (nm "a")), datum (neg (nm "b"))]
   and g.parse "x := a\n{ c : U || e : W }" == parsed [define "x" [] nothing (termBody (nm "a")), datum (sumSurface [("c", universe), ("e", world)])]
