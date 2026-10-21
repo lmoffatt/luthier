@@ -13,13 +13,17 @@ import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear symmetric symmetricOf orthogonal
 import "generators.lth" Binding byParameter
 import "laws.lth" Listed
-import "numbers.lth" Tolerance
-import "arrays.lth" Arrays Vec Mat RankFloor mat vec identity zeroMat frobDef
+import "numbers.lth" Tolerance Doubles
+import "numbers_model.lut" doubles : Doubles
+import "arrays.lth" Arrays Vec Mat RankFloor mat vec identity zeroMat frobDef transposeDef
   AddPointwise SubPointwise ScalePointwise TransposePointwise MaddPointwise MsubPointwise MscalePointwise
-  DotSymmetric DotOnBasis DotAgrees NormOfBasis NormOfDot NormScales MatVecOnBasis MatVecAgrees
-  MatMulIdentity MatMulTransposes MatMulAgrees RankOfDiagonal RankOfZeroAndIdentity RankBounded RankScales
+  DotCommutative DotOnBasis DotAgrees NormOfBasis NormOfDot NormScales MatVecOnBasis MatVecAgrees
+  MatMulNeutral MatMulByIdentity MatMulTransposes MatMulAgrees RankOfDiagonal RankOfZeroAndIdentity RankBounded RankScales
   RankUnderRotation TraceOfIdentity TraceAdditive TraceCyclic TraceAgrees PinvOfDiagonal PinvOfZero
   PinvOfIdentity PinvProjects PinvSymmetric PinvRestricts PinvTraceIsRank PinvScales
+  VecIsIndexed VecIsAnObject VecIsAFunctor VecIsFoldable VecIsTabulated MatIsIndexed MatIsAnObject
+  MatIsAFunctor SymmetricIsAnEqualizer vecIndexed vecObject vecMap matIndexed matObject matMap MatShaped
+  SymmetricMatrix
 import "arrays_model.lut" numpy
 
 tolerance : Tolerance := 1.0e-12
@@ -45,7 +49,8 @@ swapAdd : Arrays := {
 pswapAdd : List Binding := [
   { parameter := just "m", type := nothing, generator := "swapAdd", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- sub is addition
 swapSub : Arrays := {
@@ -67,7 +72,8 @@ swapSub : Arrays := {
 pswapSub : List Binding := [
   { parameter := just "m", type := nothing, generator := "swapSub", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- scale multiplies by c + 1
 shiftScale : Arrays := {
@@ -89,7 +95,8 @@ shiftScale : Arrays := {
 pshiftScale : List Binding := [
   { parameter := just "m", type := nothing, generator := "shiftScale", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- transpose forgets to swap the indices
 noSwapT : Arrays := {
@@ -111,7 +118,8 @@ noSwapT : Arrays := {
 pnoSwapT : List Binding := [
   { parameter := just "m", type := nothing, generator := "noSwapT", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- madd is subtraction
 swapMadd : Arrays := {
@@ -133,7 +141,8 @@ swapMadd : Arrays := {
 pswapMadd : List Binding := [
   { parameter := just "m", type := nothing, generator := "swapMadd", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- msub is addition
 swapMsub : Arrays := {
@@ -155,7 +164,8 @@ swapMsub : Arrays := {
 pswapMsub : List Binding := [
   { parameter := just "m", type := nothing, generator := "swapMsub", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- mscale multiplies by s + 1
 shiftMscale : Arrays := {
@@ -177,7 +187,8 @@ shiftMscale : Arrays := {
 pshiftMscale : List Binding := [
   { parameter := just "m", type := nothing, generator := "shiftMscale", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- dot adds the first coordinate of x, so it is not symmetric
 skewDot : Arrays := {
@@ -199,7 +210,8 @@ skewDot : Arrays := {
 pskewDot : List Binding := [
   { parameter := just "m", type := nothing, generator := "skewDot", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- dot drops the last coordinate
 dropDot : Arrays := {
@@ -221,7 +233,8 @@ dropDot : Arrays := {
 pdropDot : List Binding := [
   { parameter := just "m", type := nothing, generator := "dropDot", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- norm is off by one
 norm1 : Arrays := {
@@ -243,7 +256,8 @@ norm1 : Arrays := {
 pnorm1 : List Binding := [
   { parameter := just "m", type := nothing, generator := "norm1", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- norm forgets the square root
 sqNorm : Arrays := {
@@ -265,7 +279,8 @@ sqNorm : Arrays := {
 psqNorm : List Binding := [
   { parameter := just "m", type := nothing, generator := "sqNorm", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- matVec doubles its result
 doubleMV : Arrays := {
@@ -287,7 +302,8 @@ doubleMV : Arrays := {
 pdoubleMV : List Binding := [
   { parameter := just "m", type := nothing, generator := "doubleMV", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- matMul doubles its result
 doubleMM : Arrays := {
@@ -309,7 +325,8 @@ doubleMM : Arrays := {
 pdoubleMM : List Binding := [
   { parameter := just "m", type := nothing, generator := "doubleMM", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- retainedRank's floor is 1e14 times too large (about 0.67 of the largest)
 rankFloor : Arrays := {
@@ -331,7 +348,8 @@ rankFloor : Arrays := {
 prankFloor : List Binding := [
   { parameter := just "m", type := nothing, generator := "rankFloor", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- retainedRank is off by one
 rankPlus1 : Arrays := {
@@ -353,7 +371,8 @@ rankPlus1 : Arrays := {
 prankPlus1 : List Binding := [
   { parameter := just "m", type := nothing, generator := "rankPlus1", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- retainedRank's floor is an absolute 1e-3 instead of relative to the largest eigenvalue: read
 -- through the relative leaf as 1e-3 over the Frobenius norm (the largest eigenvalue is at most the
@@ -378,7 +397,8 @@ rankAbs : Arrays := {
 prankAbs : List Binding := [
   { parameter := just "m", type := nothing, generator := "rankAbs", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- retainedRank counts the positive diagonal entries, as if the matrix were diagonal
 rankDiag : Arrays := {
@@ -400,7 +420,8 @@ rankDiag : Arrays := {
 prankDiag : List Binding := [
   { parameter := just "m", type := nothing, generator := "rankDiag", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- trace is off by one
 trace1 : Arrays := {
@@ -422,7 +443,8 @@ trace1 : Arrays := {
 ptrace1 : List Binding := [
   { parameter := just "m", type := nothing, generator := "trace1", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- trace counts the first diagonal entry twice
 traceTwice : Arrays := {
@@ -444,7 +466,8 @@ traceTwice : Arrays := {
 ptraceTwice : List Binding := [
   { parameter := just "m", type := nothing, generator := "traceTwice", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- pinvSym inverts every nonzero diagonal entry with no floor (negative ones too)
 invDiag : Arrays := {
@@ -466,7 +489,8 @@ invDiag : Arrays := {
 pinvDiag : List Binding := [
   { parameter := just "m", type := nothing, generator := "invDiag", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- pinvSym adds a ridge 1e-3 I
 ridge : Arrays := {
@@ -488,7 +512,8 @@ ridge : Arrays := {
 pridge : List Binding := [
   { parameter := just "m", type := nothing, generator := "ridge", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- pinvSym returns a matrix off by 1e-3 at entry (0, 1), not symmetric
 skewPinv : Arrays := {
@@ -510,7 +535,8 @@ skewPinv : Arrays := {
 pskewPinv : List Binding := [
   { parameter := just "m", type := nothing, generator := "skewPinv", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- pinvSym's floor is 1e14 times too large
 pinvFloor : Arrays := {
@@ -532,7 +558,8 @@ pinvFloor : Arrays := {
 ppinvFloor : List Binding := [
   { parameter := just "m", type := nothing, generator := "pinvFloor", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- pinvSym's floor is an absolute 1e-3 instead of relative to the largest eigenvalue, read through
 -- the relative leaf as rankAbs is (nothing retained when the norm is at most 1e-3); PinvScales held
@@ -556,7 +583,8 @@ pinvAbs : Arrays := {
 ppinvAbs : List Binding := [
   { parameter := just "m", type := nothing, generator := "pinvAbs", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- the listed symmetric matrices of arrays_laws.test.lut (copied): the positive semidefinite ones where
 -- PinvRestricts is stated, and the ones PinvTraceIsRank runs on
@@ -622,7 +650,8 @@ skewNormPinv : Arrays := {
 pskewNormPinv : List Binding := [
   { parameter := just "m", type := nothing, generator := "skewNormPinv", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 -- offsetPinv: 1e-6 added at entry (0, 0), an amount that does not scale as 1 / c
 offsetPinv : Arrays := {
@@ -644,11 +673,12 @@ offsetPinv : Arrays := {
 poffsetPinv : List Binding := [
   { parameter := just "m", type := nothing, generator := "offsetPinv", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
 
 test "MscalePointwise" (SampledMode linear) (seed <- 20261015) (profile <- pshiftMscale) (control <- true)
 -- skewDot: the two orders differ by the coordinates added
-test "DotSymmetric" (SampledMode linear) (seed <- 20261015) (profile <- pskewDot) (control <- true)
+test "DotCommutative" (SampledMode linear) (seed <- 20261015) (profile <- pskewDot) (control <- true)
 -- dropDot: on the last basis vector the dot is 0, not x_j
 test "DotOnBasis" (SampledMode linear) (seed <- 20261015) (profile <- pdropDot) (control <- true)
 -- dropDot: the native sum has the last term
@@ -664,7 +694,9 @@ test "MatVecOnBasis" (SampledMode linear) (seed <- 20261015) (profile <- pdouble
 -- doubleMV: twice the native sum
 test "MatVecAgrees" (SampledMode linear) (seed <- 20261015) (profile <- pdoubleMV) (control <- true)
 -- doubleMM: a times the identity is twice a
-test "MatMulIdentity" (SampledMode linear) (seed <- 20261015) (profile <- pdoubleMM) (control <- true)
+test "MatMulNeutral" (SampledMode linear) (seed <- 20261015) (profile <- pdoubleMM) (control <- true)
+
+test "MatMulByIdentity" (SampledMode linear) (seed <- 20261015) (profile <- pdoubleMM) (control <- true)
 -- noSwapT: the transpose of the product is the product itself, not b^T a^T
 test "MatMulTransposes" (SampledMode linear) (seed <- 20261015) (profile <- pnoSwapT) (control <- true)
 -- doubleMM: twice the native sum
@@ -708,3 +740,127 @@ test "PinvScales" (SampledMode linear) (seed <- 20261015) (whereBindings <- draw
 test "PinvSymmetric" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnS) (profile <- pskewNormPinv) (control <- true)
 -- offsetPinv: an absolute 1e-6 at (0, 0), which P over c does not carry (2026-10-17)
 test "PinvScales" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnS) (profile <- poffsetPinv) (control <- true)
+
+-- [core bite 11, 2026-10-21] Wrong models of the container claims of arrays.lth §1, one per
+-- claim, on the censuses of arrays_laws.test.lut (Int, ExhaustiveMode, seed 20261021).
+entryType : Concrete := Int
+intEquality : Object Int := structural Int
+vecEquality : Object (Vec Int) := vecObject Int
+matEquality : Object (Mat Int) := matObject Int
+vecIndex : Indexed (Vec Int) Int := vecIndexed Int
+twoRows : Nat := 2
+threeColumns : Nat := 3
+double : Int -> Int := fn x { 2 * x }
+negated : Int -> Int := fn x { 0 - x }
+minus : Int -> Int -> Int := fn x y { x - y }
+foldUnit : Int := 9
+entry : Nat -> Int := fn k { 2 * k + 1 }
+lengths : List Nat := [0, 1, 3]
+vectors : List (Vec Int) := [
+  vec Int 0 (fn k { 0 }), vec Int 1 (fn k { 1 }), vec Int 2 (fn k { k }),
+  vec Int 2 (fn k { 1 - k }), vec Int 3 (fn k { 5 }), vec Int 3 (fn k { 0 - k }) ]
+vectorPairs : List (Related (Vec Int) (vecObject Int).eq) := [
+  { x := vec Int 2 (fn k { k }), y := vec Int 2 (fn k { k }) } ]
+vectorChains : List (Chain (Vec Int) (vecObject Int).eq) := [
+  { x := vec Int 1 (fn k { 1 }), y := vec Int 1 (fn k { 1 }), z := vec Int 1 (fn k { 1 }) } ]
+matrices : List (Mat Int) := [
+  mat Int 2 3 (fn i j { 3 * i + j }), mat Int 2 3 (fn i j { i - j }),
+  mat Int 3 2 (fn i j { 2 * i + j }), mat Int 1 6 (fn i j { j }) ]
+shaped : List (MatShaped Int 2 3) := [ mat Int 2 3 (fn i j { 3 * i + j }), mat Int 2 3 (fn i j { i - j }) ]
+matrixPairs : List (Related (Mat Int) (matObject Int).eq) := [
+  { x := mat Int 2 3 (fn i j { i - j }), y := mat Int 2 3 (fn i j { i - j }) } ]
+matrixChains : List (Chain (Mat Int) (matObject Int).eq) := [
+  { x := mat Int 1 1 (fn i j { 1 }), y := mat Int 1 1 (fn i j { 1 }), z := mat Int 1 1 (fn i j { 1 }) } ]
+symmetricMatrices : List SymmetricMatrix := [ identity 3, mat Float64 3 3 (fn i j { toFloat64 ((i + 1) * (j + 1)) }) ]
+
+-- a size of zero: every two vectors have the same (no) entries
+badVecIndex : Indexed (Vec Int) Int := { size := fn v { 0 }, at := fn v k { v.f k } }
+-- no two vectors are equal, not even a vector and itself
+badVecEquality : Object (Vec Int) := { eq := fn x y { false } }
+-- map forgets the entries
+badVecFunctor : Functor Vec := { map := fn (A B : U) g v { vec B 0 (fn k { g (v.f k) }) } }
+-- fold forgets the entries
+badVecFold : Foldable Vec := { fold := fn (A M : U) op e g v { e } }
+-- build forgets the length
+badVecTabulation : Tabulated (Vec Int) Int := { build := fn n f { vec Int 0 (fn k { f k }) } }
+-- a size of zero at one shape
+badMatIndex : Indexed (MatShaped Int 2 3) Int := { size := fn a { 0 }, at := fn a k { a.f 0 0 } }
+badMatEquality : Object (Mat Int) := { eq := fn a b { false } }
+badMatFunctor : Functor Mat := { map := fn (A B : U) g a { mat B 0 0 (fn i j { g (a.f i j) }) } }
+-- the inclusion sends every symmetric matrix to the zero one of its shape
+badSymmetricInclusion : Equalizer (Mat Float64) (Mat Float64) SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id (Mat Float64)) transposeDef :=
+  { include := fn s { zeroMat s.m s.n }, restrict := fn a { a } }
+
+onVecIsIndexed : List Binding := [
+  { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badVecIndex", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "vecEquality", coverage := Listed },
+  { parameter := just "a", type := nothing, generator := "intEquality", coverage := Listed },
+  { parameter := just "c", type := nothing, generator := "vectors", coverage := Listed },
+  { parameter := just "d", type := nothing, generator := "vectors", coverage := Listed } ]
+test "VecIsIndexed" ExhaustiveMode (seed <- 20261021) (profile <- onVecIsIndexed) (control <- true)
+onVecIsAnObject : List Binding := [
+  { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badVecEquality", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "vectors", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "vectorPairs", coverage := Listed },
+  { parameter := just "c", type := nothing, generator := "vectorChains", coverage := Listed } ]
+test "VecIsAnObject" ExhaustiveMode (seed <- 20261021) (profile <- onVecIsAnObject) (control <- true)
+onVecIsAFunctor : List Binding := [
+  { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "B", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "C", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badVecFunctor", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "vecEquality", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "double", coverage := Listed },
+  { parameter := just "h", type := nothing, generator := "negated", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "vectors", coverage := Listed } ]
+test "VecIsAFunctor" ExhaustiveMode (seed <- 20261021) (profile <- onVecIsAFunctor) (control <- true)
+onVecIsFoldable : List Binding := [
+  { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "M", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badVecFold", coverage := Listed },
+  { parameter := just "i", type := nothing, generator := "vecIndex", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "intEquality", coverage := Listed },
+  { parameter := just "op", type := nothing, generator := "minus", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "foldUnit", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "double", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "vectors", coverage := Listed } ]
+test "VecIsFoldable" ExhaustiveMode (seed <- 20261021) (profile <- onVecIsFoldable) (control <- true)
+onVecIsTabulated : List Binding := [
+  { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badVecTabulation", coverage := Listed },
+  { parameter := just "n", type := nothing, generator := "lengths", coverage := Listed },
+  { parameter := just "f", type := nothing, generator := "entry", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "intEquality", coverage := Listed } ]
+test "VecIsTabulated" ExhaustiveMode (seed <- 20261021) (profile <- onVecIsTabulated) (control <- true)
+onMatIsIndexed : List Binding := [
+  { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "r", type := nothing, generator := "twoRows", coverage := Listed },
+  { parameter := just "c", type := nothing, generator := "threeColumns", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badMatIndex", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "matEquality", coverage := Listed },
+  { parameter := just "a", type := nothing, generator := "intEquality", coverage := Listed },
+  { parameter := nothing, type := just "MatShaped", generator := "shaped", coverage := Listed } ]
+test "MatIsIndexed" ExhaustiveMode (seed <- 20261021) (profile <- onMatIsIndexed) (control <- true)
+onMatIsAnObject : List Binding := [
+  { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badMatEquality", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "matrices", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "matrixPairs", coverage := Listed },
+  { parameter := just "c", type := nothing, generator := "matrixChains", coverage := Listed } ]
+test "MatIsAnObject" ExhaustiveMode (seed <- 20261021) (profile <- onMatIsAnObject) (control <- true)
+onMatIsAFunctor : List Binding := [
+  { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "B", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "C", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badMatFunctor", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "matEquality", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "double", coverage := Listed },
+  { parameter := just "h", type := nothing, generator := "negated", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "matrices", coverage := Listed } ]
+test "MatIsAFunctor" ExhaustiveMode (seed <- 20261021) (profile <- onMatIsAFunctor) (control <- true)
+onSymmetricIsAnEqualizer : List Binding := [
+  { parameter := just "model", type := nothing, generator := "badSymmetricInclusion", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "symmetricMatrices", coverage := Listed } ]
+test "SymmetricIsAnEqualizer" ExhaustiveMode (seed <- 20261021) (profile <- onSymmetricIsAnEqualizer) (control <- true)
