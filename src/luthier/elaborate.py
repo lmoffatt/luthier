@@ -218,6 +218,16 @@ def unfold(ty, c):
         return t.Sigma('_', args[0], args[1]) if h.name == '*' else t.Sum((('left', args[0]), ('right', args[1])))
     if h.name in c.predicates and not args:
         return c.predicates[h.name]
+    if h.name in c.aliases and c.aliases[h.name].binders and h.name not in c.bodies:
+        # an alias's type former applied (`Vec A` where `Functor Vec` names it): its body under
+        # the arguments, as an applied alias is elaborated where it is written
+        ns = [n for b in c.aliases[h.name].binders for n in b.names]
+        if len(ns) != len(args):
+            return None
+        inner = c.child()
+        for n, a in zip(ns, args):
+            inner.names[n] = a
+        return walk(c.aliases[h.name].value, inner)
     if h.name in c.bodies:
         params, body = c.bodies[h.name]
         if len(params) != len(args):
@@ -1427,7 +1437,9 @@ def walk(v, c, expected=None):
                 return t.Var(value) if isinstance(value, str) else value
             if n in c.aliases:
                 if c.aliases[n].binders:
-                    raise ElaborationError(f'alias {n} needs arguments')
+                    # an alias with parameters named without its arguments is the type former
+                    # itself (`Functor Vec`, core bite 11): kept by name, unfolded where applied
+                    return t.Var(n)
                 return walk(c.aliases[n].value, c)
             q = qualified(v, c)
             if q is not None:

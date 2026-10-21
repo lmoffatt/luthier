@@ -150,8 +150,8 @@ CORE_FILE = "core.lut"
 # record/plan/core-2026-10-17/execution.md §6 that rewrites the file and so removes them; and the
 # names two core files define, until bite 6 writes the structures over core/properties/. Each is
 # a parameter (P11) with its reason; a name not listed here is refused. Keys are paths under lib/.
+# Empty since the core's bite 11 (arrays.lth's `Symmetric` is `SymmetricMatrix`); bite 13 checks it.
 CORE_COLLISIONS = {
-    "arrays.lth": ("Symmetric", "bite 11, arrays and tables"),
 }
 
 

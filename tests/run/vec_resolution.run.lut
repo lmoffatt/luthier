@@ -1,0 +1,8 @@
+-- Core bite 11 (execution.md §6): `size`, `at` and `map` resolve at `Vec Float64` through
+-- arrays.lth's claims `VecIsIndexed` and `VecIsAFunctor`, with no qualification (D-2026-10-18-b).
+import "world_model.lut" HostConsole host : HostConsole
+import "arrays.lth" Vec vec
+v : Vec Float64 := vec Float64 3 (fn k { if k == 0 then 3.0 else if k == 1 then 4.0 else 5.0 })
+doubled : Vec Float64 := map Float64 Float64 (fn x { 2.0 * x }) v
+resolved : Bool := size v == 3 and at v 1 == 4.0 and size doubled == 3 and at doubled 2 == 10.0
+main (w : W) : W * Unit := host.print w (if resolved then "resolved" else "wrong")
