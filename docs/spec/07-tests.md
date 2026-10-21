@@ -4,7 +4,7 @@ Chapter 7 of the specification, draft 0, 2026-10-12. It rewrites `docs/spec/08-t
 
 - A type has no single generator, so every test says which generators it used, and its certificate records them.
 - Generators are values of Luthier like any other. The random source is an extern whose laws of stochasticity are stated in Luthier; what is heavy runs as an extern.
-- Generators are functors over types: when a type is well defined, its generator is obvious. So the generic generators are few (exhaustive, and sampled with a linear or a logarithmic metric), and sampling by a weight puts numbers and lists under one rule.
+- Generators are functors over types: when a type is well defined, its generator is obvious. So the generic generators are few (exhaustive, and sampled with a linear or a logarithmic placement), and sampling by a weight puts numbers and lists under one rule.
 - Drawing a type is an error. There are generators only of defined types.
 - The bounds of a number are part of its type, decided when the type is defined.
 - A certificate says that a defined value belongs to a defined type. For a function the value is the function, and a run must use it inside what the certificate's generators covered. For the result of an analysis the value is the result, checked once, when it is produced.
@@ -33,7 +33,7 @@ A generic generator takes a type and builds a generator of it by following the t
 | `value v` | a value | `v`, always |
 | `census vs` | a list of values; optionally a weight | each value of the list in turn, or draws from it by its weight |
 | `exhaustive` | none | every value of a finite type |
-| `sampled m` | a metric: `linear`, `log`, or a weight | draws by the inverse of the cumulative weight |
+| `sampled m` | a placement: `linear`, `log`, or a weight | draws by the inverse of the cumulative weight |
 
 **7.S2. Sampling inverts a cumulative weight.** [decided D-2026-10-12-ah] His idea (D-2026-10-06-ab), decided with the chapter. To draw from a support with weight `c`, draw `u` uniform in [0, C) and return the first value at which the cumulative weight exceeds `u`. Over a finite list `v1, ..., vk` the cumulative weight at `vi` is the running sum `c(v1) + ... + c(vi)`. Over an interval [lo, hi] of numbers it is the integral of `c` from `lo` to `x`. The two placements of numbers are two weights (generators.lth's `Placement`, D-2026-10-18-e): `linear` is `c(x) = 1`, uniform between the bounds, and `log` is `c(x) = 1/|x|`, uniform in the logarithm of the magnitude, which needs a positive lower bound on the magnitude. A census with weights and a range of numbers are drawn by the same rule. Feat [Duregård, Jansson and Wang 2012] draws values of algebraic types in this way, indexing into the cumulative counts of the values of each size.
 
@@ -42,9 +42,9 @@ A generic generator takes a type and builds a generator of it by following the t
 | form of the type | `exhaustive` | `sampled m` |
 |---|---|---|
 | `Unit`, `Bool`, `Fin n` | every value | by weight, equal unless given |
-| `Int`, `Nat` with bounds | every value between them | the metric over the bounds |
-| `Int`, `Nat` without bounds | error (spec 7.R3) | the metric over [-s, s] or [0, s] |
-| `Float64`, `Rational` | error (spec 7.R3) | the metric over the bounds, continuous; without bounds, error (spec 7.S4) |
+| `Int`, `Nat` with bounds | every value between them | the placement over the bounds |
+| `Int`, `Nat` without bounds | error (spec 7.R3) | the placement over [-s, s] or [0, s] |
+| `Float64`, `Rational` | error (spec 7.R3) | the placement over the bounds, continuous; without bounds, error (spec 7.S4) |
 | product, record | the product of the components | each component, dependent ones in order (spec 7.S7) |
 | sum | each constructor with each payload | a constructor by weight, then its payload; [proposed] on a recursive `data` the size bounds the depth: at size 0 only constructors with no recursive argument, otherwise the size less one is split among the recursive arguments, as Feat counts by size (spec 7.S2) |
 | `List A`, `Vec A` | every length up to the size, entries exhaustive | a length (spec 7.S5), then that many entries |
@@ -136,7 +136,7 @@ A statistical law (the uniformity of draws, a density pair, the transform of res
 
 **7.S20. `test` is a function with named arguments.** [implemented] `test` is a function
 of `lib/test.lut`, the one with the most parameters in the language, so each option is a named
-argument with a default: the mode (`exhaustive`, `sampled` with its metric), the number of cases,
+argument with a default: the mode (`exhaustive`, `sampled` with its placement), the number of cases,
 the size, the bindings and the profile, which is a record value, and every budget of 7.S8. The
 directive forms of 7.R1 are its older surface (`spec 2`). [decided D-2026-10-13-ad] `test` builds a
 `TestSpec`, data the module keeps (D9 of the plan, `test "x.lut"` the action), in

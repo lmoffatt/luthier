@@ -636,11 +636,11 @@ def test_every_core_file_is_seen_without_an_import(tmp_path):
                     "main (w : W) : W * Unit := host.print w (showInt (compose Int Int Int succ succ 1))\n",
                     encoding="utf-8")
     loaded = Loaded(path)
-    assert loaded.name(loaded.top, "compose") == "compose" and loaded.see(loaded.top, "compose")[0] == LIB / "core" / "properties" / "functions.lth"
+    assert loaded.name(loaded.top, "compose") == "compose" and loaded.see(loaded.top, "compose")[0] == LIB / "core" / "core.lut"
     assert run_file(path) == "3\n"
 
 
-@pytest.mark.parametrize("name, where", [("not", "core/core.lut"), ("compose", "core/properties/functions.lth"),
+@pytest.mark.parametrize("name, where", [("not", "core/core.lut"), ("compose", "core/core.lut"),
                                           ("Object", "core/structures/equality.lth")])
 def test_a_file_that_redefines_a_core_name_is_refused(tmp_path, name, where):
     path = tmp_path / "redefines.run.lut"
@@ -650,15 +650,15 @@ def test_a_file_that_redefines_a_core_name_is_refused(tmp_path, name, where):
     assert f"redefines.run.lut defines {name}, which the core defines in {where}" in str(error.value)
 
 
-def test_a_name_two_core_files_define_is_imported_from_one(tmp_path):
-    # until bite 6, core/structures/equality.lth and core/properties/relations.lth both define
-    # `Reflexive` (run.py's CORE_COLLISIONS): a file that writes it without an import is told so
-    path = tmp_path / "ambiguous.lut"
+def test_the_seven_core_collisions_have_one_definition_and_are_seen_without_an_import(tmp_path):
+    from luthier.run import core_definitions, CORE_COLLISIONS
+    names = "Reflexive Symmetric Transitive Associative LeftNeutral RightNeutral Idempotent".split()
+    assert all(len(core_definitions()[n]) == 1 for n in names)
+    assert not any(path.startswith("core/") for path in CORE_COLLISIONS)
+    path = tmp_path / "unique.lut"
     path.write_text("r (x : Int) : Bool := Reflexive Int (fn a b { a == b }) x\n", encoding="utf-8")
     loaded = Loaded(path)
-    with pytest.raises(RunError, match="Reflexive is defined by core/structures/equality.lth and "
-                                       "core/properties/relations.lth, so it is imported from one of them"):
-        loaded.see(loaded.top, "Reflexive")
+    assert loaded.see(loaded.top, "Reflexive") == (LIB / "core/properties/relations.lth", "Reflexive")
 
 
 def _core_of(tmp_path, files):
@@ -724,10 +724,8 @@ def _mentions(value, names):
 # grade is `AssumedGrade`, so those two are no longer clashes; `LeqBoth` is gone from numbers.lth
 # (4a158b0).
 CLASHES = {
-    "LeqPair": ("core/structures/algebraic.lth", "algebra.lth", "numbers.lth"),
-    "LeqChain": ("core/structures/algebraic.lth", "algebra.lth", "numbers.lth"),
-    "LeqBoth": ("core/structures/algebraic.lth", "algebra.lth"),
-    "PlusCommutes": ("core/structures/algebraic.lth", "numbers.lth"),
+    "LeqPair": ("algebra.lth", "numbers.lth"),
+    "LeqChain": ("algebra.lth", "numbers.lth"),
     "NonNegative": ("generators.lth", "numbers.lth"),
 }
 SEEN_FROM = {}
@@ -758,9 +756,9 @@ def test_a_name_several_libraries_define_does_not_collide(numbers_laws, name):
 
 def test_the_numbers_laws_import_resolves_in_numbers_lth(numbers_laws):
     # the test file imports numbers.lth's PlusCommutes; core/structures/algebraic.lth's is another definition
-    assert numbers_laws.name(numbers_laws.top, "PlusCommutes") == "PlusCommutes@numbers"
+    assert numbers_laws.name(numbers_laws.top, "PlusCommutes") == "PlusCommutes"
     # a name the file does not import is the core's, every core file being seen (the core's bite 5)
-    assert numbers_laws.see(numbers_laws.top, "LeqPair") == ((LIB / "core/structures/algebraic.lth").resolve(), "LeqPair")
+    assert numbers_laws.see(numbers_laws.top, "LeqPair") is None
 
 
 # ---------------------------------------------------------------- an extern's arity from its type

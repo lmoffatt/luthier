@@ -1,3 +1,6 @@
+-- Bite 6 revision, Codex, 2026-10-21, prompt-bite-6.md at 2859815.
+-- Kernel property instances now live in core.lut and write core/core.cert.json.
+-- The following historical bite 2 description records the original organization.
 -- tests/tester/core_controls.test.lut: the controls of core_laws.test.lut (bite 2 of
 -- record/plan/core-2026-10-17/execution.md). Each line is a law's line of core_laws.test.lut
 -- written `(control <- true)`, its profile binding a wrong instance in place of the real one, and
@@ -15,25 +18,15 @@
 -- against Transitive, `equal` against Total and Asymmetric, implication against the laws of a
 -- Boolean operation, a projection against the neutral law of the other side.
 
+import "core_instances.lut" boolEq
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "core_instances.lut" leq less equal parity plus minus times first second zero one
+import "core_instances.lut" leq less equal parity plus minus times first second zero intOne
   identity negate succ pred double square timesZero nonNegative flippedMinus
   boolAnd boolOr boolNot top bottom append
   fplus ftimes fzero fnegate noBound1 noBound2 noBound3
-  IntReflexive IntIrreflexive IntSymmetric IntAntisymmetric IntAsymmetric IntTransitive IntTotal
-  IntEquivalence IntPreorder IntPartialOrder IntTotalOrder IntStrictOrder IntBothWaysEqual
-  IntAssociative IntCommutative IntIdempotent IntLeftNeutral IntRightNeutral IntNeutral IntAbsorbing
-  IntCancellative IntInvertible IntDistributive IntAbsorptive IntDistinct
-  BoolAssociative BoolCommutative BoolIdempotent BoolNeutral BoolAbsorbing BoolDistributive BoolAbsorptive
-  BoolComplemented StringAssociative StringCommutative StringNeutral
-  FloatAssociativeWithin FloatCommutativeWithin FloatNeutralWithin FloatDistributiveWithin FloatInvertibleWithin
-  IntPointwise IntPointwise2 IntInjective BoolInjective IntSurjective IntInverse IntIsomorphism IntBijective
-  IntIdempotentFunction IntInvolutive BoolInvolutive IntMonotone IntPreserving IntCongruent IntLandsIn
-  FloatIdempotentWithin FloatInvolutiveWithin FloatPointwiseWithin
-
 -- ---------------------------------------------------------------- the wrong instances
 
 -- every pair related, written as comparability so that the predicate reads its arguments (4.R3)
@@ -66,7 +59,7 @@ onPlus : List Binding := [
   { parameter := just "z", type := nothing, generator := "zero", coverage := Listed } ]
 onPlusWithOne : List Binding := [
   { parameter := just "op", type := nothing, generator := "plus", coverage := Listed },
-  { parameter := just "e", type := nothing, generator := "one", coverage := Listed } ]
+  { parameter := just "e", type := nothing, generator := "intOne", coverage := Listed } ]
 onPlusWithIdentity : List Binding := [
   { parameter := just "op", type := nothing, generator := "plus", coverage := Listed },
   { parameter := just "e", type := nothing, generator := "zero", coverage := Listed },
@@ -227,3 +220,356 @@ test "IntLandsIn" (SampledMode linear) (profile <- succInNonNegative) (control <
 test "FloatIdempotentWithin" (SampledMode linear) (profile <- onFloatSucc) (control <- true)
 test "FloatInvolutiveWithin" (SampledMode linear) (profile <- onFloatSucc) (control <- true)
 test "FloatPointwiseWithin" (SampledMode linear) (profile <- onFloatSucc) (control <- true)
+
+-- Bite 6: the core's own models, with each model explicitly bound by its census.
+coreType : Concrete := Bool
+coreBoolIdentity : Bool -> Bool := fn b { b }
+coreUnitTrue : Unit -> Bool := fn (u : Unit) { u == unit }
+coreUnitFalse : Unit -> Bool := fn (u : Unit) { not (u == unit) }
+coreBoolMonoid : Monoid Bool (structural Bool) := { neutral := true, combine := conj }
+coreFalseUnitEquality : Object Unit := { eq := fn x y { false } }
+goodUnitIsTerminal : Terminal Unit (structural Unit) := unitIsTerminalModel
+onCoreUnitIsTerminal : List Binding := [ { parameter := just "model", type := nothing, generator := "goodUnitIsTerminal", coverage := Listed }, { parameter := just "equality", type := nothing, generator := "coreFalseUnitEquality", coverage := Listed } ]
+test "UnitIsTerminal" (SampledMode linear) (seed <- 20261020) (profile <- onCoreUnitIsTerminal) (control <- true)
+goodEmptyIsInitial : Initial Empty := emptyIsInitialModel
+goodBoolIsTheBooleans : TheBooleans := boolIsTheBooleansModel
+badBoolIsTheBooleans : TheBooleans := { algebra := { top := false, bottom := true, complement := not, meet := conj, join := disj } }
+onCoreBoolIsTheBooleans : List Binding := [ { parameter := just "model", type := nothing, generator := "badBoolIsTheBooleans", coverage := Listed } ]
+test "BoolIsTheBooleans" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsTheBooleans) (control <- true)
+goodBoolIsACoproduct : Coproduct Unit Unit Bool (structural Bool) := boolIsACoproductModel
+badBoolIsACoproduct : Coproduct Unit Unit Bool (structural Bool) := { left := fn (u : Unit) { not (u == unit) }, right := fn (u : Unit) { not (u == unit) }, cases := fn (C : U) f g b { if b then f unit else g unit } }
+onCoreBoolIsACoproduct : List Binding := [ { parameter := just "model", type := nothing, generator := "badBoolIsACoproduct", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "c", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreUnitTrue", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreUnitFalse", coverage := Listed } ]
+test "BoolIsACoproduct" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsACoproduct) (control <- true)
+goodMaybeIsACoproduct : Coproduct Unit Bool (Maybe Bool) (structural (Maybe Bool)) := maybeIsACoproductModel Bool
+badMaybeIsACoproduct : Coproduct Unit Bool (Maybe Bool) (structural (Maybe Bool)) := { left := fn u { nothing }, right := fn b { nothing }, cases := fn (C : U) f g m { match m { nothing -> f unit ; just b -> g b } } }
+onCoreMaybeIsACoproduct : List Binding := [ { parameter := just "model", type := nothing, generator := "badMaybeIsACoproduct", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "c", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreUnitTrue", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed } ]
+test "MaybeIsACoproduct" (SampledMode linear) (seed <- 20261020) (profile <- onCoreMaybeIsACoproduct) (control <- true)
+goodListIsTheFreeMonoid : Lists Bool (structural (List Bool)) := listIsTheFreeMonoidModel Bool
+badListIsTheFreeMonoid : Lists Bool (structural (List Bool)) := { free := { monoid := { neutral := nil, combine := fn xs ys { xs } }, inject := fn b { cons b nil }, foldable := { fold := foldList } } }
+onCoreListIsTheFreeMonoid : List Binding := [ { parameter := just "model", type := nothing, generator := "badListIsTheFreeMonoid", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "N", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "nO", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "n", type := nothing, generator := "coreBoolMonoid", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := nothing, type := just "List", generator := "coreBoolLists", coverage := Listed } ]
+test "ListIsTheFreeMonoid" ExhaustiveMode (seed <- 20261020) (profile <- onCoreListIsTheFreeMonoid) (control <- true)
+goodIntIsAnObject : Object Int := intIsAnObjectModel
+badIntIsAnObject : Object Int := { eq := fn x y { false } }
+onCoreIntIsAnObject : List Binding := [ { parameter := just "model", type := nothing, generator := "badIntIsAnObject", coverage := Listed } ]
+test "IntIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onCoreIntIsAnObject) (control <- true)
+goodNatIsAnObject : Object Nat := natIsAnObjectModel
+badNatIsAnObject : Object Nat := { eq := fn x y { false } }
+onCoreNatIsAnObject : List Binding := [ { parameter := just "model", type := nothing, generator := "badNatIsAnObject", coverage := Listed } ]
+test "NatIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onCoreNatIsAnObject) (control <- true)
+goodBoolIsAnObject : Object Bool := boolIsAnObjectModel
+badBoolIsAnObject : Object Bool := { eq := fn x y { false } }
+onCoreBoolIsAnObject : List Binding := [ { parameter := just "model", type := nothing, generator := "badBoolIsAnObject", coverage := Listed } ]
+test "BoolIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsAnObject) (control <- true)
+goodStringIsAnObject : Object String := stringIsAnObjectModel
+badStringIsAnObject : Object String := { eq := fn x y { false } }
+onCoreStringIsAnObject : List Binding := [ { parameter := just "model", type := nothing, generator := "badStringIsAnObject", coverage := Listed } ]
+test "StringIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onCoreStringIsAnObject) (control <- true)
+goodFloatIsAnObject : Object Float64 := floatIsAnObjectModel
+badFloatIsAnObject : Object Float64 := { eq := fn x y { false } }
+onCoreFloatIsAnObject : List Binding := [ { parameter := just "model", type := nothing, generator := "badFloatIsAnObject", coverage := Listed } ]
+test "FloatIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onCoreFloatIsAnObject) (control <- true)
+goodIntIsASemiring : Semiring Int (structural Int) := intIsASemiringModel
+badIntIsASemiring : Semiring Int (structural Int) := { zero := 0, one := 1, plus := intMinus, times := intTimes }
+onCoreIntIsASemiring : List Binding := [ { parameter := just "model", type := nothing, generator := "badIntIsASemiring", coverage := Listed } ]
+test "IntIsASemiring" (SampledMode linear) (seed <- 20261020) (profile <- onCoreIntIsASemiring) (control <- true)
+goodIntIsACommutativeRing : CommutativeRing Int (structural Int) := intIsACommutativeRingModel
+badIntIsACommutativeRing : CommutativeRing Int (structural Int) := { zero := 0, one := 1, plus := intPlus, times := intTimes, negate := id Int }
+onCoreIntIsACommutativeRing : List Binding := [ { parameter := just "model", type := nothing, generator := "badIntIsACommutativeRing", coverage := Listed } ]
+test "IntIsACommutativeRing" (SampledMode linear) (seed <- 20261020) (profile <- onCoreIntIsACommutativeRing) (control <- true)
+goodIntIsOrdered : Order Int (structural Int) := intIsOrderedModel
+badIntIsOrdered : Order Int (structural Int) := { leq := fn x y { false } }
+onCoreIntIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "badIntIsOrdered", coverage := Listed } ]
+test "IntIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCoreIntIsOrdered) (control <- true)
+goodNatIsOrdered : Order Nat (structural Nat) := natIsOrderedModel
+badNatIsOrdered : Order Nat (structural Nat) := { leq := fn x y { false } }
+onCoreNatIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "badNatIsOrdered", coverage := Listed } ]
+test "NatIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCoreNatIsOrdered) (control <- true)
+goodBoolIsOrdered : Order Bool (structural Bool) := boolIsOrderedModel
+badBoolIsOrdered : Order Bool (structural Bool) := { leq := fn x y { false } }
+onCoreBoolIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "badBoolIsOrdered", coverage := Listed } ]
+test "BoolIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsOrdered) (control <- true)
+goodStringIsOrdered : Order String (structural String) := stringIsOrderedModel
+badStringIsOrdered : Order String (structural String) := { leq := fn x y { false } }
+onCoreStringIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "badStringIsOrdered", coverage := Listed } ]
+test "StringIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCoreStringIsOrdered) (control <- true)
+goodFloatIsOrdered : Order Float64 (structural Float64) := floatIsOrderedModel
+badFloatIsOrdered : Order Float64 (structural Float64) := { leq := fn x y { false } }
+onCoreFloatIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "badFloatIsOrdered", coverage := Listed } ]
+test "FloatIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCoreFloatIsOrdered) (control <- true)
+goodNatIsAnOrderedSemiring : OrderedSemiring Nat (structural Nat) := natIsAnOrderedSemiringModel
+badNatIsAnOrderedSemiring : OrderedSemiring Nat (structural Nat) := { semiring := { zero := 0, one := 1, plus := fn a b { a + b }, times := fn a b { 0 } }, order := { leq := fn x y { x <= y } } }
+onCoreNatIsAnOrderedSemiring : List Binding := [ { parameter := just "model", type := nothing, generator := "badNatIsAnOrderedSemiring", coverage := Listed } ]
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onCoreNatIsAnOrderedSemiring) (control <- true)
+goodStringIsAMonoid : Monoid String (structural String) := stringIsAMonoidModel
+badStringIsAMonoid : Monoid String (structural String) := { neutral := "", combine := fn x y { x } }
+onCoreStringIsAMonoid : List Binding := [ { parameter := just "model", type := nothing, generator := "badStringIsAMonoid", coverage := Listed } ]
+test "StringIsAMonoid" (SampledMode linear) (seed <- 20261020) (profile <- onCoreStringIsAMonoid) (control <- true)
+goodBoolIsABooleanAlgebra : BooleanAlgebra Bool (structural Bool) := boolIsABooleanAlgebraModel
+badBoolIsABooleanAlgebra : BooleanAlgebra Bool (structural Bool) := { top := true, bottom := false, complement := id Bool, meet := conj, join := disj }
+onCoreBoolIsABooleanAlgebra : List Binding := [ { parameter := just "model", type := nothing, generator := "badBoolIsABooleanAlgebra", coverage := Listed } ]
+test "BoolIsABooleanAlgebra" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsABooleanAlgebra) (control <- true)
+goodIntIsAMetric : Metric MetricInteger (structural MetricInteger) := intIsAMetricModel
+badIntIsAMetric : Metric MetricInteger (structural MetricInteger) := { d := fn x y { toFloat64 ((x - y) * (x - y)) } }
+coreMetricPairs : List (Related MetricInteger (structural MetricInteger).eq) := [{ x := 0, y := 0 }, { x := 1, y := 1 }]
+onCoreIntIsAMetric : List Binding := [ { parameter := just "p", type := nothing, generator := "coreMetricPairs", coverage := Listed }, { parameter := just "model", type := nothing, generator := "badIntIsAMetric", coverage := Listed } ]
+test "IntIsAMetric" (SampledMode linear) (seed <- 20261020) (profile <- onCoreIntIsAMetric) (control <- true)
+goodBoolIsAMetric : Metric Bool (structural Bool) := boolIsAMetricModel
+badBoolIsAMetric : Metric Bool (structural Bool) := { d := fn x y { 0.0 } }
+onCoreBoolIsAMetric : List Binding := [ { parameter := just "model", type := nothing, generator := "badBoolIsAMetric", coverage := Listed } ]
+test "BoolIsAMetric" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsAMetric) (control <- true)
+goodKernelApplies : Exponential Bool Bool (structural Bool) := kernelAppliesModel Bool Bool
+badKernelApplies : Exponential Bool Bool (structural Bool) := { apply := fn f x { f (not x) } }
+onCoreKernelApplies : List Binding := [ { parameter := just "model", type := nothing, generator := "badKernelApplies", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed } ]
+test "KernelApplies" (SampledMode linear) (seed <- 20261020) (profile <- onCoreKernelApplies) (control <- true)
+goodPairsAreTheProduct : Product Bool Bool (Bool * Bool) (structural Bool) (structural Bool) (structural (Bool * Bool)) := pairsAreTheProductModel Bool Bool
+badPairsAreTheProduct : Product Bool Bool (Bool * Bool) (structural Bool) (structural Bool) (structural (Bool * Bool)) := { pair := fn a b { (b, a) }, first := fn p { match p { (a, b) -> a } }, second := fn p { match p { (a, b) -> b } } }
+onCorePairsAreTheProduct : List Binding := [ { parameter := just "model", type := nothing, generator := "badPairsAreTheProduct", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed } ]
+test "PairsAreTheProduct" (SampledMode linear) (seed <- 20261020) (profile <- onCorePairsAreTheProduct) (control <- true)
+goodRecordsAreNamedProducts : NamedProduct Bool Bool { x : Bool, y : Bool } (structural Bool) (structural Bool) (structural { x : Bool, y : Bool }) := recordsAreNamedProductsModel Bool Bool
+badRecordsAreNamedProducts : NamedProduct Bool Bool { x : Bool, y : Bool } (structural Bool) (structural Bool) (structural { x : Bool, y : Bool }) := { pair := fn a b { { x := a, y := b } }, first := fn r { r.x }, second := fn r { r.y }, firstName := "x", secondName := "x", select := fn n r { if n == "x" then just (one r.x) else just (two r.y) } }
+onCoreRecordsAreNamedProducts : List Binding := [ { parameter := just "model", type := nothing, generator := "badRecordsAreNamedProducts", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed } ]
+test "RecordsAreNamedProducts" (SampledMode linear) (seed <- 20261020) (profile <- onCoreRecordsAreNamedProducts) (control <- true)
+goodSumsAreNamedCoproducts : NamedCoproduct Bool Bool ({ one : Bool || two : Bool }) (structural ({ one : Bool || two : Bool })) := sumsAreNamedCoproductsModel Bool Bool
+badSumsAreNamedCoproducts : NamedCoproduct Bool Bool ({ one : Bool || two : Bool }) (structural ({ one : Bool || two : Bool })) := { left := one, right := two, cases := fn (C : U) f g s { match s { one a -> f a ; two b -> g b } }, leftName := "one", rightName := "one", labelOf := fn s { match s { one a -> "one" ; two b -> "two" } } }
+onCoreSumsAreNamedCoproducts : List Binding := [ { parameter := just "model", type := nothing, generator := "badSumsAreNamedCoproducts", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "c", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed } ]
+test "SumsAreNamedCoproducts" (SampledMode linear) (seed <- 20261020) (profile <- onCoreSumsAreNamedCoproducts) (control <- true)
+
+-- Individual, deterministic controls for the new theory laws (no probabilistic model).
+-- Bite 6 controls, Codex, 2026-10-20; input 2859815, prompt-bite-6.md.
+-- These are explicit counterexamples to the cited theories, not certified models of them.
+-- Each witness is deterministic (no random data); the test lines use seed 20261020.
+-- Mathematical references and the separation of planes are in core/structures/*.lth.
+import "numbers_model.lut" elementary
+
+boolDistance (x y : Bool) : Float64 := if x == y then 0.0 else 1.0
+intDistance (x y : Int) : Float64 := floatAbs (toFloat64 (x - y))
+intSquareDistance (x y : Int) : Float64 := toFloat64 ((x - y) * (x - y))
+boolListIndexed : Indexed (List Bool) Bool := { size := lengthList Bool, at := atList Bool }
+boolListFoldable : Foldable List := { fold := foldList }
+boolListMonoid : Monoid (List Bool) (structural (List Bool)) := { neutral := nil, combine := appendList Bool }
+boolMonoid : Monoid Bool (structural Bool) := { neutral := true, combine := conj }
+boolOrder : Order Bool (structural Bool) := { leq := fn x y { not x or y } }
+boolFree : FreeMonoid Bool List (structural (List Bool)) := { monoid := boolListMonoid, inject := fn b { cons b nil }, foldable := boolListFoldable }
+buildBooleans (n : Nat) (f : Fin n -> Bool) : List Bool := if n == 0 then nil else cons (f 0) (buildBooleans (n - 1) (fn k { f (k + 1) }))
+boolTabulated : Tabulated (List Bool) Bool := { build := buildBooleans }
+badMap : Functor List := { map := fn (A B : U) f xs { match xs { nil -> nil ; cons x rest -> mapKernelList A B f rest } } }
+falseJoin : Quantale Bool (structural Bool) := { neutral := true, combine := conj, leq := fn x y { not x or y }, supremum := fn (I : U) f { false } }
+trueJoin : Quantale Bool (structural Bool) := { neutral := true, combine := fn x y { not (x == y) }, leq := fn x y { not x or y }, supremum := fn (I : U) f { true } }
+badDistribution : DistanceDistribution := { cdf := fn t { 1.0 }, tail := fn p { 0.0 }, below := fn t p { t } }
+zeroDistribution : DistanceDistribution := { cdf := fn t { 0.0 }, tail := fn p { 0.0 }, below := fn t p { t - 1.0 } }
+badTNorm : TNorm := { tensor := fn x y { (x + y) / 2.0 } }
+minTNorm : TNorm := { tensor := fn x y { if x <= y then x else y } }
+badMenger : ProbabilisticMetric Bool (structural Bool) minTNorm := { distribution := fn x y { if x == y then zeroDistribution else badDistribution }, separates := fn p { 1.0 } }
+asymmetricMenger : ProbabilisticMetric Bool (structural Bool) minTNorm := { distribution := fn x y { if x then badDistribution else zeroDistribution }, separates := fn p { 1.0 } }
+boolQuotient : Coequalizer Bool Bool (structural Bool) (fn x y { x == y }) := { project := id Bool, representative := id Bool, lift := fn (B : U) b f respect x { f x } }
+RefuteStructuralSubstitution : Bool := Substitutive Bool { eq := fn x y { true } } Bool (id Bool) { x := true, y := false }
+RefuteMetricDiagonal : Bool := MetricZeroOnEqual Bool (structural Bool) { d := fn x y { 1.0 } } { x := true, y := true }
+RefuteMetricIdentity : Bool := MetricIndiscernible Bool (structural Bool) { d := fn x y { 0.0 } } true false
+RefuteMetricTriangle : Bool := Triangular Int intSquareDistance 0 1 2
+RefuteMetricUltraTriangle : Bool := Ultratriangular Int intDistance 0 1 2
+RefuteMetricPositive : Bool := MetricNonNegative Bool (fn x y { -1.0 }) true false
+RefuteMetricWithinDiagonal : Bool := WithinZeroOnEqual Bool (structural Bool) { d := fn x y { 1.0 }, bound := fn x y { 0.0 } } { x := true, y := true }
+RefuteMetricWithinSymmetry : Bool := WithinSymmetric Bool (structural Bool) { d := fn x y { if x then 1.0 else 0.0 }, bound := fn x y { 0.0 } } true false
+RefuteMetricWithinTriangle : Bool := WithinTriangular Int (structural Int) { d := intSquareDistance, bound := fn x y { 0.0 } } 0 1 2
+RefuteToleranceReflexivity : Bool := Reflexive Int (MetricTolerance Int intDistance 0.0) 0 and Reflexive Int (fn x y { x < y }) 0
+RefuteToleranceNotTransitive : Bool := Transitive Int (MetricTolerance Int intDistance 1.0) { x := 0, y := 1, z := 2 }
+RefuteUltrametricThreshold : Bool := Transitive Int (MetricTolerance Int intDistance 1.0) { x := 0, y := 1, z := 2 }
+RefuteNonExpansiveFunction : Bool := NonExpansive Int Int intDistance intDistance (fn x { x * 2 }) 0 1
+RefuteLipschitzFunction : Bool := Lipschitz Int Int intDistance intDistance (fn x { x * 2 }) 1.0 0 1
+RefuteOrderLeast : Bool := Least Bool (fn x y { not x or y }) true false
+RefuteOrderGreatest : Bool := Greatest Bool (fn x y { not x or y }) false true
+RefuteOrderDiscrete : Bool := Discrete Int (structural Int) (fn x y { x <= y }) (fn x { x + 2 }) { x := 0, y := 1 }
+RefuteOrderMonotone : Bool := MonotoneIn Int (fn x y { x <= y }) (fn x y { 0 - x }) { x := 0, y := 1 } 0
+RefuteOrderPositive : Bool := PositiveClosed Int (fn x y { x <= y }) (fn x y { -1 }) 0 { x := 1, y := 1 }
+RefuteQuantaleUpper : Bool := JoinUpper Bool (structural Bool) falseJoin Bool (id Bool) true
+boolUpperWitness (i : Bool) : { u : Unit | trueJoin.leq ((fn b { false }) i) false } := unit
+RefuteQuantaleLeast : Bool := JoinLeast Bool (structural Bool) trueJoin Bool (fn b { false }) false boolUpperWitness
+RefuteQuantaleDistribution : Bool := TensorPreservesJoins Bool (structural Bool) trueJoin Bool (id Bool) true
+RefuteTNormAssociativity : Bool := Associative ProbabilityLevel (structural ProbabilityLevel) badTNorm.tensor 0.0 0.0 1.0
+RefuteTNormCommutativity : Bool := Commutative ProbabilityLevel ProbabilityLevel (structural ProbabilityLevel) (fn x y { x }) 0.0 1.0
+RefuteTNormNeutral : Bool := Neutral ProbabilityLevel (structural ProbabilityLevel) (fn x y { x }) 1.0 0.0
+probabilityOrderPair : Related ProbabilityLevel (fn x y { x <= y }) := { x := 0.0, y := 1.0 }
+decreasingTensor (x y : ProbabilityLevel) : ProbabilityLevel := 1.0 - x
+RefuteTNormMonotone : Bool := MonotoneIn ProbabilityLevel (fn x y { x <= y }) decreasingTensor probabilityOrderPair 0.0
+RefuteDistributionOrigin : Bool := DistributionZero badDistribution 0.0
+descendingCDF (t : Float64) : ProbabilityLevel := if t < 1.0 then 1.0 else 0.0
+RefuteDistributionOrder : Bool := Monotone Float64 ProbabilityLevel (fn x y { x <= y }) (fn x y { x <= y }) descendingCDF { x := 0.0, y := 1.0 }
+RefuteDistributionLimit : Bool := DistributionTail zeroDistribution 0.5 1.0
+RefuteDistributionLeftLimit : Bool := DistributionLeftContinuous badDistribution 1.0 0.5
+RefuteMengerOrigin : Bool := MengerDiagonal Bool (structural Bool) minTNorm badMenger { x := true, y := true } 1.0
+RefuteMengerSeparation : Bool := MengerSeparated Bool (structural Bool) minTNorm badMenger { x := true, y := false }
+RefuteMengerSymmetry : Bool := MengerSymmetric Bool (structural Bool) minTNorm asymmetricMenger true false 1.0
+RefuteMengerInequality : Bool := MengerTriangle Bool (structural Bool) minTNorm badMenger false true false 1.0 1.0
+RefuteTerminalPoint : Bool := OnlyThePoint Bool (structural Bool) { point := true } false
+RefuteProductFirst : Bool := PairFst Bool Bool (Bool * Bool) (structural Bool) (structural Bool) (structural (Bool * Bool)) { pair := fn x y { (x, y) }, first := fn p { match p { (x, y) -> y } }, second := fn p { match p { (x, y) -> y } } } true false
+RefuteProductSecond : Bool := PairSnd Bool Bool (Bool * Bool) (structural Bool) (structural Bool) (structural (Bool * Bool)) { pair := fn x y { (x, y) }, first := fn p { match p { (x, y) -> x } }, second := fn p { match p { (x, y) -> x } } } true false
+RefuteProductUnique : Bool := Pairing Bool Bool (Bool * Bool) (structural Bool) (structural Bool) (structural (Bool * Bool)) { pair := fn x y { (y, x) }, first := fn p { match p { (x, y) -> x } }, second := fn p { match p { (x, y) -> y } } } (true, false)
+RefuteExponentialBeta : Bool := Beta Bool Bool (structural Bool) { apply := fn f x { f (not x) } } (id Bool) true
+RefuteEqualizerCommutes : Bool := Equalizes Bool Bool Bool (structural Bool) (structural Bool) (structural Bool) (id Bool) (fn x { true }) { include := id Bool, restrict := id Bool } false
+RefuteEqualizerSection : Bool := RestrictIncludes Bool Bool Bool (structural Bool) (structural Bool) (structural Bool) (id Bool) (fn x { true }) { include := id Bool, restrict := fn x { false } } true
+RefuteEqualizerRetract : Bool := IncludeRestricts Bool Bool Bool (structural Bool) (structural Bool) (structural Bool) (id Bool) (fn x { true }) { include := fn x { true }, restrict := id Bool } false
+RefutePullbackSquare : Bool := PullbackCommutes Bool Bool Bool Bool (structural Bool) (structural Bool) (structural Bool) (structural Bool) (id Bool) (id Bool) { first := id Bool, second := not, pair := fn v { v.x } } true
+RefutePullbackProjection : Bool := PullbackProjects Bool Bool Bool Bool (structural Bool) (structural Bool) (structural Bool) (structural Bool) (id Bool) (id Bool) { first := id Bool, second := id Bool, pair := fn v { not v.x } } { x := true, y := true }
+RefutePullbackUnique : Bool := PullbackUnique Bool Bool Bool Bool (structural Bool) (structural Bool) (structural Bool) (structural Bool) (id Bool) (id Bool) { first := id Bool, second := id Bool, pair := fn v { not v.x } } true
+RefuteQuotientRelation : Bool := ProjectsRelated Bool Bool (structural Bool) (fn x y { true }) { project := id Bool, representative := id Bool, lift := fn (B : U) b f respect x { f x } } { x := true, y := false }
+RefuteQuotientOnto : Bool := ProjectIsOnto Bool Bool (structural Bool) (fn x y { x == y }) { project := fn x { false }, representative := id Bool, lift := fn (B : U) b f respect x { f x } } true
+boolRespectWitness (p : Related Bool (fn x y { x == y })) : { u : Unit | (structural Bool).eq (id Bool p.x) (id Bool p.y) } := unit
+RefuteQuotientLift : Bool := LiftProjects Bool Bool (structural Bool) (fn x y { x == y }) { project := not, representative := id Bool, lift := fn (B : U) b f respect x { f x } } Bool (structural Bool) (id Bool) boolRespectWitness true
+RefuteFunctorIdentity : Bool := MapId List badMap Bool (structural (List Bool)) [true]
+RefuteFunctorComposition : Bool := MapCompose List badMap Bool Bool Bool (structural (List Bool)) (id Bool) (id Bool) [true, false]
+badIndexed : Indexed (List Bool) Bool := { size := fn xs { 0 }, at := fn xs k { true } }
+RefuteIndexExtensionality : Bool := Extensional (List Bool) Bool badIndexed (structural (List Bool)) (structural Bool) [true] [false]
+RefuteBuildSize : Bool := SizeBuild (List Bool) Bool boolListIndexed { build := fn n f { nil } } 1 (fn k { true })
+RefuteBuildEntry : Bool := AtBuild (List Bool) Bool boolListIndexed { build := fn n f { [false] } } (structural Bool) 1 (fn k { true }) 0
+RefuteMapSize : Bool := SizeMap List Bool Bool badMap boolListIndexed boolListIndexed (id Bool) [true]
+RefuteMapEntry : Bool := AtMap List Bool Bool badMap boolListIndexed boolListIndexed (structural Bool) (id Bool) [true, false] 0
+RefuteAppendSize : Bool := Preserving (List Bool) Nat (structural Nat) (fn xs ys { xs }) (fn (x y : Nat) { x + y }) (lengthList Bool) [true] [false]
+RefuteFoldBuild : Bool := FoldOfBuild List Bool Bool { fold := fn (A M : U) op e f xs { e } } boolTabulated (structural Bool) conj true (id Bool) 1 (fn k { false })
+RefuteQuantifiersDuality : Bool := QuantifiersDual 1 { every := fn p { false }, some := fn p { false }, pairs := fn p { false } } (fn k { true })
+RefuteQuantifiersNesting : Bool := QuantifiersPairs 1 { every := fn p { true }, some := fn p { true }, pairs := fn p { false } } (fn i j { true })
+RefuteQueryAll : Bool := QueriesEvery List boolListFoldable { every := fn (A : U) p xs { false }, contains := fn (A : U) o x xs { false } } Bool (id Bool) [true]
+RefuteQueryMember : Bool := QueriesContains List boolListFoldable { every := fn (A : U) p xs { all List A boolListFoldable p xs }, contains := fn (A : U) o x xs { false } } Bool (structural Bool) true [true]
+RefuteEntrywiseBall : Bool := EntrywiseSpecification (List Bool) Bool boolListIndexed boolDistance (fn radius xs ys { not (entrywiseBall (List Bool) Bool coreListIndex coreListDistance radius xs ys) }) (fn xs ys k { 0.0 }) [true] [true]
+RefuteImplicationTruth : Bool := MaterialImplication conj false false
+RefuteFreeNeutral : Bool := FoldNeutral Bool List (structural (List Bool)) { monoid := { neutral := [false], combine := appendList Bool }, inject := fn b { [b] }, foldable := { fold := foldList } } Bool (structural Bool) boolMonoid (id Bool)
+RefuteFreeInject : Bool := FoldInject Bool List (structural (List Bool)) { monoid := { neutral := nil, combine := appendList Bool }, inject := fn b { nil }, foldable := { fold := foldList } } Bool (structural Bool) boolMonoid (id Bool) false
+RefuteFreeCombine : Bool := FoldCombine Bool List (structural (List Bool)) { monoid := { neutral := nil, combine := fn xs ys { nil } }, inject := fn b { [b] }, foldable := { fold := foldList } } Bool (structural Bool) boolMonoid (id Bool) [false] nil
+RefuteFreeItself : Bool := FoldIsItself Bool List (structural (List Bool)) { monoid := { neutral := nil, combine := appendList Bool }, inject := fn b { [b] }, foldable := { fold := fn (A M : U) op e f xs { e } } } [true]
+RefuteListNil : Bool := NilIsNeutral Bool (structural (List Bool)) { free := { monoid := { neutral := [true], combine := appendList Bool }, inject := fn b { [b] }, foldable := { fold := foldList } } }
+RefuteListCons : Bool := ConsIsInjectionCombined Bool (structural (List Bool)) { free := { monoid := { neutral := nil, combine := appendList Bool }, inject := fn b { nil }, foldable := { fold := foldList } } } true nil
+
+-- Four metric controls required by D-2026-10-17-f. The carrier is bounded away from zero so
+-- that relative error and Bernoulli KL are defined. None is asserted to be an exact metric.
+MetricProbability : U := { p : Float64 | 0.125 <= p and p <= 0.875 }
+MetricCandidate (candidate : Metric MetricProbability (structural MetricProbability)) := Metric MetricProbability (structural MetricProbability) candidate
+squaredMetric : Metric MetricProbability (structural MetricProbability) := { d := fn x y { (x - y) * (x - y) } }
+relativeMetric : Metric MetricProbability (structural MetricProbability) := { d := fn x y { floatAbs (x - y) / floatAbs x } }
+negativeMetric : Metric MetricProbability (structural MetricProbability) := { d := fn x y { 0.0 - floatAbs (x - y) } }
+klMetric : Metric MetricProbability (structural MetricProbability) := {
+  d := fn p q { p * elementary.log (p / q) + (1.0 - p) * elementary.log ((1.0 - p) / (1.0 - q)) } }
+
+test "RefuteStructuralSubstitution" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMetricDiagonal" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMetricIdentity" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMetricTriangle" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMetricUltraTriangle" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMetricPositive" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMetricWithinDiagonal" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMetricWithinSymmetry" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMetricWithinTriangle" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteToleranceReflexivity" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteToleranceNotTransitive" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteUltrametricThreshold" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteNonExpansiveFunction" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteLipschitzFunction" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteOrderLeast" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteOrderGreatest" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteOrderDiscrete" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteOrderMonotone" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteOrderPositive" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteQuantaleUpper" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteQuantaleLeast" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteQuantaleDistribution" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteTNormAssociativity" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteTNormCommutativity" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteTNormNeutral" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteTNormMonotone" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteDistributionOrigin" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteDistributionOrder" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteDistributionLimit" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteDistributionLeftLimit" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMengerOrigin" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMengerSeparation" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMengerSymmetry" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMengerInequality" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteTerminalPoint" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteProductFirst" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteProductSecond" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteProductUnique" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteExponentialBeta" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteEqualizerCommutes" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteEqualizerSection" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteEqualizerRetract" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefutePullbackSquare" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefutePullbackProjection" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefutePullbackUnique" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteQuotientRelation" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteQuotientOnto" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteQuotientLift" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteFunctorIdentity" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteFunctorComposition" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteIndexExtensionality" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteBuildSize" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteBuildEntry" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMapSize" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteMapEntry" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteAppendSize" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteFoldBuild" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteQuantifiersDuality" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteQuantifiersNesting" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteQueryAll" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteQueryMember" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteEntrywiseBall" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteImplicationTruth" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteFreeNeutral" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteFreeInject" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteFreeCombine" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteFreeItself" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteListNil" ExhaustiveMode (seed <- 20261020) (control <- true)
+test "RefuteListCons" ExhaustiveMode (seed <- 20261020) (control <- true)
+
+onSquaredMetric : List Binding := [ { parameter := just "candidate", type := nothing, generator := "squaredMetric", coverage := Listed } ]
+onRelativeMetric : List Binding := [ { parameter := just "candidate", type := nothing, generator := "relativeMetric", coverage := Listed } ]
+onNegativeMetric : List Binding := [ { parameter := just "candidate", type := nothing, generator := "negativeMetric", coverage := Listed } ]
+onKLMetric : List Binding := [ { parameter := just "candidate", type := nothing, generator := "klMetric", coverage := Listed } ]
+test "MetricCandidate" (SampledMode linear) (seed <- 20261020) (profile <- onSquaredMetric) (control <- true)
+test "MetricCandidate" (SampledMode linear) (seed <- 20261020) (profile <- onRelativeMetric) (control <- true)
+test "MetricCandidate" (SampledMode linear) (seed <- 20261020) (profile <- onNegativeMetric) (control <- true)
+test "MetricCandidate" (SampledMode linear) (seed <- 20261020) (profile <- onKLMetric) (control <- true)
+
+coreBoolLists : List (List Bool) := [nil, [true], [false], [true, false], [false, true]]
+
+-- Remaining kernel constructions, instantiated at finite carriers.
+coreListType : U -> U := List
+coreListBoolType : Concrete := List Bool
+coreListEquality : Object (List Bool) := structural (List Bool)
+coreListPairs : List (Related (List Bool) (structural (List Bool)).eq) := [{ x := nil, y := nil }, { x := [true], y := [true] }]
+coreListChains : List (Chain (List Bool) (structural (List Bool)).eq) := [{ x := nil, y := nil, z := nil }, { x := [true], y := [true], z := [true] }]
+coreListFold : Foldable List := { fold := foldList }
+coreListIndex : Indexed (List Bool) Bool := { size := lengthList Bool, at := atList Bool }
+coreListDistance (x y : Bool) : Float64 := if x == y then 0.0 else 1.0
+coreRadius (xs ys : List Bool) (k : Fin (lengthList Bool xs)) : Float64 := 0.0
+coreOne : Nat := 1
+coreTwo : { n : Int | 0 < n } := 2
+coreFinPredicate : Fin 1 -> Bool := fn k { k == 0 }
+coreFinRelation : Fin 1 -> Fin 1 -> Bool := fn i j { i == j }
+coreModuloPredicate (k : Int) : Bool := k mod 2 == 0
+coreModuloRespect (p : Related Int (fn x y { x mod 2 == y mod 2 })) : { u : Unit | (structural Bool).eq (coreModuloPredicate p.x) (coreModuloPredicate p.y) } := unit
+badListIsAFunctor : Functor List := { map := fn (A B : U) f xs { match xs { nil -> nil ; cons x rest -> mapKernelList A B f rest } } }
+onCoreListIsAFunctor : List Binding := [ { parameter := just "model", type := nothing, generator := "badListIsAFunctor", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "o", type := nothing, generator := "coreListEquality", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "h", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "xs", type := nothing, generator := "coreBoolLists", coverage := Listed } ]
+test "ListIsAFunctor" (SampledMode linear) (seed <- 20261020) (profile <- onCoreListIsAFunctor) (control <- true)
+badListIsIndexed : Indexed (List Bool) Bool := { size := fn xs { 0 }, at := fn xs k { true } }
+onCoreListIsIndexed : List Binding := [ { parameter := just "model", type := nothing, generator := "badListIsIndexed", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "o", type := nothing, generator := "coreListEquality", coverage := Listed }, { parameter := just "a", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "c", type := nothing, generator := "coreBoolLists", coverage := Listed }, { parameter := just "d", type := nothing, generator := "coreBoolLists", coverage := Listed } ]
+test "ListIsIndexed" ExhaustiveMode (seed <- 20261020) (profile <- onCoreListIsIndexed) (control <- true)
+badListIsAnObject : Object (List Bool) := { eq := fn xs ys { false } }
+onCoreListIsAnObject : List Binding := [ { parameter := just "model", type := nothing, generator := "badListIsAnObject", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "x", type := nothing, generator := "coreBoolLists", coverage := Listed }, { parameter := just "p", type := nothing, generator := "coreListPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "coreListChains", coverage := Listed } ]
+test "ListIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onCoreListIsAnObject) (control <- true)
+badFinIsACoequalizer : Coequalizer Int (Fin 2) (structural (Fin 2)) (fn x y { x mod 2 == y mod 2 }) := { project := fn x { 0 }, representative := fn x { x }, lift := fn (B : U) b f respect x { f x } }
+onCoreFinIsACoequalizer : List Binding := [ { parameter := just "model", type := nothing, generator := "badFinIsACoequalizer", coverage := Listed }, { parameter := just "n", type := nothing, generator := "coreTwo", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "b", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreModuloPredicate", coverage := Listed }, { parameter := just "respect", type := nothing, generator := "coreModuloRespect", coverage := Listed } ]
+test "FinIsACoequalizer" (SampledMode linear) (seed <- 20261020) (profile <- onCoreFinIsACoequalizer) (control <- true)
+badSubtypeIsAnEqualizer : Equalizer Bool Bool { x : Bool | coreBoolIdentity x } (structural Bool) (structural Bool) (structural { x : Bool | coreBoolIdentity x }) coreBoolIdentity (fn x { true }) := { include := fn x { false }, restrict := fn x { x } }
+onCoreSubtypeIsAnEqualizer : List Binding := [ { parameter := just "model", type := nothing, generator := "badSubtypeIsAnEqualizer", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "predicate", type := nothing, generator := "coreBoolIdentity", coverage := Listed } ]
+test "SubtypeIsAnEqualizer" (SampledMode linear) (seed <- 20261020) (profile <- onCoreSubtypeIsAnEqualizer) (control <- true)
+badKernelFiniteQuantifiers : FiniteQuantifiers 1 := { every := fn p { false }, some := fn p { false }, pairs := fn p { false } }
+onCoreKernelFiniteQuantifiers : List Binding := [ { parameter := just "model", type := nothing, generator := "badKernelFiniteQuantifiers", coverage := Listed }, { parameter := just "n", type := nothing, generator := "coreOne", coverage := Listed }, { parameter := just "p", type := nothing, generator := "coreFinPredicate", coverage := Listed }, { parameter := just "relation", type := nothing, generator := "coreFinRelation", coverage := Listed } ]
+test "KernelFiniteQuantifiers" (SampledMode linear) (seed <- 20261020) (profile <- onCoreKernelFiniteQuantifiers) (control <- true)
+badKernelQueries : FoldableQueries List coreListFold := { every := fn (A : U) p xs { false }, contains := fn (A : U) o x xs { false } }
+onCoreKernelQueries : List Binding := [ { parameter := just "model", type := nothing, generator := "badKernelQueries", coverage := Listed }, { parameter := just "F", type := nothing, generator := "coreListType", coverage := Listed }, { parameter := just "folding", type := nothing, generator := "coreListFold", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "p", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "o", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "xs", type := nothing, generator := "coreBoolLists", coverage := Listed } ]
+test "KernelQueries" (SampledMode linear) (seed <- 20261020) (profile <- onCoreKernelQueries) (control <- true)
+coreImplication : Bool -> Bool -> Bool := conj
+onKernelImplication : List Binding := [ { parameter := just "candidate", type := nothing, generator := "coreImplication", coverage := Listed } ]
+test "KernelImplication" ExhaustiveMode (profile <- onKernelImplication) (control <- true)
+
+coreEntrywise : ((c : List Bool) -> List Bool -> Fin (lengthList Bool c) -> Float64) -> List Bool -> List Bool -> Bool := fn radius xs ys { not (entrywiseBall (List Bool) Bool coreListIndex coreListDistance radius xs ys) }
+onKernelEntrywise : List Binding := [ { parameter := just "candidate", type := nothing, generator := "coreEntrywise", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreListBoolType", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "i", type := nothing, generator := "coreListIndex", coverage := Listed }, { parameter := just "d", type := nothing, generator := "coreListDistance", coverage := Listed }, { parameter := just "radius", type := nothing, generator := "coreRadius", coverage := Listed }, { parameter := just "c", type := nothing, generator := "coreBoolLists", coverage := Listed }, { parameter := just "e", type := nothing, generator := "coreBoolLists", coverage := Listed } ]
+test "KernelEntrywise" ExhaustiveMode (seed <- 20261020) (profile <- onKernelEntrywise) (control <- true)

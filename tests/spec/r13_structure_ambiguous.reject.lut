@@ -4,17 +4,9 @@
 -- (tests/test_check.py, `test_a_shared_field_name_is_resolved_once_qualified`).
 -- expect: write Metric.d or Ultrametric.d
 
-Metric (A : U) : { d : A -> A -> Float64 }
-DistanceToItself (A : U) (m : Metric A) (x : A) : Bool := m.d x x == 0.0
-Metric (A : U) := DistanceToItself A
-
-Ultrametric (A : U) : { d : A -> A -> Float64 }
-UltraToItself (A : U) (m : Ultrametric A) (x : A) : Bool := m.d x x == 0.0
-Ultrametric (A : U) := UltraToItself A
-
 gap (a b : Float64) : Float64 := if a < b then b - a else a - b
-FloatIsAMetric : Bool := Metric Float64 { d := gap }
-FloatIsAnUltrametric : Bool := Ultrametric Float64 { d := fn a b { if a == b then 0.0 else 1.0 } }
+FloatIsAMetric : Bool := Metric Float64 (structural Float64) { d := gap }
+FloatIsAnUltrametric : Bool := Ultrametric Float64 (structural Float64) { d := fn a b { if a == b then 0.0 else 1.0 } }
 Claims := FloatIsAMetric & FloatIsAnUltrametric
 
 far : Float64 := d 1.0 2.0

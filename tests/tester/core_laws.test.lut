@@ -1,3 +1,6 @@
+-- Bite 6 revision, Codex, 2026-10-21, prompt-bite-6.md at 2859815.
+-- Kernel property instances now live in core.lut and write core/core.cert.json.
+-- The following historical bite 2 description records the original organization.
 -- tests/tester/core_laws.test.lut: each property of core/properties/ confirmed at a listed instance
 -- (bite 2 of record/plan/core-2026-10-17/execution.md): `Int` with `+`, `*`, `<=`, `<`, `==`
 -- and its functions, `Bool` with `and`, `or`, `not`, `String` with `+`, `Float64` with `+` and
@@ -13,26 +16,16 @@
 -- `to`, `from`, the bounds by arity) and is named after the instance; a law over `Bool` runs
 -- exhaustively, the rest sampled at the default size and cases.
 
+import "core_instances.lut" boolEq
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "core_instances.lut" leq less equal parity plus minus times smaller larger first second zero one
+import "core_instances.lut" leq less equal parity plus minus times smaller larger first second zero intOne
   identity negate succ pred double square clamp timesZero remainder2 nonNegative
   succThenPred zeroConst flippedMinus reversedMinus
   boolAnd boolOr boolNot top bottom append empty
   fplus ftimes fzero fnegate fclamp tenth byTen sumBound productBound scaleBound noBound1 noBound2 noBound3
-  IntReflexive IntIrreflexive IntSymmetric IntAntisymmetric IntAsymmetric IntTransitive IntTotal
-  IntEquivalence IntPreorder IntPartialOrder IntTotalOrder IntStrictOrder IntBothWaysEqual
-  IntAssociative IntCommutative IntIdempotent IntLeftNeutral IntRightNeutral IntNeutral IntAbsorbing
-  IntCancellative IntInvertible IntDistributive IntAbsorptive IntDistinct
-  BoolAssociative BoolCommutative BoolIdempotent BoolNeutral BoolAbsorbing BoolDistributive BoolAbsorptive
-  BoolComplemented StringAssociative StringNeutral
-  FloatAssociativeWithin FloatCommutativeWithin FloatNeutralWithin FloatDistributiveWithin FloatInvertibleWithin
-  IntPointwise IntPointwise2 IntInjective BoolInjective IntSurjective IntInverse IntIsomorphism IntBijective
-  IntIdempotentFunction IntInvolutive BoolInvolutive IntMonotone IntPreserving IntCongruent IntLandsIn
-  FloatIdempotentWithin FloatInvolutiveWithin FloatPointwiseWithin
-
 -- ---------------------------------------------------------------- the profiles
 
 onLeq : List Binding := [ { parameter := just "r", type := nothing, generator := "leq", coverage := Listed } ]
@@ -48,15 +41,15 @@ onPlus : List Binding := [
   { parameter := just "inv", type := nothing, generator := "negate", coverage := Listed } ]
 onTimes : List Binding := [
   { parameter := just "op", type := nothing, generator := "times", coverage := Listed },
-  { parameter := just "e", type := nothing, generator := "one", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "intOne", coverage := Listed },
   { parameter := just "z", type := nothing, generator := "zero", coverage := Listed } ]
 onSmaller : List Binding := [ { parameter := just "op", type := nothing, generator := "smaller", coverage := Listed } ]
 onSecond : List Binding := [
   { parameter := just "op", type := nothing, generator := "second", coverage := Listed },
-  { parameter := just "e", type := nothing, generator := "one", coverage := Listed } ]
+  { parameter := just "e", type := nothing, generator := "intOne", coverage := Listed } ]
 onFirst : List Binding := [
   { parameter := just "op", type := nothing, generator := "first", coverage := Listed },
-  { parameter := just "e", type := nothing, generator := "one", coverage := Listed } ]
+  { parameter := just "e", type := nothing, generator := "intOne", coverage := Listed } ]
 onTimesOverPlus : List Binding := [
   { parameter := just "product", type := nothing, generator := "times", coverage := Listed },
   { parameter := just "sum", type := nothing, generator := "plus", coverage := Listed } ]
@@ -65,7 +58,7 @@ onMinMax : List Binding := [
   { parameter := just "join", type := nothing, generator := "larger", coverage := Listed } ]
 zeroAndOne : List Binding := [
   { parameter := just "a", type := nothing, generator := "zero", coverage := Listed },
-  { parameter := just "b", type := nothing, generator := "one", coverage := Listed } ]
+  { parameter := just "b", type := nothing, generator := "intOne", coverage := Listed } ]
 
 onAnd : List Binding := [
   { parameter := just "op", type := nothing, generator := "boolAnd", coverage := Listed },
@@ -235,3 +228,154 @@ test "IntLandsIn" (SampledMode linear) (profile <- squareInNonNegative)
 test "FloatIdempotentWithin" (SampledMode linear) (profile <- onFloatClamp)
 test "FloatInvolutiveWithin" (SampledMode linear) (profile <- onFloatNegate)
 test "FloatPointwiseWithin" (SampledMode linear) (profile <- tenthAgainstByTen)
+
+-- Bite 6: the core's own models, with each model explicitly bound by its census.
+coreType : Concrete := Bool
+coreBoolIdentity : Bool -> Bool := fn b { b }
+coreUnitTrue : Unit -> Bool := fn (u : Unit) { u == unit }
+coreUnitFalse : Unit -> Bool := fn (u : Unit) { not (u == unit) }
+coreBoolMonoid : Monoid Bool (structural Bool) := { neutral := true, combine := conj }
+goodUnitIsTerminal : Terminal Unit (structural Unit) := unitIsTerminalModel
+onCoreUnitIsTerminal : List Binding := [ { parameter := just "model", type := nothing, generator := "goodUnitIsTerminal", coverage := Listed }, { parameter := just "equality", type := nothing, generator := "coreUnitEquality", coverage := Listed } ]
+test "UnitIsTerminal" (SampledMode linear) (seed <- 20261020) (profile <- onCoreUnitIsTerminal)
+goodEmptyIsInitial : Initial Empty := emptyIsInitialModel
+onCoreEmptyIsInitial : List Binding := [ { parameter := just "model", type := nothing, generator := "goodEmptyIsInitial", coverage := Listed } ]
+test "EmptyIsInitial" ExhaustiveMode (seed <- 20261020) (profile <- onCoreEmptyIsInitial)
+goodBoolIsTheBooleans : TheBooleans := boolIsTheBooleansModel
+onCoreBoolIsTheBooleans : List Binding := [ { parameter := just "model", type := nothing, generator := "goodBoolIsTheBooleans", coverage := Listed } ]
+test "BoolIsTheBooleans" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsTheBooleans)
+goodBoolIsACoproduct : Coproduct Unit Unit Bool (structural Bool) := boolIsACoproductModel
+onCoreBoolIsACoproduct : List Binding := [ { parameter := just "model", type := nothing, generator := "goodBoolIsACoproduct", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "c", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreUnitTrue", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreUnitFalse", coverage := Listed } ]
+test "BoolIsACoproduct" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsACoproduct)
+goodMaybeIsACoproduct : Coproduct Unit Bool (Maybe Bool) (structural (Maybe Bool)) := maybeIsACoproductModel Bool
+onCoreMaybeIsACoproduct : List Binding := [ { parameter := just "model", type := nothing, generator := "goodMaybeIsACoproduct", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "c", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreUnitTrue", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed } ]
+test "MaybeIsACoproduct" (SampledMode linear) (seed <- 20261020) (profile <- onCoreMaybeIsACoproduct)
+goodListIsTheFreeMonoid : Lists Bool (structural (List Bool)) := listIsTheFreeMonoidModel Bool
+onCoreListIsTheFreeMonoid : List Binding := [ { parameter := just "model", type := nothing, generator := "goodListIsTheFreeMonoid", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "N", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "nO", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "n", type := nothing, generator := "coreBoolMonoid", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := nothing, type := just "List", generator := "coreBoolLists", coverage := Listed } ]
+test "ListIsTheFreeMonoid" ExhaustiveMode (seed <- 20261020) (profile <- onCoreListIsTheFreeMonoid)
+goodIntIsAnObject : Object Int := intIsAnObjectModel
+onCoreIntIsAnObject : List Binding := [ { parameter := just "model", type := nothing, generator := "goodIntIsAnObject", coverage := Listed }, { parameter := just "p", type := nothing, generator := "coreIntPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "coreIntChains", coverage := Listed } ]
+test "IntIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onCoreIntIsAnObject)
+goodNatIsAnObject : Object Nat := natIsAnObjectModel
+onCoreNatIsAnObject : List Binding := [ { parameter := just "model", type := nothing, generator := "goodNatIsAnObject", coverage := Listed } ]
+test "NatIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onCoreNatIsAnObject)
+goodBoolIsAnObject : Object Bool := boolIsAnObjectModel
+onCoreBoolIsAnObject : List Binding := [ { parameter := just "model", type := nothing, generator := "goodBoolIsAnObject", coverage := Listed } ]
+test "BoolIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsAnObject)
+goodStringIsAnObject : Object String := stringIsAnObjectModel
+onCoreStringIsAnObject : List Binding := [ { parameter := just "model", type := nothing, generator := "goodStringIsAnObject", coverage := Listed }, { parameter := just "p", type := nothing, generator := "coreStringPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "coreStringChains", coverage := Listed } ]
+test "StringIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onCoreStringIsAnObject)
+goodFloatIsAnObject : Object Float64 := floatIsAnObjectModel
+onCoreFloatIsAnObject : List Binding := [ { parameter := just "model", type := nothing, generator := "goodFloatIsAnObject", coverage := Listed }, { parameter := just "p", type := nothing, generator := "coreFloatPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "coreFloatChains", coverage := Listed } ]
+test "FloatIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onCoreFloatIsAnObject)
+goodIntIsASemiring : Semiring Int (structural Int) := intIsASemiringModel
+onCoreIntIsASemiring : List Binding := [ { parameter := just "model", type := nothing, generator := "goodIntIsASemiring", coverage := Listed } ]
+test "IntIsASemiring" (SampledMode linear) (seed <- 20261020) (profile <- onCoreIntIsASemiring)
+goodIntIsACommutativeRing : CommutativeRing Int (structural Int) := intIsACommutativeRingModel
+onCoreIntIsACommutativeRing : List Binding := [ { parameter := just "model", type := nothing, generator := "goodIntIsACommutativeRing", coverage := Listed } ]
+test "IntIsACommutativeRing" (SampledMode linear) (seed <- 20261020) (profile <- onCoreIntIsACommutativeRing)
+goodIntIsOrdered : Order Int (structural Int) := intIsOrderedModel
+onCoreIntIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "goodIntIsOrdered", coverage := Listed } ]
+test "IntIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCoreIntIsOrdered)
+goodNatIsOrdered : Order Nat (structural Nat) := natIsOrderedModel
+onCoreNatIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "goodNatIsOrdered", coverage := Listed } ]
+test "NatIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCoreNatIsOrdered)
+goodBoolIsOrdered : Order Bool (structural Bool) := boolIsOrderedModel
+onCoreBoolIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "goodBoolIsOrdered", coverage := Listed } ]
+test "BoolIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsOrdered)
+goodStringIsOrdered : Order String (structural String) := stringIsOrderedModel
+onCoreStringIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "goodStringIsOrdered", coverage := Listed } ]
+test "StringIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCoreStringIsOrdered)
+goodFloatIsOrdered : Order Float64 (structural Float64) := floatIsOrderedModel
+onCoreFloatIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "goodFloatIsOrdered", coverage := Listed } ]
+test "FloatIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCoreFloatIsOrdered)
+goodNatIsAnOrderedSemiring : OrderedSemiring Nat (structural Nat) := natIsAnOrderedSemiringModel
+onCoreNatIsAnOrderedSemiring : List Binding := [ { parameter := just "model", type := nothing, generator := "goodNatIsAnOrderedSemiring", coverage := Listed } ]
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onCoreNatIsAnOrderedSemiring)
+goodStringIsAMonoid : Monoid String (structural String) := stringIsAMonoidModel
+onCoreStringIsAMonoid : List Binding := [ { parameter := just "model", type := nothing, generator := "goodStringIsAMonoid", coverage := Listed } ]
+test "StringIsAMonoid" (SampledMode linear) (seed <- 20261020) (profile <- onCoreStringIsAMonoid)
+goodBoolIsABooleanAlgebra : BooleanAlgebra Bool (structural Bool) := boolIsABooleanAlgebraModel
+onCoreBoolIsABooleanAlgebra : List Binding := [ { parameter := just "model", type := nothing, generator := "goodBoolIsABooleanAlgebra", coverage := Listed } ]
+test "BoolIsABooleanAlgebra" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsABooleanAlgebra)
+goodIntIsAMetric : Metric MetricInteger (structural MetricInteger) := intIsAMetricModel
+coreMetricPairs : List (Related MetricInteger (structural MetricInteger).eq) := [{ x := 0, y := 0 }, { x := 1, y := 1 }]
+onCoreIntIsAMetric : List Binding := [ { parameter := just "p", type := nothing, generator := "coreMetricPairs", coverage := Listed }, { parameter := just "model", type := nothing, generator := "goodIntIsAMetric", coverage := Listed } ]
+test "IntIsAMetric" (SampledMode linear) (seed <- 20261020) (profile <- onCoreIntIsAMetric)
+goodBoolIsAMetric : Metric Bool (structural Bool) := boolIsAMetricModel
+onCoreBoolIsAMetric : List Binding := [ { parameter := just "model", type := nothing, generator := "goodBoolIsAMetric", coverage := Listed } ]
+test "BoolIsAMetric" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsAMetric)
+goodKernelApplies : Exponential Bool Bool (structural Bool) := kernelAppliesModel Bool Bool
+onCoreKernelApplies : List Binding := [ { parameter := just "model", type := nothing, generator := "goodKernelApplies", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed } ]
+test "KernelApplies" (SampledMode linear) (seed <- 20261020) (profile <- onCoreKernelApplies)
+goodPairsAreTheProduct : Product Bool Bool (Bool * Bool) (structural Bool) (structural Bool) (structural (Bool * Bool)) := pairsAreTheProductModel Bool Bool
+onCorePairsAreTheProduct : List Binding := [ { parameter := just "model", type := nothing, generator := "goodPairsAreTheProduct", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "q", type := nothing, generator := "corePairCensus", coverage := Listed } ]
+test "PairsAreTheProduct" (SampledMode linear) (seed <- 20261020) (profile <- onCorePairsAreTheProduct)
+goodRecordsAreNamedProducts : NamedProduct Bool Bool { x : Bool, y : Bool } (structural Bool) (structural Bool) (structural { x : Bool, y : Bool }) := recordsAreNamedProductsModel Bool Bool
+onCoreRecordsAreNamedProducts : List Binding := [ { parameter := just "model", type := nothing, generator := "goodRecordsAreNamedProducts", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed } ]
+test "RecordsAreNamedProducts" (SampledMode linear) (seed <- 20261020) (profile <- onCoreRecordsAreNamedProducts)
+goodSumsAreNamedCoproducts : NamedCoproduct Bool Bool ({ one : Bool || two : Bool }) (structural ({ one : Bool || two : Bool })) := sumsAreNamedCoproductsModel Bool Bool
+onCoreSumsAreNamedCoproducts : List Binding := [ { parameter := just "model", type := nothing, generator := "goodSumsAreNamedCoproducts", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "c", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "v", type := nothing, generator := "coreSumCensus", coverage := Listed } ]
+test "SumsAreNamedCoproducts" (SampledMode linear) (seed <- 20261020) (profile <- onCoreSumsAreNamedCoproducts)
+
+coreUnitEquality : Object Unit := structural Unit
+
+coreBoolLists : List (List Bool) := [nil, [true], [false], [true, false], [false, true]]
+
+-- Remaining kernel constructions, instantiated at finite carriers.
+coreListType : U -> U := List
+coreListBoolType : Concrete := List Bool
+coreListEquality : Object (List Bool) := structural (List Bool)
+coreListPairs : List (Related (List Bool) (structural (List Bool)).eq) := [{ x := nil, y := nil }, { x := [true], y := [true] }]
+coreListChains : List (Chain (List Bool) (structural (List Bool)).eq) := [{ x := nil, y := nil, z := nil }, { x := [true], y := [true], z := [true] }]
+coreListFold : Foldable List := { fold := foldList }
+coreListIndex : Indexed (List Bool) Bool := { size := lengthList Bool, at := atList Bool }
+coreListDistance (x y : Bool) : Float64 := if x == y then 0.0 else 1.0
+coreRadius (xs ys : List Bool) (k : Fin (lengthList Bool xs)) : Float64 := 0.0
+coreOne : Nat := 1
+coreTwo : { n : Int | 0 < n } := 2
+coreFinPredicate : Fin 1 -> Bool := fn k { k == 0 }
+coreFinRelation : Fin 1 -> Fin 1 -> Bool := fn i j { i == j }
+coreModuloPredicate (k : Int) : Bool := k mod 2 == 0
+coreModuloRespect (p : Related Int (fn x y { x mod 2 == y mod 2 })) : { u : Unit | (structural Bool).eq (coreModuloPredicate p.x) (coreModuloPredicate p.y) } := unit
+goodListIsAFunctor : Functor List := { map := mapKernelList }
+onCoreListIsAFunctor : List Binding := [ { parameter := just "model", type := nothing, generator := "goodListIsAFunctor", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "o", type := nothing, generator := "coreListEquality", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "h", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "xs", type := nothing, generator := "coreBoolLists", coverage := Listed } ]
+test "ListIsAFunctor" (SampledMode linear) (seed <- 20261020) (profile <- onCoreListIsAFunctor)
+goodListIsIndexed : Indexed (List Bool) Bool := coreListIndex
+onCoreListIsIndexed : List Binding := [ { parameter := just "model", type := nothing, generator := "goodListIsIndexed", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "o", type := nothing, generator := "coreListEquality", coverage := Listed }, { parameter := just "a", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "c", type := nothing, generator := "coreBoolLists", coverage := Listed }, { parameter := just "d", type := nothing, generator := "coreBoolLists", coverage := Listed } ]
+test "ListIsIndexed" ExhaustiveMode (seed <- 20261020) (profile <- onCoreListIsIndexed)
+goodListIsAnObject : Object (List Bool) := coreListEquality
+onCoreListIsAnObject : List Binding := [ { parameter := just "model", type := nothing, generator := "goodListIsAnObject", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "x", type := nothing, generator := "coreBoolLists", coverage := Listed }, { parameter := just "p", type := nothing, generator := "coreListPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "coreListChains", coverage := Listed } ]
+test "ListIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onCoreListIsAnObject)
+goodFinIsACoequalizer : Coequalizer Int (Fin 2) (structural (Fin 2)) (fn x y { x mod 2 == y mod 2 }) := { project := fn x { x mod 2 }, representative := fn x { x }, lift := fn (B : U) b f respect x { f x } }
+onCoreFinIsACoequalizer : List Binding := [ { parameter := just "model", type := nothing, generator := "goodFinIsACoequalizer", coverage := Listed }, { parameter := just "n", type := nothing, generator := "coreTwo", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "b", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreModuloPredicate", coverage := Listed }, { parameter := just "respect", type := nothing, generator := "coreModuloRespect", coverage := Listed } ]
+test "FinIsACoequalizer" (SampledMode linear) (seed <- 20261020) (profile <- onCoreFinIsACoequalizer)
+goodSubtypeIsAnEqualizer : Equalizer Bool Bool { x : Bool | coreBoolIdentity x } (structural Bool) (structural Bool) (structural { x : Bool | coreBoolIdentity x }) coreBoolIdentity (fn x { true }) := { include := fn x { x }, restrict := fn x { x } }
+onCoreSubtypeIsAnEqualizer : List Binding := [ { parameter := just "model", type := nothing, generator := "goodSubtypeIsAnEqualizer", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "predicate", type := nothing, generator := "coreBoolIdentity", coverage := Listed } ]
+test "SubtypeIsAnEqualizer" (SampledMode linear) (seed <- 20261020) (profile <- onCoreSubtypeIsAnEqualizer)
+goodKernelFiniteQuantifiers : FiniteQuantifiers 1 := { every := forallBelow 1, some := existsBelow 1, pairs := forallPairs 1 }
+onCoreKernelFiniteQuantifiers : List Binding := [ { parameter := just "model", type := nothing, generator := "goodKernelFiniteQuantifiers", coverage := Listed }, { parameter := just "n", type := nothing, generator := "coreOne", coverage := Listed }, { parameter := just "p", type := nothing, generator := "coreFinPredicate", coverage := Listed }, { parameter := just "relation", type := nothing, generator := "coreFinRelation", coverage := Listed } ]
+test "KernelFiniteQuantifiers" (SampledMode linear) (seed <- 20261020) (profile <- onCoreKernelFiniteQuantifiers)
+goodKernelQueries : FoldableQueries List coreListFold := { every := fn (A : U) p xs { all List A coreListFold p xs }, contains := fn (A : U) o x xs { member List A coreListFold o x xs } }
+onCoreKernelQueries : List Binding := [ { parameter := just "model", type := nothing, generator := "goodKernelQueries", coverage := Listed }, { parameter := just "F", type := nothing, generator := "coreListType", coverage := Listed }, { parameter := just "folding", type := nothing, generator := "coreListFold", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "p", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "o", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "xs", type := nothing, generator := "coreBoolLists", coverage := Listed } ]
+test "KernelQueries" (SampledMode linear) (seed <- 20261020) (profile <- onCoreKernelQueries)
+coreEntrywise : ((c : List Bool) -> List Bool -> Fin (lengthList Bool c) -> Float64) -> List Bool -> List Bool -> Bool := entrywiseBall (List Bool) Bool coreListIndex coreListDistance
+onKernelEntrywise : List Binding := [ { parameter := just "candidate", type := nothing, generator := "coreEntrywise", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreListBoolType", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "i", type := nothing, generator := "coreListIndex", coverage := Listed }, { parameter := just "d", type := nothing, generator := "coreListDistance", coverage := Listed }, { parameter := just "radius", type := nothing, generator := "coreRadius", coverage := Listed }, { parameter := just "c", type := nothing, generator := "coreBoolLists", coverage := Listed }, { parameter := just "e", type := nothing, generator := "coreBoolLists", coverage := Listed } ]
+test "KernelEntrywise" ExhaustiveMode (seed <- 20261020) (profile <- onKernelEntrywise)
+coreImplication : Bool -> Bool -> Bool := implies
+onKernelImplication : List Binding := [ { parameter := just "candidate", type := nothing, generator := "coreImplication", coverage := Listed } ]
+test "KernelImplication" ExhaustiveMode (profile <- onKernelImplication)
+
+coreIntPairs : List (Related Int (structural Int).eq) := [{ x := 0, y := 0 }, { x := 1, y := 1 }]
+coreIntChains : List (Chain Int (structural Int).eq) := [{ x := 0, y := 0, z := 0 }, { x := 1, y := 1, z := 1 }]
+coreStringPairs : List (Related String (structural String).eq) := [{ x := "", y := "" }, { x := "a", y := "a" }]
+coreStringChains : List (Chain String (structural String).eq) := [{ x := "", y := "", z := "" }, { x := "a", y := "a", z := "a" }]
+coreFloatPairs : List (Related Float64 (structural Float64).eq) := [{ x := 0.0, y := 0.0 }, { x := 0.5, y := 0.5 }]
+coreFloatChains : List (Chain Float64 (structural Float64).eq) := [{ x := 0.0, y := 0.0, z := 0.0 }, { x := 0.5, y := 0.5, z := 0.5 }]
+corePairCensus : List (Bool * Bool) := [(false, false), (false, true), (true, false), (true, true)]
+coreSumCensus : List { one : Bool || two : Bool } := [one false, two false, one true, two true]
+
+-- A commutative string operation; concatenation remains its refuting control.
+lexicalMaximum (x y : String) : String := if stringIsOrderedModel.leq x y then y else x
+onLexicalMaximum : List Binding := [{ parameter := just "op", type := nothing, generator := "lexicalMaximum", coverage := Listed }]
+test "StringCommutative" (SampledMode linear) (seed <- 20261020) (profile <- onLexicalMaximum)

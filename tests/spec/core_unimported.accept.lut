@@ -1,13 +1,35 @@
--- spec 12.S22 (the core's bite 5, D-2026-10-18-b; record/plan/core-2026-10-17/execution.md §1): the
--- core, every file of lib/core/, encloses the top-level scope of every file, so its names are seen
--- without an import: core/properties/functions.lth's `compose`, relations.lth's `Total`, and
--- equality.lth's structure `Object`, whose field `eq` is resolved by the type of its argument (rule
--- 2.2). `size` becomes a name of the core when bite 6 writes core/structures/containers.lth; this
--- program then uses it too.
+-- Spec 12.S22, D-2026-10-18-b and execution.md bite 6 at 2859815.
+-- Core field resolution at the applicable kernel carriers and their lists, without imports.
 
 succ (x : Int) : Int := x + 1
 plusTwo : Int -> Int := compose Int Int Int succ succ
-IntIsAnObject : Bool := Object Int { eq := fn a b { a == b } }
 LeqIsTotal (x y : Int) : Bool := Total Int (fn a b { a <= b }) x y
-Claims := IntIsAnObject & LeqIsTotal
+Claims := LeqIsTotal
 same : Bool := eq (plusTwo 1) 3
+
+-- The core's models resolve each concept at the appropriate kernel carrier, without imports.
+intSize : Nat := size [1, 2]
+boolAt : Bool := at [true, false] 1
+stringMapped : List String := map String String (fn s { s + "!" }) ["a", "b"]
+naturalSize : Nat := size naturalValues
+integerPlus : Int := plus 1 2
+integerOrder : Bool := leq 1 2
+booleanDistance : Float64 := Metric.d true false
+smallDistance (x y : MetricInteger) : Float64 := Metric.d x y
+
+naturalValues : List Nat := [0, 1]
+naturalAt : Nat := at naturalValues 1
+naturalMap : List Nat := map Nat Nat (fn x { x }) naturalValues
+naturalEq (x y : Nat) : Bool := eq x y
+naturalOrder (x y : Nat) : Bool := leq x y
+naturalPlus (x y : Nat) : Nat := plus x y
+booleanEq (x y : Bool) : Bool := eq x y
+booleanOrder (x y : Bool) : Bool := leq x y
+booleanSize : Nat := size [true, false]
+booleanMap : List Bool := map Bool Bool not [true, false]
+stringEq (x y : String) : Bool := eq x y
+stringOrder (x y : String) : Bool := leq x y
+stringAt : String := at ["a", "b"] 1
+stringSize : Nat := size ["a", "b"]
+integerAt : Int := at [1, 2] 1
+integerMap : List Int := map Int Int succ [1, 2]

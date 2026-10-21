@@ -463,7 +463,7 @@ def test_operator_refusals_name_the_type_and_the_candidates():
 def test_a_claim_binds_a_model_and_a_field_resolves_by_type():
     ctx = ('Sized (C : U) : { size : C -> Int }\nlen (A : U) (xs : List A) : Int\n'
            'ListIsSized (A : U) : Bool := Sized (List A) { size := fn xs { len A xs } }\nxs : List String')
-    e = term('size xs', ctx)
+    e = term('Sized.size xs', ctx)
     assert isinstance(e, t.App) and isinstance(e.function, t.Proj) and e.function.label == 'size'
     # the model is the claim's, at `A := String`
     assert alpha_equal(e.function.record, t.RecordValue((('size', t.Lam('xs', t.App(V('List'), V('String')),
@@ -472,7 +472,7 @@ def test_a_claim_binds_a_model_and_a_field_resolves_by_type():
     assert alpha_equal(term('Sized.size xs', ctx), e)
     m = term('Sized.size m xs', ctx + '\nm : Sized (List String)')
     assert m == t.App(t.Proj(V('m'), 'size'), V('xs'))
-    with pytest.raises(TypingError, match='no model of Sized at Int'):
+    with pytest.raises(TypingError, match='no model of Indexed or Sized at Int'):
         term('size 3', ctx)
 
 
@@ -538,3 +538,9 @@ def test_infer_is_total_on_the_library():
             except ElaborationError as e:
                 defects.append(f'{path.name} {act.name}: {e}')
     assert not defects, '\n'.join(defects[:20])
+
+
+def test_a_subtypes_own_model_resolves_before_its_base_model():
+    # Both Int and Nat claim Object and Order; Nat is also a refinement of Int.
+    assert term('eq n n', 'n : Nat')
+    assert term('leq n n', 'n : Nat')

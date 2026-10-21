@@ -578,7 +578,7 @@ def test_the_core_names_are_read_from_its_files():
     # core.lut's, a property's and a structure's, none imported by core.lut until bite 5
     assert {'Bool', 'not', 'compose', 'Equivalence', 'Object', 'Monoid'} <= names
     # a name two core files define is imported from one (run.py's CORE_COLLISIONS)
-    assert 'Reflexive' not in names and 'Associative' not in names
+    assert {'Reflexive', 'Associative', 'Idempotent', 'Quantale', 'Metric', 'Indexed'} <= names
 
 
 def test_a_file_that_defines_a_core_name_is_refused_with_the_core_file(tmp_path, capsys):
@@ -614,4 +614,4 @@ def test_an_import_of_a_core_name_by_its_path_is_redundant(tmp_path, capsys):
     out = capsys.readouterr().out
     assert 'redundant Concrete: imported from core/structures/equality.lth' in out
     # `Reflexive` is two core files' until bite 6: the import says which, so it is no notice
-    assert 'redundant Reflexive' not in out
+    assert 'redundant Reflexive: imported from core/properties/relations.lth' in out

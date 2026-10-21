@@ -1,3 +1,6 @@
+-- Bite 6 revision, Codex, 2026-10-21, prompt-bite-6.md at 2859815.
+-- Kernel property instances now live in core.lut and write core/core.cert.json.
+-- The following historical bite 2 description records the original organization.
 -- tests/tester/core_instances.lut: the properties of core/properties/ applied at listed instances,
 -- as laws over the instance, so that core_laws.test.lut confirms each on a real instance and
 -- core_controls.test.lut refutes it on a wrong one (L9.14: a law without a refuted model is
@@ -23,9 +26,6 @@
 
 -- The core is seen without an import (12.S22, the core's bite 5); the names imported here are the
 -- ones two core files define until bite 6 (run.py's CORE_COLLISIONS), so the import says which.
-import "core/properties/relations.lth" Reflexive Symmetric Transitive
-import "core/properties/operations.lth" Associative Idempotent LeftNeutral RightNeutral
-import "core/properties/functions.lth" Idempotent as IdempotentFunction
 
 -- ---------------------------------------------------------------- the equalities
 
@@ -52,7 +52,7 @@ larger : Int -> Int -> Int := fn a b { if a <= b then b else a }
 first : Int -> Int -> Int := fn a b { a }
 second : Int -> Int -> Int := fn a b { b }
 zero : Int := 0
-one : Int := 1
+intOne : Int := 1
 
 -- functions on Int
 identity : Int -> Int := id Int
@@ -107,85 +107,3 @@ scaleBound : Float64 -> Float64 := fn x { gamma2 * absolute x }
 noBound1 : Float64 -> Float64 := fn x { 0.0 }
 noBound2 : Float64 -> Float64 -> Float64 := fn x y { 0.0 }
 noBound3 : Float64 -> Float64 -> Float64 -> Float64 := fn x y z { 0.0 }
-
--- ---------------------------------------------------------------- relations.lth at Int
-
-IntReflexive (r : Int -> Int -> Bool) (x : Int) : Bool := Reflexive Int r x
-IntIrreflexive (r : Int -> Int -> Bool) (x : Int) : Bool := Irreflexive Int r x
-IntSymmetric (r : Int -> Int -> Bool) (p : Related Int r) : Bool := Symmetric Int r p
-IntAntisymmetric (r : Int -> Int -> Bool) (x y : Int) : Bool := Antisymmetric Int intEq r x y
-IntAsymmetric (r : Int -> Int -> Bool) (p : Related Int r) : Bool := Asymmetric Int r p
-IntTransitive (r : Int -> Int -> Bool) (c : Chain Int r) : Bool := Transitive Int r c
-IntTotal (r : Int -> Int -> Bool) (x y : Int) : Bool := Total Int r x y
-IntEquivalence (r : Int -> Int -> Bool) (x : Int) (p : Related Int r) (c : Chain Int r) : Bool := Equivalence Int r x p c
-IntPreorder (r : Int -> Int -> Bool) (x : Int) (c : Chain Int r) : Bool := Preorder Int r x c
-IntPartialOrder (r : Int -> Int -> Bool) (x y : Int) (c : Chain Int r) : Bool := PartialOrder Int intEq r x y c
-IntTotalOrder (r : Int -> Int -> Bool) (x y : Int) (c : Chain Int r) : Bool := TotalOrder Int intEq r x y c
-IntStrictOrder (r : Int -> Int -> Bool) (x : Int) (p : Related Int r) (c : Chain Int r) : Bool := StrictOrder Int r x p c
--- antisymmetry as a premise over `Both`, so that the subtype is drawn too
-IntBothWaysEqual (r : Int -> Int -> Bool) (b : Both Int r) : Bool := b.x == b.y
-
--- ---------------------------------------------------------------- operations.lth at Int, Bool, String
-
-IntAssociative (op : Int -> Int -> Int) (x y z : Int) : Bool := Associative Int intEq op x y z
-IntCommutative (op : Int -> Int -> Int) (x y : Int) : Bool := Commutative Int Int intEq op x y
-IntIdempotent (op : Int -> Int -> Int) (x : Int) : Bool := Idempotent Int intEq op x
-IntLeftNeutral (op : Int -> Int -> Int) (e : Int) (x : Int) : Bool := LeftNeutral Int intEq op e x
-IntRightNeutral (op : Int -> Int -> Int) (e : Int) (x : Int) : Bool := RightNeutral Int intEq op e x
-IntNeutral (op : Int -> Int -> Int) (e : Int) (x : Int) : Bool := Neutral Int intEq op e x
-IntAbsorbing (op : Int -> Int -> Int) (z : Int) (x : Int) : Bool := Absorbing Int intEq op z x
-IntCancellative (op : Int -> Int -> Int) (x y z : Int) : Bool := Cancellative Int intEq op x y z
-IntInvertible (op : Int -> Int -> Int) (e : Int) (inv : Int -> Int) (x : Int) : Bool := Invertible Int intEq op e inv x
-IntDistributive (product sum : Int -> Int -> Int) (x y z : Int) : Bool := Distributive Int intEq product sum x y z
-IntAbsorptive (meet join : Int -> Int -> Int) (x y : Int) : Bool := Absorptive Int intEq meet join x y
-IntDistinct (a b : Int) : Bool := Distinct Int intEq a b
-
-BoolAssociative (op : Bool -> Bool -> Bool) (x y z : Bool) : Bool := Associative Bool boolEq op x y z
-BoolCommutative (op : Bool -> Bool -> Bool) (x y : Bool) : Bool := Commutative Bool Bool boolEq op x y
-BoolIdempotent (op : Bool -> Bool -> Bool) (x : Bool) : Bool := Idempotent Bool boolEq op x
-BoolNeutral (op : Bool -> Bool -> Bool) (e : Bool) (x : Bool) : Bool := Neutral Bool boolEq op e x
-BoolAbsorbing (op : Bool -> Bool -> Bool) (z : Bool) (x : Bool) : Bool := Absorbing Bool boolEq op z x
-BoolDistributive (product sum : Bool -> Bool -> Bool) (x y z : Bool) : Bool := Distributive Bool boolEq product sum x y z
-BoolAbsorptive (meet join : Bool -> Bool -> Bool) (x y : Bool) : Bool := Absorptive Bool boolEq meet join x y
--- the complement reaches the operation's absorbing element: `false` for `and`, `true` for `or`
-BoolComplemented (op : Bool -> Bool -> Bool) (complement : Bool -> Bool) (z : Bool) (x : Bool) : Bool :=
-  Complemented Bool boolEq op complement z x
-
-StringAssociative (op : String -> String -> String) (x y z : String) : Bool := Associative String stringEq op x y z
-StringCommutative (op : String -> String -> String) (x y : String) : Bool := Commutative String String stringEq op x y
-StringNeutral (op : String -> String -> String) (e : String) (x : String) : Bool := Neutral String stringEq op e x
-
--- ---------------------------------------------------------------- the within-bound laws at Float64
-
-FloatAssociativeWithin (op : Float64 -> Float64 -> Float64) (bound3 : Float64 -> Float64 -> Float64 -> Float64) (x y z : Float64) : Bool :=
-  AssociativeWithin Float64 absDistance op bound3 x y z
-FloatCommutativeWithin (op : Float64 -> Float64 -> Float64) (bound2 : Float64 -> Float64 -> Float64) (x y : Float64) : Bool :=
-  CommutativeWithin Float64 Float64 absDistance op bound2 x y
-FloatNeutralWithin (op : Float64 -> Float64 -> Float64) (e : Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool :=
-  NeutralWithin Float64 absDistance op e bound1 x
-FloatDistributiveWithin (product sum : Float64 -> Float64 -> Float64) (bound3 : Float64 -> Float64 -> Float64 -> Float64) (x y z : Float64) : Bool :=
-  DistributiveWithin Float64 absDistance product sum bound3 x y z
-FloatInvertibleWithin (op : Float64 -> Float64 -> Float64) (e : Float64) (inv : Float64 -> Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool :=
-  InvertibleWithin Float64 absDistance op e inv bound1 x
-
--- ---------------------------------------------------------------- functions.lth at Int, Bool, Float64
-
-IntPointwise (f g : Int -> Int) (x : Int) : Bool := Pointwise Int Int intEq f g x
-IntPointwise2 (f g : Int -> Int -> Int) (x y : Int) : Bool := Pointwise2 Int Int Int intEq f g x y
-IntInjective (f : Int -> Int) (x y : Int) : Bool := Injective Int Int intEq intEq f x y
-BoolInjective (f : Bool -> Bool) (x y : Bool) : Bool := Injective Bool Bool boolEq boolEq f x y
-IntSurjective (f s : Int -> Int) (y : Int) : Bool := Surjective Int Int intEq f s y
-IntInverse (f g : Int -> Int) (x : Int) : Bool := Inverse Int Int intEq f g x
-IntIsomorphism (to from : Int -> Int) (x y : Int) : Bool := Isomorphism Int Int intEq intEq to from x y
-IntBijective (f s : Int -> Int) (x y z : Int) : Bool := Bijective Int Int intEq intEq f s x y z
-IntIdempotentFunction (f : Int -> Int) (x : Int) : Bool := IdempotentFunction Int intEq f x
-IntInvolutive (f : Int -> Int) (x : Int) : Bool := Involutive Int intEq f x
-BoolInvolutive (f : Bool -> Bool) (x : Bool) : Bool := Involutive Bool boolEq f x
-IntMonotone (r t : Int -> Int -> Bool) (f : Int -> Int) (p : Related Int r) : Bool := Monotone Int Int r t f p
-IntPreserving (opA opB : Int -> Int -> Int) (f : Int -> Int) (x y : Int) : Bool := Preserving Int Int intEq opA opB f x y
-IntCongruent (rA : Int -> Int -> Bool) (f : Int -> Int) (p : Related Int rA) : Bool := Congruent Int Int rA intEq f p
-IntLandsIn (f : Int -> Int) (inside : Int -> Bool) (x : Int) : Bool := LandsIn Int Int f inside x
-
-FloatIdempotentWithin (f : Float64 -> Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool := IdempotentWithin Float64 absDistance f bound1 x
-FloatInvolutiveWithin (f : Float64 -> Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool := InvolutiveWithin Float64 absDistance f bound1 x
-FloatPointwiseWithin (f g : Float64 -> Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool := PointwiseWithin Float64 Float64 absDistance f g bound1 x

@@ -95,8 +95,8 @@ def test_the_default_demand_records_no_fuel_bound_and_fuel_records_its_bound(tmp
 def test_no_fuel_bound_by_default_finishes_past_the_old_bound_slow(tmp_path, capsys):
     # the old default cut a run at 10,000,000 steps; this one takes about 10,150,000 (35 a turn)
     path = tmp_path / "count.run.lut"
-    path.write_text("count (n : Int) (k : Int) : Int := if k == 0 then n else if n < 0 then 0 "
-                    "else count (n + 1) (k - 1)\nmain : Int := count 0 290000\n", encoding="utf-8")
+    path.write_text("countSteps (n : Int) (k : Int) : Int := if k == 0 then n else if n < 0 then 0 "
+                    "else countSteps (n + 1) (k - 1)\nmain : Int := countSteps 0 290000\n", encoding="utf-8")
     assert DEMAND_DEFAULTS["fuel"] is None
     assert main(["run", str(path)]) == 0
     entry = _last(path)
