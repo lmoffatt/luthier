@@ -15,10 +15,10 @@ import "generators.lth" Binding Degeneracies EachWitnessIsItsCase CaseNamesAreDi
 import "laws.lth" Listed Cited
 import "certification.lth" Certifying Entry Certificate Outcome Passed Failed NotRunFor Drawing Region FromType FromLaw
   FromCode Label BindingEvidence Regioning Deriving NoRegionsLeaveTheGrade RefutedInEveryRegion ALabelEntersNoGrade
-  AnEmptyRegionLeavesBelowCases TheThreeSourcesGrade CombinesOverRegions CombinesAcrossBindings CombineCommutes
+  AnEmptyRegionLeavesBelowCases TheThreeSourcesGrade CombinesOverRegions CombinesAcrossBindings
   NothingIsTheUnit CombineNeverRaises EachCutoffGivesTwoSides EachPremiseGivesItsBoundary OnlyTheLawsRegions
   regionGrade overRegions overBindings bindingsOf standsOnNothing regionedGrade orWeakest orStrongest above
-  cutoffRegions premiseRegions appendRegions lawRegions
+  cutoffRegions premiseRegions lawRegions
 import "certification_model.lut" certifying
 
 bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
@@ -66,6 +66,10 @@ labels : List String := ["kappa above 1e8"]
 counts : List Nat := [0, 4]
 names : List String := ["zero", "fl"]
 grades : List (Maybe Grade) := [nothing, just Sampled, just Cases, just Proved]
+gradeTypes : List U := [Maybe Grade]
+gradeEqualities : List (Object (Maybe Grade)) := [structural (Maybe Grade)]
+-- the broken combination: the first argument alone, which is not commutative
+firstArguments : List (Maybe Grade -> Maybe Grade -> Maybe Grade) := [fn g h { g }]
 models : List Certifying := [certifying]
 
 -- broken regionings
@@ -127,16 +131,16 @@ test "TheThreeSourcesGrade" ExhaustiveMode (seed <- 20261017) (whereBindings <- 
   bind "c" "certificates", bind "nm" "names", bind "rs" "regionLists", bind "ev" "evidences", bind "p" "passes"]) (control <- true)
 test "CombinesOverRegions" ExhaustiveMode (seed <- 20261017) (whereBindings <- onRegion "strongestCombines") (control <- true)
 test "CombinesAcrossBindings" ExhaustiveMode (seed <- 20261017) (whereBindings <- onPass "firstBindingOnlys") (control <- true)
-test "CombineCommutes" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "firstCombines",
-  bind "g" "grades", bind "h" "grades"]) (control <- true)
+test "Commutative" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "A" "gradeTypes", bind "B" "gradeTypes",
+  bind "o" "gradeEqualities", bind "op" "firstArguments", bind "x" "grades", bind "y" "grades"]) (control <- true)
 test "NothingIsTheUnit" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "firstCombines",
   bind "g" "grades"]) (control <- true)
 test "CombineNeverRaises" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "provedCombines",
   bind "g" "grades", bind "h" "grades"]) (control <- true)
 
 -- broken derivations
-aboveOnly (cs : List String) : List Region := match cs { nil -> nil ; cons c rest -> cons (above c) (aboveOnly rest) }
-oneSided : Deriving := { ofLaw := fn cs ps { appendRegions (aboveOnly cs) (premiseRegions ps) } }
+aboveOnly (cs : List String) : List Region := map String Region above cs
+oneSided : Deriving := { ofLaw := fn cs ps { aboveOnly cs <> premiseRegions ps } }
 noBoundary : Deriving := { ofLaw := fn cs ps { cutoffRegions cs } }
 labelling : Deriving := { ofLaw := fn cs ps { cons kappa (lawRegions cs ps) } }
 oneSideds : List Deriving := [oneSided]

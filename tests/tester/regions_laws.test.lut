@@ -19,9 +19,9 @@ import "generators.lth" Binding Degeneracies EachWitnessIsItsCase CaseNamesAreDi
 import "laws.lth" Listed Cited
 import "arrays.lth" Mat Symmetric RankFloor matDegeneracies symmetricDegeneracies
 import "arrays_model.lut" numpy
-import "certification.lth" Certifying Entry Certificate Outcome Passed Failed NotRunFor Drawing Region FromType FromLaw
+import "certification.lth" orWeakest Certifying Entry Certificate Outcome Passed Failed NotRunFor Drawing Region FromType FromLaw
   FromCode Label BindingEvidence Regioning Deriving NoRegionsLeaveTheGrade RefutedInEveryRegion ALabelEntersNoGrade
-  AnEmptyRegionLeavesBelowCases TheThreeSourcesGrade CombinesOverRegions CombinesAcrossBindings CombineCommutes
+  AnEmptyRegionLeavesBelowCases TheThreeSourcesGrade CombinesOverRegions CombinesAcrossBindings
   NothingIsTheUnit CombineNeverRaises EachCutoffGivesTwoSides EachPremiseGivesItsBoundary OnlyTheLawsRegions
 import "certification_model.lut" certifying regioning deriving
 
@@ -75,6 +75,11 @@ labels : List String := ["kappa above 1e8"]
 counts : List Nat := [0, 4]
 names : List String := ["zero", "fl"]
 grades : List (Maybe Grade) := [nothing, just Sampled, just Cases, just Proved]
+-- the combination of every regioning is commutative: the core's `Commutative` at `Maybe Grade`, on the
+-- reference model's combination (certification.lth's `Regioning` states it as a bare conjunct)
+gradeTypes : List U := [Maybe Grade]
+gradeEqualities : List (Object (Maybe Grade)) := [structural (Maybe Grade)]
+combinations : List (Maybe Grade -> Maybe Grade -> Maybe Grade) := [orWeakest]
 models : List Certifying := [certifying]
 regionings : List (Regioning certifying) := [regioning]
 onRegioning : List Binding := [bind "k" "models", bind "q" "regionings", bind "c" "certificates", bind "rs" "regionLists",
@@ -95,8 +100,8 @@ test "TheThreeSourcesGrade" ExhaustiveMode (seed <- 20261017) (whereBindings <- 
 test "CombinesOverRegions" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "regionings",
   bind "c" "certificates", bind "r" "regions", bind "rs" "regionLists", bind "ev" "evidences", bind "p" "passes"])
 test "CombinesAcrossBindings" ExhaustiveMode (seed <- 20261017) (whereBindings <- onPass)
-test "CombineCommutes" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "regionings",
-  bind "g" "grades", bind "h" "grades"])
+test "Commutative" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "A" "gradeTypes", bind "B" "gradeTypes",
+  bind "o" "gradeEqualities", bind "op" "combinations", bind "x" "grades", bind "y" "grades"])
 test "NothingIsTheUnit" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "regionings",
   bind "g" "grades"])
 test "CombineNeverRaises" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "regionings",

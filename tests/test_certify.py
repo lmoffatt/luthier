@@ -1287,7 +1287,7 @@ def test_the_regions_hold_on_the_references_and_their_controls_refute_the_broken
     assert [o.spec.law for o in laws] == (
         ["EachWitnessIsItsCase"] * 3 + ["CaseNamesAreDistinct"] * 3
         + ["NoRegionsLeaveTheGrade", "RefutedInEveryRegion", "ALabelEntersNoGrade", "AnEmptyRegionLeavesBelowCases",
-           "TheThreeSourcesGrade", "CombinesOverRegions", "CombinesAcrossBindings", "CombineCommutes",
+           "TheThreeSourcesGrade", "CombinesOverRegions", "CombinesAcrossBindings", "Commutative",
            "NothingIsTheUnit", "CombineNeverRaises", "EachCutoffGivesTwoSides", "EachPremiseGivesItsBoundary",
            "OnlyTheLawsRegions"])
     assert all(o.verdict in ("Confirmed", "Supported") for o in laws), [tester.line(o) for o in laws]

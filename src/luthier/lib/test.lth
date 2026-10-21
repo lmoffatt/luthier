@@ -88,8 +88,7 @@ test (law : String) (mode : Mode) (cases : Nat <- 100) (size : Nat <- 10)
 Tester : { run : TestSpec -> Evidence }
 
 coverageOf (e : Evidence) : Maybe Coverage := match e { Points A pts c -> just c ; _ -> nothing }
-pointCount (e : Evidence) : Nat := match e { Points A pts c -> countPoints A pts ; _ -> 0 }
-countPoints (A : U) (pts : List (A * Evidence)) : Nat := match pts { nil -> 0 ; cons x rest -> 1 + countPoints A rest }
+pointCount (e : Evidence) : Nat := match e { Points A pts c -> size pts ; _ -> 0 }
 isNotRun (e : Evidence) : Bool := match e { NotRun r -> true ; _ -> false }
 -- a control passes when its law is refuted on the broken model; any other verdict is the control
 -- failing (confirmed or supported: the law cannot see the break) or settling nothing (7.S19)
@@ -99,7 +98,7 @@ controlPasses (v : Verdict) : Bool := match v { Refuted -> true ; _ -> false }
 modeCoverage (m : Mode) (size : Nat) (s : Seed) : Coverage := match m {
   ExhaustiveMode -> Bounded size ; SampledMode k -> Drawn s }
 bindingsCoverage (bs : List Binding) (c : Coverage) : Coverage :=
-  match bs { nil -> c ; cons b rest -> bindingsCoverage rest (weaker b.coverage c) }
+  fold Binding Coverage weaker c (fn (b : Binding) { b.coverage }) bs
 -- the coverage a spec reaches: the mode's, exhaustive up to the size, weakened by every binding
 -- (7.S10: the entry lists the reach of each parameter, and the grade is summarized by the weakest)
 specCoverage (s : TestSpec) : Coverage :=

@@ -30,7 +30,7 @@
 
 import "certification.lth" Certifying ConeHashing Erasure eraseBinders Store Entry Identity Certificate Demand ConeName Refusal
   Standing Link ParameterReach Reach Value Hash Support Interval Members Number Printed Passed Failed State Current Stale
-  Uncertified Provisional Disagrees Drawing stronger reachOf coversAll anyServes appendRefusals latestOf latestAt failureAt
+  Uncertified Provisional Disagrees Drawing stronger reachOf coversAll latestOf latestAt failureAt
   disputeAt Recording recordEntry Pooling pooledCases Regioning regionedGrade orWeakest Deriving lawRegions
 import "test.lth" Grade gradeRank weakest
 import "term_model.lut" alpha canonical substitute stepper
@@ -46,18 +46,16 @@ identity (e : Entry) : Identity := { law := e.law, cone := e.cone, binding := e.
 stale (h : Hash) (e : Entry) : Bool := not (e.cone == h)
 
 -- 7.S10, 7.S15: a reach as a set of values
-anyValue (v : Value) (vs : List Value) : Bool := match vs { nil -> false ; cons w rest -> w == v or anyValue v rest }
 contains (r : Reach) (v : Value) : Bool := match r {
   Support -> true ;
   Interval lo hi -> (match v { Number x -> lo <= x and x <= hi ; Printed s -> false }) ;
-  Members vs -> anyValue v vs }
+  Members vs -> any List Value (fn (w : Value) { w == v }) vs }
 
 -- 6.S7, 7.S10: the grade of a certificate. The entries that count are the law's at the current
 -- hash; a failure among them, or a disagreement (D-2026-10-15-f), leaves no grade; under one
 -- binding the strongest pass, across bindings the weakest.
 counts (c : Certificate) (e : Entry) : Bool := e.law == c.law and e.cone == c.cone
-anyFailure (c : Certificate) (es : List Entry) : Bool :=
-  match es { nil -> false ; cons e rest -> (counts c e and isFailure e) or anyFailure c rest }
+anyFailure (c : Certificate) (es : List Entry) : Bool := any List Entry (fn (e : Entry) { counts c e and isFailure e }) es
 isFailure (e : Entry) : Bool := match e.outcome { Failed x -> true ; _ -> false }
 -- the passes that count, each with its grade
 passes (c : Certificate) (es : List Entry) : List (List Drawing * Grade) :=
@@ -89,25 +87,25 @@ serves (d : Demand) (e : Entry) : Bool :=
 stateOf (d : Demand) (es : List Entry) : State :=
   match latestAt d.law d.cone es { just e -> Current e.outcome ;
     nothing -> (match latestOf d.law es { just f -> Stale f.cone ; nothing -> Uncertified }) }
+refuseLaw (es : List Entry) (n : String) (d : Demand) : List Refusal :=
+  match disputeAt identity d.law d.cone es {
+    just (a, b) -> [{ name := n, law := just d.law, state := Disagrees a b }] ;
+    nothing -> (match failureAt d.law d.cone es {
+      just f -> [{ name := n, law := just d.law, state := Current f.outcome }] ;
+      nothing -> if any List Entry (fn (e : Entry) { serves d e }) es then nil
+                 else [{ name := n, law := just d.law, state := stateOf d es }] }) }
 refuseLaws (es : List Entry) (n : String) (ds : List Demand) : List Refusal :=
-  match ds { nil -> nil ; cons d rest ->
-    match disputeAt identity d.law d.cone es {
-      just (a, b) -> cons { name := n, law := just d.law, state := Disagrees a b } (refuseLaws es n rest) ;
-      nothing -> (match failureAt d.law d.cone es {
-        just f -> cons { name := n, law := just d.law, state := Current f.outcome } (refuseLaws es n rest) ;
-        nothing -> if anyServes serves d es then refuseLaws es n rest
-                   else cons { name := n, law := just d.law, state := stateOf d es } (refuseLaws es n rest) }) } }
+  concat Refusal (map Demand (List Refusal) (refuseLaw es n) ds)
 refuseName (es : List Entry) (c : ConeName) : List Refusal :=
   if c.provisional then [{ name := c.name, law := nothing, state := Provisional }] else refuseLaws es c.name c.laws
 refuse (es : List Entry) (cs : List ConeName) : List Refusal :=
-  match cs { nil -> nil ; cons c rest -> appendRefusals (refuseName es c) (refuse es rest) }
+  concat Refusal (map ConeName (List Refusal) (refuseName es) cs)
 
 -- 6.S11: transport along a Boolean identity: the intersection of the reaches, the weaker grade, and
 -- only along a link from the law carried (C7 of the round-1 review)
 larger (x y : Float64) : Float64 := if x <= y then y else x
 smaller (x y : Float64) : Float64 := if x <= y then x else y
-keepWithin (r : Reach) (vs : List Value) : List Value :=
-  match vs { nil -> nil ; cons v rest -> if contains r v then cons v (keepWithin r rest) else keepWithin r rest }
+keepWithin (r : Reach) (vs : List Value) : List Value := filter List Value (contains r) vs
 meet (r s : Reach) : Reach := match r {
   Support -> s ;
   Interval lo hi -> (match s { Support -> r ; Interval lo2 hi2 -> Interval (larger lo lo2) (smaller hi hi2) ;
