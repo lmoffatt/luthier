@@ -110,9 +110,7 @@ Demand = { entry : String, decoration : Maybe Decoration, accepts : Grade, assum
 
 -- the value a demand gives a hole of the program, if it gives one (12.S18: a hole left without a
 -- value is an error that asks for `--set`)
-given (d : Demand) (name : String) : Maybe Value := lookupValue name d.sets
-lookupValue (name : String) (vs : List (String * Value)) : Maybe Value :=
-  match vs { nil -> nothing ; cons (n, v) rest -> if n == name then just v else lookupValue name rest }
+given (d : Demand) (name : String) : Maybe Value := lookup List String Value name d.sets
 
 -- ---------------------------------------------------------------- §2 Passing down
 
@@ -176,7 +174,7 @@ recorded (d : Demand) (h : Hash) : Record :=
 -- certificate passes and one under which it fails, B2).
 Stored (K : U) = { key : K, result : String }
 agreesWith (K : U) (eq : K -> K -> Bool) (r : Stored K) (rs : List (Stored K)) : Bool :=
-  match rs { nil -> true ; cons q rest -> (not (eq r.key q.key) or r.result == q.result) and agreesWith K eq r rest }
+  all List (Stored K) (fn (q : Stored K) { not (eq r.key q.key) or r.result == q.result }) rs
 determined (K : U) (eq : K -> K -> Bool) (rs : List (Stored K)) : Bool :=
   match rs { nil -> true ; cons r rest -> agreesWith K eq r rest and determined K eq rest }
 

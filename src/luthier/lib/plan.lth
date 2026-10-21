@@ -66,29 +66,24 @@ import "term.lth" Term Program
 Node = { name : String, reads : List String }
 Dataflow (A : U) (eq : A -> A -> Bool) : { nodes : List Node, init : A, step : String -> (String -> A) -> A }
 
-memberStr (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or memberStr x rest }
-subset (xs ys : List String) : Bool := match xs { nil -> true ; cons x rest -> memberStr x ys and subset rest ys }
+subset (xs ys : List String) : Bool := all List String (fn (x : String) { member List String x ys }) xs
 sameMembers (xs ys : List String) : Bool := subset xs ys and subset ys xs
-noDuplicates (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> not (memberStr x rest) and noDuplicates rest }
-countNodes (xs : List Node) : Nat := match xs { nil -> 0 ; cons x rest -> 1 + countNodes rest }
-names (ns : List Node) : List String := match ns { nil -> nil ; cons n rest -> cons n.name (names rest) }
+names (ns : List Node) : List String := map Node String (fn (n : Node) { n.name }) ns
 readsOf (ns : List Node) (x : String) : List String :=
   match ns { nil -> nil ; cons n rest -> if n.name == x then n.reads else readsOf rest x }
 -- the names added at the end, each once, in the order met
 addNew (xs new : List String) : List String :=
-  match new { nil -> xs ; cons n rest -> if memberStr n xs then addNew xs rest else addNew (appendOne xs n) rest }
-appendOne (xs : List String) (n : String) : List String := match xs { nil -> [n] ; cons x rest -> cons x (appendOne rest n) }
+  match new { nil -> xs ; cons n rest -> if member List String n xs then addNew xs rest else addNew (xs <> [n]) rest }
 readsOfAll (ns : List Node) (xs : List String) : List String :=
   match xs { nil -> nil ; cons x rest -> addNew (readsOf ns x) (readsOfAll ns rest) }
-allNames (p : String -> Bool) (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> p x and allNames p rest }
 -- an environment that agrees with `env` on the names listed and with `other` elsewhere
-agreeOn (A : U) (xs : List String) (env other : String -> A) : String -> A := fn m { if memberStr m xs then env m else other m }
+agreeOn (A : U) (xs : List String) (env other : String -> A) : String -> A := fn m { if member List String m xs then env m else other m }
 -- the names a name reaches by one read or more, closed in as many rounds as there are nodes
-beyond (ns : List Node) (x : String) : List String := expand ns (readsOf ns x) (countNodes ns)
+beyond (ns : List Node) (x : String) : List String := expand ns (readsOf ns x) (size ns)
 
-NamesAreUnique (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) : Bool := noDuplicates (names d.nodes)
+NamesAreUnique (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) : Bool := distinct String (structural String) (names d.nodes)
 Acyclic (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) : Bool :=
-  allNames (fn x { not (memberStr x (beyond d.nodes x)) }) (names d.nodes)
+  all List String (fn (x : String) { not (member List String x (beyond d.nodes x)) }) (names d.nodes)
 -- the step of a name gives one value on a drawn environment and on the same environment with every
 -- name its node does not list back at `init`, the value of what is not computed: a step that reads
 -- a name its node does not list is refuted where the environment holds something else there
@@ -101,7 +96,7 @@ Dataflow (A : U) (eq : A -> A -> Bool) := NamesAreUnique A eq & Acyclic A eq & S
 -- cycle too. What it does not reach, the complement of the cone, is not produced.
 expand (ns : List Node) (seen : List String) (k : Nat) : List String :=
   if k == 0 then seen else expand ns (addNew seen (readsOfAll ns seen)) (k - 1)
-reaches (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (entry : String) : List String := expand d.nodes [entry] (countNodes d.nodes)
+reaches (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (entry : String) : List String := expand d.nodes [entry] (size d.nodes)
 
 -- ---------------------------------------------------------------- §2 Schedules
 
@@ -115,9 +110,9 @@ Schedule = List String
 placedBefore (ns : List Node) (live placed s : List String) : Bool :=
   match s { nil -> true ; cons n rest -> subset (keep live (readsOf ns n)) placed and placedBefore ns live (cons n placed) rest }
 keep (within xs : List String) : List String :=
-  match xs { nil -> nil ; cons x rest -> if memberStr x within then cons x (keep within rest) else keep within rest }
+  match xs { nil -> nil ; cons x rest -> if member List String x within then cons x (keep within rest) else keep within rest }
 LinearizesOn (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (live : List String) (s : Schedule) : Bool :=
-  sameMembers s live and noDuplicates s and placedBefore d.nodes live nil s
+  sameMembers s live and distinct String (structural String) s and placedBefore d.nodes live nil s
 
 -- Running a schedule: each name in its order, from the values so far; a name not scheduled keeps
 -- `init`.
@@ -131,7 +126,7 @@ run (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (s : Schedule) : String ->
 -- The law a dataflow is certified against, with the schedules drawn; a session block reordered
 -- is one more pair it covers (8.S14).
 EquivalentOn (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (live : List String) (s1 s2 : Schedule) : Bool :=
-  allNames (fn n { eq (run A eq d s1 n) (run A eq d s2 n) }) live
+  all List String (fn (n : String) { eq (run A eq d s1 n) (run A eq d s2 n) }) live
 Confluent (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (live : List String) (s1 s2 : Schedule) : Bool :=
   not (LinearizesOn A eq d live s1 and LinearizesOn A eq d live s2) or EquivalentOn A eq d live s1 s2
 
@@ -142,20 +137,19 @@ Confluent (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (live : List String)
 -- linearize, so the law over the plan compares with these and not with schedules drawn whole.
 readyIn (ns : List Node) (live placed cands : List String) : List String :=
   match cands { nil -> nil ; cons n rest ->
-    if not (memberStr n placed) and subset (keep live (readsOf ns n)) placed then cons n (readyIn ns live placed rest)
+    if not (member List String n placed) and subset (keep live (readsOf ns n)) placed then cons n (readyIn ns live placed rest)
     else readyIn ns live placed rest }
-lengthStrs (xs : List String) : Nat := match xs { nil -> 0 ; cons x rest -> 1 + lengthStrs rest }
 atIndex (xs : List String) (i : Nat) : List String :=
   match xs { nil -> nil ; cons x rest -> if i == 0 then [x] else atIndex rest (i - 1) }
 headOr (cs : List Nat) : Nat := match cs { nil -> 0 ; cons c rest -> c }
 tailOf (cs : List Nat) : List Nat := match cs { nil -> nil ; cons c rest -> rest }
 readyOrder (ns : List Node) (live placed : List String) (cs : List Nat) (k : Nat) : Schedule :=
   if k == 0 then nil
-  else match atIndex (readyIn ns live placed live) (headOr cs mod (1 + lengthStrs (readyIn ns live placed live))) {
+  else match atIndex (readyIn ns live placed live) (headOr cs mod (1 + size (readyIn ns live placed live))) {
     nil -> (match readyIn ns live placed live { nil -> nil ; cons x rest -> cons x (readyOrder ns live (cons x placed) (tailOf cs) (k - 1)) }) ;
     cons x rest -> cons x (readyOrder ns live (cons x placed) (tailOf cs) (k - 1)) }
 linearization (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (live : List String) (cs : List Nat) : Schedule :=
-  readyOrder d.nodes live nil cs (lengthStrs live)
+  readyOrder d.nodes live nil cs (size live)
 
 -- ---------------------------------------------------------------- §3 The plan
 
@@ -183,16 +177,16 @@ highest (ns : List Node) (live : List String) (k : Nat) (xs : List String) : Nat
 -- the levels along a schedule never fall
 byLevels (ns : List Node) (live : List String) (prev : Nat) (s : Schedule) : Bool :=
   match s { nil -> true ; cons x rest -> {
-    l := level ns live (countNodes ns) x
+    l := level ns live (size ns) x
     prev <= l and byLevels ns live l rest } }
 -- the order of first demand: a name is placed after the names it reads, visited in the order its
 -- node lists them, and once; bounded by the number of nodes
 demandFrom (ns : List Node) (x : String) (done : List String) (k : Nat) : List String :=
-  if memberStr x done or k == 0 then done else appendOne (demandAll ns (readsOf ns x) done (k - 1)) x
+  if member List String x done or k == 0 then done else demandAll ns (readsOf ns x) done (k - 1) <> [x]
 demandAll (ns : List Node) (xs : List String) (done : List String) (k : Nat) : List String :=
   match xs { nil -> done ; cons x rest -> demandAll ns rest (demandFrom ns x done k) k }
 firstDemand (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (entry : String) : Schedule :=
-  demandFrom d.nodes entry nil (1 + countNodes d.nodes)
+  demandFrom d.nodes entry nil (1 + size d.nodes)
 
 -- A plan: the strategy that chose it, the entry, the live subgraph and a schedule of it
 -- (D-2026-10-13-g: the plan is a value; L5.6: its hash enters the identity of a result).
@@ -220,7 +214,7 @@ planOf (eq : Term -> Term -> Bool) (p : Planning Term eq) (d : Demand) (prog : P
 -- as it was.
 DemandKey = { decoration : Maybe Decoration, values : List (String * Value) }
 keepRead (live : List String) (vs : List (String * Value)) : List (String * Value) :=
-  match vs { nil -> nil ; cons (n, v) rest -> if memberStr n live then cons (n, v) (keepRead live rest) else keepRead live rest }
+  match vs { nil -> nil ; cons (n, v) rest -> if member List String n live then cons (n, v) (keepRead live rest) else keepRead live rest }
 demandKey (d : Demand) (live : List String) : DemandKey := { decoration := d.decoration, values := keepRead live d.sets }
 withSet (d : Demand) (n : String) (v : Value) : Demand :=
   { entry := d.entry, decoration := d.decoration, accepts := d.accepts, assumes := d.assumes, delta := d.delta,
@@ -344,7 +338,7 @@ ByNeedIsFirstDemand (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (d : Dataf
 -- value and its derivative have two keys), which waits for a model of `Keying` (8.S10, the result
 -- store). Removed, not restated.
 KeyReadsOnlyTheCone (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (st : Strategy) (d : Dataflow A eq) (dm : Demand) (n : String) (v : Value) : Bool :=
-  memberStr n (reaches A eq d dm.entry)
+  member List String n (reaches A eq d dm.entry)
     or demandKey (withSet dm n v) (p.plan st d dm.entry).live == demandKey dm (p.plan st d dm.entry).live
 
 Planning (A : U) (eq : A -> A -> Bool) := PlanIsTheLiveCone A eq & PlanLinearizes A eq & StrategiesAgree A eq
