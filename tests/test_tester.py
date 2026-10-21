@@ -157,7 +157,7 @@ def test_arrays_are_drawn_and_a_census_of_lists_lists_its_elements(tmp_path, cap
 GENERATED = '''import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear symmetricOf orthogonal unitList
 import "generators.lth" Gen Seed byParameter
-import "arrays.lth" Dim MatOf SymmetricOf Symmetric
+import "arrays.lth" Dim MatOf SymmetricOf SymmetricMatrix
 import "probability.lth" UnitList allUnit
 counter : Gen Int := fn n s { (s mod 7, (s * 1103515245 + 12345) mod 2147483648) }
 wide : Gen Int := fn n s { (s mod 70, (s + 1) mod 2147483648) }
@@ -165,7 +165,7 @@ Seven : U := { x : Int | 0 <= x and x < 7 }
 InSeven (x : Seven) : Bool := x < 7
 Rotated (k : Dim) (q : MatOf k k) (s : SymmetricOf k) : Bool := q.m == k and s.m == k
 AllUnit (vs : UnitList) : Bool := allUnit vs
-IsSquare (s : Symmetric) : Bool := s.m == s.n
+IsSquare (s : SymmetricMatrix) : Bool := s.m == s.n
 test "InSeven" (SampledMode linear) (whereBindings <- [byParameter "x" "counter"])
 test "InSeven" (SampledMode linear) (whereBindings <- [byParameter "x" "wide"])
 test "InSeven" ExhaustiveMode (whereBindings <- [byParameter "x" "counter"])
