@@ -103,7 +103,8 @@ Random := UniformInUnit & SeedMoves & DrawsAreUniform & DrawsAreIndependent
 -- the value at which the cumulative weight first exceeds `u` (7.S2). Weights are non-negative.
 -- The reference `pick` gives the last value of positive weight when rounding leaves `u` beyond the
 -- running sum (gen.1: in doubles the sum of the parts need not reach the total).
-total (T : U) (ws : List (T * Float64)) : Float64 := match ws { nil -> 0.0 ; cons (x, w) rest -> w + total T rest }
+total (T : U) (ws : List (T * Float64)) : Float64 :=
+  fold (T * Float64) Float64 (fn a b { a + b }) 0.0 (fn (xw : T * Float64) { match xw { (x, w) -> w } }) ws
 pick (T : U) (ws : List (T * Float64)) (u : Float64) : Maybe T := match ws { nil -> nothing ;
   cons (x, w) rest -> if u < w then just x else (match pick T rest (u - w) { nothing -> (if 0.0 < w then just x else nothing) ; r -> r }) }
 
@@ -113,15 +114,14 @@ pick (T : U) (ws : List (T * Float64)) (u : Float64) : Maybe T := match ws { nil
 -- sum through it (7.S2's proportionality); one value of positive weight always gives itself.
 Support (T : Concrete) : { weights : List (T * Float64), pick : Float64 -> Maybe T }
 weightOf (T : Concrete) (ws : List (T * Float64)) (x : T) : Float64 :=
-  match ws { nil -> 0.0 ; cons (y, w) rest -> (if x == y then w else 0.0) + weightOf T rest x }
-allNonNegative (T : Concrete) (ws : List (T * Float64)) : Bool :=
-  match ws { nil -> true ; cons (x, w) rest -> 0.0 <= w and allNonNegative T rest }
+  fold (T * Float64) Float64 (fn a b { a + b }) 0.0 (fn (yw : T * Float64) { match yw { (y, w) -> if x == y then w else 0.0 } }) ws
 -- the running sum before the first occurrence of `x`
 before (T : Concrete) (ws : List (T * Float64)) (x : T) : Float64 :=
   match ws { nil -> 0.0 ; cons (y, w) rest -> if x == y then 0.0 else w + before T rest x }
 occurs (T : Concrete) (ws : List (T * Float64)) (x : T) : Bool :=
-  match ws { nil -> false ; cons (y, w) rest -> x == y or occurs T rest x }
-NonNegative (T : Concrete) (s : Support T) : Bool := allNonNegative T s.weights
+  any List (T * Float64) (fn (yw : T * Float64) { match yw { (y, w) -> x == y } }) ws
+NonNegative (T : Concrete) (s : Support T) : Bool :=
+  all List (T * Float64) (fn (xw : T * Float64) { match xw { (x, w) -> 0.0 <= w } }) s.weights
 PickedHasWeight (T : Concrete) (s : Support T) (v : UnitInterval) : Bool :=
   match s.pick (total T s.weights * v) { nothing -> total T s.weights == 0.0 ; just x -> 0.0 < weightOf T s.weights x }
 -- the weight of the first occurrence of `x`, the part the running sum `before` starts
@@ -174,12 +174,7 @@ LogPlacement := LogScales
 
 -- ---------------------------------------------------------------- §3 Exhaustive and sized generators
 
-memberOf (T : Concrete) (x : T) (xs : List T) : Bool := match xs { nil -> false ; cons y rest -> x == y or memberOf T x rest }
-allOf (T : U) (p : T -> Bool) (xs : List T) : Bool := match xs { nil -> true ; cons x rest -> p x and allOf T p rest }
 firstOf (T : U) (r : T * Seed) : T := match r { (x, s) -> x }
-noDuplicates (T : Concrete) (xs : List T) : Bool := match xs { nil -> true ; cons x rest -> not (memberOf T x rest) and noDuplicates T rest }
-upTo (T : U) (size : T -> Nat) (n : Nat) (xs : List T) : List T :=
-  match xs { nil -> nil ; cons x rest -> if size x <= n then cons x (upTo T size n rest) else upTo T size n rest }
 
 -- An exhaustive generator lists every value of a finite type, once; its values up to a size are
 -- those whose size is at most it (7.S3, 7.R3). The size is the type's, one function per form
@@ -188,17 +183,17 @@ upTo (T : U) (size : T -> Nat) (n : Nat) (xs : List T) : List T :=
 -- Named `Enumeration`, apart from laws.lth's coverage `Exhaustive` (one name, two meanings; the
 -- coordinator, 2026-10-14).
 Enumeration (T : Concrete) (size : T -> Nat) : { all : List T }
-ReachesEvery (T : Concrete) (size : T -> Nat) (e : Enumeration T size) (x : T) : Bool := memberOf T x e.all
-EachOnce (T : Concrete) (size : T -> Nat) (e : Enumeration T size) : Bool := noDuplicates T e.all
+ReachesEvery (T : Concrete) (size : T -> Nat) (e : Enumeration T size) (x : T) : Bool := any List T (fn (y : T) { x == y }) e.all
+EachOnce (T : Concrete) (size : T -> Nat) (e : Enumeration T size) : Bool := distinct T (structural T) e.all
 Enumeration (T : Concrete) (size : T -> Nat) := ReachesEvery T size & EachOnce T size
-values (T : Concrete) (size : T -> Nat) (e : Enumeration T size) (n : Nat) : List T := upTo T size n e.all
+values (T : Concrete) (size : T -> Nat) (e : Enumeration T size) (n : Nat) : List T := filter List T (fn (x : T) { size x <= n }) e.all
 
 -- A sized generator keeps the size of what it gives within the size asked: for a recursive `data`
 -- the size bounds the depth, so at size 0 only constructors with no recursive argument are drawn
 -- (7.S3, proposed), and drawing ends.
-Sized (T : U) (size : T -> Nat) : { gen : Gen T }
-SizeBounded (T : U) (size : T -> Nat) (g : Sized T size) (n : Nat) (s : Seed) : Bool := size (firstOf T (g.gen n s)) <= n
-Sized (T : U) (size : T -> Nat) := SizeBounded T size
+SizedGenerator (T : U) (size : T -> Nat) : { gen : Gen T }
+SizeBounded (T : U) (size : T -> Nat) (g : SizedGenerator T size) (n : Nat) (s : Seed) : Bool := size (firstOf T (g.gen n s)) <= n
+SizedGenerator (T : U) (size : T -> Nat) := SizeBounded T size
 
 -- ---------------------------------------------------------------- §4 Subtypes and dependent records
 
@@ -236,12 +231,9 @@ dependent (A : U) (B : A -> U) (ga : Gen A) (gb : (x : A) -> Gen (B x)) : Gen ((
 -- turn, each value once (7.S3's table; gen.10: a draw by weight repeats and misses, and could not
 -- be graded as listed).
 Census (T : U) = List T
-lengthOf (T : U) (xs : List T) : Nat := match xs { nil -> 0 ; cons x rest -> 1 + lengthOf T rest }
-nthGenerated (T : U) (xs : List T) (i : Nat) : Maybe T :=
-  match xs { nil -> nothing ; cons x rest -> if i == 0 then just x else nthGenerated T rest (i - 1) }
 nextSeed (s : Seed) : Seed := (s + 1) mod 2147483648
 walk (T : U) (c : Census T) : Gen (Maybe T) :=
-  fn n s { (if lengthOf T c == 0 then nothing else nthGenerated T c (s mod lengthOf T c), nextSeed s) }
+  fn n s { (if size c == 0 then nothing else nth T c (s mod size c), nextSeed s) }
 
 -- A binding names the generator of a parameter, or of every parameter of a type, inline or through
 -- a profile, with the coverage that generator gives (every value, a census, a draw); a parameter
@@ -322,10 +314,10 @@ RuleCases (v : SurfaceProgram -> String -> Bool) : {
 }
 -- at size 0, seed `i` gives the census's `i`-th program, and the next seed is `i + 1`
 CensusFirst (v : SurfaceProgram -> String -> Bool) (c : RuleCases v) (i : Seed) : Bool :=
-  match nthGenerated (Violating v) c.census i { nothing -> true ;
+  match nth (Violating v) c.census i { nothing -> true ;
     just w -> (match c.violating 0 i { (x, s) -> x.p == w.p and x.n == w.n and s == nextSeed i }) }
 CleanCensusFirst (v : SurfaceProgram -> String -> Bool) (c : RuleCases v) (i : Seed) : Bool :=
-  match nthGenerated (Clean v) c.cleanCensus i { nothing -> true ;
+  match nth (Clean v) c.cleanCensus i { nothing -> true ;
     just w -> (match c.clean 0 i { (x, s) -> x.p == w.p and x.n == w.n and s == nextSeed i }) }
 RuleCases (v : SurfaceProgram -> String -> Bool) := CensusFirst v & CleanCensusFirst v
 
@@ -356,22 +348,19 @@ RuleCases (v : SurfaceProgram -> String -> Bool) := CensusFirst v & CleanCensusF
 DegenerateCase (T : U) = { name : String, holds : T -> Bool, witness : T }
 Degeneracies (T : U) : { cases : List (DegenerateCase T) }
 caseNames (T : U) (cs : List (DegenerateCase T)) : List String :=
-  match cs { nil -> nil ; cons c rest -> cons c.name (caseNames T rest) }
+  map (DegenerateCase T) String (fn (c : DegenerateCase T) { c.name }) cs
 witnessesHold (T : U) (cs : List (DegenerateCase T)) : Bool :=
-  match cs { nil -> true ; cons c rest -> c.holds c.witness and witnessesHold T rest }
+  all List (DegenerateCase T) (fn (c : DegenerateCase T) { c.holds c.witness }) cs
 -- each witness is in its case, and no two cases share a name
 EachWitnessIsItsCase (T : U) (d : Degeneracies T) : Bool := witnessesHold T d.cases
-CaseNamesAreDistinct (T : U) (d : Degeneracies T) : Bool := noDuplicates String (caseNames T d.cases)
+CaseNamesAreDistinct (T : U) (d : Degeneracies T) : Bool := distinct String (structural String) (caseNames T d.cases)
 Degeneracies (T : U) := EachWitnessIsItsCase T & CaseNamesAreDistinct T
 -- the names of the cases a value is in: what `classify` records of it (7.S14)
 casesOf (T : U) (cs : List (DegenerateCase T)) (x : T) : List String :=
-  match cs { nil -> nil ; cons c rest -> if c.holds x then cons c.name (casesOf T rest x) else casesOf T rest x }
+  caseNames T (filter List (DegenerateCase T) (fn (c : DegenerateCase T) { c.holds x }) cs)
 
 -- a list: empty, and one element (D-2026-10-16-j); the element the second witness needs is a
 -- parameter, since nothing here draws one
-isEmptyList (A : U) (xs : List A) : Bool := match xs { nil -> true ; cons x rest -> false }
-isOneElement (A : U) (xs : List A) : Bool :=
-  match xs { nil -> false ; cons x rest -> (match rest { nil -> true ; cons y more -> false }) }
-listDegeneracies (A : U) (a : A) : Degeneracies (List A) := { cases := [
-  { name := "empty", holds := fn xs { isEmptyList A xs }, witness := nil },
-  { name := "one element", holds := fn xs { isOneElement A xs }, witness := [a] } ] }
+listDegeneracies (A : Concrete) (a : A) : Degeneracies (List A) := { cases := [
+  { name := "empty", holds := fn (xs : List A) { isEmpty A xs }, witness := nil },
+  { name := "one element", holds := fn (xs : List A) { Indexed.size (listIndexed A) xs == 1 }, witness := [a] } ] }

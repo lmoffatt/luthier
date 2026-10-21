@@ -11,7 +11,7 @@
 -- regions. The entries, regions and censuses are regions_laws.test.lut's.
 
 import "test.lth" test ExhaustiveMode Grade Cases Sampled Proved defaultBudgets
-import "generators.lth" Binding Degeneracies isEmptyList isOneElement EachWitnessIsItsCase CaseNamesAreDistinct
+import "generators.lth" Binding Degeneracies EachWitnessIsItsCase CaseNamesAreDistinct
 import "laws.lth" Listed Cited
 import "certification.lth" Certifying Entry Certificate Outcome Passed Failed NotRunFor Drawing Region FromType FromLaw
   FromCode Label BindingEvidence Regioning Deriving NoRegionsLeaveTheGrade RefutedInEveryRegion ALabelEntersNoGrade
@@ -25,10 +25,10 @@ bind (p g : String) : Binding := { parameter := just p, type := nothing, generat
 
 -- broken declarations of the cases of a list: the witness of "empty" has an element; "empty" twice
 wrongWitness : Degeneracies (List Int) := { cases := [
-  { name := "empty", holds := fn xs { isEmptyList Int xs }, witness := [1] } ] }
+  { name := "empty", holds := fn (xs : List Int) { isEmpty Int xs }, witness := [1] } ] }
 twiceNamed : Degeneracies (List Int) := { cases := [
-  { name := "empty", holds := fn xs { isEmptyList Int xs }, witness := nil },
-  { name := "empty", holds := fn xs { isOneElement Int xs }, witness := [1] } ] }
+  { name := "empty", holds := fn (xs : List Int) { isEmpty Int xs }, witness := nil },
+  { name := "empty", holds := fn (xs : List Int) { Indexed.size (listIndexed Int) xs == 1 }, witness := [1] } ] }
 listTypes : List U := [List Int]
 wrongWitnesses : List (Degeneracies (List Int)) := [wrongWitness]
 twiceNameds : List (Degeneracies (List Int)) := [twiceNamed]

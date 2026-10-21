@@ -86,7 +86,7 @@ uniformSample : Gen UnitList := hostGenerators.uniformSample
 -- a source biased toward 0 (its distribution function is the square root, at Kolmogorov distance
 -- 1/4 from the uniform), which the sequential test refutes
 square (v : Vec Float64) : Vec Float64 := vec Float64 v.n (fn k { v.f k * v.f k })
-squares (vs : List (Vec Float64)) : List (Vec Float64) := match vs { nil -> nil ; cons v rest -> cons (square v) (squares rest) }
+squares (vs : List (Vec Float64)) : List (Vec Float64) := map (Vec Float64) (Vec Float64) square vs
 skewedSample : Gen UnitList := fn size seed { match uniformSample size seed { (vs, next) -> (squares vs, next) } }
 -- a diagonal clear of the floor: an atom at 0 of probability 0.25, else a sign and a magnitude
 -- log-uniform in [1, 1000], ClearDiagonal's bounds (7.S4)
