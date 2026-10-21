@@ -1,6 +1,6 @@
-<!-- PDF: pandoc docs/concepts.md -o docs/concepts.pdf --pdf-engine=xelatex --toc --toc-depth=2 -H docs/concepts/pdf-header.tex -V documentclass=article -V papersize=a4 -V geometry:margin=2.4cm -V fontsize=10pt -V mainfont="DejaVu Serif" -V sansfont="DejaVu Sans" -V monofont="DejaVu Sans Mono" -V monofontoptions="Scale=0.85" -V mathfont="DejaVu Math TeX Gyre" -V linkcolor=blue -V urlcolor=blue --shift-heading-level-by=-1 -->
-
 # The key concepts of Luthier and the logic that joins them
+
+<!-- PDF: pandoc docs/concepts.md -o docs/concepts.pdf --pdf-engine=xelatex --toc --toc-depth=2 -H docs/concepts/pdf-header.tex -V documentclass=article -V papersize=a4 -V geometry:margin=2.4cm -V fontsize=10pt -V mainfont="DejaVu Serif" -V sansfont="DejaVu Sans" -V monofont="DejaVu Sans Mono" -V monofontoptions="Scale=0.85" -V mathfont="DejaVu Math TeX Gyre" -V linkcolor=blue -V urlcolor=blue --shift-heading-level-by=-1 -->
 
 Draft 0, 2026-10-21, written by Claude Opus 5.5 on the brief
 `record/plan/core-2026-10-17/prompt-concepts-doc.md`, for Luciano to annotate. Inputs: the
@@ -21,11 +21,11 @@ certifies)"; the principles are `docs/principles.md`, organized under G0 to G2. 
 by its id in `record/decisions.md` (D-2026-10-18-b), a clause of the specification by chapter and
 number (spec 12.S22), and a theory or model by its file. Four marks say how firm a statement is:
 
-- [settled]: a clause Luciano has marked, or a rule the interpreter implements;
-- [proposed]: a clause awaiting his mark (the principles mark these themselves);
-- [building]: decided and not yet built, or built in part, or suspended by a later decision; the
-  core of the library is being rebuilt now (section 3.5 says what may still move);
-- [mine]: a reading or a proposal of this document, in no source.
+- [settled] marks a clause Luciano has marked, or a rule the interpreter implements;
+- [proposed] marks a clause awaiting his mark (the principles mark these themselves);
+- [building] marks what is decided and not yet built, or built in part, or suspended by a later
+  decision; the core of the library is being rebuilt now (section 3.5 says what may still move);
+- [mine] marks a reading or a proposal of this document, in no source.
 
 An unmarked paragraph explains and adds nothing that its citations don't say.
 
@@ -40,10 +40,11 @@ An unmarked paragraph explains and adds nothing that its citations don't say.
 | `U`, `W` | the universe (the type of types) and the world (section 11) |
 | `A -> B`, `A * B` | functions from A to B, pairs of an A and a B |
 | `{ x : A, y : B }`, `{ x := a, y := b }` | a record type and a record value; `e.x` its field x |
-| `{ x : T \| p }` | the subtype: the values of T for which the predicate p holds |
 | `fn x { t }` | the function with parameter x and body t |
 | `p & q` | the conjunction of two laws |
 | `(name <- v)` | a named argument (an option of a call) |
+
+The subtype, the values of `T` for which the predicate `p` holds, is written `{ x : T | p }`.
 
 In mathematical formulas, ℝ is the real numbers, ℤ the integers, and $u = 2^{-53}$ the unit
 roundoff of IEEE 754 binary64 doubles, so that $\epsilon_{\text{mach}} = 2u = 2^{-52}$ is the
@@ -77,8 +78,8 @@ one before it leaves a question that only it answers.
 2. The laws of a theory are stated over equality, and equality belongs to the object; the core
    gives the objects, their levels of equivalence and the structures, said once (section 3).
 3. A structure said once is used by one name per concept, resolved by the type (section 4).
-4. Theories, models and demands live in three kinds of file, so that the checker reads only what
-   says, and only a demand executes (section 5).
+4. Theories, models and demands live in three kinds of file, so that the checker reads only
+   statements and only a demand executes (section 5).
 5. A law over an infinite domain can't be run whole; a certifier produces evidence of a grade
    (section 6).
 6. Evidence that could not have failed is no evidence: every law carries a control (section 7).
@@ -119,8 +120,9 @@ $\{ m : S \mid \ell(m) \}$, the equalizer of $\ell$ and the constant `true`, who
 $S$ is the forgetful projection (L8.10 (the certified subtype from a law is the equalizer of the
 law and the constant true) [proposed]). The same construction, a material type and a law giving a
 new type, its only constructor and the function that says whether a value belongs, is the
-fundamental pattern of the language for values, functions and programs alike (L8.5, L8.6 (a law
-gives the type, the constructor with Maybe and the membership function at once)) [settled].
+fundamental pattern of the language for values, functions and programs alike (L8.5 (from a
+material type and a law come the certified type, its only constructor and the forgetful
+projection); L8.6 (a law gives the three at once)) [settled].
 
 Luciano's own framing (D-2026-10-12-a: Luthier is presented as a verifier of models of theories,
 not of functions): a function seldom stands alone. Every law is an equality, and the equality of a
@@ -232,7 +234,7 @@ does.
 ### 3.1 Equality belongs to the object
 
 Every law above is an equality, so before a law can be stated its type needs an equality. Luthier
-distinguishes four things that other languages run together: definition (`:=`), the identity
+distinguishes four things: definition (`:=`), the identity
 proposition, decidable equality (`==`) and definitional equality by reduction (`≡`), and each
 object carries the observational equality that fits it (L3.1 (definition, identity, decidable
 equality and definitional equality are different things, and each object carries its own))
@@ -380,7 +382,8 @@ the field, the type and the models claimed.
 ### 4.2 Why
 
 The model of a structure at a type is a fact about the type, recorded once where the type is
-defined (L2.8). If each use had to repeat it, the fact would be stated many times and could be
+defined (L2.8 (a definition and the law of its role live in one file, the one that defines it)
+[proposed]). If each use had to repeat it, the fact would be stated many times and could be
 stated differently each time; resolving by the type says it once. And since equality belongs to
 the object (3.1), a generic `member x xs` must use the equality of the type of `x`, which only the
 type can supply.
@@ -598,10 +601,13 @@ $a = 26150$, $b = 14398$. Each control line is the law's line with `(control <- 
 model in the profile; the tester records a refutation as a control's entry, never as the law's
 failure, and `check -v` then reports each law "controlled".
 
-The last control shows a second use: a control on a bound tells whether the bound is tight
-enough to mean something. The library did this with the doubles' associativity: D-2026-10-17-f
-first wrote the bound $\gamma_2(|x| + |y| + |z|)$, and a control at a third of `epsilon` showed the
-true bound needs the factor 3 (numbers.lth, §2; the correction to D-2026-10-17-f).
+The last control shows that the bound does work: without it the law fails, so the law is not
+satisfied by the doubles for free. It doesn't show that the bound is tight. For that the library
+puts a control just below the bound: D-2026-10-17-f first wrote the doubles' associativity within
+$\gamma_2(|x| + |y| + |z|)$, the correction to it showed the bound needs the factor 3, and a
+control with a third of `epsilon`, which brings $3\gamma_2$ just below $\gamma_2$, is refuted at a
+listed case (numbers.lth §2; `tests/tester/numbers_controls.test.lut`). The example has no such
+control [mine: a gap in the example, left since its bound has room by design].
 
 ## 8. The certificate and its cone
 
@@ -633,7 +639,7 @@ The *dependency cone* of a definition is the definition and everything it refers
 A certificate is identified by a hash over that cone in canonical form (bound variables renamed,
 module prefixes removed, the type annotations of binders erased), together with the host code
 behind each extern it calls and the interpreter, and with the binding that drew its cases (L10.4;
-spec 6.S8, 7.S9, 3.S34; D-2026-10-15-e) [settled]. In formula, for a law ℓ at a name $n$ under a
+spec 6.S8, 7.S9, 3.S34; D-2026-10-15-e) [settled]. In formula, for a law $\ell$ at a name $n$ under a
 binding $g$ (the generator that drew each parameter),
 
 $$\mathrm{id}(\ell, n, g) = \bigl(\ell,\; H(\mathrm{canon}(\mathrm{cone}(n)) \,\|\, \mathrm{hosts} \,\|\, \mathrm{interpreter}),\; g\bigr),$$
@@ -685,7 +691,9 @@ D-2026-10-14-c]). Two links sampled over the same distribution compose by the un
 failure fractions summed (L10.8 [proposed]; D-2026-10-12-q). Where the identity is Boolean, `==`
 structural, the certificate transports exactly (L9.9) [settled]. This is what will let the planner
 substitute one specimen for another (section 13) and what lets a renaming of a record's fields
-carry certificates at no cost (L3.4; D-2026-10-17-a).
+carry certificates at no cost (L3.4 (two types that differ only in the names of their fields are
+equivalent by a certified renaming, along which certificates transport) [proposed];
+D-2026-10-17-a).
 
 ## 9. Numbers and within-bound laws
 
@@ -751,9 +759,9 @@ resolution of rounding a stricter cutoff buys nothing (L13.5 (a cutoff is read a
 realization's defect at the point where it is met) [proposed]).
 
 The law's range is the type of its variables, marks of the tape (D-2026-10-18-j), and its control
-is `noRoom` (section 7): with the bound at zero the law fails at the first pair whose division
-rounds. A law with a bound and no control on the bound could hide a bound so loose that nothing
-fails.
+is `noRoom` (section 7): with the bound at zero the law fails at a pair whose division rounds. L9.18
+also asks the certificate to record how tight the bound is, the largest ratio of error to bound
+seen; today's entries don't record it [building].
 
 ### 9.4 How a budget scales with a bound
 
@@ -794,12 +802,16 @@ $d(f x, f y) \le c\, d(x, y)$ (D-2026-10-18-i). The bases:
 
 | Quantity | Carrier | Composition | Order |
 |---|---|---|---|
-| error | $[0, \infty]$ | $+$ | $\ge$ (the correction to D-2026-10-18-i: Lawvere's orientation, so that the empty join is ∞) |
+| error | $[0, \infty]$ | $+$ | $\ge$ |
 | uncertainty | distribution functions of distances | a t-norm, or convolution | pointwise $\ge$ |
 | evidence | $[0, 1]$ | $+$ (the union bound), or max when nested | $\le$ |
 | resources | $[0, \infty]$ | $+$ in sequence, max in parallel | not stated |
 
-Three facts settled earlier still hold inside this picture.
+The order of the error base is Lawvere's, the opposite of the usual one, so that the empty join is
+∞ and the tensor preserves it (the correction to D-2026-10-18-i, from bite 6's finding 1); the
+decision names no order for the resources.
+
+Three earlier facts still hold inside this picture.
 
 - The lift is explicit: `lift : Bool -> Cost` sends true to 0 and false to ∞, `exact` reads a cost
   as `c == 0`, and `exact ∘ lift = id`, so `Bool` is a retract of `Cost`; nothing is promoted silently
@@ -926,11 +938,11 @@ For the example, run as
 luthier run docs/concepts/tape.run.lut --set microphone=1200 --set speaker=3450 --set cable=2.5
 ```
 
-the cone of `main` holds `markIsAMetricModel`, `tape`, the core's `Metric` and the world model's
-`host`; `run` serves each from its store when its entry passed at the current hash and refuses
+the cone of `main` holds, among others, `markIsAMetricModel`, `tape`, `Mark`, the core's `Metric`
+and the world model's `host`; `run` serves each from its store when its entry passed at the current hash and refuses
 otherwise. The holes are filled by `--set`, typed against their declared types (spec 12.S18). This
-document doesn't show the run's output: runs are Luciano's to make in this repository (`CLAUDE.md`),
-and the example was checked and certified, not run.
+document doesn't show the run's output: the rules of this repository leave runs to Luciano
+(`CLAUDE.md`), and the example was checked and certified, not run.
 
 ### 12.4 The identity of a result
 
@@ -972,7 +984,8 @@ Today nothing chooses: a name is bound once and evaluation uses that binding (sp
 [building: spec 9.S5 to 9.S17 suspended by it]. For the example, `tape` is a lone specimen of
 `Tape`; a second, say a lookup table read from a calibration file, would enter the planner's graph
 only by an identity certificate with its domain, and be certified on that domain and nowhere else
-(L10's example).
+(the example of L10: a lookup table equal to the native on a grid is certified on the grid and
+nowhere else).
 
 ## 14. Claim, evidence and execution kept apart
 
@@ -982,15 +995,15 @@ belief that a value belongs to a type, with its evidence (Terms; D-2026-10-13-d,
 L5.10 names the three objects of a result in the same spirit: the meaning, which the laws fix; the
 realization, the result under a plan; the evidence, its certificates [settled].
 
-The three planes of section 3.3 and the three kinds of file of section 5 line up with these
-[mine: the reading; no source states the correspondence]:
+The three planes of section 3.3 and the three kinds of file of section 5 line up with these, in
+the table below [mine: the reading; no source states the correspondence].
 
 | | The claim | The evidence | The execution |
 |---|---|---|---|
 | What it is | a theory's laws and a model's declaration `m : T` | the entries that a certifier wrote | a run of a demand |
 | Plane | 1 and 2 state; 3 is the model claimed | about plane 3, measured against 1 and 2 | plane 3, on `W` |
-| File | `.lth` and the `.lut` that claims | the store beside the claiming `.lut` (L10.12) | the `.run.lut` and its records |
-| Keyed by | the names and the theory | the law, the cone's hash, the binding | the result's key (L5.6) |
+| File | `.lth` and the `.lut` that claims | the store beside the claiming `.lut` (L10.12, a store beside the claim) | the `.run.lut` and its records |
+| Keyed by | the names and the theory | the law, the cone's hash, the binding | the result's key (L5.6, everything that made it) |
 | Changes when | Luciano or an author rewrites a law | the cone or the binding changes | the demand or anything in the key changes |
 
 Each column can change without the others moving. A run doesn't change a certificate; a new test
@@ -1011,13 +1024,15 @@ The questions of `docs/principles.md` that the concepts above rest on, each with
   along a path, the four bases of section 10 as models of one structure. It blocks the cost types,
   transport (8.4), the planner (13) and the decorated outputs. D-2026-10-18-i proposes its shape;
   `Cost` is a library, its algebra decided when it is implemented (D-2026-10-12-al).
-- O2, how a type names its equality: settled in part by `Object` and resolution by type (sections
-  3 and 4); the syntax for a second equality on one carrier is "another type" (spec 4.R13).
+- O2, the type with its equality as the base of every theory, and how a type names its equality:
+  answered in part by `Object` and resolution by type (sections 3 and 4), a second equality on one
+  carrier being another type (spec 4.R13) [mine: the reading that these answer O2 in part].
 - O3, the world as a value and an opt-out of certification if a real case asks for one: the token
   is implemented; the stores are not yet places of the world (spec 10.S6, D-2026-10-15-d).
 - O5, the decorated output: the derivative by dual numbers, the error by intervals, as other models
   of the theory the code was written over (L5.4 [proposed]).
 - The three planes and the three levels of equivalence are in the principles as proposed clauses
-  (L3.5, L5.21) and in the core's files; the specification has no clause for them yet.
+  (L3.5 (the core has three planes); L5.21 (the tower of levels is cut by the demand)) and in the
+  core's files; the specification has no clause for them yet.
 - The core's rebuild (section 3.5): names may move until bite 13 closes, against the measures of
   `execution.md` section 0.
