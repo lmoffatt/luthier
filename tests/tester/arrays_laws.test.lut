@@ -162,11 +162,11 @@ goodMatFunctor : Functor Mat := { map := matMap }
 twoRows : Nat := 2
 threeColumns : Nat := 3
 goodMatIndex : Indexed (MatShaped Int 2 3) Int := matIndexed Int
-double : Int -> Int := fn x { 2 * x }
+twiceInt : Int -> Int := fn x { 2 * x }
 negated : Int -> Int := fn x { 0 - x }
-minus : Int -> Int -> Int := fn x y { x - y }
+differenceInt : Int -> Int -> Int := fn x y { x - y }
 foldUnit : Int := 9
-entry : Nat -> Int := fn k { 2 * k + 1 }
+oddAt : Nat -> Int := fn k { 2 * k + 1 }
 lengths : List Nat := [0, 1, 3]
 vectors : List (Vec Int) := [
   vec Int 0 (fn k { 0 }), vec Int 1 (fn k { 1 }), vec Int 2 (fn k { k }),
@@ -212,7 +212,7 @@ onVecIsAFunctor : List Binding := [
   { parameter := just "C", type := nothing, generator := "entryType", coverage := Listed },
   { parameter := just "model", type := nothing, generator := "goodVecFunctor", coverage := Listed },
   { parameter := just "o", type := nothing, generator := "vecEquality", coverage := Listed },
-  { parameter := just "g", type := nothing, generator := "double", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "twiceInt", coverage := Listed },
   { parameter := just "h", type := nothing, generator := "negated", coverage := Listed },
   { parameter := just "xs", type := nothing, generator := "vectors", coverage := Listed } ]
 test "VecIsAFunctor" ExhaustiveMode (seed <- 20261021) (profile <- onVecIsAFunctor)
@@ -222,16 +222,16 @@ onVecIsFoldable : List Binding := [
   { parameter := just "model", type := nothing, generator := "goodVecFold", coverage := Listed },
   { parameter := just "i", type := nothing, generator := "vecIndex", coverage := Listed },
   { parameter := just "o", type := nothing, generator := "intEquality", coverage := Listed },
-  { parameter := just "op", type := nothing, generator := "minus", coverage := Listed },
+  { parameter := just "op", type := nothing, generator := "differenceInt", coverage := Listed },
   { parameter := just "e", type := nothing, generator := "foldUnit", coverage := Listed },
-  { parameter := just "g", type := nothing, generator := "double", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "twiceInt", coverage := Listed },
   { parameter := just "xs", type := nothing, generator := "vectors", coverage := Listed } ]
 test "VecIsFoldable" ExhaustiveMode (seed <- 20261021) (profile <- onVecIsFoldable)
 onVecIsTabulated : List Binding := [
   { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
   { parameter := just "model", type := nothing, generator := "goodVecTabulation", coverage := Listed },
   { parameter := just "n", type := nothing, generator := "lengths", coverage := Listed },
-  { parameter := just "f", type := nothing, generator := "entry", coverage := Listed },
+  { parameter := just "f", type := nothing, generator := "oddAt", coverage := Listed },
   { parameter := just "o", type := nothing, generator := "intEquality", coverage := Listed } ]
 test "VecIsTabulated" ExhaustiveMode (seed <- 20261021) (profile <- onVecIsTabulated)
 onMatIsIndexed : List Binding := [
@@ -256,7 +256,7 @@ onMatIsAFunctor : List Binding := [
   { parameter := just "C", type := nothing, generator := "entryType", coverage := Listed },
   { parameter := just "model", type := nothing, generator := "goodMatFunctor", coverage := Listed },
   { parameter := just "o", type := nothing, generator := "matEquality", coverage := Listed },
-  { parameter := just "g", type := nothing, generator := "double", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "twiceInt", coverage := Listed },
   { parameter := just "h", type := nothing, generator := "negated", coverage := Listed },
   { parameter := just "xs", type := nothing, generator := "matrices", coverage := Listed } ]
 test "MatIsAFunctor" ExhaustiveMode (seed <- 20261021) (profile <- onMatIsAFunctor)

@@ -48,12 +48,8 @@ kindOf (c : Maybe Cell) : String :=
 knownKind (k : String) : Bool := k == "int" or k == "float" or k == "str"
 
 -- [core bite 11, execution.md §5.2] The lists of names are the core's: `size`, `member`,
--- `distinct`, `all`, `zip` (core/lists.lut), resolved at `List String`. `listLength`,
--- `memberStr` and `distinctColumns` stay only as abbreviations of the core's for plot.lth's
--- import, until bite 12 rewrites plot.lth.
-listLength (A : U) (xs : List A) : Int := lengthList A xs
-memberStr (x : String) (xs : List String) : Bool := member List String x xs
-distinctColumns (xs : List String) : Bool := distinct String (structural String) xs
+-- `distinct`, `all`, `zip` (core/lists.lut), resolved at `List String`; plot.lth, which imported
+-- this file's `listLength`, `memberStr` and `distinctColumns`, uses them too.
 
 -- the first index from k below n where p fails, or -1: for messages that point at the row
 -- (v0.1 table.lut:30; the row numbers of validate_graph.lut count from 0)
@@ -127,6 +123,7 @@ rowObject (names : List String) : Object Row := { eq := fn x y { all List String
 TableOf (names kinds : List String) : U := { t : Table | t.names == names and t.kinds == kinds }
 TableIsIndexed (names kinds : List String) (model : Indexed (TableOf names kinds) Row <- rowsOf) : Bool := Indexed (TableOf names kinds) Row model
 TableIsAnObject (model : Object Table <- { eq := sameTable }) : Bool := Object Table model
+TableClaims := TableIsIndexed & TableIsAnObject
 
 -- ---------------------------------------------------------------- §4 The codec (4.S8, 4.S22)
 

@@ -102,6 +102,8 @@ SymmetricIsAnEqualizer
   (model : Equalizer (Mat Float64) (Mat Float64) SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id (Mat Float64)) transposeDef
     <- { include := fn s { s }, restrict := fn a { a } }) : Bool :=
   Equalizer (Mat Float64) (Mat Float64) SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id (Mat Float64)) transposeDef model
+ArrayContainers := VecIsIndexed & VecIsAnObject & VecIsAFunctor & VecIsFoldable & VecIsTabulated
+  & MatIsIndexed & MatIsAnObject & MatIsAFunctor & SymmetricIsAnEqualizer
 
 -- ---------------------------------------------------------------- §2 Folds over the indices
 

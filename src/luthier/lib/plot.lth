@@ -45,7 +45,7 @@
 --   §6 Certifying the renderer along one chain of tokens (world.lth §5).                 done
 
 import "world.lth" World Described Persistence Host agreement Observed held
-import "tables.lth" Table hasColumn realAt intAt memberStr distinctColumns listLength sameCell sameTable
+import "tables.lth" Table hasColumn realAt intAt sameCell sameTable
 
 -- ---------------------------------------------------------------- §1 The value (plan G2)
 
@@ -207,7 +207,7 @@ nthLayer (ls : List Layer) (i : Int) : Maybe Layer :=
 aesOf (p : Plot) (l : Layer) (a : String) : Maybe String :=
   match lookupStr l.mapping a {
     just c -> just c ;
-    nothing -> if memberStr a (draws l.geom) then lookupStr p.mapping a else nothing }
+    nothing -> if member List String a (draws l.geom) then lookupStr p.mapping a else nothing }
 
 -- what each geometry needs mapped, and what else it may draw (plan G3: "of the kind the geometry
 -- asks")
@@ -290,19 +290,19 @@ levels (t : Table) (c : String) : Int :=
 -- plan G3 [proposed]: every aesthetic a mapping names is a known one, so a misspelt aesthetic is
 -- refused and not ignored
 AestheticsKnown (p : Plot) : Bool :=
-  allStr (keysOf p.mapping) (fn a { memberStr a knownAesthetics })
-    and allLayers p.layers (fn l { allStr (keysOf l.mapping) (fn a { memberStr a knownAesthetics }) })
+  allStr (keysOf p.mapping) (fn a { member List String a knownAesthetics })
+    and allLayers p.layers (fn l { allStr (keysOf l.mapping) (fn a { member List String a knownAesthetics }) })
 -- P11 [proposed]: the canvas has a positive width, height and resolution
 CanvasPositive (p : Plot) : Bool := p.canvas.width > 0.0 and p.canvas.height > 0.0 and p.canvas.dpi > 0.0
 -- plan G2: the tables are named once each
-TablesNamedOnce (p : Plot) : Bool := distinctColumns (namesOf p.tables)
+TablesNamedOnce (p : Plot) : Bool := distinct String (structural String) (namesOf p.tables)
 -- plan G3: a layer that draws columns names a table of the plot
 LayersNameTheirTables (p : Plot) : Bool :=
   allLayers p.layers (fn l { isNilStr (needs l.geom) or isJustTable (lookupTable p.tables l.table) })
 isJustTable (m : Maybe Table) : Bool := match m { nothing -> false ; just t -> true }
 -- plan G3 [proposed]: a layer's own mapping names only aesthetics its geometry draws
 LayerMapsWhatItDraws (p : Plot) : Bool :=
-  allLayers p.layers (fn l { allStr (keysOf l.mapping) (fn a { memberStr a (draws l.geom) }) })
+  allLayers p.layers (fn l { allStr (keysOf l.mapping) (fn a { member List String a (draws l.geom) }) })
 -- plan G3: every aesthetic a geometry needs is mapped, by the layer or by the plot
 NeedsMapped (p : Plot) : Bool :=
   allLayers p.layers (fn l { allStr (needs l.geom) (fn a { isJustStr (aesOf p l a) }) })
@@ -314,7 +314,7 @@ columnFits (p : Plot) (l : Layer) (a : String) : Bool :=
     nothing -> true ;
     just c -> match lookupTable p.tables l.table {
       nothing -> false ;
-      just t -> if numericAesthetic a then hasColumn t c "float" or hasColumn t c "int" else memberStr c t.names } }
+      just t -> if numericAesthetic a then hasColumn t c "float" or hasColumn t c "int" else member List String c t.names } }
 AestheticsAreColumns (p : Plot) : Bool := allLayers p.layers (fn l { allStr (draws l.geom) (fn a { columnFits p l a }) })
 -- plan G2, P11 [proposed]: a geometry's sizes, widths and level are positive
 geomParametersPositive (g : Geom) : Bool :=
@@ -368,7 +368,7 @@ LogScaleOnPositiveData (p : Plot) : Bool :=
 -- plan G3 [proposed]: a palette has a colour for every level of the colour column of each layer
 -- that maps colour, so that two levels never share one
 paletteLength (p : Plot) : Int :=
-  match lookupScale p.scales "colour" { nothing -> 0 ; just s -> match s { palette cs -> listLength String cs ; _ -> 0 } }
+  match lookupScale p.scales "colour" { nothing -> 0 ; just s -> match s { palette cs -> size cs ; _ -> 0 } }
 PaletteCoversLevels (p : Plot) : Bool :=
   allLayers p.layers (fn l { match aesOf p l "colour" {
     nothing -> true ;
@@ -378,7 +378,7 @@ PaletteCoversLevels (p : Plot) : Bool :=
 FacetIsAColumn (p : Plot) : Bool :=
   match p.facet {
     nothing -> true ;
-    just c -> anyLayer p.layers (fn l { match lookupTable p.tables l.table { nothing -> false ; just t -> memberStr c t.names } }) }
+    just c -> anyLayer p.layers (fn l { match lookupTable p.tables l.table { nothing -> false ; just t -> member List String c t.names } }) }
 -- plan G2 [proposed]: equal aspect draws one unit of x as one of y (positions in metres), so it
 -- asks the two position scales of one kind, both linear or both log
 scaleKind (p : Plot) (a : String) : String := match lookupScale p.scales a { nothing -> "" ; just s -> (scaleKey s).kind }
@@ -476,7 +476,7 @@ drawn (S : Concrete) (d : Drawing S) (p : Plot) (stem ext : String) : Described 
 -- `WriteThenRead` holds (world.lth §2) this follows; stated so that the law G3 names is one law,
 -- and the host is held to it by `agreement` (§6).
 FileExistsAfter (S : Concrete) (d : Drawing S) (p : Plot) (stem ext : String) (st : S) : Bool :=
-  not (wellFormed p) or not (memberStr ext d.formats)
+  not (wellFormed p) or not (member List String ext d.formats)
     or (match (drawn S d p stem ext).describe st { (after, u) -> d.store.world.read after (pathOf stem ext) == just (d.image p ext) })
 
 -- The image's laws, each over a well-formed plot (a premise, counted apart, 7.S12) and a format
@@ -484,13 +484,13 @@ FileExistsAfter (S : Concrete) (d : Drawing S) (p : Plot) (stem ext : String) (s
 
 -- plan G3: the file's format is what the path's extension says
 FormatByExtension (S : Concrete) (d : Drawing S) (p : Plot) (ext : String) : Bool :=
-  not (wellFormed p) or not (memberStr ext d.formats) or d.formatOf (d.image p ext) == ext
+  not (wellFormed p) or not (member List String ext d.formats) or d.formatOf (d.image p ext) == ext
 
 -- plan G3, 4.R8: the bytes are a function of the plot's value: two plots that are the same
 -- (`samePlot`, tables compared by their cells) draw the same bytes. Not automatic, because two
 -- host tables with the same cells may differ inside.
 ImageOfTheValue (S : Concrete) (d : Drawing S) (p q : Plot) (ext : String) : Bool :=
-  not (wellFormed p) or not (memberStr ext d.formats) or not (samePlot p q) or d.image p ext == d.image q ext
+  not (wellFormed p) or not (member List String ext d.formats) or not (samePlot p q) or d.image p ext == d.image q ext
 
 -- plan G3, L2.7 (the role of the rows): the image does not depend on the order of the rows of a
 -- table that no layer draws in the order of its rows. A permutation is a bijection of the rows
@@ -503,7 +503,7 @@ replaceTable (ds : List (String * Table)) (name : String) (t : Table) : List (St
 put (p : Plot) (name : String) (t : Table) : Plot := withData p (replaceTable p.tables name t)
 tableOrderedByRows (p : Plot) (name : String) : Bool := anyLayer p.layers (fn l { l.table == name and ordersByRows l.geom })
 RowOrderInvariant (S : Concrete) (d : Drawing S) (p : Plot) (name : String) (t : Table) (f : Fin t.nRows -> Fin t.nRows) (ext : String) : Bool :=
-  not (wellFormed (put p name t)) or not (memberStr ext d.formats) or not (bijective t.nRows f)
+  not (wellFormed (put p name t)) or not (member List String ext d.formats) or not (bijective t.nRows f)
     or tableOrderedByRows p name or d.image (put p name (permuteRows t f)) ext == d.image (put p name t) ext
 
 -- plan G3, L2.7 (the role of the order of layers): two adjacent layers that do not overlap can be
@@ -534,7 +534,7 @@ swapAt (ls : List Layer) (i : Int) : List Layer :=
     nil -> nil ;
     cons a rest -> if i == 0 then (match rest { nil -> ls ; cons b more -> cons b (cons a more) }) else cons a (swapAt rest (i - 1)) }
 LayerOrderInvariant (S : Concrete) (d : Drawing S) (margin : Margin) (p : Plot) (i : Nat) (ext : String) : Bool :=
-  not (wellFormed p) or not (memberStr ext d.formats) or not (memberStr ext d.rasters)
+  not (wellFormed p) or not (member List String ext d.formats) or not (member List String ext d.rasters)
     or (match nthLayer p.layers i {
       nothing -> true ;
       just a -> match nthLayer p.layers (i + 1) {
@@ -546,7 +546,7 @@ LayerOrderInvariant (S : Concrete) (d : Drawing S) (margin : Margin) (p : Plot) 
 -- The test draws titles that differ in a visible character (two titles of spaces would not).
 retitle (p : Plot) (s : String) : Plot := labels s p.labels.x p.labels.y p
 ImageSeesTheTitle (S : Concrete) (d : Drawing S) (p : Plot) (s : String) (ext : String) : Bool :=
-  not (wellFormed p) or not (memberStr ext d.formats) or s == p.labels.title or not (d.image (retitle p s) ext == d.image p ext)
+  not (wellFormed p) or not (member List String ext d.formats) or s == p.labels.title or not (d.image (retitle p s) ext == d.image p ext)
 
 Drawing (S : Concrete) := FileExistsAfter S & FormatByExtension S & ImageOfTheValue S & RowOrderInvariant S & LayerOrderInvariant S & ImageSeesTheTitle S
 
