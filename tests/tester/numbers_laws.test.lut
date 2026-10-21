@@ -8,10 +8,10 @@ import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "numbers_model.lut" doubles integerDivision conversion elementary
-import "numbers.lth" Tolerance PlusCommutes TimesCommutes PlusZero TimesOne DivideOne TimesZero MinusSelf DivideSelf
-  MinusIsPlusNegated NegateTwice LeqReflexive LeqTotal LeqAntisymmetric LeqTransitive LessIsStrict
+import "numbers_model.lut" doubles integerDivision conversion elementary absDistanceIsAMetricWithinModel
+import "numbers.lth" Tolerance Moderate NonZero Tame Doubles DivideOne MinusSelf DivideSelf MinusIsPlusNegated LessIsStrict
   GreaterIsLessReversed GeqIsLeqReversed UnequalIsNotEqual PlusMonotone TimesMonotone EpsilonIsTheUlpOfOne
+  PlusAssociativeWithin TimesAssociativeWithin TimesDistributiveWithin DivideInvertibleWithin
   DivisionAlgorithm RemainderOfTheDivisorsSign QuotientOfProduct
   ConvertZeroAndOne ConvertAddsExactly ConvertSucceeds ConvertKeepsOrder
   SqrtOfSquares ExpOfZero LogOfOne ErfOfZero SqrtMonotone SqrtOfSquare ExpPositive ErfOdd ErfBounded
@@ -26,21 +26,14 @@ models : List Binding := [
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
 
--- §2 the doubles
-test "PlusCommutes" (SampledMode linear) (profile <- models)
-test "TimesCommutes" (SampledMode linear) (profile <- models)
-test "PlusZero" (SampledMode linear) (profile <- models)
-test "TimesOne" (SampledMode linear) (profile <- models)
+-- §2 the doubles. `Doubles` is the claim, a conjunction of the core's properties and the laws of
+-- numbers.lth §2; the tester gives each conjunct its entry (7.S22). The laws of §2 also have lines
+-- of their own, so that each has its control (numbers_controls.test.lut). Bite 8, 2026-10-21.
+test "Doubles" (SampledMode linear) (profile <- models)
 test "DivideOne" (SampledMode linear) (profile <- models)
-test "TimesZero" (SampledMode linear) (profile <- models)
 test "MinusSelf" (SampledMode linear) (profile <- models)
 test "DivideSelf" (SampledMode linear) (profile <- models)
 test "MinusIsPlusNegated" (SampledMode linear) (profile <- models)
-test "NegateTwice" (SampledMode linear) (profile <- models)
-test "LeqReflexive" (SampledMode linear) (profile <- models)
-test "LeqTotal" (SampledMode linear) (profile <- models)
-test "LeqAntisymmetric" (SampledMode linear) (profile <- models)
-test "LeqTransitive" (SampledMode linear) (profile <- models)
 test "LessIsStrict" (SampledMode linear) (profile <- models)
 test "GreaterIsLessReversed" (SampledMode linear) (profile <- models)
 test "GeqIsLeqReversed" (SampledMode linear) (profile <- models)
@@ -48,12 +41,49 @@ test "UnequalIsNotEqual" (SampledMode linear) (profile <- models)
 test "PlusMonotone" (SampledMode linear) (profile <- models)
 test "TimesMonotone" (SampledMode linear) (profile <- models)
 test "EpsilonIsTheUlpOfOne" ExhaustiveMode (profile <- models)
+-- within the bounds of execution.md section 4 (D-2026-10-17-f, D-2026-10-18-j)
+test "PlusAssociativeWithin" (SampledMode linear) (profile <- models)
+test "TimesAssociativeWithin" (SampledMode linear) (profile <- models)
+test "TimesDistributiveWithin" (SampledMode linear) (profile <- models)
+test "DivideInvertibleWithin" (SampledMode linear) (profile <- models)
 -- the same at a size of a million
-test "PlusCommutes" (SampledMode linear) (size <- 1000000) (profile <- models)
+test "Doubles" (SampledMode linear) (size <- 1000000) (profile <- models)
 test "DivideSelf" (SampledMode linear) (size <- 1000000) (profile <- models)
-test "NegateTwice" (SampledMode linear) (size <- 1000000) (profile <- models)
 test "PlusMonotone" (SampledMode linear) (size <- 1000000) (profile <- models)
 test "TimesMonotone" (SampledMode linear) (size <- 1000000) (profile <- models)
+test "PlusAssociativeWithin" (SampledMode linear) (size <- 1000000) (profile <- models)
+test "TimesAssociativeWithin" (SampledMode linear) (size <- 1000000) (profile <- models)
+test "TimesDistributiveWithin" (SampledMode linear) (size <- 1000000) (profile <- models)
+test "DivideInvertibleWithin" (SampledMode linear) (size <- 1000000) (profile <- models)
+-- at the edges of each law's range of validity (D-2026-10-18-j: the boundary of its premise), every
+-- combination of the edges, zero and one listed: the draws above stay within a million of zero
+moderateEdges : List Moderate := [1.0e150, -1.0e150, 1.0e-150, -1.0e-150, 0.0, 1.0]
+nonZeroEdges : List NonZero := [1.0e150, -1.0e150, 1.0e-150, -1.0e-150, 1.0]
+tameEdges : List Tame := [1.0e100, -1.0e100, 1.0e-100, -1.0e-100, 0.0, 1.0]
+atModerateEdges : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "moderateEdges", coverage := Listed },
+  { parameter := just "y", type := nothing, generator := "moderateEdges", coverage := Listed },
+  { parameter := just "z", type := nothing, generator := "moderateEdges", coverage := Listed } ]
+atTameEdges : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "tameEdges", coverage := Listed },
+  { parameter := just "y", type := nothing, generator := "tameEdges", coverage := Listed },
+  { parameter := just "z", type := nothing, generator := "tameEdges", coverage := Listed } ]
+atNonZeroEdges : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "nonZeroEdges", coverage := Listed } ]
+test "PlusAssociativeWithin" ExhaustiveMode (profile <- atModerateEdges)
+test "TimesAssociativeWithin" ExhaustiveMode (profile <- atTameEdges)
+test "TimesDistributiveWithin" ExhaustiveMode (profile <- atModerateEdges)
+test "DivideInvertibleWithin" ExhaustiveMode (profile <- atNonZeroEdges)
+-- the computed distance, a metric within its bound (numbers_model.lut); its equal pairs listed
+equalDoubles : List (Related Float64 (structural Float64).eq) := [{ x := 0.0, y := 0.0 }, { x := -2.5, y := -2.5 }, { x := 1.0e100, y := 1.0e100 }]
+onAbsDistance : List Binding := [
+  { parameter := just "model", type := nothing, generator := "absDistanceIsAMetricWithinModel", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "equalDoubles", coverage := Listed } ]
+test "AbsDistanceIsAMetricWithin" (SampledMode linear) (profile <- onAbsDistance)
+test "AbsDistanceIsAMetricWithin" (SampledMode linear) (size <- 1000000) (profile <- onAbsDistance)
 
 -- §3 integer division
 test "DivisionAlgorithm" (SampledMode linear) (profile <- models)
