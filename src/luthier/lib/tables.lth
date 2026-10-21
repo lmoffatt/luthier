@@ -49,7 +49,7 @@ knownKind (k : String) : Bool := k == "int" or k == "float" or k == "str"
 
 listLength (A : U) (xs : List A) : Int := match xs { nil -> 0 ; cons x rest -> 1 + listLength A rest }
 memberStr (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or memberStr x rest }
-distinct (xs : List String) : Bool := match xs { nil -> true ; cons a rest -> not (memberStr a rest) and distinct rest }
+distinctColumns (xs : List String) : Bool := match xs { nil -> true ; cons a rest -> not (memberStr a rest) and distinctColumns rest }
 allKnown (ks : List String) : Bool := match ks { nil -> true ; cons k rest -> knownKind k and allKnown rest }
 
 -- the first index from k below n where p fails, or -1: for messages that point at the row
@@ -63,7 +63,7 @@ firstFailing (k : Nat) (n : Int) (p : Fin n -> Bool) : Int :=
 Table : { nRows : Nat, names : List String, kinds : List String, cell : String -> Fin nRows -> Maybe Cell }
 
 -- the columns are named once each, with one kind each, every kind known
-SchemaWellFormed (t : Table) : Bool := distinct t.names and listLength String t.names == listLength String t.kinds
+SchemaWellFormed (t : Table) : Bool := distinctColumns t.names and listLength String t.names == listLength String t.kinds
 KindsKnown (t : Table) : Bool := allKnown t.kinds
 -- every cell of a column is of the column's kind
 columnsOfKind (t : Table) (ns ks : List String) : Bool :=
@@ -158,7 +158,7 @@ Codec := RoundTrip & Canonical & Tolerant & Rejects
 -- The text of a table is CSV read strictly (RFC 4180): a record ends at `\n`, `\r\n` or `\r`; a
 -- field is quoted (`"..."`, a quote inside it written twice) or not; an empty line is no record.
 -- The first record is the header, each cell `name:kind`, the name not empty, the kind `int`,
--- `float` or `str`, the names distinct. Every other record has one cell per column: an int cell
+-- `float` or `str`, the names distinctColumns. Every other record has one cell per column: an int cell
 -- `[+-]digits`, a float cell a decimal `[+-](digits[.digits] | .digits)[(e|E)[+-]digits]` with a
 -- finite value, each with white space around it allowed, a str cell anything. Writing is
 -- canonical: ints as the host writes them, doubles as their shortest text that reads back to the

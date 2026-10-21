@@ -103,7 +103,7 @@ validator : Externs := {
   lawsOf := lawsOfType,
   gradeOf := gradeOfRoute,
   applied := fn a ns r h { if isProvisional r then memberStr r.name ns else settled a (gradeOfRoute r h) },
-  identity := fn r h { r.route + " at " + h },
+  identity := fn r h { r.route <> " at " <> h },
 }
 validators : List Externs := [validator]
 -- the cutoff and the state type under names of this file: a census member defined in another file

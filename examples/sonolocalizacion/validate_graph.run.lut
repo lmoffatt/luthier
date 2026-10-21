@@ -22,6 +22,6 @@ graphDir : String
 main (w : W) : W * Unit := {
   (w1, read) <- readGraph w graphDir
   host.print w1 (match read {
-    nothing -> "FAIL ReadGraph: " + graphDir + " has no nodes.csv and measurements.csv that read as typed tables" ;
+    nothing -> "FAIL ReadGraph: " <> graphDir <> " has no nodes.csv and measurements.csv that read as typed tables" ;
     just g -> report g })
 }

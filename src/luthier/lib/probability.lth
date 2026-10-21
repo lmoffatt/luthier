@@ -247,9 +247,9 @@ valueSums (vs : List (Vec Float64)) : Float64 * Float64 * Int :=
 entriesOnto (v : Vec Float64) (k : Nat) (tail : List Float64) : List Float64 :=
   if k >= v.n then tail else cons (v.f k) (entriesOnto v (k + 1) tail)
 pooled (vs : List (Vec Float64)) : List Float64 := match vs { nil -> nil ; cons v rest -> entriesOnto v 0 (pooled rest) }
-insertSorted (x : Float64) (xs : List Float64) : List Float64 :=
-  match xs { nil -> cons x nil ; cons y ys -> if x <= y then cons x xs else cons y (insertSorted x ys) }
-sortedValues (xs : List Float64) : List Float64 := match xs { nil -> nil ; cons y ys -> insertSorted y (sortedValues ys) }
+insertSortedValue (x : Float64) (xs : List Float64) : List Float64 :=
+  match xs { nil -> cons x nil ; cons y ys -> if x <= y then cons x xs else cons y (insertSortedValue x ys) }
+sortedValues (xs : List Float64) : List Float64 := match xs { nil -> nil ; cons y ys -> insertSortedValue y (sortedValues ys) }
 larger (a b : Float64) : Float64 := if a > b then a else b
 kolmogorovFrom (n i : Int) (us : List Float64) (acc : Float64) : Float64 :=
   match us {

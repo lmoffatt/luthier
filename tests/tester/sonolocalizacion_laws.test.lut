@@ -53,12 +53,12 @@ graphs : List DistanceGraph := [
   graphA,
   graphFrom "name:str,x:float,y:float,z:float\nmic1,0.0,0.0,1.69\n" measurementsTextA,
   graphFrom nodesTextA "i:int,j:int\n1,2\n",
-  graphFrom nodesTextA (measurementsTextA + "1,99,2.0\n"),
-  graphFrom nodesTextA (measurementsTextA + "3,3,1.0\n"),
-  graphFrom nodesTextA (measurementsTextA + "1,2,0.0\n"),
-  graphFrom (nodesTextA + "extra,9.0,9.0,1.0,0.0,1.0,0.01\n") measurementsTextA,
-  graphFrom (nodesTextA + "mic1,9.0,9.0,1.0,1.0,1.0,0.01\n") measurementsTextA,
-  graphFrom nodesTextA (measurementsTextA + "6,7,1.0\n") ]
+  graphFrom nodesTextA (measurementsTextA <> "1,99,2.0\n"),
+  graphFrom nodesTextA (measurementsTextA <> "3,3,1.0\n"),
+  graphFrom nodesTextA (measurementsTextA <> "1,2,0.0\n"),
+  graphFrom (nodesTextA <> "extra,9.0,9.0,1.0,0.0,1.0,0.01\n") measurementsTextA,
+  graphFrom (nodesTextA <> "mic1,9.0,9.0,1.0,1.0,1.0,0.01\n") measurementsTextA,
+  graphFrom nodesTextA (measurementsTextA <> "6,7,1.0\n") ]
 checks : List (DistanceGraph -> Maybe Violation) := [firstViolation]
 listedGraphs : List Binding := [
   { parameter := just "f", type := nothing, generator := "checks", coverage := Listed },

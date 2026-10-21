@@ -237,11 +237,11 @@ dependent (A : U) (B : A -> U) (ga : Gen A) (gb : (x : A) -> Gen (B x)) : Gen ((
 -- be graded as listed).
 Census (T : U) = List T
 lengthOf (T : U) (xs : List T) : Nat := match xs { nil -> 0 ; cons x rest -> 1 + lengthOf T rest }
-nth (T : U) (xs : List T) (i : Nat) : Maybe T :=
-  match xs { nil -> nothing ; cons x rest -> if i == 0 then just x else nth T rest (i - 1) }
+nthGenerated (T : U) (xs : List T) (i : Nat) : Maybe T :=
+  match xs { nil -> nothing ; cons x rest -> if i == 0 then just x else nthGenerated T rest (i - 1) }
 nextSeed (s : Seed) : Seed := (s + 1) mod 2147483648
 walk (T : U) (c : Census T) : Gen (Maybe T) :=
-  fn n s { (if lengthOf T c == 0 then nothing else nth T c (s mod lengthOf T c), nextSeed s) }
+  fn n s { (if lengthOf T c == 0 then nothing else nthGenerated T c (s mod lengthOf T c), nextSeed s) }
 
 -- A binding names the generator of a parameter, or of every parameter of a type, inline or through
 -- a profile, with the coverage that generator gives (every value, a census, a draw); a parameter
@@ -322,10 +322,10 @@ RuleCases (v : SurfaceProgram -> String -> Bool) : {
 }
 -- at size 0, seed `i` gives the census's `i`-th program, and the next seed is `i + 1`
 CensusFirst (v : SurfaceProgram -> String -> Bool) (c : RuleCases v) (i : Seed) : Bool :=
-  match nth (Violating v) c.census i { nothing -> true ;
+  match nthGenerated (Violating v) c.census i { nothing -> true ;
     just w -> (match c.violating 0 i { (x, s) -> x.p == w.p and x.n == w.n and s == nextSeed i }) }
 CleanCensusFirst (v : SurfaceProgram -> String -> Bool) (c : RuleCases v) (i : Seed) : Bool :=
-  match nth (Clean v) c.cleanCensus i { nothing -> true ;
+  match nthGenerated (Clean v) c.cleanCensus i { nothing -> true ;
     just w -> (match c.clean 0 i { (x, s) -> x.p == w.p and x.n == w.n and s == nextSeed i }) }
 RuleCases (v : SurfaceProgram -> String -> Bool) := CensusFirst v & CleanCensusFirst v
 

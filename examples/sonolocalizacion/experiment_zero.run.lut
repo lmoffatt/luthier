@@ -63,22 +63,22 @@ pairColours : List String := ["#0072B2", "#D55E00"]
 bandLevel : Float64 := 0.05
 
 writeReport (w : W) (r : Report) : W * Unit := {
-  (w1, u1) <- writeTable w (outDir + "/positions.csv") r.positions
-  (w2, u2) <- writeTable w1 (outDir + "/residuals.csv") r.residuals
-  (w3, u3) <- writeTable w2 (outDir + "/transform.csv") r.transform
-  (w4, u4) <- matplotlib.render w3 (positionsPlot figureCanvas figureStyle ellipseLevel r.positions) (outDir + "/positions.png")
+  (w1, u1) <- writeTable w (outDir <> "/positions.csv") r.positions
+  (w2, u2) <- writeTable w1 (outDir <> "/residuals.csv") r.residuals
+  (w3, u3) <- writeTable w2 (outDir <> "/transform.csv") r.transform
+  (w4, u4) <- matplotlib.render w3 (positionsPlot figureCanvas figureStyle ellipseLevel r.positions) (outDir <> "/positions.png")
   (w5, u5) <- matplotlib.render w4 (residualsPlot figureCanvas figureStyle highlightedNode pairColours r.positions r.residuals)
-                (outDir + "/residuals.png")
+                (outDir <> "/residuals.png")
   (w6, u6) <- matplotlib.render w5 (transformPlot figureCanvas figureStyle (bandHalfWidth bandLevel (keptCount r.transform)) r.transform)
-                (outDir + "/transform.png")
+                (outDir <> "/transform.png")
   host.print w6 r.summary }
 
 -- The graph is checked against its invariants before the fit; an invalid one is reported, not fit.
 -- The run of the experiment and its two controls differ in the prior and in how sigma is treated.
 runOn (w : W) (read : Maybe DistanceGraph) (c : Widening) (st : SigmaTreatment) : W * Unit :=
   match read {
-    nothing -> host.print w ("FAIL ReadGraph: " + graphDir + " has no nodes.csv and measurements.csv that read as typed tables") ;
-    just g -> if ValidGraph g then (match reportOf runSettings g c st { r -> writeReport w r }) else host.print w ("the graph in " + graphDir + " is not valid") }
+    nothing -> host.print w ("FAIL ReadGraph: " <> graphDir <> " has no nodes.csv and measurements.csv that read as typed tables") ;
+    just g -> if ValidGraph g then (match reportOf runSettings g c st { r -> writeReport w r }) else host.print w ("the graph in " <> graphDir <> " is not valid") }
 
 runWith (w : W) (c : Widening) (st : SigmaTreatment) : W * Unit := {
   (w1, read) <- readGraph w graphDir
@@ -90,7 +90,7 @@ runWith (w : W) (c : Widening) (st : SigmaTreatment) : W * Unit := {
 main (w : W) : W * Unit := runWith w 1.0 (eliminated unit)
 priorWidened (w : W) : W * Unit :=
   if 0.0 < horizontalWidening then runWith w horizontalWidening (eliminated unit)
-  else host.print w ("horizontalWidening must be positive: " + realToString horizontalWidening)
+  else host.print w ("horizontalWidening must be positive: " <> realToString horizontalWidening)
 sigmaKnown (w : W) : W * Unit :=
   if 0.0 < fixedSigma then runWith w 1.0 (known fixedSigma)
-  else host.print w ("fixedSigma must be positive: " + realToString fixedSigma)
+  else host.print w ("fixedSigma must be positive: " <> realToString fixedSigma)

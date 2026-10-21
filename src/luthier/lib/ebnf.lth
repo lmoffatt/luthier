@@ -60,7 +60,7 @@ splits (A : U) (ts : List A) : List (List A * List A) :=
 prefixed (A : U) (t : A) (ps : List (List A * List A)) : List (List A * List A) :=
   match ps { nil -> nil ; cons (xs, ys) more -> cons (cons t xs, ys) (prefixed A t more) }
 
-isEmpty (A : U) (xs : List A) : Bool := match xs { nil -> true ; cons x rest -> false }
+ebnfEmpty (A : U) (xs : List A) : Bool := match xs { nil -> true ; cons x rest -> false }
 
 -- the texts a grammar takes as literals, and the kinds it takes as categories: what a lexer for it
 -- must reserve and must produce (grammar.lth derives its keywords from them, L2.7)
@@ -165,20 +165,20 @@ anyRhs (d : Derives) (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : Bool :=
 anySplit (d : Derives) (e : Ebnf) (nonEmptyFirst : Bool) (a b : Rhs)
          (ps : List (List TokenView * List TokenView)) : Bool :=
   match ps { nil -> false ; cons (xs, ys) more ->
-    (not (nonEmptyFirst and isEmpty TokenView xs) and d.derivesRhs e a xs and d.derivesRhs e b ys)
+    (not (nonEmptyFirst and ebnfEmpty TokenView xs) and d.derivesRhs e a xs and d.derivesRhs e b ys)
     or anySplit d e nonEmptyFirst a b more }
 
 -- the empty string derives exactly the empty list: the unit of sequence
 EpsEmpty (d : Derives) (e : WellFormedEbnf) (ts : List TokenView) : Bool :=
-  d.derivesRhs e eps ts == isEmpty TokenView ts
+  d.derivesRhs e eps ts == ebnfEmpty TokenView ts
 
 -- a literal derives exactly the one token with that text
 LitOne (d : Derives) (e : WellFormedEbnf) (s : String) (ts : List TokenView) : Bool :=
-  d.derivesRhs e (lit s) ts == match ts { cons t rest -> isEmpty TokenView rest and t.text == s ; nil -> false }
+  d.derivesRhs e (lit s) ts == match ts { cons t rest -> ebnfEmpty TokenView rest and t.text == s ; nil -> false }
 
 -- a category derives exactly the one token of that kind
 CatOne (d : Derives) (e : WellFormedEbnf) (k : String) (ts : List TokenView) : Bool :=
-  d.derivesRhs e (cat k) ts == match ts { cons t rest -> isEmpty TokenView rest and t.kind == k ; nil -> false }
+  d.derivesRhs e (cat k) ts == match ts { cons t rest -> ebnfEmpty TokenView rest and t.kind == k ; nil -> false }
 
 -- a nonterminal derives what any of its right-hand sides derives
 RefUnion (d : Derives) (e : WellFormedEbnf) (n : String) (ts : List TokenView) : Bool :=
@@ -186,7 +186,7 @@ RefUnion (d : Derives) (e : WellFormedEbnf) (n : String) (ts : List TokenView) :
 
 -- an empty sequence is the empty string; a longer one splits the list between head and tail
 SeqEmpty (d : Derives) (e : WellFormedEbnf) (ts : List TokenView) : Bool :=
-  d.derivesRhs e (seq nil) ts == isEmpty TokenView ts
+  d.derivesRhs e (seq nil) ts == ebnfEmpty TokenView ts
 SeqSplits (d : Derives) (e : WellFormedEbnf) (a : Rhs) (rs : List Rhs) (ts : List TokenView) : Bool :=
   d.derivesRhs e (seq (cons a rs)) ts == anySplit d e false a (seq rs) (splits TokenView ts)
 
@@ -196,12 +196,12 @@ AltUnion (d : Derives) (e : WellFormedEbnf) (rs : List Rhs) (ts : List TokenView
 
 -- optional is the empty list or the thing
 OptEmptyOrOne (d : Derives) (e : WellFormedEbnf) (a : Rhs) (ts : List TokenView) : Bool :=
-  d.derivesRhs e (opt a) ts == (isEmpty TokenView ts or d.derivesRhs e a ts)
+  d.derivesRhs e (opt a) ts == (ebnfEmpty TokenView ts or d.derivesRhs e a ts)
 
 -- repetition is the empty list, or a round that consumes something followed by the repetition
 -- again. Asking the round to consume is what makes the law determine `rep`: the rest is shorter.
 RepRounds (d : Derives) (e : WellFormedEbnf) (a : Rhs) (ts : List TokenView) : Bool :=
-  d.derivesRhs e (rep a) ts == (isEmpty TokenView ts or anySplit d e true a (rep a) (splits TokenView ts))
+  d.derivesRhs e (rep a) ts == (ebnfEmpty TokenView ts or anySplit d e true a (rep a) (splits TokenView ts))
 
 -- On a well-formed grammar the laws have one solution, by induction on the length of the list,
 -- in three steps (Kimi and Claude, round 2). First the empty list: there `derivesRhs e r nil` is

@@ -45,7 +45,7 @@
 --   §6 Certifying the renderer along one chain of tokens (world.lth §5).                 done
 
 import "world.lth" World Described Persistence Host agreement Observed held
-import "tables.lth" Table hasColumn realAt intAt memberStr distinct listLength sameCell sameTable
+import "tables.lth" Table hasColumn realAt intAt memberStr distinctColumns listLength sameCell sameTable
 
 -- ---------------------------------------------------------------- §1 The value (plan G2)
 
@@ -295,7 +295,7 @@ AestheticsKnown (p : Plot) : Bool :=
 -- P11 [proposed]: the canvas has a positive width, height and resolution
 CanvasPositive (p : Plot) : Bool := p.canvas.width > 0.0 and p.canvas.height > 0.0 and p.canvas.dpi > 0.0
 -- plan G2: the tables are named once each
-TablesNamedOnce (p : Plot) : Bool := distinct (namesOf p.tables)
+TablesNamedOnce (p : Plot) : Bool := distinctColumns (namesOf p.tables)
 -- plan G3: a layer that draws columns names a table of the plot
 LayersNameTheirTables (p : Plot) : Bool :=
   allLayers p.layers (fn l { isNilStr (needs l.geom) or isJustTable (lookupTable p.tables l.table) })
@@ -461,7 +461,7 @@ Drawing (S : Concrete) : {
   formatOf : String -> String,
 }
 Renderer (S : Concrete) = { drawing : Drawing S, render : W -> Plot -> String -> W * Unit }
-pathOf (stem ext : String) : String := stem + "." + ext
+pathOf (stem ext : String) : String := stem <> "." <> ext
 
 -- the description of `render w p (pathOf stem ext)` (world.lth §1): a world action (not Luthier's
 -- store), declaring the one place it changes, so that world.lth's `ChangesOnlyDeclared` holds it

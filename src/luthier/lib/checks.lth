@@ -32,17 +32,17 @@ Reason (T E : U) : U := data {
   failed : E -> Reason T E ;
 }
 
-isEmpty (E : U) (fs : Failures E) : Bool := match fs { nil -> true ; cons f rest -> false }
-take (E : U) (n : Nat) (fs : Failures E) : Failures E :=
-  if n == 0 then nil else match fs { nil -> nil ; cons f rest -> cons f (take E (n - 1) rest) }
+failuresEmpty (E : U) (fs : Failures E) : Bool := match fs { nil -> true ; cons f rest -> false }
+takeFailures (E : U) (n : Nat) (fs : Failures E) : Failures E :=
+  if n == 0 then nil else match fs { nil -> nil ; cons f rest -> cons f (takeFailures E (n - 1) rest) }
 concatFailures (E : U) (xs ys : Failures E) : Failures E :=
   match xs { nil -> ys ; cons x rest -> cons x (concatFailures E rest ys) }
 
 -- the projections of a check `c`, computed from its failures. `refine`'s type in 5.S9 is the
 -- subtype `Maybe { x : T | holds c x }`; written here as `Maybe T`, the law `RefineIsHolds` stands
 -- for the subtype.
-holds (T E : U) (c : T -> Failures E) (x : T) : Bool := isEmpty E (c x)
-first (T E : U) (c : T -> Failures E) (n : Nat) (x : T) : Failures E := take E n (c x)
+holds (T E : U) (c : T -> Failures E) (x : T) : Bool := failuresEmpty E (c x)
+first (T E : U) (c : T -> Failures E) (n : Nat) (x : T) : Failures E := takeFailures E n (c x)
 reason (T E : U) (c : T -> Failures E) (x : T) : Reason T E := match c x { nil -> ok x ; cons f rest -> failed f }
 refine (T E : U) (c : T -> Failures E) (x : T) : Maybe T := if holds T E c x then just x else nothing
 
@@ -73,7 +73,7 @@ RefineIsHolds (T E : U) (c : Check T E) (x : T) : Bool :=
   (refine T E c.failures x == just x) == holds T E c.failures x
 -- the first failures: none exactly when the check holds, and never more than asked
 FirstIsAPrefix (T E : U) (c : Check T E) (n : Nat) (x : T) : Bool :=
-  isEmpty E (first T E c.failures (n + 1) x) == holds T E c.failures x
+  failuresEmpty E (first T E c.failures (n + 1) x) == holds T E c.failures x
 -- composition is the logic of the verdicts: `both` holds when both hold, `either` when either
 BothIsAnd (T E : U) (c : Check T E) (d : T -> Failures E) (x : T) : Bool :=
   holds T E (both T E c.failures d) x == (holds T E c.failures x and holds T E d x)

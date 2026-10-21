@@ -10,4 +10,4 @@ import "right.lut" tenfold as ten
 showInt (x : Int) : String := extern "python:builtins.repr" x
 showBool (b : Bool) : String := if b then "true" else "false"
 main (w : W) : W * Unit :=
-  host.print w (showInt (twice 1) + " " + showInt (ten 1) + " " + showBool (not true) + " " + showBool (leftNot true))
+  host.print w (showInt (twice 1) <> " " <> showInt (ten 1) <> " " <> showBool (not true) <> " " <> showBool (leftNot true))

@@ -422,9 +422,9 @@ dropCases (b : List Drawing) (r : Region) (ev : List BindingEvidence) : List Bin
 -- predicate barely holds: at the cutoff for a predicate stated by one (`PsdAt m fl`, barely
 -- semidefinite at the floor); for an exact predicate (`Symmetric`) the boundary is the premise
 -- itself, and the region records that the premise held (7.S14). The law is `Deriving` (§5).
-above (c : String) : Region := { source := FromLaw, name := c + " above" }
-below (c : String) : Region := { source := FromLaw, name := c + " below" }
-boundary (p : String) : Region := { source := FromLaw, name := p + " boundary" }
+above (c : String) : Region := { source := FromLaw, name := c <> " above" }
+below (c : String) : Region := { source := FromLaw, name := c <> " below" }
+boundary (p : String) : Region := { source := FromLaw, name := p <> " boundary" }
 cutoffRegions (cs : List String) : List Region :=
   match cs { nil -> nil ; cons c rest -> cons (above c) (cons (below c) (cutoffRegions rest)) }
 premiseRegions (ps : List String) : List Region := match ps { nil -> nil ; cons p rest -> cons (boundary p) (premiseRegions rest) }

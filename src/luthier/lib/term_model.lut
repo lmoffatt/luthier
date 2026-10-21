@@ -15,7 +15,7 @@
 import "term.lth" Constant Pattern Term Act Program Alpha Substitution CanonicalForm Reduction
   IntConst FloatConst StringConst PVar PWild PCon PPair PLit PInj
   Var Lit Universe World Lam App Pi Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Record RecordValue Proj Let
-  Declare Define Datum termMember remove concat removeAll freeVars patternVars patternsVars swap swapPattern
+  Declare Define Datum termMember removeTermName concatTermNames removeTermNames freeVars patternVars patternsVars swap swapPattern
   partsAgree sameNames free negateAnswer
 
 -- Spec 11 gives String equality but no text decomposition, concatenation or Nat rendering.
@@ -36,22 +36,22 @@ freshName (x : String) (avoid : List String) : String :=
 -- All variable and binder names, including shadowed ones: nominal swapping needs more than FV.
 allNames (t : Term) : List String := match t {
   Var x -> [x] ;
-  Lam x a b -> cons x (concat (allNames a) (allNames b)) ;
-  Pi x a b -> cons x (concat (allNames a) (allNames b)) ;
-  Sigma x a b -> cons x (concat (allNames a) (allNames b)) ;
-  Subtype x a b -> cons x (concat (allNames a) (allNames b)) ;
-  Let x ty v b -> cons x (concat (allNames ty) (concat (allNames v) (allNames b))) ;
-  App a b -> concat (allNames a) (allNames b) ; Pair a b -> concat (allNames a) (allNames b) ;
-  Inj l a -> allNames a ; Match a arms -> concat (allNames a) (armNames arms) ;
+  Lam x a b -> cons x (concatTermNames (allNames a) (allNames b)) ;
+  Pi x a b -> cons x (concatTermNames (allNames a) (allNames b)) ;
+  Sigma x a b -> cons x (concatTermNames (allNames a) (allNames b)) ;
+  Subtype x a b -> cons x (concatTermNames (allNames a) (allNames b)) ;
+  Let x ty v b -> cons x (concatTermNames (allNames ty) (concatTermNames (allNames v) (allNames b))) ;
+  App a b -> concatTermNames (allNames a) (allNames b) ; Pair a b -> concatTermNames (allNames a) (allNames b) ;
+  Inj l a -> allNames a ; Match a arms -> concatTermNames (allNames a) (armNames arms) ;
   Sum kvs -> pairNames kvs ; Data x cs -> cons x (pairNames cs) ;
   Record kvs -> recordNames kvs ; RecordValue kvs -> pairNames kvs ; Proj r x -> allNames r ; _ -> nil ; }
 armNames (xs : List (Pattern * Term)) : List String := match xs {
-  nil -> nil ; cons (p, b) rest -> concat (patternVars p) (concat (allNames b) (armNames rest)) }
+  nil -> nil ; cons (p, b) rest -> concatTermNames (patternVars p) (concatTermNames (allNames b) (armNames rest)) }
 pairNames (xs : List (String * Term)) : List String := match xs {
-  nil -> nil ; cons (k, b) rest -> concat (allNames b) (pairNames rest) }
+  nil -> nil ; cons (k, b) rest -> concatTermNames (allNames b) (pairNames rest) }
 -- a record type's labels bind in its later fields, so a fresh name avoids them too
 recordNames (xs : List (String * Term)) : List String := match xs {
-  nil -> nil ; cons (k, b) rest -> cons k (concat (allNames b) (recordNames rest)) }
+  nil -> nil ; cons (k, b) rest -> cons k (concatTermNames (allNames b) (recordNames rest)) }
 
 -- Exact recursive parts, with per-arm free-name agreement to prevent capture.
 -- §2 compares Data through underBinderPairs and patterns through simultaneous renameAll.
@@ -61,7 +61,7 @@ appendEnv (xs ys : List (String * String)) : List (String * String) := match xs 
   nil -> ys ; cons x rest -> cons x (appendEnv rest ys) }
 armScopesAgree (ps qs : List (Pattern * Term)) : Bool := match (ps, qs) {
   (nil, nil) -> true ; (cons (p, b) rest, cons (q, c) more) ->
-    sameNames (removeAll (patternVars p) (freeVars b)) (removeAll (patternVars q) (freeVars c))
+    sameNames (removeTermNames (patternVars p) (freeVars b)) (removeTermNames (patternVars q) (freeVars c))
     and bindingPositionsAgree (patternVars p) (patternVars q) and armScopesAgree rest more ; _ -> false }
 bindingPositionsAgree (xs ys : List String) : Bool := match (xs, ys) {
   (nil, nil) -> true ; (cons x rest, cons y more) ->
@@ -95,12 +95,12 @@ substTerm (x : String) (s t : Term) : Term :=
   _ -> t ; }
 substBody (x : String) (s : Term) (y : String) (b : Term) : String * Term :=
   if x == y or not (termMember x (freeVars b)) then (y, b)
-  else if termMember y (freeVars s) then substRenamed x s y b (freshName y (cons x (concat (allNames s) (allNames b))))
+  else if termMember y (freeVars s) then substRenamed x s y b (freshName y (cons x (concatTermNames (allNames s) (allNames b))))
   else (y, substTerm x s b)
 substRenamed (x : String) (s : Term) (y : String) (b : Term) (z : String) : String * Term :=
   (z, substTerm x s (swap y z b))
 freshData (x : String) (s : Term) (y : String) (cs : List (String * Term)) : String * List (String * Term) :=
-  if termMember y (freeVars s) then renameData y cs (freshName y (cons x (concat (allNames s) (pairNames cs)))) else (y, cs)
+  if termMember y (freeVars s) then renameData y cs (freshName y (cons x (concatTermNames (allNames s) (pairNames cs)))) else (y, cs)
 renameData (y : String) (cs : List (String * Term)) (z : String) : String * List (String * Term) :=
   (z, swapLocalPairs y z cs)
 swapLocalPairs (y z : String) (cs : List (String * Term)) : List (String * Term) := match cs {
@@ -118,10 +118,10 @@ substArm (x : String) (s : Term) (p : Pattern) (b : Term) : Pattern * Term :=
 freshArm (x : String) (s : Term) (vs : List String) (p : Pattern) (b : Term) : Pattern * Term := match vs {
   nil -> (p, b) ; cons y rest ->
     if termMember y (freeVars s) then renameArm x s y rest p b
-      (freshName y (cons x (concat (allNames s) (concat (patternVars p) (allNames b)))))
+      (freshName y (cons x (concatTermNames (allNames s) (concatTermNames (patternVars p) (allNames b)))))
     else freshArm x s rest p b }
 renameArm (x : String) (s : Term) (y : String) (rest : List String) (p : Pattern) (b : Term) (z : String) : Pattern * Term :=
-  freshArm x s (remove y rest) (swapPattern y z p) (swap y z b)
+  freshArm x s (removeTermName y rest) (swapPattern y z p) (swap y z b)
 substitute : Substitution alpha := { subst := substTerm }
 
 -- A global preorder counter, skipping every unqualified free name, prevents capture.
@@ -174,7 +174,7 @@ canonTelescope (avoid : List String) (env : List (String * String)) (n : Nat) (x
     match canonTelescope avoid (cons (k, k) env) n1 rest { (bs, n2) -> (cons (k, b) bs, n2) } } }
 canonBindings (avoid : List String) (n : Nat) (xs : List String) : List (String * String) * Nat := match xs {
   nil -> (nil, n) ; cons x rest -> match nextBinder avoid n { (y, n1) ->
-    match canonBindings avoid n1 (remove x rest) { (bs, n2) -> (cons (x, y) bs, n2) } } }
+    match canonBindings avoid n1 (removeTermName x rest) { (bs, n2) -> (cons (x, y) bs, n2) } } }
 canonPattern (env : List (String * String)) (p : Pattern) : Pattern := match p {
   PVar x -> PVar (resolveName env x) ; PCon c ps -> PCon c (canonPatterns env ps) ;
   PPair a b -> PPair (canonPattern env a) (canonPattern env b) ;
@@ -203,14 +203,14 @@ appendBindings (xs ys : Bindings) : Bindings := match xs {
 bindingNames (xs : Bindings) : List String := match xs {
   nil -> nil ; cons (x, v) rest -> cons x (bindingNames rest) }
 bindingTermNames (xs : Bindings) : List String := match xs {
-  nil -> nil ; cons (x, v) rest -> concat (allNames v) (bindingTermNames rest) }
+  nil -> nil ; cons (x, v) rest -> concatTermNames (allNames v) (bindingTermNames rest) }
 linearBindings (xs : Bindings) : Bool := match xs {
   nil -> true ; cons (x, v) rest -> not (termMember x (bindingNames rest)) and linearBindings rest }
 -- Rename every bound occurrence to a distinct temporary absent from the body and
 -- every replacement, then substitute replacements. No replacement is revisited.
 applyBindings (xs : Bindings) (b : Term) : Term := match xs {
   nil -> b ; cons (x, v) nil -> substTerm x v b ;
-  _ -> stageBindings xs b (concat (allNames b) (concat (bindingNames xs) (bindingTermNames xs))) nil }
+  _ -> stageBindings xs b (concatTermNames (allNames b) (concatTermNames (bindingNames xs) (bindingTermNames xs))) nil }
 stageBindings (xs : Bindings) (b : Term) (avoid : List String) (ready : Bindings) : Term := match xs {
   nil -> finishBindings ready b ; cons (x, v) rest ->
     stageBinding x v rest b avoid ready (freshName x avoid) }
@@ -242,7 +242,7 @@ primitiveResult (op : String) (i j : Term) : Maybe Term := match (i, j) {
     else if op == ">" then just (truthTerm (a > b))
     else if op == ">=" then just (truthTerm (a >= b)) else nothing ;
   (Lit (StringConst a), Lit (StringConst b)) ->
-    if op == "+" then just (Lit (StringConst (a + b)))
+    if op == "+" then just (Lit (StringConst (a <> b)))
     else if op == "==" then just (truthTerm (a == b)) else nothing ; _ -> nothing }
 -- one-argument primitives: `toFloat64` on an integer constant (PrimConvert), after its argument
 -- has reached its head; any other primitive applied once waits for its second argument

@@ -434,7 +434,7 @@ def test_an_imported_alias_does_not_take_a_labels_name(tmp_path):
     (tmp_path / 'h.lut').write_text('Hash = String\n')
     d = tmp_path / 'd.lut'
     d.write_text('import "a.lut" other\nimport "b.lut" pick\nimport "h.lut" Hash\n'
-                 'tag (l : String) (h : Hash) : String := l + h\ntagged : String := tag "L" "sha256:cccc"\n')
+                 'tag (l : String) (h : Hash) : String := l <> h\ntagged : String := tag "L" "sha256:cccc"\n')
     assert not c.check(program(d.read_text()), d)
 
 

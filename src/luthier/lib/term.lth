@@ -118,19 +118,19 @@ Program = List Act
 -- definitions the laws need: names as lists, the free variables of a term, and the swap of two
 -- names everywhere in a term (binders included), the nominal way to rename without capture
 termMember (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or termMember x rest }
-remove (x : String) (xs : List String) : List String :=
-  match xs { nil -> nil ; cons y rest -> if x == y then remove x rest else cons y (remove x rest) }
-concat (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (concat rest ys) }
-removeAll (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> removeAll rest (remove x ys) }
+removeTermName (x : String) (xs : List String) : List String :=
+  match xs { nil -> nil ; cons y rest -> if x == y then removeTermName x rest else cons y (removeTermName x rest) }
+concatTermNames (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (concatTermNames rest ys) }
+removeTermNames (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> removeTermNames rest (removeTermName x ys) }
 
 patternVars (p : Pattern) : List String := match p {
   PVar x -> [x] ; PWild -> nil ; PLit c -> nil ;
   PCon c ps -> patternsVars ps ;
-  PPair a b -> concat (patternVars a) (patternVars b) ;
+  PPair a b -> concatTermNames (patternVars a) (patternVars b) ;
   PInj l q -> patternVars q ;
 }
 patternsVars (ps : List Pattern) : List String :=
-  match ps { nil -> nil ; cons p rest -> concat (patternVars p) (patternsVars rest) }
+  match ps { nil -> nil ; cons p rest -> concatTermNames (patternVars p) (patternsVars rest) }
 
 -- spec 3.S9, 3.S31: the variables a term mentions and does not bind. A `Hole` names a declaration,
 -- not a variable; a `Data` binds its own name in its constructors' types.
@@ -138,29 +138,29 @@ freeVars (t : Term) : List String := match t {
   Var x -> [x] ;
   Lit c -> nil ; Universe -> nil ; World -> nil ; Extern r -> nil ; Primitive r -> nil ; Axiom r -> nil ;
   Hole x -> nil ;
-  Lam x a b -> concat (freeVars a) (remove x (freeVars b)) ;
-  Pi x a b -> concat (freeVars a) (remove x (freeVars b)) ;
-  Sigma x a b -> concat (freeVars a) (remove x (freeVars b)) ;
-  Subtype x a b -> concat (freeVars a) (remove x (freeVars b)) ;
-  App f a -> concat (freeVars f) (freeVars a) ;
-  Pair a b -> concat (freeVars a) (freeVars b) ;
+  Lam x a b -> concatTermNames (freeVars a) (removeTermName x (freeVars b)) ;
+  Pi x a b -> concatTermNames (freeVars a) (removeTermName x (freeVars b)) ;
+  Sigma x a b -> concatTermNames (freeVars a) (removeTermName x (freeVars b)) ;
+  Subtype x a b -> concatTermNames (freeVars a) (removeTermName x (freeVars b)) ;
+  App f a -> concatTermNames (freeVars f) (freeVars a) ;
+  Pair a b -> concatTermNames (freeVars a) (freeVars b) ;
   Inj l a -> freeVars a ;
-  Match s arms -> concat (freeVars s) (armsFree arms) ;
+  Match s arms -> concatTermNames (freeVars s) (armsFree arms) ;
   Sum kvs -> pairsFree kvs ;
-  Data n cs -> remove n (pairsFree cs) ;
+  Data n cs -> removeTermName n (pairsFree cs) ;
   Record kvs -> telescopeFree kvs ; RecordValue kvs -> pairsFree kvs ;
   Proj r x -> freeVars r ;
-  Let x ty v b -> concat (freeVars ty) (concat (freeVars v) (remove x (freeVars b))) ;
+  Let x ty v b -> concatTermNames (freeVars ty) (concatTermNames (freeVars v) (removeTermName x (freeVars b))) ;
 }
 armsFree (arms : List (Pattern * Term)) : List String := match arms { nil -> nil ;
-  cons (p, b) rest -> concat (removeAll (patternVars p) (freeVars b)) (armsFree rest) }
+  cons (p, b) rest -> concatTermNames (removeTermNames (patternVars p) (freeVars b)) (armsFree rest) }
 pairsFree (kvs : List (String * Term)) : List String :=
-  match kvs { nil -> nil ; cons (k, v) rest -> concat (freeVars v) (pairsFree rest) }
+  match kvs { nil -> nil ; cons (k, v) rest -> concatTermNames (freeVars v) (pairsFree rest) }
 -- a record type is a telescope (7.S7's dependent records, 12.S1, arrays.lth's `Mat`): a label binds
 -- in the types of the later fields, never in its own or in an earlier one; a `RecordValue`'s labels
 -- bind nothing (kernel.py bite 11, aa198f2, by a Sonnet agent; stated here by luthier-03)
 telescopeFree (kvs : List (String * Term)) : List String :=
-  match kvs { nil -> nil ; cons (k, v) rest -> concat (freeVars v) (remove k (telescopeFree rest)) }
+  match kvs { nil -> nil ; cons (k, v) rest -> concatTermNames (freeVars v) (removeTermName k (telescopeFree rest)) }
 
 swapName (x y n : String) : String := if n == x then y else if n == y then x else n
 swapPattern (x y : String) (p : Pattern) : Pattern := match p {
@@ -209,7 +209,7 @@ head (t : Term) : String := match t {
   Subtype x a b -> "Subtype" ; Extern r -> "Extern" ; Primitive r -> "Primitive" ; Axiom r -> "Axiom" ;
   Hole x -> "Hole" ; Record kvs -> "Record" ; RecordValue kvs -> "RecordValue" ; Proj r x -> "Proj" ; Let x ty v b -> "Let" ;
 }
-sameNames (xs ys : List String) : Bool := removeAll xs ys == nil and removeAll ys xs == nil
+sameNames (xs ys : List String) : Bool := removeTermNames xs ys == nil and removeTermNames ys xs == nil
 
 -- a name and a term in which it is not free: the fresh names a binder may be renamed to; random
 -- names are almost always fresh, so drawing them is cheap
@@ -540,9 +540,10 @@ PrimFloat (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (
   and stepsTo a (m.step p (bin ">" (Lit (FloatConst u)) (Lit (FloatConst v)))) (truth (u > v))
   and stepsTo a (m.step p (bin ">=" (Lit (FloatConst u)) (Lit (FloatConst v)))) (truth (u >= v))
   and isNormal (m.step p (bin "/" (Lit (FloatConst u)) (Lit (FloatConst 0.0))))
--- `+` on strings is concatenation (core.lut `stringAppend`; the monoid of numbers_model.lut)
+-- stringAppend's internal `+` primitive concatenates; surface strings use `<>` through
+-- core.lut's StringIsAMonoid (D-2026-10-21-a).
 PrimString (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (s t : String) : Bool :=
-  stepsTo a (m.step p (bin "+" (Lit (StringConst s)) (Lit (StringConst t)))) (Lit (StringConst (s + t)))
+  stepsTo a (m.step p (bin "+" (Lit (StringConst s)) (Lit (StringConst t)))) (Lit (StringConst (s <> t)))
 -- `toFloat64` (11.S5, core.lut): a `Primitive` applied to an integer constant steps to the
 -- nearest double
 PrimConvert (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (i : Int) : Bool :=

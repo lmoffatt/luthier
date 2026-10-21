@@ -8,4 +8,4 @@ logs : Logs := { log := extern "python:math.log", pi := extern "python:math.pi" 
 untypedLog := extern "python:math.log"
 showFloat (x : Float64) : String := extern "python:builtins.repr" x
 main (w : W) : W * Unit :=
-  host.print w (showFloat (logs.log 1.0) + " " + showFloat logs.pi + " " + showFloat (untypedLog 1.0))
+  host.print w (showFloat (logs.log 1.0) <> " " <> showFloat logs.pi <> " " <> showFloat (untypedLog 1.0))

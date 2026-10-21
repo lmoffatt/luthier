@@ -247,10 +247,10 @@ Crossing (A B : Concrete) := CallbackGivesTheFunction A B & CallsAreCounted A B 
 -- other place; reading a file gives what is at its place, and changes nothing (10.S2; D8: `print`
 -- the first action). Stated by their descriptions over the representation; the host's actions in
 -- world_model.lut are certified against them by the protocol of §5. `appendStr` is `String`
--- concatenation, the core's `+` on strings [proposed: a body, so that a description runs when a
+-- concatenation, the core's `<>` on strings [proposed: a body, so that a description runs when a
 -- host action is validated against it (§5); declared without one in draft 1, A12 of the naive
 -- review, record/IA/review-naive-2026-10-15/].
-appendStr (a b : String) : String := a + b
+appendStr (a b : String) : String := a <> b
 Console (S : Concrete) : {
   world : World S,
   printLine : String -> S -> S * Unit,

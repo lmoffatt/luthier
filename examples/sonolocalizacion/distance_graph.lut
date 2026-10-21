@@ -41,8 +41,8 @@ parseTable (text : Maybe String) : Maybe Table := match text { nothing -> nothin
 graphOf (n m : Maybe Table) : Maybe DistanceGraph :=
   match n { nothing -> nothing ; just a -> match m { nothing -> nothing ; just b -> just { nodes := a, measurements := b } } }
 readGraph (w : W) (dir : String) : W * Maybe DistanceGraph := {
-  (w1, nodesText) <- host.readFile w (dir + "/nodes.csv")
-  (w2, measurementsText) <- host.readFile w1 (dir + "/measurements.csv")
+  (w1, nodesText) <- host.readFile w (dir <> "/nodes.csv")
+  (w2, measurementsText) <- host.readFile w1 (dir <> "/measurements.csv")
   (w2, graphOf (parseTable nodesText) (parseTable measurementsText))
 }
 
@@ -157,17 +157,17 @@ rowCells (t : Table) (r : Fin t.nRows) (ns : List String) : String :=
   match ns {
     nil -> "" ;
     cons n rest -> match rest {
-      nil -> n + "=" + cellText (t.cell n r) ;
-      cons m more -> n + "=" + cellText (t.cell n r) + ", " + rowCells t r rest } }
+      nil -> n <> "=" <> cellText (t.cell n r) ;
+      cons m more -> n <> "=" <> cellText (t.cell n r) <> ", " <> rowCells t r rest } }
 rowText (t : Table) (r : Int) : String := if 0 <= r and r < t.nRows then rowCells t r t.names else ""
 
 -- the line a check prints for a violation: `FAIL <invariant>`, and for a row-wise one its table,
 -- its row and the row's cells (validate_graph.lut:26-30 of v0.1)
 describe (g : DistanceGraph) (v : Violation) : String :=
   match v {
-    schema name -> "FAIL " + name ;
-    inRow r -> "FAIL " + r.invariant + ": " + r.table + " row " + intToString r.row + " ("
-               + (if r.table == "nodes" then rowText g.nodes r.row else rowText g.measurements r.row) + ")" }
+    schema name -> "FAIL " <> name ;
+    inRow r -> "FAIL " <> r.invariant <> ": " <> r.table <> " row " <> intToString r.row <> " ("
+               <> (if r.table == "nodes" then rowText g.nodes r.row else rowText g.measurements r.row) <> ")" }
 
 -- ---------------------------------------------------------------- the pairs measured
 -- the pairs of nodes measured, each counted once whatever its order and however often it is measured

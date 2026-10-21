@@ -28,10 +28,10 @@ import "distance_graph.lut" DistanceGraph ValidDistanceGraph ValidGraph firstVio
 rankFloor (g : DistanceGraph) : RankFloor := toFloat64 (3 * g.nodes.nRows) * doubles.epsilon
 
 summary (g : ValidDistanceGraph) : String :=
-  "valid: " + intToString g.nodes.nRows + " nodes, " + intToString g.measurements.nRows + " measurements, "
-  + intToString (distinctPairs g) + " distinct pairs; directions the distances do not see: "
-  + intToString (unseenDirections (rankFloor g) g) + " (of which " + intToString g.nodes.nRows + " are the heights and "
-  + intToString rigidMotions + " the rigid motions of the plane)"
+  "valid: " <> intToString g.nodes.nRows <> " nodes, " <> intToString g.measurements.nRows <> " measurements, "
+  <> intToString (distinctPairs g) <> " distinct pairs; directions the distances do not see: "
+  <> intToString (unseenDirections (rankFloor g) g) <> " (of which " <> intToString g.nodes.nRows <> " are the heights and "
+  <> intToString rigidMotions <> " the rigid motions of the plane)"
 
 -- the first violation, or the summary of a graph that has none; a graph with no violation is valid
 -- by the law of a check (ReportsValidity), which the branch states again

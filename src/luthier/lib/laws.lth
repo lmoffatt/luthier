@@ -30,7 +30,7 @@
 --      sequential test over a stream of samples (7.S17 to 7.S19, L9.15,
 --      D-2026-10-15-b).                                                             done
 
-import "checks.lth" Failures isEmpty
+import "checks.lth" Failures failuresEmpty
 
 -- ---------------------------------------------------------------- §1 The verdict
 
@@ -54,12 +54,12 @@ exact (C : U) (s : CostScale C) (c : C) : Bool := s.leq c s.zero
 -- type with none of these verdicts is not a law: that is the checker's (4.R6, program.lth).
 verdictOfBool (C : U) (s : CostScale C) (b : Bool) : C := lift C s b
 verdictOfCost (C : U) (s : CostScale C) (c : C) : C := c
-verdictOfCheck (C : U) (s : CostScale C) (E : U) (fs : Failures E) : C := lift C s (isEmpty E fs)
+verdictOfCheck (C : U) (s : CostScale C) (E : U) (fs : Failures E) : C := lift C s (failuresEmpty E fs)
 
 -- What characterizes a verdict is its retraction: reading it back as whether it holds exactly
 -- gives what the law said (5.S5). Claimed by `CostScale`, whose two laws make it hold.
 VerdictsAreExact (C : U) (s : CostScale C) (b : Bool) (E : U) (fs : Failures E) : Bool :=
-  exact C s (verdictOfBool C s b) == b and exact C s (verdictOfCheck C s E fs) == isEmpty E fs
+  exact C s (verdictOfBool C s b) == b and exact C s (verdictOfCheck C s E fs) == failuresEmpty E fs
 
 -- ---------------------------------------------------------------- §2 The laws of relations
 

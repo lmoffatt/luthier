@@ -103,17 +103,17 @@ gradeOfRoute (r : Route) (h : String) : Maybe Grade :=
   if isProvisional r then just AssumedGrade else if lawsOfType r.declared == nil then nothing else lookupGrade h validations
 -- applies every extern, validated or not
 appliesEvery : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute, applied := fn a ns r h { true },
-  identity := fn r h { r.route + " at " + h } }
+  identity := fn r h { r.route <> " at " <> h } }
 -- grades by the hash whether or not the type states a law
 gradesLawless (r : Route) (h : String) : Maybe Grade := if isProvisional r then just AssumedGrade else lookupGrade h validations
 gradesWithoutLaws : Externs := { lawsOf := lawsOfType, gradeOf := gradesLawless,
   applied := fn a ns r h { if isProvisional r then memberStr r.name ns else settled a (gradesLawless r h) },
-  identity := fn r h { r.route + " at " + h } }
+  identity := fn r h { r.route <> " at " <> h } }
 -- validates a provisional extern as any other
 validatesAll (r : Route) (h : String) : Maybe Grade := if lawsOfType r.declared == nil then nothing else lookupGrade h validations
 validatesProvisional : Externs := { lawsOf := lawsOfType, gradeOf := validatesAll,
   applied := fn a ns r h { if isProvisional r then memberStr r.name ns else settled a (validatesAll r h) },
-  identity := fn r h { r.route + " at " + h } }
+  identity := fn r h { r.route <> " at " <> h } }
 -- the identity of what an extern produces is its route, whatever was read
 identityByRoute : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute,
   applied := fn a ns r h { if isProvisional r then memberStr r.name ns else settled a (gradeOfRoute r h) },
@@ -123,7 +123,7 @@ identityByRoute : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute,
 blanketAssumed : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute,
   applied := fn a ns r h { if isProvisional r then memberStr r.name ns or settled a (just AssumedGrade)
                            else settled a (gradeOfRoute r h) },
-  identity := fn r h { r.route + " at " + h } }
+  identity := fn r h { r.route <> " at " <> h } }
 blanketAssumedList : List Externs := [blanketAssumed]
 appliesEveryList : List Externs := [appliesEvery]
 gradesWithoutLawsList : List Externs := [gradesWithoutLaws]

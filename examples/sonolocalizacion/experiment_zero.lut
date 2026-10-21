@@ -225,12 +225,12 @@ transformTable (g : ValidDistanceGraph) (lev z u : Vec Float64) : Table := {
 
 -- ---------------------------------------------------------------- the program
 summary (settings : Settings) (n : Int) (f : Fit n) (t : Transform) (g : DistanceGraph) : String :=
-  "nodes " + intToString g.nodes.nRows + ", measurements " + intToString g.measurements.nRows
-  + ", sigma " + realToString f.sigma + " m, nu " + realToString f.nu
-  + ", transform of the residuals: Kolmogorov distance " + realToString t.distance + " over " + intToString t.count
-  + ", tail probability " + realToString (transformTail t)
-  + (if f.converged then "" else ", NOT CONVERGED: the maximizer ran out of its " + intToString settings.maxIter + " iterations")
-  + (if f.separated then "" else ", NOT SEPARATED: two measured nodes coincide where the fit ended")
+  "nodes " <> intToString g.nodes.nRows <> ", measurements " <> intToString g.measurements.nRows
+  <> ", sigma " <> realToString f.sigma <> " m, nu " <> realToString f.nu
+  <> ", transform of the residuals: Kolmogorov distance " <> realToString t.distance <> " over " <> intToString t.count
+  <> ", tail probability " <> realToString (transformTail t)
+  <> (if f.converged then "" else ", NOT CONVERGED: the maximizer ran out of its " <> intToString settings.maxIter <> " iterations")
+  <> (if f.separated then "" else ", NOT SEPARATED: two measured nodes coincide where the fit ended")
 
 -- What a run writes and says, from a valid graph: the tables of the positions, the residuals and
 -- their transforms, and the summary. A function of the graph, so its laws are tested on graphs drawn
@@ -249,7 +249,7 @@ reportOf (settings : Settings) (g : ValidDistanceGraph) (c : Widening) (st : Sig
 -- A table as text (tables_model.lut's codec), at a path. The host has no write action yet
 -- (world_model.lut), so the text goes to the standard output after a header line naming the path.
 writeTable (w : W) (path : String) (t : Table) : W * Unit := {
-  (w1, done) <- host.print w ("== " + path)
+  (w1, done) <- host.print w ("== " <> path)
   host.print w1 (csv.render t) }
 
 -- [proposed] The half-width of the Kolmogorov band at level alpha over n transforms: c / (sqrt n +

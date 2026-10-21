@@ -59,7 +59,7 @@ positionsPlot (cv : Canvas) (s : Style) (level : Float64) (positions : Table) : 
 -- "touches <node>" or "other", which the palette colours in that sorted order.
 touchLevel (positions residuals : Table) (node : String) (r : Int) : String :=
   if cellText positions "name" (cellInt residuals "i" r) == node or cellText positions "name" (cellInt residuals "j" r) == node
-  then "touches " + node else "other"
+  then "touches " <> node else "other"
 withPairs (positions residuals : Table) (node : String) : Table := {
   nRows := residuals.nRows,
   names := appendNames residuals.names ["pair"],
