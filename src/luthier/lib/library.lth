@@ -29,7 +29,7 @@
 import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern Item ImportName declare define importAct name
   app termBody record recordValue alias dataBody Binder explicit implicit Field literal stringLit floatLit universe
   binop tuple pi sigma sigmaNamed subtype sum list proj block lambda ifThen matchOf bind rebind
-import "program.lth" actNames programMember coreNames
+import "program.lth" actNames coreNames pairValues itemValues armBodies
 
 -- ---------------------------------------------------------------- §1 Files and their kinds
 
@@ -73,26 +73,20 @@ Loader : {
 externHead (t : Surface) : Bool := match t { app f a -> externHead f ; name s -> s == "extern" ; _ -> false }
 externBody (t : Surface) : Bool := externHead t or (match t {
   app f a -> externBody f or externBody a ;
-  recordValue kvs -> anyExtern (pairValues kvs) ;
-  block items e -> externBody e or anyExtern (itemValues items) ;
-  lambda ps items e -> externBody e or anyExtern (itemValues items) ;
-  tuple ts -> anyExtern ts ; list ts -> anyExtern ts ;
+  recordValue kvs -> any List Surface externBody (pairValues kvs) ;
+  block items e -> externBody e or any List Surface externBody (itemValues items) ;
+  lambda ps items e -> externBody e or any List Surface externBody (itemValues items) ;
+  tuple ts -> any List Surface externBody ts ; list ts -> any List Surface externBody ts ;
   binop o a b -> externBody a or externBody b ;
   ifThen c a m -> externBody c or externBody a or (match m { nothing -> false ; just y -> externBody y }) ;
-  matchOf x arms -> externBody x or anyExtern (armBodies arms) ;
+  matchOf x arms -> externBody x or any List Surface externBody (armBodies arms) ;
   _ -> false })
-anyExtern (ts : List Surface) : Bool := match ts { nil -> false ; cons t rest -> externBody t or anyExtern rest }
-pairValues (kvs : List (String * Surface)) : List Surface := match kvs { nil -> nil ; cons (k, v) rest -> cons v (pairValues rest) }
-itemValues (items : List Item) : List Surface := match items { nil -> nil ;
-  cons it rest -> cons (match it { bind x v -> v ; rebind q v -> v }) (itemValues rest) }
-armBodies (arms : List (SurfacePattern * Surface)) : List Surface := match arms { nil -> nil ; cons (q, b) rest -> cons b (armBodies rest) }
 hasExtern (p : SurfaceProgram) : Bool := match p { nil -> false ;
   cons act rest -> (match act { define x bs t b -> (match b { termBody u -> externBody u ; _ -> false }) ; _ -> false })
                    or hasExtern rest }
 -- the programs with an extern: the domain of the law below, since a random program has none (lib.7)
 WithExtern : U := { p : SurfaceProgram | hasExtern p }
-sameNames (xs ys : List String) : Bool := allIn xs ys and allIn ys xs
-allIn (xs ys : List String) : Bool := match xs { nil -> true ; cons x rest -> programMember x ys and allIn rest ys }
+sameVisible (xs ys : List String) : Bool := all List String (fn (x : String) { member List String x ys }) xs and all List String (fn (y : String) { member List String y xs }) ys
 
 -- the kind is the extension, wherever the file is and whatever its name
 KindByExtension (l : Loader) : Bool :=
@@ -114,8 +108,8 @@ ModelFileTakesExtern (l : Loader) : Bool :=
 -- ---------------------------------------------------------------- §2 What a file sees
 
 -- the names an import line brings in: each name, or its alias (12.S22)
-importLineNames (ns : List ImportName) : List String := match ns { nil -> nil ;
-  cons i rest -> cons (match i.asName { nothing -> i.name ; just y -> y }) (importLineNames rest) }
+importLineNames (ns : List ImportName) : List String :=
+  map (fn (i : ImportName) { match i.asName { nothing -> i.name ; just y -> y } }) ns
 
 -- a small set of files: a theory with one field `f`, a model of it with fields `f` and `g` and a
 -- helper, a file that imports both under an alias, and an unrelated file
@@ -131,11 +125,10 @@ sample : FileSystem := [
 -- a file sees exactly its own names, what its imports name, and core's (12.S21: core encloses
 -- every file): not a model's other names, not its own name, not an unimported file's
 SeesExactly (l : Loader) : Bool :=
-  sameNames (l.visible sample "main.lut") (concatNames ["x", "LinearAlgebra", "LA"] coreNames)
-concatNames (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (concatNames rest ys) }
+  sameVisible (l.visible sample "main.lut") ((["x", "LinearAlgebra", "LA"] <> coreNames))
 -- an imported model is seen through its theory: the fields the theory names, not the model's
 -- others (privacy is ascription, L6.12, 12.S22)
-SeesTheTheorysFields (l : Loader) : Bool := sameNames (l.fieldsOf sample "main.lut" "LA") ["f"]
+SeesTheTheorysFields (l : Loader) : Bool := sameVisible (l.fieldsOf sample "main.lut" "LA") ["f"]
 
 -- ---------------------------------------------------------------- §3 What is read
 
@@ -145,12 +138,12 @@ SeesTheTheorysFields (l : Loader) : Bool := sameNames (l.fieldsOf sample "main.l
 NothingWithoutDemand (l : Loader) : Bool :=
   l.reads sample "main.lut" Checking nil == nil and l.reads sample "main.lut" Running nil == nil
 CheckingReadsTheories (l : Loader) : Bool :=
-  sameNames (l.reads sample "main.lut" Checking ["LA"]) ["la.lth"]
-  and sameNames (l.reads sample "main.lut" Checking ["x"]) ["la.lth"]
+  sameVisible (l.reads sample "main.lut" Checking ["LA"]) ["la.lth"]
+  and sameVisible (l.reads sample "main.lut" Checking ["x"]) ["la.lth"]
 RunningReadsWhatItReaches (l : Loader) : Bool :=
-  sameNames (l.reads sample "main.lut" Running ["LA"]) ["la.lth", "la_numpy.lut"]
-  and sameNames (l.reads sample "main.lut" Running ["x"]) ["la.lth", "la_numpy.lut"]
-  and sameNames (l.reads sample "main.lut" Running ["LinearAlgebra"]) ["la.lth"]
+  sameVisible (l.reads sample "main.lut" Running ["LA"]) ["la.lth", "la_numpy.lut"]
+  and sameVisible (l.reads sample "main.lut" Running ["x"]) ["la.lth", "la_numpy.lut"]
+  and sameVisible (l.reads sample "main.lut" Running ["LinearAlgebra"]) ["la.lth"]
 -- a model file, read on first demand, is verified to define the imported name as a model of its
 -- theory, and an error otherwise (12.S22)
 VerifiesTheModel (l : Loader) : Bool :=
@@ -175,21 +168,17 @@ typeMentions (s : String) (t : Surface) : Bool := match t {
   name x -> x == s ;
   app f a -> typeMentions s f or typeMentions s a ;
   binop o a b -> typeMentions s a or typeMentions s b ;
-  tuple ts -> anyMentions s ts ;
+  tuple ts -> any List Surface (typeMentions s) ts ;
   pi xs a b -> typeMentions s a or typeMentions s b ;
   sigma xs a b -> typeMentions s a or typeMentions s b ;
   sigmaNamed x a y b -> typeMentions s a or typeMentions s b ;
-  record fs law -> fieldsMention s fs ;
+  record fs law -> any List Field (fn (f : Field) { typeMentions s f.type }) fs ;
   subtype q a law -> typeMentions s a ;
-  sum kvs -> pairsMention s kvs ;
-  list ts -> anyMentions s ts ;
+  sum kvs -> any List (String * Surface) (fn (kv : String * Surface) { match kv { (k, v) -> typeMentions s v } }) kvs ;
+  list ts -> any List Surface (typeMentions s) ts ;
   proj a x -> typeMentions s a ;
   _ -> false ;
 }
-anyMentions (s : String) (ts : List Surface) : Bool := match ts { nil -> false ; cons t rest -> typeMentions s t or anyMentions s rest }
-fieldsMention (s : String) (fs : List Field) : Bool := match fs { nil -> false ; cons f rest -> typeMentions s f.type or fieldsMention s rest }
-pairsMention (s : String) (kvs : List (String * Surface)) : Bool :=
-  match kvs { nil -> false ; cons (k, v) rest -> typeMentions s v or pairsMention s rest }
 bindersMention (s : String) (bs : List Binder) : Bool := match bs { nil -> false ;
   cons b rest -> (match b { explicit xs t dft -> typeMentions s t ; implicit xs t -> typeMentions s t }) or bindersMention s rest }
 -- a program mentions `R` in a type: a declared type, a binder's type, an alias's right side, or a
@@ -198,7 +187,7 @@ mentionsR (p : SurfaceProgram) : Bool := match p { nil -> false ;
   cons act rest -> (match act {
     declare x bs t -> bindersMention "R" bs or typeMentions "R" t ;
     define x bs mt b -> bindersMention "R" bs or (match mt { nothing -> false ; just t -> typeMentions "R" t })
-                        or (match b { dataBody kvs -> pairsMention "R" kvs ; _ -> false }) ;
+                        or (match b { dataBody kvs -> any List (String * Surface) (fn (kv : String * Surface) { match kv { (k, v) -> typeMentions "R" v } }) kvs ; _ -> false }) ;
     alias x bs t -> bindersMention "R" bs or typeMentions "R" t ;
     _ -> false }) or mentionsR rest }
 
