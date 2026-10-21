@@ -20,8 +20,8 @@
 --
 --   §1 The verdict: `lift`, `exact`, and the verdicts as definitions, what the core asks
 --      of a law's value (5.S2, 5.S3, 5.S5; D-2026-10-13-aa Q5).                                                       done
---   §2 The laws of relations and operations, as templates a theory applies
---      (D-2026-10-11-l).                                                              done
+--   §2 (removed 2026-10-21, core bite 9: the laws of relations and operations are the core's,
+--      core/properties/; the twelve templates `isReflexive` to `isHomomorphism` went with it.)
 --   §3 A law as a theory: its forms (`forall`, `exists`, and, or, then, a case) and
 --      its evidence, with what each kind of evidence settles (D-2026-10-13-l); the
 --      coverages in order (7.S10; D-2026-10-14-b, from test.lth).                   done
@@ -30,7 +30,7 @@
 --      sequential test over a stream of samples (7.S17 to 7.S19, L9.15,
 --      D-2026-10-15-b).                                                             done
 
-import "checks.lth" Failures failuresEmpty
+import "checks.lth" Failures
 
 -- ---------------------------------------------------------------- §1 The verdict
 
@@ -54,37 +54,12 @@ exact (C : U) (s : CostScale C) (c : C) : Bool := s.leq c s.zero
 -- type with none of these verdicts is not a law: that is the checker's (4.R6, program.lth).
 verdictOfBool (C : U) (s : CostScale C) (b : Bool) : C := lift C s b
 verdictOfCost (C : U) (s : CostScale C) (c : C) : C := c
-verdictOfCheck (C : U) (s : CostScale C) (E : U) (fs : Failures E) : C := lift C s (failuresEmpty E fs)
+verdictOfCheck (C : U) (s : CostScale C) (E : U) (fs : Failures E) : C := lift C s (isEmpty E fs)
 
 -- What characterizes a verdict is its retraction: reading it back as whether it holds exactly
 -- gives what the law said (5.S5). Claimed by `CostScale`, whose two laws make it hold.
 VerdictsAreExact (C : U) (s : CostScale C) (b : Bool) (E : U) (fs : Failures E) : Bool :=
-  exact C s (verdictOfBool C s b) == b and exact C s (verdictOfCheck C s E fs) == failuresEmpty E fs
-
--- ---------------------------------------------------------------- §2 The laws of relations
-
--- Templates a theory applies to its own relation or operation (D-2026-10-11-l): definitions the
--- laws of a theory are written with, not laws on their own, so a theory that claims them gives
--- them their subject (4.S14). The relation `r` and the operation `op` are the theory's; equality
--- is the structural `==` (4.R8) or the theory's own `eq`, passed as `same`.
-isReflexive (A : U) (r : A -> A -> Bool) (x : A) : Bool := r x x
-isSymmetric (A : U) (r : A -> A -> Bool) (x y : A) : Bool := not (r x y) or r y x
-isAntisymmetric (A : U) (same r : A -> A -> Bool) (x y : A) : Bool := not (r x y and r y x) or same x y
-isTransitive (A : U) (r : A -> A -> Bool) (x y z : A) : Bool := not (r x y and r y z) or r x z
-isTotal (A : U) (r : A -> A -> Bool) (x y : A) : Bool := r x y or r y x
-isAssociative (A : U) (same : A -> A -> Bool) (op : A -> A -> A) (x y z : A) : Bool := same (op (op x y) z) (op x (op y z))
-isCommutative (A : U) (same : A -> A -> Bool) (op : A -> A -> A) (x y : A) : Bool := same (op x y) (op y x)
-isLeftIdentity (A : U) (same : A -> A -> Bool) (op : A -> A -> A) (e x : A) : Bool := same (op e x) x
-isRightIdentity (A : U) (same : A -> A -> Bool) (op : A -> A -> A) (e x : A) : Bool := same (op x e) x
-isInverse (A : U) (same : A -> A -> Bool) (op : A -> A -> A) (inv : A -> A) (e x : A) : Bool :=
-  same (op x (inv x)) e and same (op (inv x) x) e
-isDistributive (A : U) (same : A -> A -> Bool) (times plus : A -> A -> A) (x y z : A) : Bool :=
-  same (times x (plus y z)) (plus (times x y) (times x z))
-isHomomorphism (A B : U) (same : B -> B -> Bool) (f : A -> B) (opA : A -> A -> A) (opB : B -> B -> B) (x y : A) : Bool :=
-  same (f (opA x y)) (opB (f x) (f y))
--- The implications above (symmetric, antisymmetric, transitive) are written as alternatives:
--- sampled at random, their premises rarely hold (7.S12), so a theory quantifies them over the
--- pairs its relation relates, as kernel_laws.lth §1 does for equality.
+  exact C s (verdictOfBool C s b) == b and exact C s (verdictOfCheck C s E fs) == isEmpty E fs
 
 -- ---------------------------------------------------------------- §3 A law as a theory
 
@@ -100,7 +75,7 @@ Law : U := data {
   Case : Bool -> Law ;
   Forall : (A : U) -> (A -> Law) -> Law ;
   Exists : (A : U) -> (A -> Law) -> Law ;
-  Both : Law -> Law -> Law ;
+  Conjunction : Law -> Law -> Law ;
   Either : Law -> Law -> Law ;
   Not : Law -> Law ;
   Then : Law -> Law -> Law ;
@@ -174,19 +149,15 @@ Settling : {
 
 isRefuted (v : Verdict) : Bool := match v { Refuted -> true ; _ -> false }
 isConfirmed (v : Verdict) : Bool := match v { Confirmed -> true ; _ -> false }
-allConfirmed (vs : List Verdict) : Bool := match vs { nil -> true ; cons v rest -> isConfirmed v and allConfirmed rest }
-anyRefuted (vs : List Verdict) : Bool := match vs { nil -> false ; cons v rest -> isRefuted v or anyRefuted rest }
-anyConfirmed (vs : List Verdict) : Bool := match vs { nil -> false ; cons v rest -> isConfirmed v or anyConfirmed rest }
 -- the verdicts of the law at each point
 pointVerdicts (m : Settling) (A : U) (p : A -> Law) (pts : List (A * Evidence)) : List Verdict :=
-  match pts { nil -> nil ; cons (a, e) rest -> cons (m.settles (p a) e) (pointVerdicts m A p rest) }
+  map (A * Evidence) Verdict (fn (pt : A * Evidence) { match pt { (a, e) -> m.settles (p a) e } }) pts
 -- an `exists` on points: confirmed by any witness; refuted only when the points are all of the type
 -- and each refutes
 existsVerdict (vs : List Verdict) (c : Coverage) : Verdict :=
-  if anyConfirmed vs then Confirmed
-  else match c { Exhaustive -> (if allRefutedOf vs then Refuted else Unsettled) ; _ -> Unsettled }
-allRefutedOf (vs : List Verdict) : Bool := match vs { nil -> true ; cons v rest -> isRefuted v and allRefutedOf rest }
-flip (v : Verdict) : Verdict := match v { Confirmed -> Refuted ; Refuted -> Confirmed ; _ -> Unsettled }
+  if any List Verdict isConfirmed vs then Confirmed
+  else match c { Exhaustive -> (if all List Verdict isRefuted vs then Refuted else Unsettled) ; _ -> Unsettled }
+reversedVerdict (v : Verdict) : Verdict := match v { Confirmed -> Refuted ; Refuted -> Confirmed ; _ -> Unsettled }
 
 -- a case is settled by evaluating it, and evidence that does not agree with the case settles
 -- nothing (it cannot lie; review of layers 0-1, C)
@@ -206,13 +177,12 @@ ForallAtOnePoint (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : 
 -- requiring every point confirmed left the outer `Unsettled`, so no sampled law of more than one
 -- parameter was settled, where 7.S10 grades it by the weakest reach.
 isSupported (v : Verdict) : Bool := match v { Supported -> true ; _ -> false }
-allConfirmedOrSupported (vs : List Verdict) : Bool :=
-  match vs { nil -> true ; cons v rest -> (isConfirmed v or isSupported v) and allConfirmedOrSupported rest }
+isConfirmedOrSupported (v : Verdict) : Bool := isConfirmed v or isSupported v
 ForallOnPoints (m : Settling) (A : U) (p : A -> Law) (pts : List (A * Evidence)) (c : Coverage) : Bool :=
   m.settles (Forall A p) (Points A pts c)
-    == (if anyRefuted (pointVerdicts m A p pts) then Refuted
-        else if allConfirmed (pointVerdicts m A p pts) then (match c { Exhaustive -> Confirmed ; _ -> Supported })
-        else if allConfirmedOrSupported (pointVerdicts m A p pts) then Supported
+    == (if any List Verdict isRefuted (pointVerdicts m A p pts) then Refuted
+        else if all List Verdict isConfirmed (pointVerdicts m A p pts) then (match c { Exhaustive -> Confirmed ; _ -> Supported })
+        else if all List Verdict isConfirmedOrSupported (pointVerdicts m A p pts) then Supported
         else Unsettled)
 -- an `exists` is confirmed by a witness, and a failing instance does not refute it
 ExistsAtOnePoint (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : Bool :=
@@ -222,8 +192,8 @@ ExistsOnPoints (m : Settling) (A : U) (p : A -> Law) (pts : List (A * Evidence))
 -- `and` by a pair, its verdicts combined; `or` by either side, which confirms when its side does
 -- and supports when its side is supported (the same review item: a sampled side was dropped), or
 -- by a pair of refutations
-BothByPair (m : Settling) (p q : Law) (e f : Evidence) : Bool :=
-  m.settles (Both p q) (Pair e f) == m.combine (m.settles p e) (m.settles q f)
+ConjunctionByPair (m : Settling) (p q : Law) (e f : Evidence) : Bool :=
+  m.settles (Conjunction p q) (Pair e f) == m.combine (m.settles p e) (m.settles q f)
 EitherBySide (m : Settling) (p q : Law) (side : Bool) (e : Evidence) : Bool :=
   m.settles (Either p q) (Side side e)
     == (if isConfirmed (m.settles (if side then p else q) e) then Confirmed
@@ -234,12 +204,12 @@ EitherRefutedByBoth (m : Settling) (p q : Law) (e f : Evidence) : Bool :=
 -- `not` exchanges confirmation and refutation; what is only supported or unsettled stays unsettled.
 -- [proposed, L1 of summary-BCD.md, Fable's one-line fix] Not on a citation or an assumption, which
 -- model any law whole (`CitedWhole`, `AssumedWhole`): at `p := Not q` the two laws gave `Cites r`
--- and `flip (Cites r) == Unsettled` for one value, so `Settling` had no model.
+-- and `reversedVerdict (Cites r) == Unsettled` for one value, so `Settling` had no model.
 takenWhole (e : Evidence) : Bool := match e { Cited r -> true ; Assumed -> true ; _ -> false }
-NotFlips (m : Settling) (p : Law) (e : Evidence) : Bool := takenWhole e or m.settles (Not p) e == flip (m.settles p e)
+NotFlips (m : Settling) (p : Law) (e : Evidence) : Bool := takenWhole e or m.settles (Not p) e == reversedVerdict (m.settles p e)
 -- `then` is material: settled as `not (p and not q)`, by the same evidence
 ThenIsMaterial (m : Settling) (p q : Law) (e : Evidence) : Bool :=
-  m.settles (Then p q) e == m.settles (Not (Both p (Not q))) e
+  m.settles (Then p q) e == m.settles (Not (Conjunction p (Not q))) e
 -- a citation or an assumption models any law whole, and says on what it is taken
 CitedWhole (m : Settling) (p : Law) (r : String) : Bool := m.settles p (Cited r) == Cites r
 AssumedWhole (m : Settling) (p : Law) : Bool := m.settles p Assumed == Assumes
@@ -253,8 +223,6 @@ StatisticalByTest (m : Settling) (S T : U) (l : StatisticalLaw S) (draw : Nat ->
 -- the combination of a conjunction's verdicts: commutative and associative, a refutation absorbs
 -- everything, an unsettled part absorbs all but a refutation, and confirmation is neutral; beyond
 -- that it is the demand's (5.S8)
-CombineCommutes (m : Settling) (u v : Verdict) : Bool := m.combine u v == m.combine v u
-CombineAssociates (m : Settling) (u v w : Verdict) : Bool := m.combine (m.combine u v) w == m.combine u (m.combine v w)
 CombineAbsorbs (m : Settling) (v : Verdict) : Bool :=
   m.combine Refuted v == Refuted and (isRefuted v or m.combine Unsettled v == Unsettled) and m.combine Confirmed v == v
 -- [proposed, L4 of summary-BCD.md] and a conjunction is confirmed only when both parts are: two
@@ -264,9 +232,10 @@ CombineAbsorbs (m : Settling) (v : Verdict) : Bool :=
 CombineNeverConfirmsMore (m : Settling) (u v : Verdict) : Bool :=
   isConfirmed (m.combine u v) == (isConfirmed u and isConfirmed v)
 
-Settling := CaseIsEvaluated & ForallAtOnePoint & ForallOnPoints & ExistsAtOnePoint & ExistsOnPoints & BothByPair
-  & EitherBySide & EitherRefutedByBoth & NotFlips & ThenIsMaterial & CitedWhole & AssumedWhole & NotRunIsUnsettled
-  & StatisticalByTest & CombineCommutes & CombineAssociates & CombineAbsorbs & CombineNeverConfirmsMore
+Settling (m : Settling) := CaseIsEvaluated m & ForallAtOnePoint m & ForallOnPoints m & ExistsAtOnePoint m & ExistsOnPoints m
+  & ConjunctionByPair m & EitherBySide m & EitherRefutedByBoth m & NotFlips m & ThenIsMaterial m & CitedWhole m
+  & AssumedWhole m & NotRunIsUnsettled m & StatisticalByTest m & Commutative Verdict Verdict (structural Verdict) m.combine
+  & Associative Verdict (structural Verdict) m.combine & CombineAbsorbs m & CombineNeverConfirmsMore m
 
 -- ---------------------------------------------------------------- §4 Statistical laws
 

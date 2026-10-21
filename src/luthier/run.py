@@ -151,7 +151,6 @@ CORE_FILE = "core.lut"
 # names two core files define, until bite 6 writes the structures over core/properties/. Each is
 # a parameter (P11) with its reason; a name not listed here is refused. Keys are paths under lib/.
 CORE_COLLISIONS = {
-    "laws.lth": ("Both flip", "bite 9, the machinery"),
     "arrays.lth": ("Symmetric", "bite 11, arrays and tables"),
     "term.lth": ("Beta", "bite 10, Luthier's self-description"),
     "translation.lth": ("Lists", "bite 10, Luthier's self-description"),
