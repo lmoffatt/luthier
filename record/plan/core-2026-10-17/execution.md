@@ -865,7 +865,11 @@ recursions bites 9 and 10 kept (`latestWith`, `failureAt`, `reachOf`, `removeNam
 the like) and the test programs' local helpers, each moved to a core function or kept with its
 reason; `Settling` given a model and a test line so its two combination laws are graded; and a
 finding to settle first: `luthier eval` and `luthier session` leave a top-level term over core's
-`foldList` unreduced, which blocks differential testing of anything using `all` or `any`.
+`foldList` unreduced, which blocks differential testing of anything using `all` or `any` (fixed
+at a182ed5, report-eval-foldlist.md). Left by the differential after it (report-bite-10.md, f53b425):
+`luthier eval` doesn't reduce `textParts` and `textJoin`, so `freshName`, `unqualified`,
+`canonName` and the renaming paths of `substTerm`, `canonicalTerm` and `applyBindings` stay
+unchecked old against new; fix and rerun the differential's script.
 Bite 9's question answered: `Regioning`'s commutativity graded by the core's `Commutative` at
 `Maybe Grade` is accepted (D-2026-10-18-b, D-2026-10-18-f).
 
