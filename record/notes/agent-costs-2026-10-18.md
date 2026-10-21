@@ -82,9 +82,10 @@ Argon when off the VPN. Claude only coordinates, in short turns.
   tokens of which 57,592,448 cached, output 181,948, reasoning 126,431. Codex's weekly quota after
   it: not read (90% remaining before).
 - Agent SDK, Opus 5.5, on API credits, core bite 8 (prompt-bite-8.md): three runs, cut twice by a
-  transient 403 and once by the coordinator; $8.46 for the first, the second's cost not printed
-  (killed), $14.62 for the third (`total_cost_usd`). The Console's spend for the Luthier workspace is
-  the total. About $12 an hour for Opus through the API; the $300 promotional credit covers the
+  transient 403 and once by the coordinator. The SDK's `total_cost_usd` is cumulative over a resumed
+  session: $8.46 after the first run, $14.62 after the third. The Console agrees: $300 of credit,
+  $285.29 left on 2026-10-21 evening, so $14.71 spent, about $14.67 of it bite 8 and the rest the
+  launcher's smoke tests. About $12 an hour for Opus through the API; the $300 promotional credit covers the
   Agent SDK and expires 2026-11-07, so it goes further on Sonnet.
 - Claude Code subagents, Sonnet 5.5, on the Team quota: bite 9, 269,832 tokens after its resume
   (17 tool calls, 10 min); bite 10, 256,975 tokens after its resume (33 tool calls, 14 min). Their
