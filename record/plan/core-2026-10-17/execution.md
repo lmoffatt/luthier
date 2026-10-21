@@ -840,6 +840,14 @@ queue reopened), `record/handoff-*.md`; the notes to the spec's agent gathered (
 with the commit; the tag is Luciano's (D-2026-10-17-e).
 Accepted when: the plan says nothing false; the counts are (1) 0, (2) 0, (3) 0, (4) the real ones
 listed; the suite green; the stores committed.
+Also (2026-10-21, the coordinator on report-bite-9.md and report-bite-10.md): the search-style
+recursions bites 9 and 10 kept (`latestWith`, `failureAt`, `reachOf`, `removeName`, `anySplit` and
+the like) and the test programs' local helpers, each moved to a core function or kept with its
+reason; `Settling` given a model and a test line so its two combination laws are graded; and a
+finding to settle first: `luthier eval` and `luthier session` leave a top-level term over core's
+`foldList` unreduced, which blocks differential testing of anything using `all` or `any`.
+Bite 9's question answered: `Regioning`'s commutativity graded by the core's `Commutative` at
+`Maybe Grade` is accepted (D-2026-10-18-b, D-2026-10-18-f).
 
 ## 7. Schedule
 
