@@ -70,7 +70,7 @@ memberStr (x : String) (xs : List String) : Bool := match xs { nil -> false ; co
 subset (xs ys : List String) : Bool := match xs { nil -> true ; cons x rest -> memberStr x ys and subset rest ys }
 sameMembers (xs ys : List String) : Bool := subset xs ys and subset ys xs
 noDuplicates (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> not (memberStr x rest) and noDuplicates rest }
-count (xs : List Node) : Nat := match xs { nil -> 0 ; cons x rest -> 1 + count rest }
+countNodes (xs : List Node) : Nat := match xs { nil -> 0 ; cons x rest -> 1 + countNodes rest }
 names (ns : List Node) : List String := match ns { nil -> nil ; cons n rest -> cons n.name (names rest) }
 readsOf (ns : List Node) (x : String) : List String :=
   match ns { nil -> nil ; cons n rest -> if n.name == x then n.reads else readsOf rest x }
@@ -84,7 +84,7 @@ allNames (p : String -> Bool) (xs : List String) : Bool := match xs { nil -> tru
 -- an environment that agrees with `env` on the names listed and with `other` elsewhere
 agreeOn (A : U) (xs : List String) (env other : String -> A) : String -> A := fn m { if memberStr m xs then env m else other m }
 -- the names a name reaches by one read or more, closed in as many rounds as there are nodes
-beyond (ns : List Node) (x : String) : List String := expand ns (readsOf ns x) (count ns)
+beyond (ns : List Node) (x : String) : List String := expand ns (readsOf ns x) (countNodes ns)
 
 NamesAreUnique (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) : Bool := noDuplicates (names d.nodes)
 Acyclic (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) : Bool :=
@@ -101,7 +101,7 @@ Dataflow (A : U) (eq : A -> A -> Bool) := NamesAreUnique A eq & Acyclic A eq & S
 -- cycle too. What it does not reach, the complement of the cone, is not produced.
 expand (ns : List Node) (seen : List String) (k : Nat) : List String :=
   if k == 0 then seen else expand ns (addNew seen (readsOfAll ns seen)) (k - 1)
-reaches (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (entry : String) : List String := expand d.nodes [entry] (count d.nodes)
+reaches (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (entry : String) : List String := expand d.nodes [entry] (countNodes d.nodes)
 
 -- ---------------------------------------------------------------- §2 Schedules
 
@@ -183,16 +183,16 @@ highest (ns : List Node) (live : List String) (k : Nat) (xs : List String) : Nat
 -- the levels along a schedule never fall
 byLevels (ns : List Node) (live : List String) (prev : Nat) (s : Schedule) : Bool :=
   match s { nil -> true ; cons x rest -> {
-    l := level ns live (count ns) x
+    l := level ns live (countNodes ns) x
     prev <= l and byLevels ns live l rest } }
 -- the order of first demand: a name is placed after the names it reads, visited in the order its
--- node lists them, and once; bounded by the count of nodes
+-- node lists them, and once; bounded by the number of nodes
 demandFrom (ns : List Node) (x : String) (done : List String) (k : Nat) : List String :=
   if memberStr x done or k == 0 then done else appendOne (demandAll ns (readsOf ns x) done (k - 1)) x
 demandAll (ns : List Node) (xs : List String) (done : List String) (k : Nat) : List String :=
   match xs { nil -> done ; cons x rest -> demandAll ns rest (demandFrom ns x done k) k }
 firstDemand (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (entry : String) : Schedule :=
-  demandFrom d.nodes entry nil (1 + count d.nodes)
+  demandFrom d.nodes entry nil (1 + countNodes d.nodes)
 
 -- A plan: the strategy that chose it, the entry, the live subgraph and a schedule of it
 -- (D-2026-10-13-g: the plan is a value; L5.6: its hash enters the identity of a result).

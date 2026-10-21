@@ -1,5 +1,5 @@
--- core.lut: what the interpreter provides, and nothing else (11.R2): the primitive types, the
--- core's data, `Nat` and `Fin`, and the operations the kernel computes on constants (3.S17).
+-- core.lut: primitive data and operations, their structural claims, and the core's
+-- computable constructions (plane 3, D-2026-10-18-c; bite 6, prompt-bite-6.md at 2859815).
 --
 -- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
 -- record/IA/slice-theories-2026-10-14/prompt.md (item 1 of the inventory's §6). Sources: spec
@@ -28,10 +28,13 @@
 -- `==` is one operation on every concrete type (4.R8). [proposed] So the comparisons are named
 -- here in this comment and nowhere else; the arithmetic is named below and bound by `operator`.
 
+import "core/lists.lut" appendList foldList mapKernelList lengthList atList
+  all any count member lookup sum toList filter zipWith sameEntries pointwise supDistance entrywiseBall indicator
 import "core/structures/universal.lth" Terminal Initial Coproduct Lists
   Exponential Product NamedProduct NamedCoproduct Selected one two
-import "core/structures/algebraic.lth" TheBooleans Monoid OrderedSemiring
-import "core/structures/equality.lth" Concrete Structural
+import "core/structures/algebraic.lth" TheBooleans Monoid Semiring CommutativeRing BooleanAlgebra
+import "core/structures/order.lth" OrderedSemiring Order
+import "core/structures/equality.lth" Concrete Structural Object Metric
 
 -- ---------------------------------------------------------------- the core's data (3.S7, 3.R3)
 
@@ -75,23 +78,21 @@ List (A : U) : U := data { nil : List A ; cons : A -> List A -> List A }
 -- names: core/structures/ sees core's names unqualified (12.S22) and core names its theories, but
 -- no definition reaches itself through the other file (the theories mention `Bool` and `List`, the
 -- data mention no theory), and a demand reads definitions, not files (3.S1, 12.S22).
-UnitIsTerminal : Bool := Terminal Unit { point := unit }
-EmptyIsInitial : Bool := Initial Empty { absurd := fn (A : U) (e : Empty) { match e { } } }
-BoolIsTheBooleans : Bool := TheBooleans { algebra := { top := true, bottom := false, complement := fn b { not b },
-                                                      meet := fn a b { conj a b }, join := fn a b { disj a b } } }
-BoolIsACoproduct : Bool := Coproduct Unit Unit Bool {
-  left := fn u { true }, right := fn u { false },
-  cases := fn (C : U) f g b { if b then f unit else g unit } }
-MaybeIsACoproduct (A : U) : Bool := Coproduct Unit A (Maybe A) {
-  left := fn u { nothing }, right := fn a { just a },
-  cases := fn (C : U) f g m { match m { nothing -> f unit ; just a -> g a } } }
-ListIsTheFreeMonoid (A : U) : Bool := Lists A { free := {
-  neutral := nil, combine := fn xs ys { appendList A xs ys }, inject := fn a { cons a nil },
-  fold := fn (N : U) (n : Monoid N) (f : A -> N) (xs : List A) { foldInto A N n f xs } } }
-appendList (A : U) (xs ys : List A) : List A := match xs { nil -> ys ; cons x rest -> cons x (appendList A rest ys) }
-foldInto (A N : U) (n : Monoid N) (f : A -> N) (xs : List A) : N :=
+unitIsTerminalModel  : Terminal Unit (structural Unit) := { point := unit }
+UnitIsTerminal (equality : Object Unit <- structural Unit) (model : Terminal Unit equality <- { point := unit }) : Bool := Terminal Unit equality model
+emptyIsInitialModel  : Initial Empty := { absurd := fn (A : U) (e : Empty) { match e { } } }
+EmptyIsInitial  (model : Initial Empty <- { absurd := fn (A : U) (e : Empty) { match e { } } }) : Bool := Initial Empty model
+boolIsTheBooleansModel  : TheBooleans := { algebra := { top := true, bottom := false, complement := fn b { not b }, meet := fn a b { conj a b }, join := fn a b { disj a b } } }
+BoolIsTheBooleans  (model : TheBooleans <- { algebra := { top := true, bottom := false, complement := fn b { not b }, meet := fn a b { conj a b }, join := fn a b { disj a b } } }) : Bool := TheBooleans model
+boolIsACoproductModel  : Coproduct Unit Unit Bool (structural Bool) := { left := fn u { true }, right := fn u { false }, cases := fn (C : U) f g b { if b then f unit else g unit } }
+BoolIsACoproduct  (model : Coproduct Unit Unit Bool (structural Bool) <- { left := fn u { true }, right := fn u { false }, cases := fn (C : U) f g b { if b then f unit else g unit } }) : Bool := Coproduct Unit Unit Bool (structural Bool) model
+maybeIsACoproductModel (A : Concrete) : Coproduct Unit A (Maybe A) (structural (Maybe A)) := { left := fn u { nothing }, right := fn a { just a }, cases := fn (C : U) f g m { match m { nothing -> f unit ; just a -> g a } } }
+MaybeIsACoproduct (A : Concrete) (model : Coproduct Unit A (Maybe A) (structural (Maybe A)) <- { left := fn u { nothing }, right := fn a { just a }, cases := fn (C : U) f g m { match m { nothing -> f unit ; just a -> g a } } }) : Bool := Coproduct Unit A (Maybe A) (structural (Maybe A)) model
+listIsTheFreeMonoidModel (A : Concrete) : Lists A (structural (List A)) := { free := { monoid := { neutral := nil, combine := appendList A }, inject := fn a { cons a nil }, foldable := { fold := foldList } } }
+ListIsTheFreeMonoid (A : Concrete) (model : Lists A (structural (List A)) <- { free := { monoid := { neutral := nil, combine := appendList A }, inject := fn a { cons a nil }, foldable := { fold := foldList } } }) : Bool := Lists A (structural (List A)) model
+foldInto (A N : U) (n : Monoid N (structural N)) (f : A -> N) (xs : List A) : N :=
   match xs { nil -> n.neutral ; cons a rest -> n.combine (f a) (foldInto A N n f rest) }
-CoreData := UnitIsTerminal & EmptyIsInitial & BoolIsTheBooleans & BoolIsACoproduct & MaybeIsACoproduct & ListIsTheFreeMonoid
+
 
 -- ---------------------------------------------------------------- the primitive types (11.R1, 11.S4)
 
@@ -172,17 +173,14 @@ toFloat64 : Int -> Float64 := primitive "toFloat64"
 structuralEquality (A : Concrete) : Structural A := { eq := fn x y { x == y } }
 
 -- `Nat` is an ordered commutative semiring (11.R1)
-naturals : OrderedSemiring Nat := {
-  zero := 0, one := 1,
-  plus := fn a b { a + b },
-  times := fn a b { a * b },
-  leq := fn a b { a <= b },
-}
+naturals : OrderedSemiring Nat (structural Nat) := {
+  semiring := { zero := 0, one := 1, plus := fn a b { a + b }, times := fn a b { a * b } },
+  order := { leq := fn a b { a <= b } } }
 
 -- the kernel's application, pairing and match are the exponential, the product and the coproduct
 -- (3.S8, 3.S36); on `Bool` and `Maybe` the coproduct is core.lut's
-application (A B : U) : Exponential A B := { apply := fn f x { f x } }
-pairs (A B : U) : Product A B (A * B) := {
+application (A B : Concrete) : Exponential A B (structural B) := { apply := fn f x { f x } }
+pairs (A B : Concrete) : Product A B (A * B) (structural A) (structural B) (structural (A * B)) := {
   pair := fn a b { (a, b) },
   first := fn p { match p { (a, b) -> a } },
   second := fn p { match p { (a, b) -> b } },
@@ -193,15 +191,207 @@ pairs (A B : U) : Product A B (A * B) := {
 -- file imported; in core every program loads them, and a label reserves its name in every file of
 -- the program (run.py's `Loaded`), so a user's `a` or `b` would be renamed `a@file` (the record's
 -- plan in test_run.py showed it). `one` and `two` are `Selected`'s, loaded with core already.
-recordXY (A B : U) : NamedProduct A B { x : A, y : B } := {
+recordXY (A B : Concrete) : NamedProduct A B { x : A, y : B } (structural A) (structural B) (structural { x : A, y : B }) := {
   pair := fn u v { { x := u, y := v } },
   first := fn r { r.x }, second := fn r { r.y },
   firstName := "x", secondName := "y",
   select := fn n r { if n == "x" then just (one r.x) else if n == "y" then just (two r.y) else nothing },
 }
-sumAB (A B : U) : NamedCoproduct A B { one : A || two : B } := {
+sumAB (A B : Concrete) : NamedCoproduct A B { one : A || two : B } (structural { one : A || two : B }) := {
   left := fn u { one u }, right := fn v { two v },
   cases := fn (C : U) f g s { match s { one u -> f u ; two v -> g v } },
   leftName := "one", rightName := "two",
   labelOf := fn s { match s { one u -> "one" ; two v -> "two" } },
 }
+
+-- Computable combinators (D-2026-10-18-c, plane 3), moved from properties/functions.lth.
+id (A : U) : A -> A := fn x { x }
+compose (A B C : U) (g : B -> C) (f : A -> B) : A -> C := fn x { g (f x) }
+flip (A B C : U) (f : A -> B -> C) : B -> A -> C := fn b a { f a b }
+const (A B : U) (b : B) : A -> B := fn a { b }
+
+
+-- Computable models and helpers, plane 3 (D-2026-10-18-c).
+structural (A : Concrete) : Object A := { eq := fn x y { x == y } }
+asObject (A : Concrete) (s : Structural A) : Object A := { eq := s.eq }
+floatAbs (x : Float64) : Float64 := if x < 0.0 then 0.0 - x else x
+MetricTolerance (A : U) (d : A -> A -> Float64) (epsilon : NonNegativeFloat) : A -> A -> Bool := fn x y { d x y <= epsilon }
+
+intIsAnObjectModel  : Object Int := structural Int
+IntIsAnObject  (model : Object Int <- structural Int) : Bool := Object Int model
+natIsAnObjectModel  : Object Nat := structural Nat
+NatIsAnObject  (model : Object Nat <- structural Nat) : Bool := Object Nat model
+boolIsAnObjectModel  : Object Bool := structural Bool
+BoolIsAnObject  (model : Object Bool <- structural Bool) : Bool := Object Bool model
+stringIsAnObjectModel  : Object String := structural String
+StringIsAnObject  (model : Object String <- structural String) : Bool := Object String model
+floatIsAnObjectModel  : Object Float64 := structural Float64
+FloatIsAnObject  (model : Object Float64 <- structural Float64) : Bool := Object Float64 model
+intIsASemiringModel  : Semiring Int (structural Int) := { zero := 0, one := 1, plus := intPlus, times := intTimes }
+IntIsASemiring  (model : Semiring Int (structural Int) <- { zero := 0, one := 1, plus := intPlus, times := intTimes }) : Bool := Semiring Int (structural Int) model
+intIsACommutativeRingModel  : CommutativeRing Int (structural Int) := { zero := 0, one := 1, plus := intPlus, times := intTimes, negate := fn x { 0 - x } }
+IntIsACommutativeRing  (model : CommutativeRing Int (structural Int) <- { zero := 0, one := 1, plus := intPlus, times := intTimes, negate := fn x { 0 - x } }) : Bool := CommutativeRing Int (structural Int) model
+intIsOrderedModel  : Order Int (structural Int) := { leq := fn a b { a <= b } }
+IntIsOrdered  (model : Order Int (structural Int) <- { leq := fn a b { a <= b } }) : Bool := Order Int (structural Int) model
+natIsOrderedModel  : Order Nat (structural Nat) := { leq := fn a b { a <= b } }
+NatIsOrdered  (model : Order Nat (structural Nat) <- { leq := fn a b { a <= b } }) : Bool := Order Nat (structural Nat) model
+boolIsOrderedModel  : Order Bool (structural Bool) := { leq := fn a b { not a or b } }
+BoolIsOrdered  (model : Order Bool (structural Bool) <- { leq := fn a b { not a or b } }) : Bool := Order Bool (structural Bool) model
+stringIsOrderedModel  : Order String (structural String) := { leq := extern "python:operator.le" }
+StringIsOrdered  (model : Order String (structural String) <- { leq := extern "python:operator.le" }) : Bool := Order String (structural String) model
+floatIsOrderedModel  : Order Float64 (structural Float64) := { leq := fn a b { a <= b } }
+FloatIsOrdered  (model : Order Float64 (structural Float64) <- { leq := fn a b { a <= b } }) : Bool := Order Float64 (structural Float64) model
+natIsAnOrderedSemiringModel  : OrderedSemiring Nat (structural Nat) := naturals
+NatIsAnOrderedSemiring  (model : OrderedSemiring Nat (structural Nat) <- naturals) : Bool := OrderedSemiring Nat (structural Nat) model
+stringIsAMonoidModel  : Monoid String (structural String) := { neutral := "", combine := stringAppend }
+StringIsAMonoid  (model : Monoid String (structural String) <- { neutral := "", combine := stringAppend }) : Bool := Monoid String (structural String) model
+boolIsABooleanAlgebraModel  : BooleanAlgebra Bool (structural Bool) := { top := true, bottom := false, complement := not, meet := conj, join := disj }
+BoolIsABooleanAlgebra  (model : BooleanAlgebra Bool (structural Bool) <- { top := true, bottom := false, complement := not, meet := conj, join := disj }) : Bool := BooleanAlgebra Bool (structural Bool) model
+-- The Float64-valued integer distance is exact on MetricInteger, not on unbounded Int
+-- distances. This bound belongs to the carrier, not a silent testing restriction (11.S4).
+MetricInteger : U := { k : Int | -4503599627370496 <= k and k <= 4503599627370496 }
+intIsAMetricModel  : Metric MetricInteger (structural MetricInteger) := { d := fn x y { floatAbs (toFloat64 (x - y)) } }
+IntIsAMetric  (model : Metric MetricInteger (structural MetricInteger) <- { d := fn x y { floatAbs (toFloat64 (x - y)) } }) : Bool := Metric MetricInteger (structural MetricInteger) model
+boolIsAMetricModel  : Metric Bool (structural Bool) := { d := fn x y { if x == y then 0.0 else 1.0 } }
+BoolIsAMetric  (model : Metric Bool (structural Bool) <- { d := fn x y { if x == y then 0.0 else 1.0 } }) : Bool := Metric Bool (structural Bool) model
+kernelAppliesModel (A B : Concrete) : Exponential A B (structural B) := application A B
+KernelApplies (A B : Concrete) (model : Exponential A B (structural B) <- application A B) : Bool := Exponential A B (structural B) model
+pairsAreTheProductModel (A B : Concrete) : Product A B (A * B) (structural A) (structural B) (structural (A * B)) := pairs A B
+PairsAreTheProduct (A B : Concrete) (model : Product A B (A * B) (structural A) (structural B) (structural (A * B)) <- pairs A B) : Bool := Product A B (A * B) (structural A) (structural B) (structural (A * B)) model
+recordsAreNamedProductsModel (A B : Concrete) : NamedProduct A B { x : A, y : B } (structural A) (structural B) (structural { x : A, y : B }) := recordXY A B
+RecordsAreNamedProducts (A B : Concrete) (model : NamedProduct A B { x : A, y : B } (structural A) (structural B) (structural { x : A, y : B }) <- recordXY A B) : Bool := NamedProduct A B { x : A, y : B } (structural A) (structural B) (structural { x : A, y : B }) model
+sumsAreNamedCoproductsModel (A B : Concrete) : NamedCoproduct A B ({ one : A || two : B }) (structural ({ one : A || two : B })) := sumAB A B
+SumsAreNamedCoproducts (A B : Concrete) (model : NamedCoproduct A B ({ one : A || two : B }) (structural ({ one : A || two : B })) <- sumAB A B) : Bool := NamedCoproduct A B ({ one : A || two : B }) (structural ({ one : A || two : B })) model
+CoreData := UnitIsTerminal & EmptyIsInitial & BoolIsTheBooleans & BoolIsACoproduct & MaybeIsACoproduct
+  & ListIsTheFreeMonoid & IntIsAnObject & NatIsAnObject & BoolIsAnObject & StringIsAnObject & FloatIsAnObject
+  & IntIsASemiring & IntIsACommutativeRing & IntIsOrdered & NatIsOrdered & BoolIsOrdered & StringIsOrdered
+  & FloatIsOrdered & NatIsAnOrderedSemiring & StringIsAMonoid & BoolIsABooleanAlgebra
+  & IntIsAMetric & BoolIsAMetric & KernelApplies & PairsAreTheProduct & RecordsAreNamedProducts & SumsAreNamedCoproducts
+  & FinIsACoequalizer & SubtypeIsAnEqualizer
+
+-- Finite folds, moved from arrays.lth §2 (same right association).
+foldFrom (A : U) (op : A -> A -> A) (unit : A) (n : Int) (lo : Nat) (f : Fin n -> A) : A :=
+  if lo >= n then unit else op (f lo) (foldFrom A op unit n (lo + 1) f)
+foldWith (A : U) (op : A -> A -> A) (unit : A) (n : Int) (f : Fin n -> A) : A := foldFrom A op unit n 0 f
+
+-- spec 3.S27: the sum of n doubles is `f 0 + (f 1 + (... + (f (n - 1) + 0.0)))`; the order is
+-- part of the definition, and every specimen keeps it.
+sumTo (n : Int) (f : Fin n -> Float64) : Float64 := foldWith Float64 (fn a b { a + b }) 0.0 n f
+sumToInt (n : Int) (f : Fin n -> Int) : Int := foldWith Int (fn a b { a + b }) 0 n f
+-- a law over every index, some index, every pair of indices below n: the closure, evaluated
+forallBelow (n : Int) (p : Fin n -> Bool) : Bool := foldWith Bool (fn a b { a and b }) true n p
+existsBelow (n : Int) (p : Fin n -> Bool) : Bool := foldWith Bool (fn a b { a or b }) false n p
+forallPairs (n : Int) (p : Fin n -> Fin n -> Bool) : Bool := forallBelow n (fn i { forallBelow n (p i) })
+countBelow (n : Int) (p : Fin n -> Bool) : Int := sumToInt n (fn k { if p k then 1 else 0 })
+
+-- Generic finite container computations (execution.md §3.4; D-2026-10-18-c plane 3).
+
+
+
+-- Minimal container models for kernel name resolution; bite 7 extends lists.lut.
+ListIsAFunctor (model : Functor List <- { map := mapKernelList }) : Bool := Functor List model
+ListIsIndexed (A : Concrete) (model : Indexed (List A) A <- { size := lengthList A, at := atList A }) : Bool := Indexed (List A) A model
+ListIsAnObject (A : Concrete) (model : Object (List A) <- structural (List A)) : Bool := Object (List A) model
+FinIsACoequalizer (n : { n : Int | 0 < n })
+  (model : Coequalizer Int (Fin n) (structural (Fin n)) (fn a b { a mod n == b mod n }) <- {
+    project := fn a { a mod n }, representative := fn k { k }, lift := fn (B : U) b f respect k { f k } }) : Bool :=
+  Coequalizer Int (Fin n) (structural (Fin n)) (fn a b { a mod n == b mod n }) model
+SubtypeIsAnEqualizer (A : Concrete) (predicate : A -> Bool)
+  (model : Equalizer A Bool { x : A | predicate x } (structural A) (structural Bool) (structural { x : A | predicate x }) predicate (fn x { true }) <- {
+    include := fn x { x }, restrict := fn x { x } }) : Bool :=
+  Equalizer A Bool { x : A | predicate x } (structural A) (structural Bool) (structural { x : A | predicate x }) predicate (fn x { true }) model
+CoreConstructions := ListIsAFunctor & ListIsIndexed & ListIsAnObject & FinIsACoequalizer & SubtypeIsAnEqualizer
+
+-- Kernel type instances of the generic properties (moved from bite 2 test scaffolding).
+-- ---------------------------------------------------------------- relations.lth at Int
+
+IntReflexive (r : Int -> Int -> Bool) (x : Int) : Bool := Reflexive Int r x
+IntIrreflexive (r : Int -> Int -> Bool) (x : Int) : Bool := Irreflexive Int r x
+IntSymmetric (r : Int -> Int -> Bool) (p : Related Int r) : Bool := Symmetric Int r p
+IntAntisymmetric (r : Int -> Int -> Bool) (x y : Int) : Bool := Antisymmetric Int (structural Int) r x y
+IntAsymmetric (r : Int -> Int -> Bool) (p : Related Int r) : Bool := Asymmetric Int r p
+IntTransitive (r : Int -> Int -> Bool) (c : Chain Int r) : Bool := Transitive Int r c
+IntTotal (r : Int -> Int -> Bool) (x y : Int) : Bool := Total Int r x y
+IntEquivalence (r : Int -> Int -> Bool) := Equivalence Int r
+IntPreorder (r : Int -> Int -> Bool) := Preorder Int r
+IntPartialOrder (r : Int -> Int -> Bool) := PartialOrder Int (structural Int) r
+IntTotalOrder (r : Int -> Int -> Bool) := TotalOrder Int (structural Int) r
+IntStrictOrder (r : Int -> Int -> Bool) := StrictOrder Int r
+-- antisymmetry as a premise over `Both`, so that the subtype is drawn too
+IntBothWaysEqual (r : Int -> Int -> Bool) (b : Both Int r) : Bool := b.x == b.y
+
+-- ---------------------------------------------------------------- operations.lth at Int, Bool, String
+
+IntAssociative (op : Int -> Int -> Int) (x y z : Int) : Bool := Associative Int (structural Int) op x y z
+IntCommutative (op : Int -> Int -> Int) (x y : Int) : Bool := Commutative Int Int (structural Int) op x y
+IntIdempotent (op : Int -> Int -> Int) (x : Int) : Bool := Idempotent Int (structural Int) op x
+IntLeftNeutral (op : Int -> Int -> Int) (e : Int) (x : Int) : Bool := LeftNeutral Int (structural Int) op e x
+IntRightNeutral (op : Int -> Int -> Int) (e : Int) (x : Int) : Bool := RightNeutral Int (structural Int) op e x
+IntNeutral (op : Int -> Int -> Int) (e : Int) (x : Int) : Bool := Neutral Int (structural Int) op e x
+IntAbsorbing (op : Int -> Int -> Int) (z : Int) (x : Int) : Bool := Absorbing Int (structural Int) op z x
+IntCancellative (op : Int -> Int -> Int) (x y z : Int) : Bool := Cancellative Int (structural Int) op x y z
+IntInvertible (op : Int -> Int -> Int) (e : Int) (inv : Int -> Int) (x : Int) : Bool := Invertible Int (structural Int) op e inv x
+IntDistributive (product sum : Int -> Int -> Int) (x y z : Int) : Bool := Distributive Int (structural Int) product sum x y z
+IntAbsorptive (meet join : Int -> Int -> Int) (x y : Int) : Bool := Absorptive Int (structural Int) meet join x y
+IntDistinct (a b : Int) : Bool := Distinct Int (structural Int) a b
+
+BoolAssociative (op : Bool -> Bool -> Bool) (x y z : Bool) : Bool := Associative Bool (structural Bool) op x y z
+BoolCommutative (op : Bool -> Bool -> Bool) (x y : Bool) : Bool := Commutative Bool Bool (structural Bool) op x y
+BoolIdempotent (op : Bool -> Bool -> Bool) (x : Bool) : Bool := Idempotent Bool (structural Bool) op x
+BoolNeutral (op : Bool -> Bool -> Bool) (e : Bool) (x : Bool) : Bool := Neutral Bool (structural Bool) op e x
+BoolAbsorbing (op : Bool -> Bool -> Bool) (z : Bool) (x : Bool) : Bool := Absorbing Bool (structural Bool) op z x
+BoolDistributive (product sum : Bool -> Bool -> Bool) (x y z : Bool) : Bool := Distributive Bool (structural Bool) product sum x y z
+BoolAbsorptive (meet join : Bool -> Bool -> Bool) (x y : Bool) : Bool := Absorptive Bool (structural Bool) meet join x y
+-- the complement reaches the operation's absorbing element: `false` for `and`, `true` for `or`
+BoolComplemented (op : Bool -> Bool -> Bool) (complement : Bool -> Bool) (z : Bool) (x : Bool) : Bool :=
+  Complemented Bool (structural Bool) op complement z x
+
+StringAssociative (op : String -> String -> String) (x y z : String) : Bool := Associative String (structural String) op x y z
+StringCommutative (op : String -> String -> String) (x y : String) : Bool := Commutative String String (structural String) op x y
+StringNeutral (op : String -> String -> String) (e : String) (x : String) : Bool := Neutral String (structural String) op e x
+
+-- ---------------------------------------------------------------- the within-bound laws at Float64
+
+FloatAssociativeWithin (op : Float64 -> Float64 -> Float64) (bound3 : Float64 -> Float64 -> Float64 -> Float64) (x y z : Float64) : Bool :=
+  AssociativeWithin Float64 coreFloatDistance op bound3 x y z
+FloatCommutativeWithin (op : Float64 -> Float64 -> Float64) (bound2 : Float64 -> Float64 -> Float64) (x y : Float64) : Bool :=
+  CommutativeWithin Float64 Float64 coreFloatDistance op bound2 x y
+FloatNeutralWithin (op : Float64 -> Float64 -> Float64) (e : Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool :=
+  NeutralWithin Float64 coreFloatDistance op e bound1 x
+FloatDistributiveWithin (product sum : Float64 -> Float64 -> Float64) (bound3 : Float64 -> Float64 -> Float64 -> Float64) (x y z : Float64) : Bool :=
+  DistributiveWithin Float64 coreFloatDistance product sum bound3 x y z
+FloatInvertibleWithin (op : Float64 -> Float64 -> Float64) (e : Float64) (inv : Float64 -> Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool :=
+  InvertibleWithin Float64 coreFloatDistance op e inv bound1 x
+
+-- ---------------------------------------------------------------- functions.lth at Int, Bool, Float64
+
+IntPointwise (f g : Int -> Int) (x : Int) : Bool := Pointwise Int Int (structural Int) f g x
+IntPointwise2 (f g : Int -> Int -> Int) (x y : Int) : Bool := Pointwise2 Int Int Int (structural Int) f g x y
+IntInjective (f : Int -> Int) (x y : Int) : Bool := Injective Int Int (structural Int) (structural Int) f x y
+BoolInjective (f : Bool -> Bool) (x y : Bool) : Bool := Injective Bool Bool (structural Bool) (structural Bool) f x y
+IntSurjective (f s : Int -> Int) (y : Int) : Bool := Surjective Int Int (structural Int) f s y
+IntInverse (f g : Int -> Int) (x : Int) : Bool := Inverse Int Int (structural Int) f g x
+IntIsomorphism (to from : Int -> Int) := Isomorphism Int Int (structural Int) (structural Int) to from
+IntBijective (f s : Int -> Int) := Bijective Int Int (structural Int) (structural Int) f s
+IntIdempotentFunction (f : Int -> Int) (x : Int) : Bool := Pointwise Int Int (structural Int) (compose Int Int Int f f) f x
+IntInvolutive (f : Int -> Int) (x : Int) : Bool := Involutive Int (structural Int) f x
+BoolInvolutive (f : Bool -> Bool) (x : Bool) : Bool := Involutive Bool (structural Bool) f x
+IntMonotone (r t : Int -> Int -> Bool) (f : Int -> Int) (p : Related Int r) : Bool := Monotone Int Int r t f p
+IntPreserving (opA opB : Int -> Int -> Int) (f : Int -> Int) (x y : Int) : Bool := Preserving Int Int (structural Int) opA opB f x y
+IntCongruent (rA : Int -> Int -> Bool) (f : Int -> Int) (p : Related Int rA) : Bool := Congruent Int Int rA (structural Int) f p
+IntLandsIn (f : Int -> Int) (inside : Int -> Bool) (x : Int) : Bool := LandsIn Int Int f inside x
+
+FloatIdempotentWithin (f : Float64 -> Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool := IdempotentWithin Float64 coreFloatDistance f bound1 x
+FloatInvolutiveWithin (f : Float64 -> Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool := InvolutiveWithin Float64 coreFloatDistance f bound1 x
+FloatPointwiseWithin (f g : Float64 -> Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool := PointwiseWithin Float64 Float64 coreFloatDistance f g bound1 x
+
+coreFloatDistance (a b : Float64) : Float64 := floatAbs (a - b)
+CoreProperties := IntReflexive & IntIrreflexive & IntSymmetric & IntAntisymmetric & IntAsymmetric & IntTransitive & IntTotal & IntEquivalence & IntPreorder & IntPartialOrder & IntTotalOrder & IntStrictOrder & IntBothWaysEqual & IntAssociative & IntCommutative & IntIdempotent & IntLeftNeutral & IntRightNeutral & IntNeutral & IntAbsorbing & IntCancellative & IntInvertible & IntDistributive & IntAbsorptive & IntDistinct & BoolAssociative & BoolCommutative & BoolIdempotent & BoolNeutral & BoolAbsorbing & BoolDistributive & BoolAbsorptive & BoolComplemented & StringAssociative & StringCommutative & StringNeutral & FloatAssociativeWithin & FloatCommutativeWithin & FloatNeutralWithin & FloatDistributiveWithin & FloatInvertibleWithin & IntPointwise & IntPointwise2 & IntInjective & BoolInjective & IntSurjective & IntInverse & IntIsomorphism & IntBijective & IntIdempotentFunction & IntInvolutive & BoolInvolutive & IntMonotone & IntPreserving & IntCongruent & IntLandsIn & FloatIdempotentWithin & FloatInvolutiveWithin & FloatPointwiseWithin
+
+KernelFiniteQuantifiers (n : Nat) (model : FiniteQuantifiers n <- { every := forallBelow n, some := existsBelow n, pairs := forallPairs n }) : Bool := FiniteQuantifiers n model
+KernelQueries (F : U -> U) (folding : Foldable F) (model : FoldableQueries F folding <- { every := fn (A : U) { all F A folding }, contains := fn (A : U) { member F A folding } }) : Bool := FoldableQueries F folding model
+KernelEntrywise (C A : U) (i : Indexed C A) (d : A -> A -> Float64)
+  (candidate : ((c : C) -> C -> Fin (i.size c) -> Float64) -> C -> C -> Bool <- entrywiseBall C A i d) :=
+  EntrywiseSpecification C A i d candidate
+KernelImplication (candidate : Bool -> Bool -> Bool <- implies) := MaterialImplication candidate
+CoreComputations := KernelFiniteQuantifiers & KernelQueries & KernelEntrywise & KernelImplication

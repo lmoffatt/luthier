@@ -47,7 +47,6 @@ LexResult = { lexed : List Token || lexFailed : LexError }
 -- double); it has no sign, which is negation, so a literal is never negative. Roles: `LiteralTree`.
 -- Finite, as every Float64 (11.R1). It holds -0.0, which equals 0.0 (11.S12's `nearest (toQ x) == x`
 -- needs it), so the printer writes either as `0.0` (Codex, random trees).
-NonNegativeFloat : U := { x : Float64 | 0.0 <= x }
 Literal : U := data {
   intLit : Nat -> Literal ;
   floatLit : NonNegativeFloat -> Literal ;
@@ -98,7 +97,7 @@ Surface : U := data {
   subtype : SurfacePattern -> Surface -> Surface -> Surface ;
   recordValue : List (String * Surface) -> Surface ;
   block : List Item -> Surface -> Surface ;
-  sum : List (String * Surface) -> Surface ;
+  sumSurface : List (String * Surface) -> Surface ;
   list : List Surface -> Surface ;
   lambda : List LambdaParam -> List Item -> Surface -> Surface ;
   matchOf : Surface -> List (SurfacePattern * Surface) -> Surface ;
@@ -447,7 +446,7 @@ wf (ok : String -> Bool) (t : Surface) : Bool := match t {
   subtype p a law -> subtypePatternOk ok p and wf ok a and wf ok law ;
   recordValue kvs -> nonEmpty (String * Surface) kvs and allPairs ok kvs ;
   block items e -> allItems ok items and wf ok e ;
-  sum kvs -> atLeastTwo (String * Surface) kvs and allPairs ok kvs ;
+  sumSurface kvs -> atLeastTwo (String * Surface) kvs and allPairs ok kvs ;
   list ts -> allWf ok ts ;
   lambda ps items e -> nonEmpty LambdaParam ps and allParams ok ps and allItems ok items and wf ok e ;
   matchOf s arms -> wf ok s and allArms ok arms ;
@@ -597,7 +596,7 @@ LayoutEnds (d : Derives) (g : Grammar d) (s : String) : Bool :=
   match layoutOf d g s { just ts -> isEmptyViews ts or lastIsNewline ts ; nothing -> true }
 ColumnZeroStartsAct (d : Derives) (g : Grammar d) : Bool :=
   g.parse "x := a\n-b" == parsed [define "x" [] nothing (termBody (nm "a")), datum (neg (nm "b"))]
-  and g.parse "x := a\n{ c : U || e : W }" == parsed [define "x" [] nothing (termBody (nm "a")), datum (sum [("c", universe), ("e", world)])]
+  and g.parse "x := a\n{ c : U || e : W }" == parsed [define "x" [] nothing (termBody (nm "a")), datum (sumSurface [("c", universe), ("e", world)])]
 IndentContinuesAct (d : Derives) (g : Grammar d) : Bool :=
   sameLayout d g "f (a : Int) : Int :=\n  a + 1" "f (a : Int) : Int := a + 1"
 BracketsIgnoreBreaks (d : Derives) (g : Grammar d) : Bool :=
@@ -674,10 +673,10 @@ DanglingElse (d : Derives) (g : Grammar d) : Bool :=
 -- D-2026-10-13-w: a labeled sum is braced with `||`, an atom like any braced form; `,` and `||`
 -- do not mix at one level; `<` and `>` are comparisons only
 SumTree (d : Derives) (g : Grammar d) : Bool :=
-  parsesX d g "x := { a : A || b : B }" (sum [("a", nm "A"), ("b", nm "B")])
-  and parsesX d g "x := f { a : A || b : B }" (app (nm "f") (sum [("a", nm "A"), ("b", nm "B")]))
+  parsesX d g "x := { a : A || b : B }" (sumSurface [("a", nm "A"), ("b", nm "B")])
+  and parsesX d g "x := f { a : A || b : B }" (app (nm "f") (sumSurface [("a", nm "A"), ("b", nm "B")]))
   and parsesX d g "x := { s : { a : A || b : B }, d : D }"
-    (record [{ names := ["s"], type := sum [("a", nm "A"), ("b", nm "B")] }, { names := ["d"], type := nm "D" }] nothing)
+    (record [{ names := ["s"], type := sumSurface [("a", nm "A"), ("b", nm "B")] }, { names := ["d"], type := nm "D" }] nothing)
   and not (isParsed (g.parse "x := { a : A || b : B, c : C }"))
   and parsesX d g "x := a < b and c > e" (binop "and" (binop "<" (nm "a") (nm "b")) (binop ">" (nm "c") (nm "e")))
 

@@ -117,7 +117,7 @@ Program = List Act
 
 -- definitions the laws need: names as lists, the free variables of a term, and the swap of two
 -- names everywhere in a term (binders included), the nominal way to rename without capture
-member (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or member x rest }
+termMember (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or termMember x rest }
 remove (x : String) (xs : List String) : List String :=
   match xs { nil -> nil ; cons y rest -> if x == y then remove x rest else cons y (remove x rest) }
 concat (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (concat rest ys) }
@@ -213,7 +213,7 @@ sameNames (xs ys : List String) : Bool := removeAll xs ys == nil and removeAll y
 
 -- a name and a term in which it is not free: the fresh names a binder may be renamed to; random
 -- names are almost always fresh, so drawing them is cheap
-Fresh : U := { y : String, t : Term | not (member y (freeVars t)) }
+Fresh : U := { y : String, t : Term | not (termMember y (freeVars t)) }
 AlphaPair (a : Alpha) : U := { s t : Term | a.alphaEq s t }
 
 FreeVariablesAreNames (a : Alpha) (x y : String) : Bool := a.alphaEq (Var x) (Var y) == (x == y)
@@ -247,12 +247,12 @@ AlphaCongruent (a : Alpha) (p q : AlphaPair a) (x l : String) : Bool :=
 -- below, stated up to alpha, weakens with it (Fable, review of layers 0-1).
 renamedTo (x y : String) (t : Term) : Term := if x == y then t else swap x y t
 underBinder (a : Alpha) (x y : String) (b c : Term) : Bool :=
-  (x == y and a.alphaEq b c) or (not (member x (freeVars c)) and a.alphaEq b (renamedTo y x c))
+  (x == y and a.alphaEq b c) or (not (termMember x (freeVars c)) and a.alphaEq b (renamedTo y x c))
 -- a `data` binds its own name in its constructors' types (`freeVars`, `swap`), so its name is
 -- compared as a binder (Codex, writing kernel.py: `RenameBound` renamed it and `AlphaPartsAgree`
 -- asked it fixed)
 underBinderPairs (a : Alpha) (x y : String) (cs ds : List (String * Term)) : Bool :=
-  (x == y and pairsAgree a cs ds) or (not (member x (pairsFree ds)) and pairsAgree a cs (renamePairs y x ds))
+  (x == y and pairsAgree a cs ds) or (not (termMember x (pairsFree ds)) and pairsAgree a cs (renamePairs y x ds))
 renamePairs (y x : String) (kvs : List (String * Term)) : List (String * Term) :=
   match kvs { nil -> nil ; cons (k, v) rest -> cons (k, renamedTo y x v) (renamePairs y x rest) }
 pairsAgree (a : Alpha) (xs ys : List (String * Term)) : Bool := match xs {
@@ -309,7 +309,7 @@ Alpha := FreeVariablesAreNames & RenameBound & AlphaKeepsHead & AlphaKeepsFree &
 Substitution (a : Alpha) : { subst : String -> Term -> Term -> Term }
 
 -- a name and a term in which it is not free, for the binder that substitution passes under
-NotFreeIn : U := { y : String, s : Term | not (member y (freeVars s)) }
+NotFreeIn : U := { y : String, s : Term | not (termMember y (freeVars s)) }
 
 SubstHits (a : Alpha) (m : Substitution a) (x : String) (s : Term) : Bool := a.alphaEq (m.subst x s (Var x)) s
 SubstMisses (a : Alpha) (m : Substitution a) (x y : String) (s : Term) : Bool :=
@@ -352,7 +352,7 @@ SubstPassesBinder (a : Alpha) (m : Substitution a) (x : String) (f : NotFreeIn) 
 -- over its constructors; that changes 3.S29's `Record`, and is Luciano's (asked through the
 -- coordinator, 2026-10-14).
 capturable (y z : String) (s b : Term) : Bool :=
-  member y (freeVars s) and not (member z (freeVars s)) and not (member z (freeVars b)) and not (y == z)
+  termMember y (freeVars s) and not (termMember z (freeVars s)) and not (termMember z (freeVars b)) and not (y == z)
 CaptureCase : U := { y z : String, s b : Term | capturable y z s b }
 SubstAvoidsCapture (a : Alpha) (m : Substitution a) (x : String) (c : CaptureCase) (ty : Term) : Bool :=
   x == c.y or x == c.z
@@ -486,7 +486,7 @@ IotaConstructors (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Pro
 -- the program with a `data` `t` whose constructors are `c`, `k` (nullary) and `f`, `g` (unary)
 withData (t c k f g : String) (p : Program) : Program :=
   cons (Define t Universe (Data t [(c, Var t), (k, Var t), (f, Pi "_" (Var t) (Var t)), (g, Pi "_" (Var t) (Var t))])) p
-distinctNames (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> not (member x rest) and distinctNames rest }
+distinctNames (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> not (termMember x rest) and distinctNames rest }
 allFree (p : Program) (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> free p x and allFree p rest }
 
 -- a local definition steps to its body with the value for its name (zeta; D-2026-10-13-aa, Q1)

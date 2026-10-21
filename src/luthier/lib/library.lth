@@ -29,7 +29,7 @@
 import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern Item ImportName declare define importAct name
   app termBody record recordValue alias dataBody Binder explicit implicit Field literal stringLit floatLit universe
   binop tuple pi sigma sigmaNamed subtype sum list proj block lambda ifThen matchOf bind rebind
-import "program.lth" actNames member coreNames
+import "program.lth" actNames programMember coreNames
 
 -- ---------------------------------------------------------------- §1 Files and their kinds
 
@@ -92,7 +92,7 @@ hasExtern (p : SurfaceProgram) : Bool := match p { nil -> false ;
 -- the programs with an extern: the domain of the law below, since a random program has none (lib.7)
 WithExtern : U := { p : SurfaceProgram | hasExtern p }
 sameNames (xs ys : List String) : Bool := allIn xs ys and allIn ys xs
-allIn (xs ys : List String) : Bool := match xs { nil -> true ; cons x rest -> member x ys and allIn rest ys }
+allIn (xs ys : List String) : Bool := match xs { nil -> true ; cons x rest -> programMember x ys and allIn rest ys }
 
 -- the kind is the extension, wherever the file is and whatever its name
 KindByExtension (l : Loader) : Bool :=

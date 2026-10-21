@@ -11,76 +11,27 @@
 -- 7.R4 (a function over an infinite domain, the predicate of a set, is drawn from a census). The
 -- v0.1 file is `src/luthier/lib/algebra.lut` at the tag v0.1-final.
 --
--- Its name. The specification says `lib/algebra.lut`; under Z8 a theory is a `.lth`
--- (12.S23), so this is `algebra.lth`, and its models (`integers`, `realField`) are in
--- numbers_model.lut. Each structure below is built from the ones before it by inclusion
--- (4.R10), through a field that holds the smaller structure, and reuses its laws through an
--- `as...` projection, as kernel_laws.lth's `asMonoid` does. Equality is the structural `==` of
--- the kernel (4.R8); the doubles, which have no exact ring (11.S15), are not a model of any of
--- these, and what they have instead is numbers.lth.
---
--- Index (all sections written in this draft):
---   §0 Isomorphism: two maps that undo each other, each side under its own equality
---      (v0.1 algebra.lut:26; positions.lut's `layout` is one).                           done
---   §1 Abelian group: a commutative monoid with inverses.                               done
---   §2 Commutative ring: an abelian group and a monoid joined by distributivity.         done
---   §3 Field: every element but zero has a reciprocal.                                   done
---   §4 Ordered ring and ordered field: a total order the operations respect.             done
---   §5 Complete ordered field: every set bounded above has a least upper bound (11.R3).  done
+-- Bite 6 revision, Codex, 2026-10-21, prompt-bite-6.md at 2859815:
+-- Sections 0-2 moved to core/structures/; Int and String models moved to core.lut.
+-- The remaining sections 3-5 build fields and ordered fields on the core's CommutativeRing.
+-- Iso and its inverse-law aliases remain for positions.lut until bite 12.
+-- Float64 is not asserted to be a field; numbers.lth states its bounded laws.
 
--- the core is seen without an import (12.S22); these three names are also core/properties/
--- operations.lth's until the core's bite 6, so the import says which (run.py's CORE_COLLISIONS)
-import "core/structures/algebraic.lth" LeftNeutral RightNeutral Associative
 import "laws.lth" Law Forall Exists Then Case
 
--- ---------------------------------------------------------------- §0 Isomorphism
-
--- two maps that undo each other, each side judged by its own equality (4.R8: a type holding a
--- function carries the equality it is compared by)
+-- Compatibility for positions.lut until bite 12; the laws are the core's Isomorphism.
 Iso (A B : U) : { eqA : A -> A -> Bool, eqB : B -> B -> Bool, to : A -> B, from : B -> A }
-FromUndoesTo (A B : U) (i : Iso A B) (a : A) : Bool := i.eqA (i.from (i.to a)) a
-ToUndoesFrom (A B : U) (i : Iso A B) (b : B) : Bool := i.eqB (i.to (i.from b)) b
-Iso (A B : U) := FromUndoesTo A B & ToUndoesFrom A B
+Iso (A B : U) (i : Iso A B) := Isomorphism A B { eq := i.eqA } { eq := i.eqB } i.to i.from
 
--- ---------------------------------------------------------------- §1 Abelian group
-
--- a monoid whose operation commutes, with an inverse for every element
-AbelianGroup (G : U) : { monoid : Monoid G, inverse : G -> G }
--- spec 4.R10: the monoid's laws, applied, not restated
-GroupIsMonoid (G : U) (g : AbelianGroup G) (x y z : G) : Bool :=
-  LeftNeutral G g.monoid x and RightNeutral G g.monoid x and Associative G g.monoid x y z
-GroupCommutes (G : U) (g : AbelianGroup G) (x y : G) : Bool := g.monoid.combine x y == g.monoid.combine y x
-GroupInverse (G : U) (g : AbelianGroup G) (x : G) : Bool := g.monoid.combine x (g.inverse x) == g.monoid.neutral
-AbelianGroup (G : U) := GroupIsMonoid G & GroupCommutes G & GroupInverse G
-
--- ---------------------------------------------------------------- §2 Commutative ring
-
--- the additive group and the multiplicative monoid, with multiplication distributing over
--- addition and commuting; `zero` and `one` are the two neutral elements
-CommutativeRing (R : U) : { add : AbelianGroup R, mul : Monoid R }
-zeroOf (R : U) (r : CommutativeRing R) : R := r.add.monoid.neutral
-oneOf (R : U) (r : CommutativeRing R) : R := r.mul.neutral
-plusOf (R : U) (r : CommutativeRing R) (x y : R) : R := r.add.monoid.combine x y
-timesOf (R : U) (r : CommutativeRing R) (x y : R) : R := r.mul.combine x y
-negateOf (R : U) (r : CommutativeRing R) (x : R) : R := r.add.inverse x
-
-RingAdds (R : U) (r : CommutativeRing R) (x y z : R) : Bool :=
-  GroupIsMonoid R r.add x y z and GroupCommutes R r.add x y and GroupInverse R r.add x
-RingMultiplies (R : U) (r : CommutativeRing R) (x y z : R) : Bool :=
-  LeftNeutral R r.mul x and RightNeutral R r.mul x and Associative R r.mul x y z
-TimesCommutes (R : U) (r : CommutativeRing R) (x y : R) : Bool := timesOf R r x y == timesOf R r y x
-Distributes (R : U) (r : CommutativeRing R) (x y z : R) : Bool :=
-  timesOf R r x (plusOf R r y z) == plusOf R r (timesOf R r x y) (timesOf R r x z)
--- the ring has two elements at least
-OneIsNotZero (R : U) (r : CommutativeRing R) : Bool := not (oneOf R r == zeroOf R r)
-CommutativeRing (R : U) := RingAdds R & RingMultiplies R & TimesCommutes R & Distributes R & OneIsNotZero R
+FromUndoesTo (A B : U) (i : Iso A B) := Inverse A B { eq := i.eqA } i.to i.from
+ToUndoesFrom (A B : U) (i : Iso A B) := Inverse B A { eq := i.eqB } i.from i.to
 
 -- ---------------------------------------------------------------- §3 Field
 
 -- every element but zero has a reciprocal; what `reciprocal` gives at zero is not asked
-Field (F : U) : { ring : CommutativeRing F, reciprocal : F -> F }
+Field (F : U) : { ring : CommutativeRing F (structural F), reciprocal : F -> F }
 Reciprocal (F : U) (f : Field F) (x : F) : Bool :=
-  x == zeroOf F f.ring or timesOf F f.ring x (f.reciprocal x) == oneOf F f.ring
+  x == f.ring.zero or f.ring.times x (f.reciprocal x) == f.ring.one
 Field (F : U) := Reciprocal F
 
 -- ---------------------------------------------------------------- §4 Order
@@ -88,19 +39,18 @@ Field (F : U) := Reciprocal F
 -- A total order on a ring that addition respects and that positive multiplication respects.
 -- The pairs and chains the order relates are drawn by their generators (7.S12), as in
 -- kernel_laws.lth §5; `leq` is the order, `x <= y`.
-OrderedRing (R : U) : { ring : CommutativeRing R, leq : R -> R -> Bool }
+OrderedRing (R : U) : { ring : CommutativeRing R (structural R), leq : R -> R -> Bool }
 LeqPair (R : U) (o : OrderedRing R) : U := { x y : R | o.leq x y }
 LeqChain (R : U) (o : OrderedRing R) : U := { x y z : R | o.leq x y and o.leq y z }
 LeqBoth (R : U) (o : OrderedRing R) : U := { x y : R | o.leq x y and o.leq y x }
-NonNegativePair (R : U) (o : OrderedRing R) : U := { x y : R | o.leq (zeroOf R o.ring) x and o.leq (zeroOf R o.ring) y }
 
 LeqTotal (R : U) (o : OrderedRing R) (x y : R) : Bool := o.leq x y or o.leq y x
 LeqAntisymmetric (R : U) (o : OrderedRing R) (p : LeqBoth R o) : Bool := p.x == p.y
 LeqTransitive (R : U) (o : OrderedRing R) (c : LeqChain R o) : Bool := o.leq c.x c.z
 PlusMonotone (R : U) (o : OrderedRing R) (p : LeqPair R o) (z : R) : Bool :=
-  o.leq (plusOf R o.ring p.x z) (plusOf R o.ring p.y z)
-TimesPositive (R : U) (o : OrderedRing R) (p : NonNegativePair R o) : Bool :=
-  o.leq (zeroOf R o.ring) (timesOf R o.ring p.x p.y)
+  o.leq (o.ring.plus p.x z) (o.ring.plus p.y z)
+TimesPositive (R : U) (o : OrderedRing R) (p : NonNegativePair R o.leq o.ring.zero) : Bool :=
+  o.leq (o.ring.zero) (o.ring.times p.x p.y)
 OrderedRing (R : U) := LeqTotal R & LeqAntisymmetric R & LeqTransitive R & PlusMonotone R & TimesPositive R
 
 -- an ordered field: a field whose ring is ordered; the order's laws are the ordered ring's. The
@@ -112,7 +62,7 @@ FieldIsOrdered (F : U) (o : OrderedField F) (x y : F)
                (p : LeqPair F { ring := o.field.ring, leq := o.leq })
                (c : LeqChain F { ring := o.field.ring, leq := o.leq })
                (b : LeqBoth F { ring := o.field.ring, leq := o.leq })
-               (q : NonNegativePair F { ring := o.field.ring, leq := o.leq }) : Bool :=
+               (q : NonNegativePair F o.leq o.field.ring.zero) : Bool :=
   LeqTotal F { ring := o.field.ring, leq := o.leq } x y
   and LeqAntisymmetric F { ring := o.field.ring, leq := o.leq } b
   and LeqTransitive F { ring := o.field.ring, leq := o.leq } c

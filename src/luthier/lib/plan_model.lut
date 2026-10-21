@@ -18,7 +18,7 @@
 -- before what it reads is refused.
 
 import "plan.lth" Planning Plan Dataflow Node Schedule Strategy ForwardOnDemand CallByNeed reaches memberStr appendOne
-  subset keep readsOf count firstDemand LinearizesOn EquivalentOn Confluent NamesAreUnique Acyclic
+  subset keep readsOf countNodes firstDemand LinearizesOn EquivalentOn Confluent NamesAreUnique Acyclic
 
 -- call by need: the order of first demand (plan.lth `firstDemand`, a depth-first visit from the
 -- entry in the order the reads are listed, each name after what it reads and once)
@@ -35,7 +35,7 @@ round (ns : List Node) (live before placed candidates : List String) : List Stri
     round ns live before (if placeable ns live before n then appendOne placed n else placed) rest }
 rounds (ns : List Node) (live placed : List String) (k : Nat) : List String :=
   if k == 0 then placed else rounds ns live (round ns live placed placed live) (k - 1)
-forward (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (live : List String) : Schedule := rounds d.nodes live nil (1 + count d.nodes)
+forward (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (live : List String) : Schedule := rounds d.nodes live nil (1 + countNodes d.nodes)
 
 plan (A : U) (eq : A -> A -> Bool) (st : Strategy) (d : Dataflow A eq) (entry : String) : Plan A :=
   { strategy := st, entry := entry, live := reaches A eq d entry,

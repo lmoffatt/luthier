@@ -1,0 +1,52 @@
+-- Minimal list implementations used by the kernel's structural models.
+-- Codex, bite 6, 2026-10-20, prompt-bite-6.md, execution.md §§3.5-3.7 at 2859815.
+-- The definitions of appendList and foldInto at 2859815 supply the recursion; foldList exposes
+-- that same right fold. Map, length and at implement the declared Functor/Indexed operations.
+-- Bite 7 extends this model file; no sort, zip or list-specific library is introduced here.
+import "core/core.lut" List nil cons Nat Fin
+
+appendList (A : U) (xs ys : List A) : List A := match xs { nil -> ys ; cons x rest -> cons x (appendList A rest ys) }
+
+foldList (A M : U) (op : M -> M -> M) (e : M) (f : A -> M) (xs : List A) : M :=
+  match xs { nil -> e ; cons x rest -> op (f x) (foldList A M op e f rest) }
+
+mapKernelList (A B : U) (f : A -> B) (xs : List A) : List B := match xs { nil -> nil ; cons x rest -> cons (f x) (mapKernelList A B f rest) }
+
+lengthList (A : U) (xs : List A) : Nat := match xs { nil -> 0 ; cons x rest -> 1 + lengthList A rest }
+
+atList (A : U) (xs : List A) (i : Fin (lengthList A xs)) : A := match xs { nil -> match i { } ; cons x rest -> if i == 0 then x else atList A rest (i - 1) }
+
+-- Generic computations over the container interfaces, implemented once in the model plane.
+-- They serve lists and other certified Foldable/Indexed/Tabulated models alike.
+all (F : U -> U) (A : U) (f : Foldable F) (p : A -> Bool) (c : F A) : Bool := f.fold A Bool conj true p c
+
+any (F : U -> U) (A : U) (f : Foldable F) (p : A -> Bool) (c : F A) : Bool := f.fold A Bool disj false p c
+
+count (F : U -> U) (A : U) (f : Foldable F) (p : A -> Bool) (c : F A) : Nat := f.fold A Nat (fn x y { x + y }) 0 (fn x { indicator (p x) }) c
+
+member (F : U -> U) (A : U) (f : Foldable F) (o : Object A) (x : A) (c : F A) : Bool := any F A f (fn y { o.eq x y }) c
+
+lookup (F : U -> U) (K V : U) (f : Foldable F) (o : Object K) (k : K) (c : F (K * V)) : Maybe V :=
+  f.fold (K * V) (Maybe V) (fn a b { match a { nothing -> b ; just v -> a } }) nothing
+    (fn kv { match kv { (key, value) -> if o.eq k key then just value else nothing } }) c
+
+sum (F : U -> U) (A : U) (f : Foldable F) (o : Object A) (m : Monoid A o) (c : F A) : A := f.fold A A m.combine m.neutral (id A) c
+
+toList (F : U -> U) (A : U) (f : Foldable F) (c : F A) : List A := f.fold A (List A) (appendList A) nil (fn x { cons x nil }) c
+
+filter (F : U -> U) (A : U) (f : Foldable F) (p : A -> Bool) (c : F A) : List A := f.fold A (List A) (appendList A) nil (fn x { if p x then cons x nil else nil }) c
+
+zipWith (C D E A B R : U) (i : Indexed C A) (j : Indexed D B) (t : Tabulated E R) (g : A -> B -> R) (c : C) (d : { d : D | j.size d == i.size c }) : E := t.build (i.size c) (fn k { g (i.at c k) (j.at d k) })
+
+sameEntries (C A : U) (i : Indexed C A) (o : Object A) (c d : C) : Bool :=
+  i.size c == i.size d and forallBelow (i.size c) (fn k { o.eq (i.at c k) (i.at d k) })
+
+pointwise (C A : U) (i : Indexed C A) (o : Object A) : Object C := { eq := sameEntries C A i o }
+
+supDistance (C A : U) (i : Indexed C A) (d : A -> A -> Float64) (c e : C) : Float64 :=
+  foldWith Float64 (fn x y { if x <= y then y else x }) 0.0 (i.size c) (fn k { d (i.at c k) (i.at e k) })
+
+entrywiseBall (C A : U) (i : Indexed C A) (d : A -> A -> Float64) (radius : (c : C) -> C -> Fin (i.size c) -> Float64) (c e : C) : Bool :=
+  i.size c == i.size e and forallBelow (i.size c) (fn k { d (i.at c k) (i.at e k) <= radius c e k })
+
+indicator (b : Bool) : Nat := if b then 1 else 0

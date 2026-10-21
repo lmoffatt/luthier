@@ -32,7 +32,7 @@
 
 import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern Literal Field Item Body Clause Binder
   LambdaParam declare define alias datum operatorAct importAct explicit implicit termBody dataBody clausesBody name
-  literal universe world app binop neg tuple pi sigma record subtype recordValue block sum list lambda
+  literal universe world app binop neg tuple pi sigma record subtype recordValue block sumSurface list lambda
   matchOf namedArg ifThen proj intLit floatLit stringLit pWild pApp pLit pTuple plainParam typedParam
   shapeParam bind rebind
 import "term.lth" Term Program Act Pattern Constant Alpha Var Lit Universe World Lam App Pi Sigma Pair
@@ -115,7 +115,7 @@ Lists (a : Alpha) (e : Elaboration a) : Bool :=
 -- a sum, a record type, a `data` (2.S12; 3.S4). A record type keeps its names in the kernel: it is
 -- a product whose projections are named (D-2026-10-13-x).
 TypeForms (a : Alpha) (e : Elaboration a) : Bool :=
-  gives a (e.term scope (sum [("x", nm "A"), ("y", nm "B")])) (Sum [("x", Var "A"), ("y", Var "B")])
+  gives a (e.term scope (sumSurface [("x", nm "A"), ("y", nm "B")])) (Sum [("x", Var "A"), ("y", Var "B")])
   and gives a (e.term scope (record [{ names := ["x"], type := nm "A" }, { names := ["y"], type := nm "B" }] nothing))
           (Record [("x", Var "A"), ("y", Var "B")])
   and sameProgram a (e.elaborate [define "C" [] (just universe)

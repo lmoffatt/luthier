@@ -72,19 +72,6 @@ SymmetricOf (k : Int) : U := { s : Symmetric | s.m == k }
 -- the fold of an operation with a unit over n terms, associated to the right:
 -- `f 0 op (f 1 op (... op (f (n - 1) op unit)))`; no law claimed of the operation (v0.1
 -- algebra.lut `foldWith`): what the doubles have, since they are not a monoid (11.S15)
-foldFrom (A : U) (op : A -> A -> A) (unit : A) (n : Int) (lo : Nat) (f : Fin n -> A) : A :=
-  if lo >= n then unit else op (f lo) (foldFrom A op unit n (lo + 1) f)
-foldWith (A : U) (op : A -> A -> A) (unit : A) (n : Int) (f : Fin n -> A) : A := foldFrom A op unit n 0 f
-
--- spec 3.S27: the sum of n doubles is `f 0 + (f 1 + (... + (f (n - 1) + 0.0)))`; the order is
--- part of the definition, and any specimen keeps it
-sumTo (n : Int) (f : Fin n -> Float64) : Float64 := foldWith Float64 (fn a b { a + b }) 0.0 n f
-sumToInt (n : Int) (f : Fin n -> Int) : Int := foldWith Int (fn a b { a + b }) 0 n f
--- a law over every index, some index, every pair of indices below n: the closure, evaluated
-forallBelow (n : Int) (p : Fin n -> Bool) : Bool := foldWith Bool (fn a b { a and b }) true n p
-existsBelow (n : Int) (p : Fin n -> Bool) : Bool := foldWith Bool (fn a b { a or b }) false n p
-forallPairs (n : Int) (p : Fin n -> Fin n -> Bool) : Bool := forallBelow n (fn i { forallBelow n (p i) })
-countBelow (n : Int) (p : Fin n -> Bool) : Int := sumToInt n (fn k { if p k then 1 else 0 })
 -- the sum of the magnitudes of n terms: the scale a rounded sum is compared at (11.S14)
 absSumTo (n : Int) (f : Fin n -> Float64) : Float64 := sumTo n (fn k { abs (f k) })
 

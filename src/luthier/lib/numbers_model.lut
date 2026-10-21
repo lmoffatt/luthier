@@ -1,3 +1,5 @@
+-- Bite 6 revision, Codex, 2026-10-21, prompt-bite-6.md at 2859815:
+-- Int's ring and String's monoid now live in core.lut; the remaining numeric models follow.
 -- numbers_model.lut: the core's numbers as models of algebra.lth and numbers.lth, the structure
 -- of `Real` as an axiom, and the elementary functions as routes to the host's library.
 --
@@ -8,18 +10,10 @@
 -- axiom is allowed here by 11.R3 (core and the libraries). The externs are routes (3.S40,
 -- 10.S8): Python's `math`, which is what v0.1's real_python.lut bound (tag v0.1-final).
 
-import "algebra.lth" OrderedRing CompleteOrderedField
+import "algebra.lth" CompleteOrderedField
 import "numbers.lth" Doubles IntegerDivision Conversion Elementary
 
--- `Int` is an ordered commutative ring, exactly (11.S4), with the core's operations
-integers : OrderedRing Int := {
-  ring := {
-    add := { monoid := { neutral := 0, combine := fn a b { a + b } }, inverse := fn a { 0 - a } },
-    mul := { neutral := 1, combine := fn a b { a * b } },
-  },
-  leq := fn a b { a <= b },
-}
--- and its quotient and remainder are the host's floor division (numbers.lth §3)
+-- Int's quotient and remainder are the host's floor division (numbers.lth §3)
 integerDivision : IntegerDivision := { quotient := fn a b { a / b }, remainder := fn a b { a mod b } }
 
 -- `Real` is the complete ordered field: assumed, since nothing computes its operations (11.R3,
@@ -48,6 +42,3 @@ elementary : Elementary := {
   log := extern "python:math.log",
   erf := extern "python:math.erf",
 }
-
--- `String` under `+` is a monoid, the empty text its neutral element (kernel_laws.lth §4)
-strings : Monoid String := { neutral := "", combine := fn a b { a + b } }

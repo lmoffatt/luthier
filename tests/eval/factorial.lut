@@ -1,4 +1,4 @@
 Peano : U := data { zero : Peano; succ : Peano -> Peano }
-factorial (n : Peano) : Int := match n { zero -> 1; succ k -> (count n) * (factorial k) }
-count (n : Peano) : Int := match n { zero -> 0; succ k -> 1 + count k }
+factorial (n : Peano) : Int := match n { zero -> 1; succ k -> (countDown n) * (factorial k) }
+countDown (n : Peano) : Int := match n { zero -> 0; succ k -> 1 + countDown k }
 answer : Int := factorial (succ (succ (succ (succ zero))))
