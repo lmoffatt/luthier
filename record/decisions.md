@@ -3318,3 +3318,20 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line
 Kind:       arrays.lth, numbers.lth (`Elementary`), probability.lth, the slice's laws with `tol`;
             the tester (ratio recorded, the validity radius as a region); the stores re-certified
 Status:     current
+
+D-2026-10-21-a  Question 5 of record/plan/core-2026-10-17/decisions.md, decided otherwise than
+                recommended there: the semigroup's operation is written `<>` (lists, strings and any
+                semigroup or monoid); `+` is kept for commutative additive structures only. String's
+                `+` moves to `<>`. Reasons (coordinator, accepted): one name per concept
+                (D-2026-10-18-b), concatenation not being commutative; the ambiguity of `[1, 2] +
+                [3, 4]` between concatenation and pointwise sum in numerical code; Haskell's manner
+                (L7.6), which separates `+`, `++` and `<>`. Done in core bite 7 with the list library;
+                the uses of `+` on strings in the library and the examples migrated, what they touch
+                re-certified.
+Author:     Luciano, on the coordinator's arguments for and against
+Quote:      "si, me parece que <> para semigrupo suena bien."
+Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-21; the line unknown until the
+            export)
+Kind:       core (structures/algebraic.lth, core.lut, lists.lut), the grammar's operators, the
+            library's string uses, spec 2 and 3
+Status:     current
