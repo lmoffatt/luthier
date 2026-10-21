@@ -1441,3 +1441,17 @@ def test_a_pattern_variable_is_never_another_files_constructor(tmp_path, capsys)
     assert arms[0][0] == s.PApp("schema", (s.PApp("name%var", ()),)) and arms[0][1] == s.Name("name%var")
     assert main(["run", str(path)]) == 0
     assert capsys.readouterr().out == "a\n"
+
+
+# ---------------------------------------------------------------- the refusal's holes, at load
+# (record/plan/core-2026-10-17/review-bite-5.md findings 1, 2a to 2c; D-2026-10-18-b, 12.S22)
+
+def test_a_core_collision_exempts_only_the_file_it_lists_at_load(tmp_path, monkeypatch):
+    import luthier.run as run
+    monkeypatch.setattr(run, "CORE_COLLISIONS", {"core/properties/relations.lth": ("Reflexive", "a test")})
+    path = tmp_path / "mine.lut"
+    path.write_text("Reflexive : Bool := true\n", encoding="utf-8")
+    with pytest.raises(RunError) as error:
+        Loaded(path)
+    assert "mine.lut defines Reflexive, which the core defines in core/properties/relations.lth" in str(error.value)
+

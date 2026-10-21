@@ -615,3 +615,16 @@ def test_an_import_of_a_core_name_by_its_path_is_redundant(tmp_path, capsys):
     assert 'redundant Concrete: imported from core/structures/equality.lth' in out
     # `Reflexive` is two core files' until bite 6: the import says which, so it is no notice
     assert 'redundant Reflexive: imported from core/properties/relations.lth' in out
+
+
+# ---------------------------------------------------------------- the refusal's holes
+# (record/plan/core-2026-10-17/review-bite-5.md findings 1, 2a to 2d; D-2026-10-18-b, 12.S22)
+
+def test_a_core_collision_exempts_only_the_file_it_lists(tmp_path, monkeypatch):
+    # finding 1: an entry for a core file once exempted the name in every file
+    from luthier import run
+    monkeypatch.setattr(run, 'CORE_COLLISIONS', {'core/properties/relations.lth': ('Reflexive', 'a test')})
+    refused = c.core_refusals(program('Reflexive : Bool := true\n'), tmp_path / 'mine.lut')
+    assert [f.name for f in refused] == ['Reflexive']
+    assert 'which the core defines in core/properties/relations.lth' in refused[0].message
+

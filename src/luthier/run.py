@@ -190,14 +190,15 @@ def core_definitions(core=CORE):
 
 def redefinitions(path, defined, definitions, core=CORE):
     """The refusals of D-2026-10-18-b for the file at `path` that defines the names `defined`: a name
-    a core file defines, other than the file itself, and not a known collision (CORE_COLLISIONS),
-    each message naming the core file."""
+    a core file defines, other than the file itself, and not a known collision of this file
+    (CORE_COLLISIONS lists (file, name) pairs: a file not listed for the name has no exemption,
+    whichever other file is), each message naming the core file."""
     path = Path(path).resolve()
     root = Path(core).resolve()
     out = []
     for n in sorted(defined):
         others = [p for p in definitions.get(n, ()) if p != path]
-        if others and not known_collision(path, n) and not any(known_collision(p, n) for p in others):
+        if others and not known_collision(path, n):
             where = ", ".join(_core_name(p, root) for p in others)
             out.append(f"{path.name} defines {n}, which the core defines in {where}: a file does not "
                        f"redefine a core name (12.S22, D-2026-10-18-b); rename it")
