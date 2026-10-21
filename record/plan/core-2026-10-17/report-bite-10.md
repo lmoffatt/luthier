@@ -88,3 +88,25 @@ Verdict: no disagreement found, no fix made. The open part is the stuck terms (2
 `textParts` and `textJoin` to reduce in `luthier eval`; until then their correctness rests on `check`
 and the pytest selection, as before. The `foldList` obstacle of the first differential is gone: `all`,
 `distinct`, `removeAll` and `remove` reduce to values at a182ed5.
+
+## Differential after the text fix
+
+Run 2026-10-22 by Claude Sonnet 5.5 on `prompt-eval-text.md`. No fix was made: `textParts`, `textJoin` and
+`natDecimal` are declared holes of term_model.lut with no body, and a term with a hole where the reduction
+needs a value does not reduce (spec 3.S19); the kernel has string `+` and `==` but no decomposition of a
+string (spec 11 gives none, as term_model.lut's comment says). Details in `report-eval-text.md`.
+To compare the renaming paths anyway, both sides ran with a scratch model of the three holes, the same text
+on each side (a table for the dotted strings used, `[s]` for any other, `<>` for join, a table for `natDecimal`
+0 to 3), in two `git worktree`s under `~/.cache/luthier-sdk/difft/` (old: 010d17c^ with `Beta` to `BetaReduces`
+in term.lth and `Selected` to `ArmSelected` in term_model.lut; new: HEAD 43f6d3d), each run with the installed
+`luthier eval FILE TERM` from its own lib directory (script `run.sh`, terms `terms.txt`, results `out.tsv`,
+overlay `overlay.py`, all there; scratch, not kept in the repo).
+
+Terms: the 208 of the earlier run plus 33 that exercise `freshName` (collision, chain, dotted name),
+`unqualified`, `canonName`, `textParts`, `textJoin`, `canonicalTerm` (renaming binders, a free `x1`),
+`substTerm` (Lam, Pi, Sigma, Let, Match, Subtype with a capturing binder), `applyBindings` (swap, chain, three
+bindings, Match), `nextBinder`, `canonBindings`. 241 terms: 241 equal, 0 differ, and every one reduces to a
+value (no `stuck match`, no unreduced `textJoin`). That includes the 28 that were stuck before and the
+16 that differed only in print.
+Verdict: no disagreement found over the renaming paths, under the scratch model of the text holes; the
+real holes stay unfilled, so this checks the rewrite of `member`, `<>` and `allNames`, not the model of text.
