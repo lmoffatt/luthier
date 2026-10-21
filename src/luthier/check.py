@@ -52,13 +52,14 @@ def core_names():
 
 
 def core_refusals(program, path):
-    """D-2026-10-18-b: a name the file defines that a core file defines is refused, naming the core
-    file (run.py's `redefinitions`; a core file checked against the other core files)."""
+    """D-2026-10-18-b: a name the file defines (a definition, a constructor, a label of a sum, an
+    import's `as`: run.py's `binds`) that a core file defines is refused, naming the core file
+    (run.py's `redefinitions`; a core file checked against the other core files)."""
     from pathlib import Path
-    from .run import redefinitions, _defines
+    from .run import redefinitions, binds
     if not _with_core[0]:
         return []
-    defined = {n for a in program for n in _defines(a)}
+    defined = binds(program)
     where = Path(path) if path is not None else Path('<file>')
     return [Failure('12.S22', m.split(' defines ', 1)[1].split(',', 1)[0], m)
             for m in redefinitions(where, defined, core_definitions())]

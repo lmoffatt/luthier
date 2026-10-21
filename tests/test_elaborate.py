@@ -60,7 +60,9 @@ def test_ActsCurried():
 
 def test_ActsKept():
     peq('A : U\nB : U\nP = A * B\nx : P\ntest x', [t.Declare('A', U), t.Declare('B', U), t.Declare('x', t.Sigma('_', V('A'), V('B'))), t.Datum(t.App(V('test'), V('x')))])
-    assert elaborate_program(program('operator + := addZ7\nimport "m.lut" module\naddZ7 : Int -> Int -> Int')) == (t.Declare('addZ7', t.Pi('_', I, t.Pi('_', I, I))),)
+    # at Bool, since `+` at Int is the core's, which a file does not rebind (12.S22, D-2026-10-18-b)
+    B = V('Bool')
+    assert elaborate_program(program('operator + := addZ7\nimport "m.lut" module\naddZ7 : Bool -> Bool -> Bool')) == (t.Declare('addZ7', t.Pi('_', B, t.Pi('_', B, B))),)
 
 
 def test_Atoms():

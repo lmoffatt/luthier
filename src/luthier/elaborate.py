@@ -1944,10 +1944,33 @@ def bind_operator(act, c, core=False):
         if b.name == name and alpha_equal(b.domain, domain):
             c.operators[(act.operator, domain)] = b.term
             return
+    if not core:
+        # a file does not rebind a core operator (12.S22, D-2026-10-18-b): another function of the
+        # type of the core's binding (4.R13's "same declared type", across the core) is refused
+        for b in c.bindings.get(act.operator, ()):
+            if b.term == t.Var(act.operator) and b.name != name and alpha_equal(b.type, ty):
+                raise TypingError(f'operator {act.operator} := {name} rebinds {act.operator}, which the core '
+                                  f'binds to {b.name} in {_core_operator_file(act.operator, b.name)}: a file '
+                                  f'does not redefine a core name (12.S22, D-2026-10-18-b); bind another '
+                                  f'operator', rule='12.S22')
     term = t.Var(act.operator) if core else target
     binding = Binding(tuple(vars_), domain, term, ty, name)
     c.bindings[act.operator] = [b for b in c.bindings.get(act.operator, ()) if not alpha_equal(b.domain, domain)] + [binding]
     c.operators[(act.operator, domain)] = term
+
+
+@lru_cache(maxsize=None)
+def _core_operator_file(operator, name):
+    """The core file, as `core/...`, whose `operator operator := name` the core's binding is."""
+    from .parse import parse
+    root = PRELUDE.parent.resolve()
+    for path in core_paths():
+        r = parse(path.read_text(encoding='utf-8'))
+        if isinstance(r, s.Parsed) and any(isinstance(a, s.OperatorAct) and a.operator == operator
+                                           and isinstance(a.value, s.Name) and a.value.name == name
+                                           for a in r.program):
+            return 'core/' + path.relative_to(root).as_posix()
+    return 'the core'
 
 
 def elaborate_term(surface: s.Surface, context: s.SurfaceProgram | Context) -> t.Term:

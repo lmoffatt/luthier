@@ -1455,3 +1455,15 @@ def test_a_core_collision_exempts_only_the_file_it_lists_at_load(tmp_path, monke
         Loaded(path)
     assert "mine.lut defines Reflexive, which the core defines in core/properties/relations.lth" in str(error.value)
 
+
+@pytest.mark.parametrize("text, message", [
+    ("operator + := intMinus\n", "minus.lut's operator + := intMinus rebinds +, which the core binds to intPlus in core/core.lut"),
+    ("S = { unit : Int || compose : Int }\n", "minus.lut defines compose, which the core defines in core/core.lut"),
+    ("import \"core/structures/algebraic.lth\" Monoid as compose\n", "minus.lut defines compose, which the core defines in core/core.lut")])
+def test_an_operator_a_label_and_an_import_alias_of_a_core_name_are_refused_at_load(tmp_path, text, message):
+    # findings 2a to 2c: before, `luthier eval` of `5 + 2` with the first gave 7, the core's meaning
+    path = tmp_path / "minus.lut"
+    path.write_text(text, encoding="utf-8")
+    with pytest.raises(RunError) as error:
+        Loaded(path)
+    assert message in str(error.value)

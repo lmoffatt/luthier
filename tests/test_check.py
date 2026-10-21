@@ -628,3 +628,32 @@ def test_a_core_collision_exempts_only_the_file_it_lists(tmp_path, monkeypatch):
     assert [f.name for f in refused] == ['Reflexive']
     assert 'which the core defines in core/properties/relations.lth' in refused[0].message
 
+
+def test_an_operator_that_rebinds_a_core_operator_is_refused(tmp_path, capsys):
+    # finding 2a; another function at another type is an overload (4.R13) and the core's own a no-op
+    path = tmp_path / 'minus.lut'
+    path.write_text('operator + := intMinus\n', encoding='utf-8')
+    assert main(['check', str(path)]) == 1
+    assert ('12.S22 operator + := intMinus: operator + := intMinus rebinds +, which the core binds to '
+            'intPlus in core/core.lut') in capsys.readouterr().out
+    path.write_text('both (a b : Bool) : Bool := a and b\noperator + := both\noperator + := intPlus\n', encoding='utf-8')
+    assert main(['check', str(path)]) == 0
+
+
+def test_a_label_of_a_sum_that_is_a_core_name_is_refused(tmp_path, capsys):
+    # finding 2b
+    path = tmp_path / 'labels.lut'
+    path.write_text('S = { unit : Int || compose : Int }\n', encoding='utf-8')
+    assert main(['check', str(path)]) == 1
+    out = capsys.readouterr().out
+    assert '12.S22 compose: labels.lut defines compose, which the core defines in core/core.lut' in out
+    assert '12.S22 unit: labels.lut defines unit' in out
+
+
+def test_an_import_alias_that_is_a_core_name_is_refused(tmp_path, capsys):
+    # finding 2c
+    path = tmp_path / 'alias.lut'
+    path.write_text('import "core/structures/algebraic.lth" Monoid as compose\n', encoding='utf-8')
+    assert main(['check', str(path)]) == 1
+    assert '12.S22 compose: alias.lut defines compose, which the core defines in core/core.lut' in capsys.readouterr().out
+

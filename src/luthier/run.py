@@ -205,6 +205,19 @@ def redefinitions(path, defined, definitions, core=CORE):
     return out
 
 
+def operator_rebindings(path, acts):
+    """The refusals of D-2026-10-18-b for the `operator` acts of the file at `path` that rebind a
+    core operator: another function at the type of the core's binding (elaborate.py's
+    `bind_operator`, read in the core's context with the file's acts; an act whose function the file
+    alone does not type is left to `check`)."""
+    if not any(isinstance(a, s.OperatorAct) for a in acts):
+        return []
+    from .elaborate import context_of, TypingError
+    c = context_of(tuple(acts))
+    return [f"{Path(path).name}'s {e}" for a, e in c.errors.items()
+            if isinstance(a, s.OperatorAct) and isinstance(e, TypingError) and e.rule == "12.S22"]
+
+
 def _core_name(path, root):
     try:
         return "core/" + Path(path).relative_to(root).as_posix()
@@ -224,6 +237,21 @@ def _defines(act):
     if isinstance(act, s.Define) and isinstance(act.body, s.DataBody):
         names += [n for n, _ in act.body.constructors]
     return names
+
+
+def binds(program):
+    """The top-level names a file's acts give a meaning to, the ones D-2026-10-18-b forbids to be a
+    core name: what each act defines (`_defines`), each label of a sum the file writes (labels are
+    global, prompt-10.md), and each name an import binds with `as`. A record's field, a parameter and
+    a pattern variable are not among them: they stay free (12.S22)."""
+    out = set()
+    for act in program:
+        if isinstance(act, s.ImportAct):
+            out.update(i.asName for i in act.names if i.asName and i.asName != i.name)
+        else:
+            out.update(_defines(act))
+            _sum_labels(act, out)
+    return out
 
 
 def _sum_labels(value, out):
@@ -428,6 +456,7 @@ class _File:
     constructors: set = field(default_factory=set)
     labels: set = field(default_factory=set)      # the labels of the sums its acts write
     imports: dict = field(default_factory=dict)   # the name the file sees -> (file, the name there)
+    aliased: set = field(default_factory=set)     # the names its imports bind with `as`
 
 
 class Loaded(FileScope):
@@ -467,7 +496,10 @@ class Loaded(FileScope):
         self.core_defined = {n: [p for p in fs if p in self.core_files] for n, fs in definers.items()
                              if any(p in self.core_files for p in fs)}
         refusals = [m for f in self.files.values()
-                    for m in redefinitions(f.path, f.defined, self.core_defined, root)] if root else []
+                    for m in redefinitions(f.path, f.defined | f.labels | f.aliased, self.core_defined, root)] if root else []
+        if root == CORE.resolve():
+            refusals += [m for f in self.files.values() if f.path not in self.core_files
+                         for m in operator_rebindings(f.path, f.acts)]
         if refusals:
             raise RunError("; ".join(refusals))
         self.plain = {}
@@ -531,6 +563,8 @@ class Loaded(FileScope):
                 self.visit(target, active)
                 for name in act.names:
                     f.imports[name.asName or name.name] = (target.resolve(), name.name)
+                    if name.asName and name.asName != name.name:
+                        f.aliased.add(name.asName)
             else:
                 f.acts.append(act)
                 f.defined.update(_defines(act))
