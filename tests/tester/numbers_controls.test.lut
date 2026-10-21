@@ -12,10 +12,11 @@ import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "numbers_model.lut" doubles integerDivision conversion elementary
-import "numbers.lth" Tolerance Doubles IntegerDivision Conversion Elementary PlusCommutes TimesCommutes PlusZero TimesOne DivideOne TimesZero MinusSelf DivideSelf
-  MinusIsPlusNegated NegateTwice LeqReflexive LeqTotal LeqAntisymmetric LeqTransitive LeqChain LessIsStrict
-  GreaterIsLessReversed GeqIsLeqReversed UnequalIsNotEqual PlusMonotone TimesMonotone EpsilonIsTheUlpOfOne
+import "numbers_model.lut" doubles integerDivision conversion elementary absDistanceIsAMetricWithinModel
+import "numbers.lth" Tolerance Moderate NonZero Tame Doubles IntegerDivision Conversion Elementary absDistance abs
+  DivideOne MinusSelf DivideSelf MinusIsPlusNegated LessIsStrict GreaterIsLessReversed GeqIsLeqReversed
+  UnequalIsNotEqual PlusMonotone TimesMonotone EpsilonIsTheUlpOfOne
+  PlusAssociativeWithin TimesAssociativeWithin TimesDistributiveWithin DivideInvertibleWithin
   DivisionAlgorithm RemainderOfTheDivisorsSign QuotientOfProduct
   ConvertZeroAndOne ConvertAddsExactly ConvertSucceeds ConvertKeepsOrder
   SqrtOfSquares ExpOfZero LogOfOne ErfOfZero SqrtMonotone SqrtOfSquare ExpPositive ErfOdd ErfBounded
@@ -235,7 +236,7 @@ leqSlackProfile : List Binding := [
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
 -- the chain where leqSlack breaks transitivity: 1.5 <= 0.75 + 1 and 0.75 <= 0.0 + 1, but not
 -- 1.5 <= 0.0 + 1 (2026-10-17, 3j j2a)
-slackChain : LeqChain leqSlack := { x := 1.5, y := 0.75, z := 0.0 }
+slackChain : Chain Float64 leqSlack.leq := { x := 1.5, y := 0.75, z := 0.0 }
 slackChainBinding : List Binding := [
   { parameter := just "c", type := nothing, generator := "slackChain", coverage := Listed } ]
 lessLoose : Doubles := { plus := doubles.plus,
@@ -350,6 +351,85 @@ epsilonSmallProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+-- Bite 8, 2026-10-21 (prompt-bite-8.md): the broken models of the within-bound laws. `coarse`
+-- rounds a double to 26 significant bits, Veltkamp's splitting with the constant 2^27 + 1 (Dekker,
+-- A floating-point technique for extending the available precision, 1971): an operation rounded
+-- to that grid errs by about 2^-27 of its result, far above the laws' bounds near 2^-52
+coarse (v : Float64) : Float64 :=
+  { t := 134217729.0 * v
+    t - (t - v) }
+plusCoarse : Doubles := { plus := fn a b { coarse (a + b) }, minus := doubles.minus, times := doubles.times,
+  divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
+  unequal := doubles.unequal, epsilon := doubles.epsilon }
+plusCoarseProfile : List Binding := [ { parameter := nothing, type := just "Doubles", generator := "plusCoarse", coverage := Listed } ]
+timesCoarse : Doubles := { plus := doubles.plus, minus := doubles.minus, times := fn a b { coarse (a * b) },
+  divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
+  unequal := doubles.unequal, epsilon := doubles.epsilon }
+timesCoarseProfile : List Binding := [ { parameter := nothing, type := just "Doubles", generator := "timesCoarse", coverage := Listed } ]
+divideCoarse : Doubles := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
+  divide := fn a b { coarse (a / b) }, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
+  unequal := doubles.unequal, epsilon := doubles.epsilon }
+divideCoarseProfile : List Binding := [ { parameter := nothing, type := just "Doubles", generator := "divideCoarse", coverage := Listed } ]
+-- the real operations with a third of the real epsilon: each bound `3 gamma2` becomes `3 gamma2 (epsilon / 3)`,
+-- just below `gamma2`, the bound D-2026-10-17-f first wrote; refuted at a listed case, found by a
+-- search of uniform draws in [-10, 10] (seed 20261021) and checked in Python with the law's own
+-- order of operations; at a quarter, the reciprocal's bound `2u` becomes `u / 2`
+epsilonThird : Doubles := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
+  divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
+  unequal := doubles.unequal, epsilon := doubles.epsilon / 3.0 }
+epsilonQuarter : Doubles := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
+  divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
+  unequal := doubles.unequal, epsilon := doubles.epsilon / 4.0 }
+epsilonThirdProfile : List Binding := [ { parameter := nothing, type := just "Doubles", generator := "epsilonThird", coverage := Listed } ]
+epsilonQuarterProfile : List Binding := [ { parameter := nothing, type := just "Doubles", generator := "epsilonQuarter", coverage := Listed } ]
+plusWitnessX : List Moderate := [1.822]
+plusWitnessY : List Moderate := [8.248]
+plusWitnessZ : List Moderate := [4.954]
+plusWitness : List Binding := [
+  { parameter := just "x", type := nothing, generator := "plusWitnessX", coverage := Listed },
+  { parameter := just "y", type := nothing, generator := "plusWitnessY", coverage := Listed },
+  { parameter := just "z", type := nothing, generator := "plusWitnessZ", coverage := Listed } ]
+timesWitnessX : List Tame := [2.64]
+timesWitnessY : List Tame := [-5.153]
+timesWitnessZ : List Tame := [8.311]
+timesWitness : List Binding := [
+  { parameter := just "x", type := nothing, generator := "timesWitnessX", coverage := Listed },
+  { parameter := just "y", type := nothing, generator := "timesWitnessY", coverage := Listed },
+  { parameter := just "z", type := nothing, generator := "timesWitnessZ", coverage := Listed } ]
+distributiveWitnessX : List Moderate := [-3.892]
+distributiveWitnessY : List Moderate := [-8.146]
+distributiveWitnessZ : List Moderate := [-8.159]
+distributiveWitness : List Binding := [
+  { parameter := just "x", type := nothing, generator := "distributiveWitnessX", coverage := Listed },
+  { parameter := just "y", type := nothing, generator := "distributiveWitnessY", coverage := Listed },
+  { parameter := just "z", type := nothing, generator := "distributiveWitnessZ", coverage := Listed } ]
+reciprocalWitnessX : List NonZero := [1.637]
+reciprocalWitness : List Binding := [
+  { parameter := just "x", type := nothing, generator := "reciprocalWitnessX", coverage := Listed } ]
+-- times scales the product by 1.5: commutative, zero absorbs, but one is not neutral
+timesScaled : Doubles := { plus := doubles.plus, minus := doubles.minus, times := fn a b { a * b * 1.5 },
+  divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
+  unequal := doubles.unequal, epsilon := doubles.epsilon }
+timesScaledProfile : List Binding := [ { parameter := nothing, type := just "Doubles", generator := "timesScaled", coverage := Listed } ]
+-- the computed distance: rounded to the coarse grid, and with a bound of zero, which the triangle
+-- refutes at a listed triple (found by an adversarial search, seed 20261021, checked in Python)
+equalDoubles : List (Related Float64 (structural Float64).eq) := [{ x := 0.0, y := 0.0 }, { x := -2.5, y := -2.5 }]
+distanceCoarse : MetricWithin Float64 (structural Float64) :=
+  { d := fn a b { coarse (absDistance a b) }, bound := absDistanceIsAMetricWithinModel.bound }
+distanceUnbounded : MetricWithin Float64 (structural Float64) := { d := absDistance, bound := fn a b { 0.0 } }
+onDistanceCoarse : List Binding := [
+  { parameter := just "model", type := nothing, generator := "distanceCoarse", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "equalDoubles", coverage := Listed } ]
+triangleWitnessX : List Float64 := [46335101106.32112]
+triangleWitnessY : List Float64 := [-0.001832427150917524]
+triangleWitnessZ : List Float64 := [-2161794998296.6406]
+onDistanceUnbounded : List Binding := [
+  { parameter := just "model", type := nothing, generator := "distanceUnbounded", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "equalDoubles", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "triangleWitnessX", coverage := Listed },
+  { parameter := just "y", type := nothing, generator := "triangleWitnessY", coverage := Listed },
+  { parameter := just "z", type := nothing, generator := "triangleWitnessZ", coverage := Listed } ]
+
 quotientOff : IntegerDivision := { quotient := fn a b { a / b + 1 }, remainder := integerDivision.remainder }
 quotientOffProfile : List Binding := [
   { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
@@ -435,37 +515,38 @@ erfDoubledProfile : List Binding := [
   { parameter := nothing, type := just "Elementary", generator := "erfDoubled", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
 
--- §2 the doubles
+-- §2 the doubles. `Doubles`, the claim: each broken model refutes a different conjunct, the
+-- conjuncts running in order until one is refuted (7.S22)
 -- plus is a - b, which is not commutative
-test "PlusCommutes" (SampledMode linear) (seed <- 20261015) (profile <- swappedProfile) (control <- true)
+test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- swappedProfile) (control <- true)
 -- times adds a - b to the product, which is not symmetric
-test "TimesCommutes" (SampledMode linear) (seed <- 20261015) (profile <- timesSkewedProfile) (control <- true)
+test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- timesSkewedProfile) (control <- true)
 -- plus adds one to the sum, so x + 0 is x + 1
-test "PlusZero" (SampledMode linear) (seed <- 20261015) (profile <- plusOffProfile) (control <- true)
--- times adds one to the product, so x * 1 is x + 1
-test "TimesOne" (SampledMode linear) (seed <- 20261015) (profile <- timesOffProfile) (control <- true)
+test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- plusOffProfile) (control <- true)
+-- times adds one to the product, so x * 0 is 1
+test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- timesOffProfile) (control <- true)
+-- times scales by 1.5, so x * 1 is 1.5 x
+test "Doubles" (SampledMode linear) (seed <- 20261021) (profile <- timesScaledProfile) (control <- true)
+-- minus takes twice b, so negating twice multiplies by four
+test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- minusDoubledProfile) (control <- true)
+-- leq is the strict order, which fails on x and x
+test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- leqStrictProfile) (control <- true)
+-- leq is equality, so two distinct doubles are not comparable
+test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- leqIsEqualProfile) (control <- true)
+-- leq is always true, so two distinct doubles are each at most the other
+test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- leqAlwaysProfile) (control <- true)
+-- leq allows a slack of one, which does not compose along the listed chain
+test "Doubles" ExhaustiveMode (whereBindings <- slackChainBinding) (profile <- leqSlackProfile) (control <- true)
+
+-- the laws of §2, each on its own line
 -- divide adds one to the quotient, so x / 1 is x + 1
 test "DivideOne" (SampledMode linear) (seed <- 20261015) (profile <- divideOffProfile) (control <- true)
--- times adds one to the product, so x * 0 is 1
-test "TimesZero" (SampledMode linear) (seed <- 20261015) (profile <- timesOffProfile) (control <- true)
 -- minus adds one to the difference, so x - x is 1
 test "MinusSelf" (SampledMode linear) (seed <- 20261015) (profile <- minusOffProfile) (control <- true)
 -- divide divides by b + 1, so x / x is not one
 test "DivideSelf" (SampledMode linear) (seed <- 20261015) (profile <- divideShiftedProfile) (control <- true)
 -- minus is b - a: x - y is y - x, while x + (0 - y) is x + y
 test "MinusIsPlusNegated" (SampledMode linear) (seed <- 20261015) (profile <- minusFlippedProfile) (control <- true)
--- minus takes twice b, so negating twice multiplies by four
-test "NegateTwice" (SampledMode linear) (seed <- 20261015) (profile <- minusDoubledProfile) (control <- true)
--- leq is the strict order, which fails on x and x
-test "LeqReflexive" (SampledMode linear) (seed <- 20261015) (profile <- leqStrictProfile) (control <- true)
--- leq is equality, so two distinct doubles are not comparable
-test "LeqTotal" (SampledMode linear) (seed <- 20261015) (profile <- leqIsEqualProfile) (control <- true)
--- leq is always true, so two distinct doubles are each at most the other
-test "LeqAntisymmetric" (SampledMode linear) (seed <- 20261015) (profile <- leqAlwaysProfile) (control <- true)
--- leq allows a slack of one, which does not compose along a chain: listed at the chain where it
--- breaks (x - z in (1, 2]); a draw landed there at seed 20261015 before the special values took
--- mass and missed it after (3j j2a, finding 5), so the case is listed rather than hoped for
-test "LeqTransitive" ExhaustiveMode (whereBindings <- slackChainBinding) (profile <- leqSlackProfile) (control <- true)
 -- less is a <= b, wrong only at a tie, which the law draws with probability one half (report-weak-laws.md)
 test "LessIsStrict" (SampledMode linear) (seed <- 20261015) (profile <- lessLooseProfile) (control <- true)
 -- greater is a < b, the wrong direction
@@ -480,6 +561,20 @@ test "PlusMonotone" (SampledMode linear) (seed <- 20261015) (profile <- plusFlip
 test "TimesMonotone" (SampledMode linear) (seed <- 20261015) (profile <- timesNegatedProfile) (control <- true)
 -- epsilon is 1e-16, below half the ulp of one, so one plus it is one
 test "EpsilonIsTheUlpOfOne" ExhaustiveMode (seed <- 20261015) (profile <- epsilonSmallProfile) (control <- true)
+
+-- the within-bound laws, two controls each: an operation rounded to the coarse grid, and a bound
+-- too small on the real doubles (D-2026-10-17-f's gamma2, or u / 2 for the reciprocal)
+test "PlusAssociativeWithin" (SampledMode linear) (seed <- 20261021) (profile <- plusCoarseProfile) (control <- true)
+test "PlusAssociativeWithin" ExhaustiveMode (whereBindings <- plusWitness) (profile <- epsilonThirdProfile) (control <- true)
+test "TimesAssociativeWithin" (SampledMode linear) (seed <- 20261021) (profile <- timesCoarseProfile) (control <- true)
+test "TimesAssociativeWithin" ExhaustiveMode (whereBindings <- timesWitness) (profile <- epsilonThirdProfile) (control <- true)
+test "TimesDistributiveWithin" (SampledMode linear) (seed <- 20261021) (profile <- timesCoarseProfile) (control <- true)
+test "TimesDistributiveWithin" ExhaustiveMode (whereBindings <- distributiveWitness) (profile <- epsilonThirdProfile) (control <- true)
+test "DivideInvertibleWithin" (SampledMode linear) (seed <- 20261021) (profile <- divideCoarseProfile) (control <- true)
+test "DivideInvertibleWithin" ExhaustiveMode (whereBindings <- reciprocalWitness) (profile <- epsilonQuarterProfile) (control <- true)
+-- the computed distance: its distances rounded to the coarse grid; a bound of zero
+test "AbsDistanceIsAMetricWithin" (SampledMode linear) (seed <- 20261021) (profile <- onDistanceCoarse) (control <- true)
+test "AbsDistanceIsAMetricWithin" ExhaustiveMode (profile <- onDistanceUnbounded) (control <- true)
 
 -- §3 integer division
 -- the quotient is one too large, so q * b + r is a + b
