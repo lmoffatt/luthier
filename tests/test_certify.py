@@ -545,15 +545,15 @@ LAWS_OF_MODEL = '''import "test.lth" test SampledMode
 import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "numbers.lth" Doubles PlusCommutes
+import "numbers.lth" Doubles DivideOne
 import "m_model.lut" doubles
 
 models : List Binding := [
   { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed } ]
 
-Wrapper (d : Doubles) (x : Float64) : Bool := PlusCommutes d x x
+Wrapper (d : Doubles) (x : Float64) : Bool := DivideOne d x
 
-test "PlusCommutes" (SampledMode linear) (profile <- models)
+test "DivideOne" (SampledMode linear) (profile <- models)
 test "Wrapper" (SampledMode linear) (profile <- models)
 '''
 
@@ -566,7 +566,7 @@ def test_an_entry_goes_into_the_store_of_the_file_that_defines_the_model(tmp_pat
     home = certify.read_store(tmp_path / "m_model.lut")
     # only the model's store (L10.12, D-2026-10-16-b): the law of the library and the program's
     # own wrapper on the library's model; the test program keeps none
-    assert [e["law"] for e in home][::-1] == ["PlusCommutes", "Wrapper"]
+    assert [e["law"] for e in home][::-1] == ["DivideOne", "Wrapper"]
     assert not certify.store_path(top).exists()
     assert [o.store for o in outcomes] == [tmp_path / "m_model.lut"] * 2
     assert home[1]["outcome"] == "Passed" and len(outcomes) == 2
@@ -590,7 +590,7 @@ def test_a_census_that_lists_a_model_sends_the_entry_to_its_file(tmp_path):
     assert LAWS_OF_LIST != LAWS_OF_MODEL
     tester.run_tests(top, store=True)
     home = certify.read_store(tmp_path / "m_model.lut")
-    assert [e["law"] for e in home][::-1] == ["PlusCommutes", "Wrapper"] and not certify.store_path(top).exists()
+    assert [e["law"] for e in home][::-1] == ["DivideOne", "Wrapper"] and not certify.store_path(top).exists()
     assert all(e["binding"][0]["generator"].startswith("census") for e in home)
 
 

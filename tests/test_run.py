@@ -722,10 +722,9 @@ def _mentions(value, names):
 # choice 8 and "Findings for others"), with the files that define them, and a file that uses each
 # meaning. Since 993f200 generators.lth's theory is `Enumeration` and since aef8d2c test.lth's
 # grade is `AssumedGrade`, so those two are no longer clashes; `LeqBoth` is gone from numbers.lth
-# (4a158b0).
+# (4a158b0), and `LeqPair`, `LeqChain` from numbers.lth and algebra.lth (the core's bite 8, which
+# states their laws by the core's `Related` and `Chain`).
 CLASHES = {
-    "LeqPair": ("algebra.lth", "numbers.lth"),
-    "LeqChain": ("algebra.lth", "numbers.lth"),
     "NonNegative": ("generators.lth", "numbers.lth"),
 }
 SEEN_FROM = {}
@@ -755,8 +754,8 @@ def test_a_name_several_libraries_define_does_not_collide(numbers_laws, name):
 
 
 def test_the_numbers_laws_import_resolves_in_numbers_lth(numbers_laws):
-    # the test file imports numbers.lth's PlusCommutes; core/structures/algebraic.lth's is another definition
-    assert numbers_laws.name(numbers_laws.top, "PlusCommutes") == "PlusCommutes"
+    # the test file imports numbers.lth's TimesMonotone
+    assert numbers_laws.name(numbers_laws.top, "TimesMonotone") == "TimesMonotone"
     # a name the file does not import is the core's, every core file being seen (the core's bite 5)
     assert numbers_laws.see(numbers_laws.top, "LeqPair") is None
 
