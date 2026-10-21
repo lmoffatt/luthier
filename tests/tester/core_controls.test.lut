@@ -37,7 +37,7 @@ leqSameParity : Int -> Int -> Bool := fn a b { a <= b and a mod 2 == b mod 2 }
 half : Int -> Int := fn y { y / 2 }
 boolImplies : Bool -> Bool -> Bool := fn a b { if a then b else true }
 constTrue : Bool -> Bool := fn b { b or not b }
-appendMarked : String -> String -> String := fn a b { a + b + "x" }
+appendMarked : String -> String -> String := fn a b { a <> b <> "x" }
 marker : String := "x"
 fminus : Float64 -> Float64 -> Float64 := fn a b { a - b }
 fone : Float64 := 1.0
@@ -190,7 +190,7 @@ test "BoolAbsorptive" ExhaustiveMode (profile <- onImpliesOverAnd) (control <- t
 test "BoolComplemented" ExhaustiveMode (profile <- onAndWithBottom) (control <- true)
 
 test "StringAssociative" (SampledMode linear) (profile <- onAppendMarked) (control <- true)
--- `+` on strings is not commutative: a control with no confirmed instance, documenting by absence
+-- `<>` on strings is not commutative: a control with no confirmed instance, documenting by absence
 test "StringCommutative" (SampledMode linear) (profile <- onAppend) (control <- true)
 test "StringNeutral" (SampledMode linear) (profile <- onAppendWithMarker) (control <- true)
 
@@ -346,7 +346,7 @@ intDistance (x y : Int) : Float64 := floatAbs (toFloat64 (x - y))
 intSquareDistance (x y : Int) : Float64 := toFloat64 ((x - y) * (x - y))
 boolListIndexed : Indexed (List Bool) Bool := { size := lengthList Bool, at := atList Bool }
 boolListFoldable : Foldable List := { fold := foldList }
-boolListMonoid : Monoid (List Bool) (structural (List Bool)) := { neutral := nil, combine := appendList Bool }
+boolListMonoid : Monoid (List Bool) (structural (List Bool)) := { neutral := nil, combine := combineList Bool }
 boolMonoid : Monoid Bool (structural Bool) := { neutral := true, combine := conj }
 boolOrder : Order Bool (structural Bool) := { leq := fn x y { not x or y } }
 boolFree : FreeMonoid Bool List (structural (List Bool)) := { monoid := boolListMonoid, inject := fn b { cons b nil }, foldable := boolListFoldable }
@@ -431,12 +431,12 @@ RefuteQueryAll : Bool := QueriesEvery List boolListFoldable { every := fn (A : U
 RefuteQueryMember : Bool := QueriesContains List boolListFoldable { every := fn (A : U) p xs { all List A boolListFoldable p xs }, contains := fn (A : U) o x xs { false } } Bool (structural Bool) true [true]
 RefuteEntrywiseBall : Bool := EntrywiseSpecification (List Bool) Bool boolListIndexed boolDistance (fn radius xs ys { not (entrywiseBall (List Bool) Bool coreListIndex coreListDistance radius xs ys) }) (fn xs ys k { 0.0 }) [true] [true]
 RefuteImplicationTruth : Bool := MaterialImplication conj false false
-RefuteFreeNeutral : Bool := FoldNeutral Bool List (structural (List Bool)) { monoid := { neutral := [false], combine := appendList Bool }, inject := fn b { [b] }, foldable := { fold := foldList } } Bool (structural Bool) boolMonoid (id Bool)
-RefuteFreeInject : Bool := FoldInject Bool List (structural (List Bool)) { monoid := { neutral := nil, combine := appendList Bool }, inject := fn b { nil }, foldable := { fold := foldList } } Bool (structural Bool) boolMonoid (id Bool) false
+RefuteFreeNeutral : Bool := FoldNeutral Bool List (structural (List Bool)) { monoid := { neutral := [false], combine := combineList Bool }, inject := fn b { [b] }, foldable := { fold := foldList } } Bool (structural Bool) boolMonoid (id Bool)
+RefuteFreeInject : Bool := FoldInject Bool List (structural (List Bool)) { monoid := { neutral := nil, combine := combineList Bool }, inject := fn b { nil }, foldable := { fold := foldList } } Bool (structural Bool) boolMonoid (id Bool) false
 RefuteFreeCombine : Bool := FoldCombine Bool List (structural (List Bool)) { monoid := { neutral := nil, combine := fn xs ys { nil } }, inject := fn b { [b] }, foldable := { fold := foldList } } Bool (structural Bool) boolMonoid (id Bool) [false] nil
-RefuteFreeItself : Bool := FoldIsItself Bool List (structural (List Bool)) { monoid := { neutral := nil, combine := appendList Bool }, inject := fn b { [b] }, foldable := { fold := fn (A M : U) op e f xs { e } } } [true]
-RefuteListNil : Bool := NilIsNeutral Bool (structural (List Bool)) { free := { monoid := { neutral := [true], combine := appendList Bool }, inject := fn b { [b] }, foldable := { fold := foldList } } }
-RefuteListCons : Bool := ConsIsInjectionCombined Bool (structural (List Bool)) { free := { monoid := { neutral := nil, combine := appendList Bool }, inject := fn b { nil }, foldable := { fold := foldList } } } true nil
+RefuteFreeItself : Bool := FoldIsItself Bool List (structural (List Bool)) { monoid := { neutral := nil, combine := combineList Bool }, inject := fn b { [b] }, foldable := { fold := fn (A M : U) op e f xs { e } } } [true]
+RefuteListNil : Bool := NilIsNeutral Bool (structural (List Bool)) { free := { monoid := { neutral := [true], combine := combineList Bool }, inject := fn b { [b] }, foldable := { fold := foldList } } }
+RefuteListCons : Bool := ConsIsInjectionCombined Bool (structural (List Bool)) { free := { monoid := { neutral := nil, combine := combineList Bool }, inject := fn b { nil }, foldable := { fold := foldList } } } true nil
 
 -- Four metric controls required by D-2026-10-17-f. The carrier is bounded away from zero so
 -- that relative error and Bernoulli KL are defined. None is asserted to be an exact metric.

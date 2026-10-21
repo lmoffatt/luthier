@@ -13,6 +13,10 @@ Extensional (C A : U) (i : Indexed C A) (o : Object C) (a : Object A) (c d : C) 
   not (sameEntries C A i a c d) or o.eq c d
 Indexed (C A : U) (i : Indexed C A) := Extensional C A i
 Foldable (F : U -> U) : { fold : (A M : U) -> (M -> M -> M) -> M -> (A -> M) -> F A -> M }
+-- A Foldable's right-fold contract, against its indexed entries (Bird/de Moor, 1997).
+FoldEntries (F : U -> U) (f : Foldable F) (A M : U) (i : Indexed (F A) A) (o : Object M) (op : M -> M -> M) (e : M) (g : A -> M) (xs : F A) : Bool :=
+  o.eq (f.fold A M op e g xs) (foldWith M op e (i.size xs) (fn k { g (i.at xs k) }))
+Foldable (F : U -> U) := FoldEntries F
 Tabulated (C A : U) : { build : (n : Nat) -> (Fin n -> A) -> C }
 SizeBuild (C A : U) (i : Indexed C A) (t : Tabulated C A) (n : Nat) (f : Fin n -> A) : Bool := i.size (t.build n f) == n
 AtBuild (C A : U) (i : Indexed C A) (t : Tabulated C A) (o : Object A) (n : Nat) (f : Fin n -> A) (k : Fin n) : Bool := o.eq (i.at (t.build n f) k) (f k)
@@ -23,6 +27,17 @@ SizeAppend (C A : U) (i : Indexed C A) (combine : C -> C -> C) := Preserving C N
 FoldOfBuild (F : U -> U) (A M : U) (f : Foldable F) (t : Tabulated (F A) A) (o : Object M) (op : M -> M -> M) (e : M) (g : A -> M) (n : Nat) (h : Fin n -> A) : Bool :=
   o.eq (f.fold A M op e g (t.build n h)) (foldWith M op e n (fn k { g (h k) }))
 ContainerLaws := SizeMap & AtMap & SizeAppend & FoldOfBuild
+
+-- Specifications of order and multiplicity, independent of a sorting algorithm.
+SortedEntries (C A : U) (i : Indexed C A) (leq : A -> A -> Bool) (xs : C) : Bool :=
+  forallPairs (i.size xs) (fn j k { j >= k or leq (i.at xs j) (i.at xs k) })
+PermutesEntries (F : U -> U) (A : U) (i : Indexed (F A) A) (f : Foldable F) (o : Object A) (candidate : F A -> F A) (xs : F A) : Bool :=
+  i.size (candidate xs) == i.size xs and all F A f (fn x { count F A f (o.eq x) (candidate xs) == count F A f (o.eq x) xs }) xs
+ReversesEntries (C A : U) (i : Indexed C A) (o : Object A) (candidate : C -> C) (xs : C) : Bool :=
+  i.size (candidate xs) == i.size xs and forallBelow (i.size xs) (fn k { o.eq (i.at (candidate xs) k) (i.at xs (i.size xs - 1 - k)) })
+EmptyBySize (C A : U) (i : Indexed C A) (candidate : C -> Bool) (xs : C) : Bool := candidate xs == (i.size xs == 0)
+DistinctByIndices (C A : U) (i : Indexed C A) (o : Object A) (candidate : C -> Bool) (xs : C) : Bool :=
+  candidate xs == forallPairs (i.size xs) (fn j k { j == k or not (o.eq (i.at xs j) (i.at xs k)) })
 
 -- The finite quantifiers' duality and nesting (classical predicate calculus), independently
 -- stated on the supplied operations; the core implements this interface by its finite folds.

@@ -1,0 +1,171 @@
+-- Codex, bite 7, 2026-10-21; prompt-bite-7.md, input 1429de8.
+-- Finite listed evidence, seed 20261021; no claim over every type in U.
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+
+testedType : Concrete := Int
+intEquality : Object Int := structural Int
+listEquality : Object (List Int) := structural (List Int)
+indexModel : Indexed (List Int) Int := listIndexed Int
+foldModel : Foldable List := { fold := foldList }
+functorModel : Functor List := { map := mapKernelList }
+tabulationModel : Tabulated (List Int) Int := { build := buildList Int }
+monoidModel : Monoid (List Int) (structural (List Int)) := listMonoid Int
+orderModel : Order Int (structural Int) := { leq := fn x y { x <= y } }
+ordered : Int -> Int -> Bool := fn x y { x <= y }
+plusOne : Int -> Int := fn x { x + 1 }
+minusOne : Int -> Int := fn x { x - 1 }
+subtract : Int -> Int -> Int := fn x y { x - y }
+foldNeutral : Int := 9
+sizes : List Nat := [0, 1, 2, 3]
+values : List (List Int) := [[], [0], [1], [1, 2], [2, 1], [1, 1], [3, 1, 2, 1]]
+predicate : Int -> Bool := fn x { 1 <= x }
+keep : List Int -> List Int := filter List Int foldModel predicate
+reverseModel : List Int -> List Int := reverse Int
+sortModel : List Int -> List Int := sortBy Int ordered
+joiningModel : List Int -> List Int -> List Int := combineList Int
+hammingSize : HammingLength := 2
+hammingModel : Metric (BoolListOf 2) (structural (BoolListOf 2)) := { d := hammingList 2 }
+boolVectors : List (BoolListOf 2) := [[false, false], [false, true], [true, false], [true, true]]
+equalVectors : List (EqualPair (BoolListOf 2) (structural (BoolListOf 2))) := [
+  { x := [false, false], y := [false, false] }, { x := [false, true], y := [false, true] },
+  { x := [true, false], y := [true, false] }, { x := [true, true], y := [true, true] }]
+
+-- The four controls named by §3.7, plus independent controls for the other claims.
+badFunctor : Functor List := { map := fn (A B : U) f xs { take B (if lengthList A xs == 0 then 0 else lengthList A xs - 1) (mapKernelList A B f xs) } }
+badFold : Foldable List := { fold := fn (A M : U) op e f xs { e } }
+badTabulation : Tabulated (List Int) Int := { build := fn n f { nil } }
+-- Same lengths, wrong order: Monoid's associativity/neutral laws must see this.
+badAppend (xs ys : List Int) : List Int := combineList Int xs (reverse Int ys)
+badMonoid : Monoid (List Int) (structural (List Int)) := { neutral := nil, combine := badAppend }
+shortAppend : List Int -> List Int -> List Int := fn xs ys { xs }
+shortReverse : List Int -> List Int := fn xs { drop Int 1 xs }
+-- Fixing the head still gives an involution; it refutes ReversesEntries instead.
+fixedHead (xs : List Int) : List Int := match xs { nil -> nil ; cons x rest -> cons x (reverse Int rest) }
+noFilter : List Int -> List Int := id (List Int)
+noSort : List Int -> List Int := id (List Int)
+uniqueSort (xs : List Int) : List Int := sortBy Int ordered (foldList Int (List Int) (fn front tail { if member List Int (atList Int front 0) tail then tail else combineList Int front tail }) nil (singleton Int) xs)
+badHamming : Metric (BoolListOf 2) (structural (BoolListOf 2)) := { d := fn xs ys { 0.0 } }
+
+onListIsAFunctor : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "B", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "C", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badFunctor", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "listEquality", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "plusOne", coverage := Listed },
+  { parameter := just "h", type := nothing, generator := "minusOne", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "values", coverage := Listed } ]
+test "ListIsAFunctor" ExhaustiveMode (seed <- 20261021) (profile <- onListIsAFunctor) (control <- true)
+
+onListIsFoldable : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "M", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badFold", coverage := Listed },
+  { parameter := just "i", type := nothing, generator := "indexModel", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "intEquality", coverage := Listed },
+  { parameter := just "op", type := nothing, generator := "subtract", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "foldNeutral", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "plusOne", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "values", coverage := Listed } ]
+test "ListIsFoldable" ExhaustiveMode (seed <- 20261021) (profile <- onListIsFoldable) (control <- true)
+
+onListIsTabulated : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badTabulation", coverage := Listed },
+  { parameter := just "n", type := nothing, generator := "sizes", coverage := Listed },
+  { parameter := just "f", type := nothing, generator := "plusOne", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "intEquality", coverage := Listed } ]
+test "ListIsTabulated" ExhaustiveMode (seed <- 20261021) (profile <- onListIsTabulated) (control <- true)
+
+onListIsAMonoid : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badMonoid", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "values", coverage := Listed },
+  { parameter := just "y", type := nothing, generator := "values", coverage := Listed },
+  { parameter := just "z", type := nothing, generator := "values", coverage := Listed } ]
+test "ListIsAMonoid" ExhaustiveMode (seed <- 20261021) (profile <- onListIsAMonoid) (control <- true)
+
+onMapKeepsLength : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "B", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badFunctor", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "plusOne", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "values", coverage := Listed } ]
+test "MapKeepsLength" ExhaustiveMode (seed <- 20261021) (profile <- onMapKeepsLength) (control <- true)
+
+onAppendAddsLengths : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "op", type := nothing, generator := "shortAppend", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "values", coverage := Listed },
+  { parameter := just "y", type := nothing, generator := "values", coverage := Listed } ]
+test "AppendAddsLengths" ExhaustiveMode (seed <- 20261021) (profile <- onAppendAddsLengths) (control <- true)
+
+onListFoldOfBuild : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "M", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badFold", coverage := Listed },
+  { parameter := just "op", type := nothing, generator := "subtract", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "foldNeutral", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "plusOne", coverage := Listed },
+  { parameter := just "n", type := nothing, generator := "sizes", coverage := Listed },
+  { parameter := just "h", type := nothing, generator := "minusOne", coverage := Listed } ]
+test "ListFoldOfBuild" ExhaustiveMode (seed <- 20261021) (profile <- onListFoldOfBuild) (control <- true)
+
+onReverseIsAnInvolution : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "candidate", type := nothing, generator := "shortReverse", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "values", coverage := Listed } ]
+test "ReverseIsAnInvolution" ExhaustiveMode (seed <- 20261021) (profile <- onReverseIsAnInvolution) (control <- true)
+
+onReverseReindexes : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "candidate", type := nothing, generator := "fixedHead", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "values", coverage := Listed } ]
+test "ReverseReindexes" ExhaustiveMode (seed <- 20261021) (profile <- onReverseReindexes) (control <- true)
+
+onFilterKeeps : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "predicate", coverage := Listed },
+  { parameter := just "candidate", type := nothing, generator := "noFilter", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "values", coverage := Listed } ]
+test "FilterKeeps" ExhaustiveMode (seed <- 20261021) (profile <- onFilterKeeps) (control <- true)
+
+onSortIsSorted : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "order", type := nothing, generator := "orderModel", coverage := Listed },
+  { parameter := just "candidate", type := nothing, generator := "noSort", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "values", coverage := Listed } ]
+test "SortIsSorted" ExhaustiveMode (seed <- 20261021) (profile <- onSortIsSorted) (control <- true)
+
+onSortIsAPermutation : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "leq", type := nothing, generator := "ordered", coverage := Listed },
+  { parameter := just "candidate", type := nothing, generator := "uniqueSort", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "values", coverage := Listed } ]
+test "SortIsAPermutation" ExhaustiveMode (seed <- 20261021) (profile <- onSortIsAPermutation) (control <- true)
+
+onHammingListIsAMetric : List Binding := [
+  { parameter := just "n", type := nothing, generator := "hammingSize", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "badHamming", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "equalVectors", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "boolVectors", coverage := Listed },
+  { parameter := just "y", type := nothing, generator := "boolVectors", coverage := Listed },
+  { parameter := just "z", type := nothing, generator := "boolVectors", coverage := Listed } ]
+test "HammingListIsAMetric" ExhaustiveMode (seed <- 20261021) (profile <- onHammingListIsAMetric) (control <- true)
+
+emptyPredicate : List Int -> Bool := fn xs { true }
+distinctPredicate : List Int -> Bool := fn xs { true }
+
+onListEmptiness : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "candidate", type := nothing, generator := "emptyPredicate", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "values", coverage := Listed } ]
+test "ListEmptiness" ExhaustiveMode (seed <- 20261021) (profile <- onListEmptiness) (control <- true)
+
+onListDistinctness : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "candidate", type := nothing, generator := "distinctPredicate", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "values", coverage := Listed } ]
+test "ListDistinctness" ExhaustiveMode (seed <- 20261021) (profile <- onListDistinctness) (control <- true)

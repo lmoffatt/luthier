@@ -28,7 +28,7 @@
 -- `==` is one operation on every concrete type (4.R8). [proposed] So the comparisons are named
 -- here in this comment and nowhere else; the arithmetic is named below and bound by `operator`.
 
-import "core/lists.lut" appendList foldList mapKernelList lengthList atList
+import "core/lists.lut" combineList foldList mapKernelList lengthList atList listMonoid listFreeMonoid
   all any count member lookup sum toList filter zipWith sameEntries pointwise supDistance entrywiseBall indicator
 import "core/structures/universal.lth" Terminal Initial Coproduct Lists
   Exponential Product NamedProduct NamedCoproduct Selected one two
@@ -88,12 +88,8 @@ boolIsACoproductModel  : Coproduct Unit Unit Bool (structural Bool) := { left :=
 BoolIsACoproduct  (model : Coproduct Unit Unit Bool (structural Bool) <- { left := fn u { true }, right := fn u { false }, cases := fn (C : U) f g b { if b then f unit else g unit } }) : Bool := Coproduct Unit Unit Bool (structural Bool) model
 maybeIsACoproductModel (A : Concrete) : Coproduct Unit A (Maybe A) (structural (Maybe A)) := { left := fn u { nothing }, right := fn a { just a }, cases := fn (C : U) f g m { match m { nothing -> f unit ; just a -> g a } } }
 MaybeIsACoproduct (A : Concrete) (model : Coproduct Unit A (Maybe A) (structural (Maybe A)) <- { left := fn u { nothing }, right := fn a { just a }, cases := fn (C : U) f g m { match m { nothing -> f unit ; just a -> g a } } }) : Bool := Coproduct Unit A (Maybe A) (structural (Maybe A)) model
-listIsTheFreeMonoidModel (A : Concrete) : Lists A (structural (List A)) := { free := { monoid := { neutral := nil, combine := appendList A }, inject := fn a { cons a nil }, foldable := { fold := foldList } } }
-ListIsTheFreeMonoid (A : Concrete) (model : Lists A (structural (List A)) <- { free := { monoid := { neutral := nil, combine := appendList A }, inject := fn a { cons a nil }, foldable := { fold := foldList } } }) : Bool := Lists A (structural (List A)) model
-foldInto (A N : U) (n : Monoid N (structural N)) (f : A -> N) (xs : List A) : N :=
-  match xs { nil -> n.neutral ; cons a rest -> n.combine (f a) (foldInto A N n f rest) }
-
-
+listIsTheFreeMonoidModel (A : Concrete) : Lists A (structural (List A)) := { free := listFreeMonoid A }
+ListIsTheFreeMonoid (A : Concrete) (model : Lists A (structural (List A)) <- { free := { monoid := listMonoid A, inject := fn a { cons a nil }, foldable := { fold := foldList } } }) : Bool := Lists A (structural (List A)) model
 -- ---------------------------------------------------------------- the primitive types (11.R1, 11.S4)
 
 -- Each body says what it is (11.R1). `Int` is the integers without bound, realized exactly by
@@ -150,10 +146,9 @@ operator - := floatMinus
 operator * := floatTimes
 operator / := floatDivide
 
--- text: `+` is concatenation, the free monoid on characters (core/structures/algebraic.lth `Monoid`,
--- numbers_model.lut `strings`)
+-- D-2026-10-21-a: text uses <> through StringIsAMonoid.combine.
+-- The primitive keeps its kernel symbol; + has no String binding.
 stringAppend : String -> String -> String := primitive "+"
-operator + := stringAppend
 
 -- the nearest double to an integer, exact below 2^53; the name stays with the integers
 -- (11.S5, D-2026-10-05-c). Here and not in a library, since every program that draws a double

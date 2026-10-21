@@ -10,7 +10,7 @@ same : Bool := eq (plusTwo 1) 3
 -- The core's models resolve each concept at the appropriate kernel carrier, without imports.
 intSize : Nat := size [1, 2]
 boolAt : Bool := at [true, false] 1
-stringMapped : List String := map String String (fn s { s + "!" }) ["a", "b"]
+stringMapped : List String := map String String (fn s { s <> "!" }) ["a", "b"]
 naturalSize : Nat := size naturalValues
 integerPlus : Int := plus 1 2
 integerOrder : Bool := leq 1 2

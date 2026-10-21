@@ -83,7 +83,7 @@ def constant(value):
 
 
 # 2.S9: the symbols an `operator` act binds; the comparisons are the kernel's on every concrete type
-BINDABLE = frozenset({'+', '-', '*', '/', 'mod', 'and', 'or'})
+BINDABLE = frozenset({'+', '<>', '-', '*', '/', 'mod', 'and', 'or'})
 # 2.S12: the labels of the binary sum `A + B`, never a structure's field
 KERNEL_LABELS = frozenset({'left', 'right'})
 # the kernel's own types (11.R1), known without a definition
@@ -577,14 +577,14 @@ def app_type(v, f, a, c):
             return c.meta('r')
         if isinstance(ty, t.Record) and theory_applied(f, c):
             # a theory applied to its parameters and a model is its laws' verdict (4.R6, 5.S6)
-            return t.Var('Bool')
+            return theory_verdict(f, a, c)
         u = as_type(ty.type) if isinstance(ty, t.Subtype) else unfold(ty, c)
         if u is None or u == ty:
             break
         ty = u
     if not isinstance(ty, t.Pi):
         if isinstance(ty, t.Record) and theory_applied(f, c):
-            return t.Var('Bool')
+            return theory_verdict(f, a, c)
         raise Untyped(f'no type for {show(v)}: {show(f)} has type {show(ty)}, not a function')
     if ty.name == '_' or ty.name not in _free(ty.codomain):
         sigma = {}
@@ -630,6 +630,27 @@ def theory_applied(f, c):
     while isinstance(declared, t.Pi):
         declared = declared.codomain; n += 1
     return isinstance(declared, t.Record) and n == len(args)
+
+
+def theory_verdict(f, model, c):
+    """A theory's verdict after its model, retaining further quantified law arguments.
+
+    Its declaration still denotes the model record. Tabulated, for example, also takes
+    an Indexed witness in its predicate; applying its model does not consume that witness.
+    """
+    h, args = head_of(f)
+    slots = [(n, b) for b in c.signatures.get(h.name, ()) for n in b.names]
+    supplied = [*args, model]
+    inner = c.child()
+    for (name, _), value in zip(slots, supplied):
+        inner.names[name] = value
+    tail = []
+    for name, binder in slots[len(supplied):]:
+        domain = walk_type(binder.type, inner)
+        tail.append((name, domain))
+        inner.names[name] = name
+        inner.types[name] = domain
+    return curry(t.Pi, tail, t.Var('Bool'))
 
 
 def conjunction_type(left_term, right_term, c):
@@ -985,8 +1006,14 @@ def field_shape(st, fname):
 def claim_matches(S, pattern_of, dty, extra_vars, c):
     """The claims of `S` whose instance of `pattern_of(claim)` matches the type `dty` (or one of its
     bases): [(claim, sigma)]."""
+    local = []
+    for name, value in c.names.items():
+        ty = c.types.get(value) if isinstance(value, str) else None
+        if ty is not None and structure_of(ty, c) == S:
+            _, args = head_of(ty)
+            local.append(Claim(name, (), tuple(args), t.Var(value)))
     found = []
-    for claim in c.claims.get(S, ()):
+    for claim in local + list(c.claims.get(S, ())):
         pattern = pattern_of(claim)
         for candidate in bases(dty, c):
             sigma = {}
@@ -1001,7 +1028,11 @@ def claim_matches(S, pattern_of, dty, extra_vars, c):
             pattern = substitute(name, value, pattern)
         if alpha_equal(pattern, dty):
             exact.append((claim, sigma))
-    return exact or found
+    selected = exact or found
+    # An explicitly supplied structure parameter is the author's model within this
+    # definition. It precedes the carrier's default; two local models still conflict.
+    explicit = [entry for entry in selected if entry[0] in local]
+    return explicit or selected
 
 
 def model_of(claim, sigma, c, where):
@@ -1412,6 +1443,10 @@ def walk(v, c, expected=None):
         case s.World(): return t.World()
         case s.App(): return application(v, c, expected)
         case s.Binop(op, a, b):
+            if op == '<>':
+                # D-2026-10-21-a: the semigroup operation is the model's combine field,
+                # at every carrier, including a structure parameter of a generic definition.
+                return resolve_field('combine', None, (a, b), c, expected)
             left = walk(a, c); right = walk(b, c)
             try:
                 ty = infer(left, c)
@@ -1549,6 +1584,8 @@ def operator_use(op, a, left, right, ty, c):
     its domain (4.R9); no binding is an error that names the type and the types that have one."""
     if ty is None or isinstance(ty, t.Hole):
         raise TypingError(f'{op} on {show_term(left)}: the type of the left operand is not known, so no model of {op} is found; annotate it', '4.R13')
+    if op == '+' and any(head_of(base)[0] in (t.Var('String'), t.Var('List')) for base in bases(ty, c)):
+        raise TypingError(f'+ on {show(ty)}: use <> for the semigroup or monoid operation (D-2026-10-21-a)', '4.R13')
     found = operator_binding(op, ty, c)
     if found is None:
         types = ', '.join(dict.fromkeys(show(b.domain) for b in c.bindings.get(op, ()))) or 'none'
@@ -1839,11 +1876,21 @@ def _claim(act, c):
         args.append(head.argument); head = head.function
     args.reverse()
     if not (isinstance(head, s.Name) and head.name in c.structures
-            and len(args) == len(c.structures[head.name].params) + 1):
+            and len(args) >= len(c.structures[head.name].params) + 1):
         return None
     S = head.name
     try:
         inner = c.child(); ps = parameters(act.binders, inner)
+        model_at = len(c.structures[S].params)
+        if len(args) > model_at + 1:
+            slots = [(n, b) for b in c.signatures.get(S, ()) for n in b.names]
+            witnesses = slots[model_at + 1:len(args)]
+            # Auxiliary structures may qualify the whole model (Tabulated's Indexed
+            # witness). Applying a law to a particular data point claims only that
+            # case and must not register a model for the whole carrier.
+            if (len(witnesses) != len(args) - model_at - 1
+                    or any(structure_of(walk_type(b.type, inner), c) is None for _, b in witnesses)):
+                return None
         walked = []
         record = c.structures[S].record
         for (p, _), a in zip(c.structures[S].params, args):
@@ -1857,7 +1904,9 @@ def _claim(act, c):
                 value = walk(binder.default, inner, walk_type(binder.type, inner))
                 for name in binder.names:
                     inner.names[name] = value
-        model = walk(args[-1], inner, record)
+        # The declaration's record is the model. A theory may quantify further data
+        # after it (Tabulated's Indexed witness); those are arguments of its laws.
+        model = walk(args[model_at], inner, record)
     except ElaborationError:
         return None
     return S, Claim(act.name, tuple(n for n, _ in ps), tuple(walked), model)

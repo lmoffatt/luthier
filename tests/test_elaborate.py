@@ -446,11 +446,11 @@ def test_applied_label_is_an_application_not_an_injection():
 # ---------------------------------------------------------------------- the core's bite 4
 
 def test_operator_resolved_under_instantiation_and_through_a_subtype():
-    # 4.R13: `+` at `Nat` and at `Fin n` is `Int`'s (a subtype's base); a binding at `List A`
-    # matches `List Int`, its type parameter applied
+    # 4.R13: `+` at `Nat` and at `Fin n` is `Int`'s (a subtype's base); a binding at `Box A`
+    # matches `Box Int`, its type parameter applied. Lists concatenate with <> (bite 7).
     eq('i + 1', bin('+', V('i'), num(1)), 'n : Int\ni : Fin n')
-    eq('xs + ys', apps(V('appendList'), [I, V('xs'), V('ys')]),
-       'appendList (A : U) (xs ys : List A) : List A\noperator + := appendList\nxs : List Int\nys : List Int')
+    eq('xs + ys', apps(V('addBox'), [I, V('xs'), V('ys')]),
+       'Box (A : U) : U\naddBox (A : U) (xs ys : Box A) : Box A\noperator + := addBox\nxs : Box Int\nys : Box Int')
 
 
 def test_operator_refusals_name_the_type_and_the_candidates():

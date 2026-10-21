@@ -1,11 +1,10 @@
--- Minimal list implementations used by the kernel's structural models.
--- Codex, bite 6, 2026-10-20, prompt-bite-6.md, execution.md §§3.5-3.7 at 2859815.
--- The definitions of appendList and foldInto at 2859815 supply the recursion; foldList exposes
--- that same right fold. Map, length and at implement the declared Functor/Indexed operations.
--- Bite 7 extends this model file; no sort, zip or list-specific library is introduced here.
+-- List and container computations, plane 3 (D-2026-10-18-c).
+-- Codex, bite 7, 2026-10-21; prompt-bite-7.md and execution.md §3.7 at 1429de8.
+-- foldList is the single right fold, inherited from bite 6. Derived operations use
+-- Foldable, Indexed and Tabulated; internal mapKernelList keeps its bite-6 name.
 import "core/core.lut" List nil cons Nat Fin
 
-appendList (A : U) (xs ys : List A) : List A := match xs { nil -> ys ; cons x rest -> cons x (appendList A rest ys) }
+combineList (A : U) (xs ys : List A) : List A := foldList A (List A) (fn front tail { match front { nil -> tail ; cons x ignored -> cons x tail } }) ys (fn x { cons x nil }) xs
 
 foldList (A M : U) (op : M -> M -> M) (e : M) (f : A -> M) (xs : List A) : M :=
   match xs { nil -> e ; cons x rest -> op (f x) (foldList A M op e f rest) }
@@ -32,9 +31,9 @@ lookup (F : U -> U) (K V : U) (f : Foldable F) (o : Object K) (k : K) (c : F (K 
 
 sum (F : U -> U) (A : U) (f : Foldable F) (o : Object A) (m : Monoid A o) (c : F A) : A := f.fold A A m.combine m.neutral (id A) c
 
-toList (F : U -> U) (A : U) (f : Foldable F) (c : F A) : List A := f.fold A (List A) (appendList A) nil (fn x { cons x nil }) c
+toList (F : U -> U) (A : U) (f : Foldable F) (c : F A) : List A := f.fold A (List A) (combineList A) nil (singleton A) c
 
-filter (F : U -> U) (A : U) (f : Foldable F) (p : A -> Bool) (c : F A) : List A := f.fold A (List A) (appendList A) nil (fn x { if p x then cons x nil else nil }) c
+filter (F : U -> U) (A : U) (f : Foldable F) (p : A -> Bool) (c : F A) : List A := f.fold A (List A) (combineList A) nil (fn x { if p x then singleton A x else nil }) c
 
 zipWith (C D E A B R : U) (i : Indexed C A) (j : Indexed D B) (t : Tabulated E R) (g : A -> B -> R) (c : C) (d : { d : D | j.size d == i.size c }) : E := t.build (i.size c) (fn k { g (i.at c k) (j.at d k) })
 
@@ -50,3 +49,66 @@ entrywiseBall (C A : U) (i : Indexed C A) (d : A -> A -> Float64) (radius : (c :
   i.size c == i.size e and forallBelow (i.size c) (fn k { d (i.at c k) (i.at e k) <= radius c e k })
 
 indicator (b : Bool) : Nat := if b then 1 else 0
+
+-- The list models. Their claims bind the container concepts for implicit resolution.
+listMonoid (A : U) : Monoid (List A) (structural (List A)) := { neutral := nil, combine := combineList A }
+listFreeMonoid (A : Concrete) : FreeMonoid A List (structural (List A)) := {
+  monoid := listMonoid A, inject := singleton A, foldable := { fold := foldList } }
+listIndexed (A : U) : Indexed (List A) A := { size := lengthList A, at := atList A }
+ListIsFoldable (model : Foldable List <- { fold := foldList }) : Bool := Foldable List model
+ListIsTabulated (A : Concrete) (model : Tabulated (List A) A <- { build := buildList A }) : Bool := Tabulated (List A) A model (listIndexed A)
+ListIsAMonoid (A : Concrete) (model : Monoid (List A) (structural (List A)) <- { neutral := nil, combine := combineList A }) : Bool := Monoid (List A) (structural (List A)) model
+
+-- Tabulation and list-specific operations. zip truncates to the shorter input; zipWith
+-- retains its equal-size contract. remove deletes every match; removeAll deletes
+-- every element present in its first argument, as the existing name-list callers do.
+buildList (A : U) (n : Nat) (f : Fin n -> A) : List A := foldWith (List A) (combineList A) nil n (fn k { singleton A (f k) })
+singleton (A : U) (x : A) : List A := cons x nil
+isEmpty (A : U) (xs : List A) : Bool := lengthList A xs == 0
+concat (A : U) (xss : List (List A)) : List A := sum List (List A) { fold := foldList } (structural (List A)) (listMonoid A) xss
+reverseEntries (C A : U) (i : Indexed C A) (t : Tabulated C A) (xs : C) : C := t.build (i.size xs) (fn k { i.at xs (i.size xs - 1 - k) })
+reverse (A : U) (xs : List A) : List A := reverseEntries (List A) A (listIndexed A) { build := buildList A } xs
+nth (A : U) (xs : List A) (i : Nat) : Maybe A := if i < lengthList A xs then just (atList A xs i) else nothing
+zip (A B : U) (xs : List A) (ys : List B) : List (A * B) :=
+  buildList (A * B) (if lengthList A xs <= lengthList B ys then lengthList A xs else lengthList B ys)
+    (fn k { (atList A xs k, atList B ys k) })
+take (A : U) (n : Nat) (xs : List A) : List A := buildList A (if n <= lengthList A xs then n else lengthList A xs) (fn k { atList A xs k })
+drop (A : U) (n : Nat) (xs : List A) : List A := buildList A (if n <= lengthList A xs then lengthList A xs - n else 0) (fn k { atList A xs (n + k) })
+remove (A : U) (o : Object A) (x : A) (xs : List A) : List A :=
+  filter List A { fold := foldList } (fn y { not (o.eq x y) }) xs
+removeAll (A : U) (o : Object A) (xs ys : List A) : List A :=
+  filter List A { fold := foldList } (fn y { not (member List A { fold := foldList } o y xs) }) ys
+distinct (A : U) (o : Object A) (xs : List A) : Bool :=
+  all List A { fold := foldList } (fn x { count List A { fold := foldList } (fn y { o.eq x y }) xs == 1 }) xs
+insertSorted (A : U) (leq : A -> A -> Bool) (x : A) (xs : List A) : List A :=
+  match xs { nil -> singleton A x ; cons y rest -> if leq x y then cons x xs else cons y (insertSorted A leq x rest) }
+sortBy (A : U) (leq : A -> A -> Bool) (xs : List A) : List A :=
+  foldList A (List A) (fn front tail { match front { nil -> tail ; cons x ignored -> insertSorted A leq x tail } }) nil (singleton A) xs
+
+-- Hamming's metric on Boolean lists of a fixed length. The explicit carrier bound
+-- keeps counts and sums exact when represented as Float64 (core MetricInteger's bound).
+BoolListOf (n : Nat) : U := { xs : List Bool | lengthList Bool xs == n }
+HammingLength : U := { n : Nat | n <= 4503599627370496 }
+hammingList (n : HammingLength) (xs ys : BoolListOf n) : Float64 :=
+  toFloat64 (countBelow n (fn k { not (atList Bool xs k == atList Bool ys k) }))
+HammingListIsAMetric (n : HammingLength) (model : Metric (BoolListOf n) (structural (BoolListOf n)) <- { d := hammingList n }) : Bool := Metric (BoolListOf n) (structural (BoolListOf n)) model
+
+-- Claims of the container and function laws, with replaceable candidates for controls.
+MapKeepsLength (A B : Concrete) (model : Functor List <- { map := mapKernelList }) (g : A -> B) (xs : List A) : Bool := SizeMap List A B model (listIndexed A) (listIndexed B) g xs
+AppendAddsLengths (A : Concrete) (op : List A -> List A -> List A <- combineList A) (x y : List A) : Bool := SizeAppend (List A) A (listIndexed A) op x y
+ListFoldOfBuild (A M : Concrete) (model : Foldable List <- { fold := foldList }) (op : M -> M -> M) (e : M) (g : A -> M) (n : Nat) (h : Fin n -> A) : Bool := FoldOfBuild List A M model { build := buildList A } (structural M) op e g n h
+ReverseIsAnInvolution (A : Concrete) (candidate : List A -> List A <- reverse A) (x : List A) : Bool := Involutive (List A) (structural (List A)) candidate x
+ReverseReindexes (A : Concrete) (candidate : List A -> List A <- reverse A) (xs : List A) : Bool := ReversesEntries (List A) A (listIndexed A) (structural A) candidate xs
+FilterKeeps (A : Concrete) (p : A -> Bool) (candidate : List A -> List A <- filter List A { fold := foldList } p) (x : List A) : Bool :=
+  LandsIn (List A) (List A) candidate (all List A { fold := foldList } p) x
+SortIsSorted (A : Concrete) (order : Order A (structural A)) (candidate : List A -> List A <- sortBy A order.leq) (x : List A) : Bool :=
+  LandsIn (List A) (List A) candidate (SortedEntries (List A) A (listIndexed A) order.leq) x
+SortIsAPermutation (A : Concrete) (leq : A -> A -> Bool) (candidate : List A -> List A <- sortBy A leq) (xs : List A) : Bool :=
+  PermutesEntries List A (listIndexed A) { fold := foldList } (structural A) candidate xs
+ListEmptiness (A : Concrete) (candidate : List A -> Bool <- isEmpty A) (xs : List A) : Bool :=
+  EmptyBySize (List A) A (listIndexed A) candidate xs
+ListDistinctness (A : Concrete) (candidate : List A -> Bool <- distinct A (structural A)) (xs : List A) : Bool :=
+  DistinctByIndices (List A) A (listIndexed A) (structural A) candidate xs
+ListLibrary := ListIsFoldable & ListIsTabulated & ListIsAMonoid & MapKeepsLength & AppendAddsLengths
+  & ListFoldOfBuild & ReverseIsAnInvolution & ReverseReindexes & FilterKeeps & SortIsSorted & SortIsAPermutation & HammingListIsAMetric
+  & ListEmptiness & ListDistinctness

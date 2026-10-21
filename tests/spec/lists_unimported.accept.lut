@@ -1,0 +1,25 @@
+-- Bite 7, D-2026-10-21-a: container concepts and <> resolve without an import.
+xs : List Int := [3, 1, 2, 1]
+mapped : List Int := map Int Int (fn x { x + 1 }) xs
+numberOfEntries : Nat := size xs
+entryAtTwo : Int := at xs 2
+folded : Int := fold Int Int (fn a b { a + b }) 0 (id Int) xs
+everyPositive : Bool := all List Int (fn (x : Int) { 0 < x }) xs
+hasTwo : Bool := member List Int 2 xs
+found : Maybe String := lookup List Int String 2 [(1, "a"), (2, "b"), (2, "c")]
+joined : List Int := xs <> [4] <> [5]
+greeting : String := "a" <> "b" <> "c"
+allFunctions : Bool := mapped == [4, 2, 3, 2] and numberOfEntries == 4 and entryAtTwo == 2
+  and folded == 7 and everyPositive and hasTwo and found == just "b" and joined == [3, 1, 2, 1, 4, 5]
+  and greeting == "abc" and concat Int [[1], [], [2, 3]] == [1, 2, 3]
+  and reverse Int xs == [1, 2, 1, 3] and nth Int xs 10 == nothing and nth Int xs 0 == just 3
+  and zip Int String [1, 2] ["a"] == [(1, "a")]
+  and take Int 2 xs == [3, 1] and take Int 10 xs == xs and drop Int 2 xs == [2, 1] and drop Int 10 xs == nil
+  and remove Int (structural Int) 1 xs == [3, 2]
+  and removeAll Int (structural Int) [1, 1] xs == [3, 2]
+  and removeAll Int (structural Int) [1] [1, 1, 2] == [2]
+  and distinct Int (structural Int) [1, 2] and not (distinct Int (structural Int) xs)
+  and insertSorted Int (fn x y { x <= y }) 2 [1, 3] == [1, 2, 3]
+  and sortBy Int (fn x y { x <= y }) xs == [1, 1, 2, 3]
+  and isEmpty Int nil and singleton Int 1 == [1]
+  and hammingList 2 [true, false] [false, false] == 1.0
