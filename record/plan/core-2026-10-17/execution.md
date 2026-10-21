@@ -23,6 +23,13 @@ Bite 8's question (`plus` and `times` don't resolve at `Float64`, since `Doubles
 parameter): the coordinator took (a), `Doubles (F : U)` claimed at `Float64`, done in bite 12
 with the examples' cones; (b) would lose the ranges D-2026-10-18-j asks the laws to state.
 
+Status, 2026-10-21 night (bite 11's agent): bite 11 landed (report-bite-11.md, 6e8f276 to
+621599a). Vec and Mat claim the container structures, `size`, `at` and `map` resolve at
+`Vec Float64`, `Symmetric` is `SymmetricMatrix`, the `approx...` family are balls, six summing laws
+take Higham's bounds, tables.lth and plot.lth use the core's list functions, CORE_COLLISIONS is
+empty. Waiting on the coordinator: the rename in bite 9's generators files (the report's sed
+lines); until then generators_model.lut does not load in the tree. Metrics 58, 107, 219, 31, 1995.
+
 Status: bites 1 and 2 landed (report-bite-1.md, report-bite-2.md): lib/core/ exists with core.lut,
 properties/{relations, operations, functions}.lth and structures/{equality, algebraic, universal}.lth
 (kernel_laws.lth split without renames, kernel_models.lut absorbed), the hash erases binder
