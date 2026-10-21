@@ -39,7 +39,7 @@ def test_keywords_and_operators_are_derived():
                      "match", "U", "W", "quote", "fn"}
     levels = ["ampTerm", "arrowTerm", "orTerm", "andTerm", "cmpTerm", "addTerm", "mulTerm"]
     assert lits_of_names(G, levels) == ["&", "->", "or", "and", "==", "/=", "<", "<=", ">", ">=",
-                                        "+", "-", "*", "/", "mod"]
+                                        "+", "-", "<>", "*", "/", "mod"]
 
 
 def test_one_tree_where_round_3_found_two():

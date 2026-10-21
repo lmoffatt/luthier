@@ -120,6 +120,7 @@ not to the product; the typing reads it as the product, and the term stays for t
 | 5 | `and` | left |
 | 6 | `==` `/=` `<` `<=` `>` `>=` | left |
 | 7 | `+` `-` | left |
+| 7 | `<>` | right |
 | 8 | `*` `/` `mod` | left |
 | 9 | `-` prefix, negation | (prefix) |
 | 10 | application | left |
@@ -133,6 +134,15 @@ are operators like `+`, not names (D-2026-10-13-p), and the `operator` act gives
 on a type, as for `+`, `-`, `*`, `/`. The table is stated in `src/luthier/lib/grammar.lth`, whose
 `luthierSyntax` is the grammar (2.S9).
 
+[decided D-2026-10-21-a] `<>` denotes the `combine` operation of the operand type's
+semigroup or monoid model, resolved by the same structure rule as a field name (4.R13;
+execution.md §2.2). Thus strings and lists concatenate with `<>`; `+` on either is refused
+with a message naming `<>`. Value addition `+` is reserved for commutative additive
+structures; the sum type `A + B` keeps its meaning. `<>` has the precedence of `+` and
+associates to the right: `a <> b <> c` means `a <> (b <> c)`. At that level, a chain mixing
+`<>` with the left-associative `+` or `-` needs parentheses, as with Haskell's differing
+fixities. The same rule applies in a match scrutinee. The grammar and printer preserve it.
+
 **2.R2. A type names its model.** [implemented] An operator is resolved by the type of its
 operands; two models of a carrier are two types (`spec 4.R13`), and a type with two
 models for one operator is rejected.
@@ -145,7 +155,7 @@ Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut.
 <!-- luthierSyntax: begin -->
 
 Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
-(v1; sha256: 190a298133b3039812567defb2d6ead745446aa979d28c78805376ccc89152dc).
+(v1; sha256: 4b399036ba2ccd761e8e1c8f64e59f4458a5e386e4bcee3802f8d15a70d63db2).
 
     program ::= { act newline }
 
@@ -169,6 +179,7 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
     operator ::= "operator" opSymbol ":=" term
 
     opSymbol ::= "+"
+        | "<>"
         | "-"
         | "*"
         | "/"
@@ -209,7 +220,9 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
 
     cmpTerm ::= addTerm { ( "==" | "/=" | "<" | "<=" | ">" | ">=" ) addTerm }
 
-    addTerm ::= mulTerm { ( "+" | "-" ) mulTerm }
+    addTerm ::= mulTerm ( { ( "+" | "-" ) mulTerm } | "<>" combineTerm )
+
+    combineTerm ::= mulTerm [ "<>" combineTerm ]
 
     mulTerm ::= negTerm { ( "*" | "/" | "mod" ) negTerm }
 
@@ -244,7 +257,9 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
 
     sCmp ::= sAdd { ( "==" | "/=" | "<" | "<=" | ">" | ">=" ) sAdd }
 
-    sAdd ::= sMul { ( "+" | "-" ) sMul }
+    sAdd ::= sMul ( { ( "+" | "-" ) sMul } | "<>" sCombine )
+
+    sCombine ::= sMul [ "<>" sCombine ]
 
     sMul ::= sNeg { ( "*" | "/" | "mod" ) sNeg }
 

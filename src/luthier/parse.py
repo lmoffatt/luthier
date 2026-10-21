@@ -597,8 +597,25 @@ class _Parser:
         return self._left_chain(self.addTerm, {"==", "/=", "<", "<=", ">", ">="})
 
     def addTerm(self) -> Surface:
-        """addTerm ::= mulTerm { ( "+" | "-" ) mulTerm }"""
-        return self._left_chain(self.mulTerm, {"+", "-"})
+        """The additive level: left +/-, or right <> (mixed fixities need parentheses)."""
+        return self._add_chain(self.mulTerm)
+
+    def _add_chain(self, sub) -> Surface:
+        left = sub()
+        if self._peek("<>"):
+            self._take("<>")
+            return Binop("<>", left, self._combine_chain(sub))
+        while self._peek("+") or self._peek("-"):
+            op = self._take().text
+            left = Binop(op, left, sub())
+        return left
+
+    def _combine_chain(self, sub) -> Surface:
+        left = sub()
+        if self._peek("<>"):
+            self._take("<>")
+            return Binop("<>", left, self._combine_chain(sub))
+        return left
 
     def mulTerm(self) -> Surface:
         """mulTerm ::= negTerm { ( "*" | "/" | "mod" ) negTerm }"""
@@ -656,7 +673,7 @@ class _Parser:
         return self._left_chain(self.sAdd, {"==", "/=", "<", "<=", ">", ">="})
 
     def sAdd(self) -> Surface:
-        return self._left_chain(self.sMul, {"+", "-"})
+        return self._add_chain(self.sMul)
 
     def sMul(self) -> Surface:
         return self._left_chain(self.sNeg, {"*", "/", "mod"})
@@ -1120,12 +1137,13 @@ _PREC = {
     ">": 6,
     ">=": 6,
     "+": 7,
+    "<>": 7,
     "-": 7,
     "*": 8,
     "/": 8,
     "mod": 8,
 }
-_RIGHT_ASSOC = {"&", "->"}
+_RIGHT_ASSOC = {"&", "->", "<>"}
 
 
 def _precedence(t: Surface) -> int:
@@ -1227,6 +1245,8 @@ def _needs_parens(child: Surface, parent_op: str, side: str) -> bool:
         return False
     if not isinstance(child, Binop):
         return False
+    if (child.operator in _RIGHT_ASSOC) != (parent_op in _RIGHT_ASSOC):
+        return True
     if parent_op in _RIGHT_ASSOC:
         return side == "left"
     return side == "right"
