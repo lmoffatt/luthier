@@ -44,3 +44,5 @@ bite 10 is not separable.
 3. New `wf...` predicates in grammar.lth instead of inlining each lambda.
 4. `removeName`/`removeNames` kept (different semantics).
 5. Commit bodies hold one line plus the co-author line, in two `-m` blocks.
+
+Follow-up (refusal-holes fix a37136b): term_model.lut's sum label `Selected` collided with the core alias `Selected`; it is `ArmSelected` (three uses). `check` clean on term_model.lut and certification_model.lut, `luthier test tests/tester/certification_laws.test.lut` exits 0.

@@ -382,14 +382,14 @@ stepPatternList (env : Program) (ps : List Pattern) (vs : List Term) : PatternLi
 rebuildConstructor (c : String) (args : List Term) : Term := applyArguments (Var c) args
 applyArguments (f : Term) (args : List Term) : Term := match args {
   nil -> f ; cons a rest -> applyArguments (App f a) rest }
-ArmStep = { Selected : Term || ScrutineeNext : Term || NoArm : Unit }
+ArmStep = { ArmSelected : Term || ScrutineeNext : Term || NoArm : Unit }
 chooseArm (p : Program) (s : Term) (arms : List (Pattern * Term)) : ArmStep := match arms {
   nil -> NoArm ; cons (pat, b) rest -> match stepPattern p pat s {
     Demand v -> ScrutineeNext v ; Miss -> chooseArm p s rest ; Blocked -> NoArm ;
-    Hit bs -> if linearBindings bs then Selected (applyBindings bs b) else NoArm } }
+    Hit bs -> if linearBindings bs then ArmSelected (applyBindings bs b) else NoArm } }
 stepMatch (p : Program) (s : Term) (arms : List (Pattern * Term)) : HeadStep := match stepHead p s {
   Next v -> Next (Match v arms) ; Done v -> match chooseArm p s arms {
-    Selected b -> Next b ; ScrutineeNext w -> Next (Match w arms) ; NoArm -> Done (Match s arms) } }
+    ArmSelected b -> Next b ; ScrutineeNext w -> Next (Match w arms) ; NoArm -> Done (Match s arms) } }
 stepTerm (p : Program) (t : Term) : Maybe Term := match stepHead p t {
   Done v -> nothing ; Next v -> just v }
 stepper : Reduction alpha substitute := { step := stepTerm }
