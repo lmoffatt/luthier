@@ -13,11 +13,11 @@ import "generators.lth" Binding
 import "laws.lth" Listed
 import "term.lth" Term Var App
 import "world.lth" Console appendStr lineOf PrintAppendsALine PrintChangesOnlyStdout ReadGivesThePlace
-  ReadChangesNothing World Described OwnIsIdempotent ChangesOnlyDeclared Externs Route routeOf isProvisional memberStr settled
-  AppliedWhenSettled NoLawNoGrade ProvisionalIsAssumed IdentityCarriesHash Crossing mapList lengthOf
+  ReadChangesNothing World Described OwnIsIdempotent ChangesOnlyDeclared Externs Route routeOf isProvisional settled
+  AppliedWhenSettled NoLawNoGrade ProvisionalIsAssumed IdentityCarriesHash Crossing
   CallbackGivesTheFunction CallsAreCounted RecordCrossesByField Host Observed Held held printDescription
   readFileDescription HostAgreesPrint HostAgreesReadFile HostObserveChangesNothing HostChangesOnlyDeclared
-import "world_model.lut" State console theWorld lookupFile host
+import "world_model.lut" State console theWorld host
 
 states : List Concrete := [State]
 blank : State := { stdout := "", files := nil }
@@ -40,7 +40,7 @@ readsNothing : Console State := { world := theWorld, printLine := console.printL
   readFile := fn p st { (st, nothing) }, stdout := console.stdout }
 -- readFile gives the right answer but empties the standard output
 readClears : Console State := { world := theWorld, printLine := console.printLine,
-  readFile := fn p st { ({ stdout := "", files := st.files }, lookupFile st.files p) }, stdout := console.stdout }
+  readFile := fn p st { ({ stdout := "", files := st.files }, lookup List String String p st.files) }, stdout := console.stdout }
 noNewlines : List (Console State) := [noNewline]
 dropsFilesList : List (Console State) := [dropsFiles]
 readsNothingList : List (Console State) := [readsNothing]
@@ -107,21 +107,21 @@ appliesEvery : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute, appli
 -- grades by the hash whether or not the type states a law
 gradesLawless (r : Route) (h : String) : Maybe Grade := if isProvisional r then just AssumedGrade else lookupGrade h validations
 gradesWithoutLaws : Externs := { lawsOf := lawsOfType, gradeOf := gradesLawless,
-  applied := fn a ns r h { if isProvisional r then memberStr r.name ns else settled a (gradesLawless r h) },
+  applied := fn a ns r h { if isProvisional r then member List String r.name ns else settled a (gradesLawless r h) },
   identity := fn r h { r.route <> " at " <> h } }
 -- validates a provisional extern as any other
 validatesAll (r : Route) (h : String) : Maybe Grade := if lawsOfType r.declared == nil then nothing else lookupGrade h validations
 validatesProvisional : Externs := { lawsOf := lawsOfType, gradeOf := validatesAll,
-  applied := fn a ns r h { if isProvisional r then memberStr r.name ns else settled a (validatesAll r h) },
+  applied := fn a ns r h { if isProvisional r then member List String r.name ns else settled a (validatesAll r h) },
   identity := fn r h { r.route <> " at " <> h } }
 -- the identity of what an extern produces is its route, whatever was read
 identityByRoute : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute,
-  applied := fn a ns r h { if isProvisional r then memberStr r.name ns else settled a (gradeOfRoute r h) },
+  applied := fn a ns r h { if isProvisional r then member List String r.name ns else settled a (gradeOfRoute r h) },
   identity := fn r h { r.route } }
 -- [2026-10-16, D-2026-10-16-c, L9.14] a blanket acceptance of assumed evidence applies a provisional
 -- extern the demand did not name, the danger he named (a provisional forgotten deep in the code)
 blanketAssumed : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute,
-  applied := fn a ns r h { if isProvisional r then memberStr r.name ns or settled a (just AssumedGrade)
+  applied := fn a ns r h { if isProvisional r then member List String r.name ns or settled a (just AssumedGrade)
                            else settled a (gradeOfRoute r h) },
   identity := fn r h { r.route <> " at " <> h } }
 blanketAssumedList : List Externs := [blanketAssumed]
@@ -155,16 +155,16 @@ test "IdentityCarriesHash" ExhaustiveMode (seed <- 20261015) (whereBindings <- [
 fieldOf (fs : List (String * (Int -> Int))) (l : String) : Maybe (Int -> Int) :=
   match fs { nil -> nothing ; cons (k, g) rest -> if k == l then just g else fieldOf rest l }
 reverseInts (xs acc : List Int) : List Int := match xs { nil -> acc ; cons x rest -> reverseInts rest (cons x acc) }
-callRight (f : Int -> Int) (xs : List Int) : List Int * Nat := (mapList Int Int f xs, lengthOf Int xs)
+callRight (f : Int -> Int) (xs : List Int) : List Int * Nat := (map Int Int f xs, size xs)
 -- the values given back in reverse order
 reversesCalls : Crossing Int Int := {
-  callBack := fn f xs { (reverseInts (mapList Int Int f xs) nil, lengthOf Int xs) },
-  callField := fn fs l xs { match fieldOf fs l { just f -> (reverseInts (mapList Int Int f xs) nil, lengthOf Int xs) ; nothing -> (nil, 0) } },
+  callBack := fn f xs { (reverseInts (map Int Int f xs) nil, size xs) },
+  callField := fn fs l xs { match fieldOf fs l { just f -> (reverseInts (map Int Int f xs) nil, size xs) ; nothing -> (nil, 0) } },
 }
 -- one call counted per crossing, whatever the host asked
 countsOnce : Crossing Int Int := {
-  callBack := fn f xs { (mapList Int Int f xs, 1) },
-  callField := fn fs l xs { match fieldOf fs l { just f -> (mapList Int Int f xs, 1) ; nothing -> (nil, 0) } },
+  callBack := fn f xs { (map Int Int f xs, 1) },
+  callField := fn fs l xs { match fieldOf fs l { just f -> (map Int Int f xs, 1) ; nothing -> (nil, 0) } },
 }
 -- the first field called whatever the label
 firstField (fs : List (String * (Int -> Int))) : Maybe (Int -> Int) := match fs { nil -> nothing ; cons (k, g) rest -> just g }

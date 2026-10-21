@@ -113,9 +113,8 @@ OwnIsIdempotent (S : Concrete) (A : U) (m : World S) (d : Described S A m) (s : 
 -- not a binding of another block. In the world it changes only the places it declares: at any other
 -- place, what is read after is what was read before. Quantified over every place, so a random path
 -- is one the action must leave alone, which is the case to test.
-memberStr (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or memberStr x rest }
 ChangesOnlyDeclared (S : Concrete) (A : U) (m : World S) (d : Described S A m) (s : S) (p : String) : Bool :=
-  memberStr p d.places or m.read (stateAfter S A (d.describe s)) p == m.read s p
+  member List String p d.places or m.read (stateAfter S A (d.describe s)) p == m.read s p
 
 Described (S : Concrete) (A : U) (m : World S) := OwnIsIdempotent S A m & ChangesOnlyDeclared S A m
 
@@ -184,7 +183,7 @@ settled (accepts : Grade) (g : Maybe Grade) : Bool :=
 -- demand names it, whatever the cutoff (D-2026-10-16-c)
 AppliedWhenSettled (e : Externs) (accepts : Grade) (assumes : List String) (r : Route) (h : String) : Bool :=
   e.applied accepts assumes r h
-    == (if isProvisional r then memberStr r.name assumes else settled accepts (e.gradeOf r h))
+    == (if isProvisional r then member List String r.name assumes else settled accepts (e.gradeOf r h))
 -- a type that states no law gives nothing to validate against, so no validation grades the extern
 -- and, by `AppliedWhenSettled`, it is not applied (10.S10, L11.3); over the routes that are not
 -- provisional, built from their parts
@@ -220,25 +219,20 @@ Crossing (A B : Concrete) : {
   callBack : (A -> B) -> List A -> List B * Nat,
   callField : List (String * (A -> B)) -> String -> List A -> List B * Nat,
 }
-mapList (A B : Concrete) (f : A -> B) (xs : List A) : List B :=
-  match xs { nil -> nil ; cons x rest -> cons (f x) (mapList A B f rest) }
-lengthOf (A : Concrete) (xs : List A) : Nat := match xs { nil -> 0 ; cons x rest -> 1 + lengthOf A rest }
-concatFields (A B : Concrete) (xs ys : List (String * (A -> B))) : List (String * (A -> B)) :=
-  match xs { nil -> ys ; cons x rest -> cons x (concatFields A B rest ys) }
 hasLabel (A B : Concrete) (l : String) (fs : List (String * (A -> B))) : Bool :=
-  match fs { nil -> false ; cons (k, g) rest -> k == l or hasLabel A B l rest }
+  any List (String * (A -> B)) (fn (kg : String * (A -> B)) { match kg { (k, g) -> k == l } }) fs
 -- each call gives the function's value at the argument: the crossing is faithful
 CallbackGivesTheFunction (A B : Concrete) (b : Crossing A B) (f : A -> B) (xs : List A) : Bool :=
-  match b.callBack f xs { (ys, n) -> ys == mapList A B f xs }
+  match b.callBack f xs { (ys, n) -> ys == map A B f xs }
 -- and the calls are counted, one per argument the host asked at (12.S18)
 CallsAreCounted (A B : Concrete) (b : Crossing A B) (f : A -> B) (xs : List A) : Bool :=
-  match b.callBack f xs { (ys, n) -> n == lengthOf A xs }
+  match b.callBack f xs { (ys, n) -> n == Indexed.size (listIndexed A) xs }
 -- a record of functions crosses by field: calling a field is calling its function, with its values
 -- and its count and no other field's, whatever the other fields and wherever the field sits (the
 -- review's W5: over one-field records, a bridge that called the first field whatever the label
 -- passed). The first field of a label is the one read, so a label already in `before` is not asked.
 RecordCrossesByField (A B : Concrete) (b : Crossing A B) (before after : List (String * (A -> B))) (l : String) (f : A -> B) (xs : List A) : Bool :=
-  hasLabel A B l before or b.callField (concatFields A B before (cons (l, f) after)) l xs == b.callBack f xs
+  hasLabel A B l before or b.callField (before <> cons (l, f) after) l xs == b.callBack f xs
 Crossing (A B : Concrete) := CallbackGivesTheFunction A B & CallsAreCounted A B & RecordCrossesByField A B
 
 -- ---------------------------------------------------------------- §4 The actions the first slice needs
@@ -320,7 +314,6 @@ Observed (S : Concrete) (A : Concrete) = { before : S, result : A, after : S }
 Held (S : Concrete) (A : Concrete) (m : World S) = { act : Action A, described : Described S A m }
 held (S : Concrete) (A : Concrete) (m : World S) (act : Action A) (d : Described S A m) : Held S A m :=
   { act := act, described := d }
-concatStrs (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (concatStrs rest ys) }
 
 -- The host's side of the console: its actions, routes to the host (world_model.lut), its
 -- observation, and the console whose descriptions they are held to (L11.2: an extern is declared
@@ -332,14 +325,14 @@ Host (S : Concrete) : {
   readFile : W -> String -> W * Maybe String,
 }
 agreement (S : Concrete) (A : Concrete) (m : World S) (o : Host S) (h : Held S A m) (extra : List String) (w0 : W) : W * Observed S A :=
-  match o.observe w0 (concatStrs extra h.described.places) { (w1, before) ->
+  match o.observe w0 (extra <> h.described.places) { (w1, before) ->
   match h.act w1 { (w2, x) ->
-  match o.observe w2 (concatStrs extra h.described.places) { (w3, after) ->
+  match o.observe w2 (extra <> h.described.places) { (w3, after) ->
     (w3, { before := before, result := x, after := after }) } } }
 
 -- what is read at each of the places is the same in two states
 readsAlike (S : Concrete) (m : World S) (a b : S) (ps : List String) : Bool :=
-  match ps { nil -> true ; cons p rest -> m.read a p == m.read b p and readsAlike S m a b rest }
+  all List String (fn (p : String) { m.read a p == m.read b p }) ps
 -- the case agrees with the description: the result is the described one, and at each declared
 -- place the world after reads as the description says it does (the runner names the places that
 -- differ, 10.S10)
@@ -353,7 +346,7 @@ observes (S : Concrete) (m : World S) (h : Held S S m) (c : Observed S S) : Bool
   readsAlike S m c.result c.before h.described.places and readsAlike S m c.before c.after h.described.places
 -- the places observed that the action did not declare
 undeclared (declared ps : List String) : List String :=
-  match ps { nil -> nil ; cons p rest -> if memberStr p declared then undeclared declared rest else cons p (undeclared declared rest) }
+  filter List String (fn (p : String) { not (member List String p declared) }) ps
 
 -- `HostAgrees`, one law per action: a case of the action at its arguments agrees with the
 -- console's description of it. `readFile` at the standard output's place is no file read: the

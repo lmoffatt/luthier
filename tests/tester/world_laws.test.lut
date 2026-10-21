@@ -13,8 +13,8 @@ import "laws.lth" Listed
 import "term.lth" Term Var App
 import "world.lth" Console PrintAppendsALine PrintChangesOnlyStdout ReadGivesThePlace ReadChangesNothing
   World Described OwnIsIdempotent ChangesOnlyDeclared printDescription readFileDescription observeDescription
-  Externs Route routeOf isProvisional memberStr settled AppliedWhenSettled NoLawNoGrade ProvisionalIsAssumed IdentityCarriesHash
-  Crossing mapList lengthOf CallbackGivesTheFunction CallsAreCounted RecordCrossesByField
+  Externs Route routeOf isProvisional settled AppliedWhenSettled NoLawNoGrade ProvisionalIsAssumed IdentityCarriesHash
+  Crossing CallbackGivesTheFunction CallsAreCounted RecordCrossesByField
   Host Observed Held held HostAgreesPrint HostAgreesReadFile HostObserveChangesNothing HostChangesOnlyDeclared
 import "world_model.lut" State console theWorld host
 
@@ -102,7 +102,7 @@ gradeOfRoute (r : Route) (h : String) : Maybe Grade :=
 validator : Externs := {
   lawsOf := lawsOfType,
   gradeOf := gradeOfRoute,
-  applied := fn a ns r h { if isProvisional r then memberStr r.name ns else settled a (gradeOfRoute r h) },
+  applied := fn a ns r h { if isProvisional r then member List String r.name ns else settled a (gradeOfRoute r h) },
   identity := fn r h { r.route <> " at " <> h },
 }
 validators : List Externs := [validator]
@@ -135,8 +135,8 @@ test "IdentityCarriesHash" ExhaustiveMode (seed <- 20261015) (whereBindings <- [
 fieldOf (fs : List (String * (Int -> Int))) (l : String) : Maybe (Int -> Int) :=
   match fs { nil -> nothing ; cons (k, g) rest -> if k == l then just g else fieldOf rest l }
 bridge : Crossing Int Int := {
-  callBack := fn f xs { (mapList Int Int f xs, lengthOf Int xs) },
-  callField := fn fs l xs { match fieldOf fs l { just f -> (mapList Int Int f xs, lengthOf Int xs) ; nothing -> (nil, 0) } },
+  callBack := fn f xs { (map Int Int f xs, size xs) },
+  callField := fn fs l xs { match fieldOf fs l { just f -> (map Int Int f xs, size xs) ; nothing -> (nil, 0) } },
 }
 bridges : List (Crossing Int Int) := [bridge]
 ints : List Concrete := [Int]

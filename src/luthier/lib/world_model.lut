@@ -18,12 +18,10 @@ import "world.lth" World Console Host appendStr lineOf
 
 -- the representation: the standard output so far, and the files by path
 State = { stdout : String, files : List (String * String) }
-lookupFile (fs : List (String * String)) (p : String) : Maybe String :=
-  match fs { nil -> nothing ; cons (q, c) rest -> if p == q then just c else lookupFile rest p }
 
 -- the observable world: what is read at a place of the representation
 theWorld : World State := {
-  read := fn st p { if p == "stdout" then just st.stdout else lookupFile st.files p },
+  read := fn st p { if p == "stdout" then just st.stdout else lookup List String String p st.files },
 }
 
 -- the console, by its descriptions: `print` appends a line to the standard output and changes
@@ -33,7 +31,7 @@ theWorld : World State := {
 console : Console State := {
   world := theWorld,
   printLine := fn s st { ({ stdout := appendStr st.stdout (lineOf s), files := st.files }, unit) },
-  readFile := fn p st { (st, lookupFile st.files p) },
+  readFile := fn p st { (st, lookup List String String p st.files) },
   stdout := "stdout",
 }
 
