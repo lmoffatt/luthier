@@ -1758,7 +1758,10 @@ def runtime_slice(acts, main, roots=(), *, theory_laws=False):
                 if n in by_name or n in bound or n in ("left", "right"):
                     continue
                 root, _, rest = n.partition(".")
-                for structure in fields_of.get(n, set()) | ({root} if rest and root in claims else set()):
+                # `f.fold` of a parameter typed by a structure reaches its claims too: the elaborator
+                # fills that parameter with a claimed model (`all List A p c` with core's `foldList`)
+                local = fields_of.get(rest, set()) if rest and (root in bound or root not in by_name) else set()
+                for structure in fields_of.get(n, set()) | local | ({root} if rest and root in claims else set()):
                     pending.extend(claims.get(structure, ()))
     def projections(value):
         if isinstance(value, s.Name) and "." in value.name and value.name not in by_name:

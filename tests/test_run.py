@@ -1467,3 +1467,22 @@ def test_an_operator_a_label_and_an_import_alias_of_a_core_name_are_refused_at_l
     with pytest.raises(RunError) as error:
         Loaded(path)
     assert message in str(error.value)
+
+
+@pytest.mark.parametrize("term, value", [
+    ('all List String (fn x { x == "a" }) ["a"]', "true"),
+    ('any List Nat (fn x { x == 2 }) [1, 2]', "true"),
+    ('all List Nat (fn x { x == 1 }) [1, 2]', "false")])
+def test_eval_reduces_a_term_over_the_cores_foldable_model(tmp_path, term, value):
+    # the slice reached `foldList` only through a field written free or qualified by its structure,
+    # not through `f.fold` of a parameter typed by it, so `all List ...` printed as `foldList ...`
+    from luthier.run import evaluate
+    path = tmp_path / "x.lut"
+    path.write_text("x : Nat := 1\n", encoding="utf-8")
+    result, _, _ = evaluate([str(path)], term)
+    assert result == s_true_false(value)
+
+
+def s_true_false(value):
+    from luthier import term as t
+    return t.Var(value)
