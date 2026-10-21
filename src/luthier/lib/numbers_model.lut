@@ -42,6 +42,8 @@ absDistanceIsAMetricWithinModel : MetricWithin Float64 (structural Float64) :=
 AbsDistanceIsAMetricWithin (model : MetricWithin Float64 (structural Float64) <-
     { d := absDistance, bound := fn a b { doubles.epsilon / 2.0 * (abs a + abs b) } }) : Bool :=
   MetricWithin Float64 (structural Float64) model
+-- the claims of this file, gathered as core.lut's `CoreData` gathers the core's
+NumberModels := AbsDistanceIsAMetricWithin
 
 -- the nearest double to an integer (11.S5)
 conversion : Conversion := { convert := toFloat64 }
