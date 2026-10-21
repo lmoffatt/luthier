@@ -13,6 +13,16 @@ design leaves to Luciano are in `decisions.md` beside this file; every choice ma
 the agent's, one commit undoes it. The first version of this plan (54f6228) had the core imported by
 name; D-2026-10-18-b decided otherwise and this version replaces it (git keeps the first).
 
+Status, 2026-10-21 evening (coordinator): bites 6, 7 and 8 landed (report-bite-6.md to -8.md;
+bite 7 committed by the coordinator from Codex's list, 06495fc to 0acef17; bite 8 at 465cb98).
+Bites 9 and 10 are in progress, committing file by file. Bite 8 left the full suite and the full
+certify wave red on stale stores of other bites (world.lth's console laws, the arrays stores);
+the combined verification after 9 and 10 re-certifies them. Metrics with bites 7 to 9 in the tree:
+66 homonyms, 107 executive shadows, 260 list helpers, 32 unclaimed, 2002 loose.
+Bite 8's question (`plus` and `times` don't resolve at `Float64`, since `Doubles` has no carrier
+parameter): the coordinator took (a), `Doubles (F : U)` claimed at `Float64`, done in bite 12
+with the examples' cones; (b) would lose the ranges D-2026-10-18-j asks the laws to state.
+
 Status: bites 1 and 2 landed (report-bite-1.md, report-bite-2.md): lib/core/ exists with core.lut,
 properties/{relations, operations, functions}.lth and structures/{equality, algebraic, universal}.lth
 (kernel_laws.lth split without renames, kernel_models.lut absorbed), the hash erases binder
@@ -816,6 +826,10 @@ record field of the same name (experiment_zero.lut's `fit` and `transformOf`): t
 record type are bound in its later fields' types. (3) Product types nest to the left (`(A * B) *
 C`) where 3.S4 says right, as tuples do. Each moves the cones that reach those definitions; the
 stores re-certified once with this bite's. The spec marks each as a known defect (2.S8, 4.R7, 3.S4).
+Also (2026-10-21, the coordinator on report-bite-8.md's question): give `Doubles` its carrier,
+`Doubles (F : U)`, claimed at `Float64`, so section 4's `DoublesHaveTheOperations` binds `plus` and
+`times` there; the examples' `doubles : Doubles` becomes `Doubles Float64` and their run records
+are redone with this bite's.
 
 ### Bite 13. Closing (Sonnet; after 12)
 
