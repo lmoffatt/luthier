@@ -75,3 +75,17 @@ Argon when off the VPN. Claude only coordinates, in short turns.
   session 1% used; after: pending his reading.
 - Codex and Antigravity's Gemini both fail behind the VPN (Codex: "workspace routing discovery
   failed"); a run must have the VPN off for its whole length.
+
+## Core bites 7 to 10, 2026-10-20 and 21
+
+- Codex, gpt-6.1-sol, reasoning high, core bite 7 (prompt-bite-7.md): 2 h 34 min; input 58,389,462
+  tokens of which 57,592,448 cached, output 181,948, reasoning 126,431. Codex's weekly quota after
+  it: not read (90% remaining before).
+- Agent SDK, Opus 5.5, on API credits, core bite 8 (prompt-bite-8.md): three runs, cut twice by a
+  transient 403 and once by the coordinator; $8.46 for the first, the second's cost not printed
+  (killed), $14.62 for the third (`total_cost_usd`). The Console's spend for the Luthier workspace is
+  the total. About $12 an hour for Opus through the API; the $300 promotional credit covers the
+  Agent SDK and expires 2026-11-07, so it goes further on Sonnet.
+- Claude Code subagents, Sonnet 5.5, on the Team quota: bite 9, 269,832 tokens after its resume
+  (17 tool calls, 10 min); bite 10, 256,975 tokens after its resume (33 tool calls, 14 min). Their
+  first legs' counts were lost with the interruption.

@@ -3289,6 +3289,13 @@ Kind:       principles (L12.6, L6.2, O1; the words of the record); the core (str
             functions: Lipschitz); the decorations (L5.4)
 Status:     current
 
+Correction to D-2026-10-18-i (the coordinator's, 2026-10-21, from bite 6's finding 1,
+record/plan/core-2026-10-17/report-bite-6.md): the error base written there, ([0, ∞], +, ≤) with the
+usual supremum, is not a quantale: the tensor does not preserve the empty supremum (a + sup ∅ = a
+for a > 0, while sup(a + ∅) = 0). Lawvere's base takes the opposite order, ([0, ∞], +, ≥), where
+the empty join is ∞ and a + ∞ = ∞. The decision stands with that orientation; the original wording
+is kept above.
+
 D-2026-10-18-j  Q1 of the three levels' exploration (record/plan/three-levels-2026-10-18/report.md),
                 reformulated: a numerical law relates an input tolerance δ to an output tolerance ε,
                 and that relation is the law's content. The fixed `tol` matched exactly leaves (as the
