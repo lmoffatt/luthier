@@ -282,6 +282,13 @@ def test_vector_norm_through_numpy():
     assert (result.returncode, result.stdout, result.stderr) == (0, "5.0\n", "")
 
 
+def test_size_at_and_map_resolve_at_a_vector():
+    # core bite 11 (execution.md §6): arrays.lth's VecIsIndexed and VecIsAFunctor bind the core's
+    # `size`, `at` and `map` at `Vec Float64`, written with no qualification
+    result = command(ROOT / "tests/run/vec_resolution.run.lut")
+    assert (result.returncode, result.stdout, result.stderr) == (0, "resolved\n", "")
+
+
 def test_matrix_product_through_numpy():
     result = command(ROOT / "tests/run/matrix_product.run.lut")
     assert (result.returncode, result.stdout, result.stderr) == (0, "43.0\n2\n", "")
