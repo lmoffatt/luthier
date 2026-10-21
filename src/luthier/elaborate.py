@@ -1437,9 +1437,12 @@ def walk(v, c, expected=None):
                 return t.Var(value) if isinstance(value, str) else value
             if n in c.aliases:
                 if c.aliases[n].binders:
-                    # an alias with parameters named without its arguments is the type former
-                    # itself (`Functor Vec`, core bite 11): kept by name, unfolded where applied
-                    return t.Var(n)
+                    # an alias with parameters named without its arguments where a type former is
+                    # asked (`Functor Vec`, core bite 11) is that former: kept by name, unfolded
+                    # where applied (`unfold`); elsewhere it still needs its arguments
+                    if isinstance(expected, t.Pi) and is_kind(expected):
+                        return t.Var(n)
+                    raise ElaborationError(f'alias {n} needs arguments')
                 return walk(c.aliases[n].value, c)
             q = qualified(v, c)
             if q is not None:
@@ -1905,8 +1908,10 @@ def _claim(act, c):
                 return None
         walked = []
         record = c.structures[S].record
-        for (p, _), a in zip(c.structures[S].params, args):
-            value = walk_type(a, inner); walked.append(value)
+        for (p, kind), a in zip(c.structures[S].params, args):
+            # a type former's parameter (`F : U -> U`) takes an alias by name (`Functor Vec`)
+            value = as_type(walk(a, inner, kind if isinstance(kind, t.Pi) and is_kind(kind) else None))
+            walked.append(value)
             record = substitute(p, value, record)
         # A claim may expose its concrete model as a defaulted parameter so that the same law
         # can be refuted on a control. Name resolution binds the written default, never a free
