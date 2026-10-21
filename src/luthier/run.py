@@ -1676,10 +1676,6 @@ def runtime_slice(acts, main, roots=(), *, theory_laws=False):
         if isinstance(value, s.Name):
             yield value.name
             yield value.name.split(".")[0]
-        elif isinstance(value, s.Binop) and value.operator == "<>":
-            # Like an unqualified field use, <> reaches the type's combine model.
-            yield "combine"
-            yield from names((value.left, value.right))
         elif isinstance(value, s.PApp):
             yield value.name
             yield from names(value.patterns)
