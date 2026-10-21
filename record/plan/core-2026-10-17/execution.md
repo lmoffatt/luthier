@@ -844,6 +844,12 @@ too (`gamma n` in place of `3 gamma n` on the real doubles), as section 4 does f
 settle whether an `operator` act is exported with its file, since the examples' arithmetic on
 vectors depends on it. (3) `size` doesn't resolve at `Mat Float64` or `Table` (claims at one shape
 or schema); say in the report which uses in the examples that leaves on the old helpers.
+Also (2026-10-21, the coordinator on the concepts document's question, docs/concepts.md 4.3):
+resolution through a subtype to its base (4.R13) must not land on a claim made at a sibling
+subtype. `d microphone speaker` with `microphone : Mark` resolves to core.lut's `IntIsAMetric`,
+claimed at `MetricInteger`, by way of `Int`; it is right only because `Mark` lies inside
+`MetricInteger`. A claim at a subtype applies to a value of that subtype or of a subtype declared
+inside it; anything else is refused with the candidate named. A test shows the sibling case refused.
 
 ### Bite 13. Closing (Sonnet; after 12)
 
