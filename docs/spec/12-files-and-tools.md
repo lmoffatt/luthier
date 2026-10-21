@@ -78,7 +78,12 @@ files beside it), encloses the top-level scope of every file (a scope, not a blo
 its names (`Int`, `Bool`, `List`, `compose`, `Object` and the rest) are visible unqualified; a name
 with no import is local or core's (D-2026-10-18-b). A file does not define a name the core defines:
 the checker and the loader refuse it, naming the core file; an import of a core name by its path is
-redundant, a notice of `check -v`.
+redundant, a notice of `check -v`. The names refused are the top-level ones a file gives a meaning
+to: a declaration, a definition, an alias, a constructor of a data, a label of a sum, a name an import
+binds with `as`, and an `operator` act that binds a core operator to another function at the type of
+the core's binding (4.R13's same declared type, across the core); another type is an overload. A
+record's field, a parameter and a pattern variable stay free, since D-2026-10-18-b is about top-level
+names (the coordinator, 2026-10-21, on review-bite-5.md finding 2d).
 
 **12.S23. Theory files and model files.** [decided D-2026-10-13-n] A theory file, extension `.lth`,
 holds types, declarations and laws; the checker rejects an `extern`, an action or a model value in

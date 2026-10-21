@@ -657,3 +657,11 @@ def test_an_import_alias_that_is_a_core_name_is_refused(tmp_path, capsys):
     assert main(['check', str(path)]) == 1
     assert '12.S22 compose: alias.lut defines compose, which the core defines in core/core.lut' in capsys.readouterr().out
 
+
+def test_a_field_a_parameter_and_a_pattern_variable_stay_free(tmp_path):
+    # finding 2d, the coordinator's decision of 2026-10-21: D-2026-10-18-b is about top-level names
+    path = tmp_path / 'free.lut'
+    path.write_text('R = { map : Int, compose : Int }\nr : R := { map := 1, compose := 2 }\n'
+                    'f (compose : Int) : Int := compose\ng (x : Int) : Int := match x { compose -> compose }\n',
+                    encoding='utf-8')
+    assert main(['check', str(path)]) == 0
