@@ -12,7 +12,7 @@ import "test.lth" test ExhaustiveMode Grade Proved Cases defaultBudgets
 import "generators.lth" Binding
 import "laws.lth" Listed Cited
 import "certification.lth" Certifying Recording Entry Certificate Demand ConeName Refusal Outcome Passed Failed NotRunFor
-  fuelSpent outOfFuel known recordEntry anyServes appendRefusals failureAt Current agree disputedAt
+  fuelSpent outOfFuel known recordEntry failureAt Current agree disputedAt
   ANewIdentityGoesInFront AnAgreeingReplayAddsNothing AnAgreeingPairSettles ADisagreeingReplayIsKept AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused
 import "certification_model.lut" certifying anyFailure passes weakestOfBests serves stateOf
 import "term.lth" Term Act Program Alpha Substitution Reduction Var Lit Lam App Pi Pair Match Let Define
@@ -70,15 +70,16 @@ fuelModels : List (Recording certifying) := [keepingFuel]
 -- draft 1
 blindGrade (c : Certificate) : Maybe Grade :=
   if anyFailure c c.entries then nothing else weakestOfBests (passes c c.entries) (passes c c.entries) nothing
+blindLaw (es : List Entry) (n : String) (d : Demand) : List Refusal :=
+  match failureAt d.law d.cone es {
+    just f -> [{ name := n, law := just d.law, state := Current f.outcome }] ;
+    nothing -> if any List Entry (fn (e : Entry) { serves d e }) es then nil
+               else [{ name := n, law := just d.law, state := stateOf d es }] }
 blindLaws (es : List Entry) (n : String) (ds : List Demand) : List Refusal :=
-  match ds { nil -> nil ; cons d rest ->
-    match failureAt d.law d.cone es {
-      just f -> cons { name := n, law := just d.law, state := Current f.outcome } (blindLaws es n rest) ;
-      nothing -> if anyServes serves d es then blindLaws es n rest
-                 else cons { name := n, law := just d.law, state := stateOf d es } (blindLaws es n rest) } }
+  concat Refusal (map Demand (List Refusal) (blindLaw es n) ds)
 blindName (es : List Entry) (c : ConeName) : List Refusal := blindLaws es c.name c.laws
 blindRefuse (es : List Entry) (cs : List ConeName) : List Refusal :=
-  match cs { nil -> nil ; cons c rest -> appendRefusals (blindName es c) (blindRefuse es rest) }
+  concat Refusal (map ConeName (List Refusal) (blindName es) cs)
 blind : Certifying := { identity := certifying.identity, stale := certifying.stale, grade := blindGrade,
   contains := certifying.contains, serves := certifying.serves, refuse := blindRefuse, transport := certifying.transport }
 blindModels : List Certifying := [blind]
