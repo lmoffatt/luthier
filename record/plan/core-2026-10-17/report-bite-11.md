@@ -3,8 +3,8 @@
 Claude Opus 5.5, 2026-10-21, on `prompt-bite-11.md`. Input: `a7c0b5c`. Bites 9 and 10 and the
 refusal-holes agent committed in the same tree meanwhile; every count below is of the shared
 tree. Commits: `6e8f276`, `ab2c210`, `37a63dd`, `d6b2387`, `6623993`, `f71b06b`, `756ec7f`,
-`6de1017`, `cc6d37c`, `d75119b`, `30c176c`, `e56a4fa` (stores), `582621e`, `625783b`, the plot
-stores' commit and this report's. The arrays programs were certified in a separate worktree
+`6de1017`, `cc6d37c`, `d75119b`, `30c176c`, `e56a4fa` (stores), `582621e`, `625783b`, `621599a`
+(plot's stores), `7cc9a81` (this report) and `8f9b368` (the plan's Status). The arrays programs were certified in a separate worktree
 (`~/.cache/luthier-sdk/bite11/head`) holding the committed tree plus the rename of bite 9's files
 below, since without it `generators_model.lut` does not load.
 
