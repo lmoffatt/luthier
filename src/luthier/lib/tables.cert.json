@@ -1,12 +1,453 @@
 [
  {
+  "law": "TableIsAnObject",
+  "cone": "sha256:f7e6889095f4f52d518a6a3e2d434a9cacb2f1bac8661eaeec0b4ecfb2a81808",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "tableEquality (Listed)",
+    "fingerprint": "sha256:387f71d9726de44f5c7bdd718500eb82fd194f7a430ed9a1b86cc8bfafa3cdb1"
+   },
+   {
+    "parameter": "c",
+    "generator": "tableChains (Listed)",
+    "fingerprint": "sha256:927061890be5ffee3d5522cd98f16a4108db3ac6c632bf1ef188ef1987cd6bf4"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := sameTable }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := oneRow, y := oneRow, z := oneRow }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-21T13:17:46+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "conjunct": "Transitive Table (model).eq",
+  "conjuncts": [
+   "Reflexive Table (model).eq",
+   "Symmetric Table (model).eq",
+   "Transitive Table (model).eq"
+  ],
+  "regions": []
+ },
+ {
+  "law": "TableIsAnObject",
+  "cone": "sha256:f7e6889095f4f52d518a6a3e2d434a9cacb2f1bac8661eaeec0b4ecfb2a81808",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "tableEquality (Listed)",
+    "fingerprint": "sha256:387f71d9726de44f5c7bdd718500eb82fd194f7a430ed9a1b86cc8bfafa3cdb1"
+   },
+   {
+    "parameter": "p",
+    "generator": "tablePairs (Listed)",
+    "fingerprint": "sha256:512d0de12a6eb2ce45cc5dd0d8020c4f031cfd798b3dc94185c6b0e2b32d422f"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := sameTable }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := threeRows, y := threeRows }"
+      },
+      {
+       "Printed": "{ x := noRowsOfThree, y := noRowsOfThree }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-21T13:17:46+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "conjunct": "Symmetric Table (model).eq",
+  "conjuncts": [
+   "Reflexive Table (model).eq",
+   "Symmetric Table (model).eq",
+   "Transitive Table (model).eq"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "p boundary"
+    },
+    "n": 2
+   }
+  ]
+ },
+ {
+  "law": "TableIsAnObject",
+  "cone": "sha256:f7e6889095f4f52d518a6a3e2d434a9cacb2f1bac8661eaeec0b4ecfb2a81808",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "tableEquality (Listed)",
+    "fingerprint": "sha256:387f71d9726de44f5c7bdd718500eb82fd194f7a430ed9a1b86cc8bfafa3cdb1"
+   },
+   {
+    "parameter": "x",
+    "generator": "tables (Listed)",
+    "fingerprint": "sha256:43c9579b89119f83fecff7803600dd8edc66822040bfe9dd94de72a2833591c4,sha256:7ebf070238467e1c8a7989aa5c407e7895fe202dfaf12d2aac2699b8fd335b87,sha256:be4cb1cfbb23eec64772d6e4e588f5a4a76700a16aaa64bea17c0d34504694fb,sha256:95c035a99f86cb453fa0d860d0db0ed6a403f3c4cab8039fd26ac7b9fdaaa4e4,sha256:378b8284d11ac0dcb83a4c04d8857de1b38e70b66760ee824d8c1fe647617e13"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := sameTable }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "emptyT"
+      },
+      {
+       "Printed": "noColumns"
+      },
+      {
+       "Printed": "oneRow"
+      },
+      {
+       "Printed": "threeRows"
+      },
+      {
+       "Printed": "(parsed nodesTextA)"
+      },
+      {
+       "Printed": "(parsed measurementsTextA)"
+      },
+      {
+       "Printed": "(parsed smallText)"
+      },
+      {
+       "Printed": "(parsed quotedText)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-21T13:17:45+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ]
+  ],
+  "conjunct": "Reflexive Table (model).eq",
+  "conjuncts": [
+   "Reflexive Table (model).eq",
+   "Symmetric Table (model).eq",
+   "Transitive Table (model).eq"
+  ],
+  "regions": []
+ },
+ {
+  "law": "TableIsIndexed",
+  "cone": "sha256:a6821cee4b6e7c60739676cff905814e31df92f1234fd51390227b31db661c2d",
+  "binding": [
+   {
+    "parameter": "names",
+    "generator": "schemaNames (Listed)",
+    "fingerprint": "sha256:b79bb8bbb3bbd4e7a9369b741f386c154e1c21b284fb303782b235f0818c3c3a"
+   },
+   {
+    "parameter": "kinds",
+    "generator": "schemaKinds (Listed)",
+    "fingerprint": "sha256:9a17ffc6d12b521f6eee6787b33c12139936cd483142d1b0badefb3089d38a7b"
+   },
+   {
+    "parameter": "model",
+    "generator": "goodRows (Listed)",
+    "fingerprint": "sha256:671511c9502799ac5ff67de04df15034e672ae6c444d58203e96754abd14989a"
+   },
+   {
+    "parameter": "o",
+    "generator": "tableEquality (Listed)",
+    "fingerprint": "sha256:387f71d9726de44f5c7bdd718500eb82fd194f7a430ed9a1b86cc8bfafa3cdb1"
+   },
+   {
+    "parameter": "a",
+    "generator": "rowEquality (Listed)",
+    "fingerprint": "sha256:cb752d36ec064cca60893a3771c3587ff241872833acae62cb466664a3d7a350"
+   },
+   {
+    "parameter": "c",
+    "generator": "ofOneSchema (Listed)",
+    "fingerprint": "sha256:95c035a99f86cb453fa0d860d0db0ed6a403f3c4cab8039fd26ac7b9fdaaa4e4,sha256:7458d6190511144098cae6ad0a7fcd6cf2ff90a03eb6069e6b47b860a013a911,sha256:c145c48f5e1aed505b61ba2f4a9f285f9b7933721d5d105fbea191e2f7880007"
+   },
+   {
+    "parameter": "d",
+    "generator": "ofOneSchema (Listed)",
+    "fingerprint": "sha256:95c035a99f86cb453fa0d860d0db0ed6a403f3c4cab8039fd26ac7b9fdaaa4e4,sha256:7458d6190511144098cae6ad0a7fcd6cf2ff90a03eb6069e6b47b860a013a911,sha256:c145c48f5e1aed505b61ba2f4a9f285f9b7933721d5d105fbea191e2f7880007"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "names",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"k\") ((cons \"x\") ((cons \"label\") nil)))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "kinds",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"int\") ((cons \"float\") ((cons \"str\") nil)))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "rowsOf"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := sameTable }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "a",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(rowObject ((cons \"k\") ((cons \"x\") ((cons \"label\") nil))))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "threeRows"
+      },
+      {
+       "Printed": "threeRowsRelabelled"
+      },
+      {
+       "Printed": "noRowsOfThree"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "threeRows"
+      },
+      {
+       "Printed": "threeRowsRelabelled"
+      },
+      {
+       "Printed": "noRowsOfThree"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 9,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-21T13:17:45+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "conjunct": "Extensional ((TableOf names) kinds) (_ : String) -> (Maybe { int : Int || real : Float64 || text : String }) model",
+  "conjuncts": [
+   "Extensional ((TableOf names) kinds) (_ : String) -> (Maybe { int : Int || real : Float64 || text : String }) model"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "c boundary"
+    },
+    "n": 9
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "d boundary"
+    },
+    "n": 9
+   }
+  ]
+ },
+ {
   "law": "NoCellsOffSchema",
-  "cone": "sha256:87a030c1383cb92cf602af019a061aa301f9b5a5bf6b3f56a1e81a267c9cea96",
+  "cone": "sha256:14feb8f1e1a6956792b499c7446a2a4dcdc7d46317cf90f1d19ae9af5791820f",
   "binding": [
    {
     "parameter": "t",
     "generator": "withRows (Listed)",
-    "fingerprint": "sha256:be4cb1cfbb23eec64772d6e4e588f5a4a76700a16aaa64bea17c0d34504694fb,sha256:95c035a99f86cb453fa0d860d0db0ed6a403f3c4cab8039fd26ac7b9fdaaa4e4,sha256:84fc161d382ad6df40cbc9e7d3202dab581215724c88d9b120de1507373e6d0f"
+    "fingerprint": "sha256:be4cb1cfbb23eec64772d6e4e588f5a4a76700a16aaa64bea17c0d34504694fb,sha256:95c035a99f86cb453fa0d860d0db0ed6a403f3c4cab8039fd26ac7b9fdaaa4e4,sha256:21673e4fb3a9b68dc7d433e5a18fc71e0c953b5c53c8ea65ef7f59348c504bef"
    },
    {
     "parameter": "c",
@@ -30,6 +471,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -99,7 +543,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-17T17:24:13+00:00",
+  "date": "2026-10-21T13:17:44+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -115,12 +559,12 @@
  },
  {
   "law": "CellsOfTheirKind",
-  "cone": "sha256:5fe200cbb891502017d0fe7a0172c973fe4b9ae4667c068f529c3188879e3b1d",
+  "cone": "sha256:5ae23efbbba31cd1932286ab439db54c6eced8d83221c59b77dc9fb521ba6f73",
   "binding": [
    {
     "parameter": "t",
     "generator": "tables (Listed)",
-    "fingerprint": "sha256:43c9579b89119f83fecff7803600dd8edc66822040bfe9dd94de72a2833591c4,sha256:7ebf070238467e1c8a7989aa5c407e7895fe202dfaf12d2aac2699b8fd335b87,sha256:be4cb1cfbb23eec64772d6e4e588f5a4a76700a16aaa64bea17c0d34504694fb,sha256:95c035a99f86cb453fa0d860d0db0ed6a403f3c4cab8039fd26ac7b9fdaaa4e4,sha256:b6f3f6e92744ac0c39e96371aebb314de67ef3ac1c7f15a7581db329f47e7379"
+    "fingerprint": "sha256:43c9579b89119f83fecff7803600dd8edc66822040bfe9dd94de72a2833591c4,sha256:7ebf070238467e1c8a7989aa5c407e7895fe202dfaf12d2aac2699b8fd335b87,sha256:be4cb1cfbb23eec64772d6e4e588f5a4a76700a16aaa64bea17c0d34504694fb,sha256:95c035a99f86cb453fa0d860d0db0ed6a403f3c4cab8039fd26ac7b9fdaaa4e4,sha256:378b8284d11ac0dcb83a4c04d8857de1b38e70b66760ee824d8c1fe647617e13"
    }
   ],
   "seed": 20261014,
@@ -134,6 +578,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -180,7 +627,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-17T17:24:13+00:00",
+  "date": "2026-10-21T13:17:43+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -196,12 +643,12 @@
  },
  {
   "law": "KindsKnown",
-  "cone": "sha256:a841bd96040ba80bd4153778cf5a23492328c167a0647a279f68f49dd32e7ced",
+  "cone": "sha256:6006edca6ea8f6f5cbe3a5b99159d5bf97ad9d59a697b08fffbcfa4b061fb744",
   "binding": [
    {
     "parameter": "t",
     "generator": "tables (Listed)",
-    "fingerprint": "sha256:43c9579b89119f83fecff7803600dd8edc66822040bfe9dd94de72a2833591c4,sha256:7ebf070238467e1c8a7989aa5c407e7895fe202dfaf12d2aac2699b8fd335b87,sha256:be4cb1cfbb23eec64772d6e4e588f5a4a76700a16aaa64bea17c0d34504694fb,sha256:95c035a99f86cb453fa0d860d0db0ed6a403f3c4cab8039fd26ac7b9fdaaa4e4,sha256:b6f3f6e92744ac0c39e96371aebb314de67ef3ac1c7f15a7581db329f47e7379"
+    "fingerprint": "sha256:43c9579b89119f83fecff7803600dd8edc66822040bfe9dd94de72a2833591c4,sha256:7ebf070238467e1c8a7989aa5c407e7895fe202dfaf12d2aac2699b8fd335b87,sha256:be4cb1cfbb23eec64772d6e4e588f5a4a76700a16aaa64bea17c0d34504694fb,sha256:95c035a99f86cb453fa0d860d0db0ed6a403f3c4cab8039fd26ac7b9fdaaa4e4,sha256:378b8284d11ac0dcb83a4c04d8857de1b38e70b66760ee824d8c1fe647617e13"
    }
   ],
   "seed": 20261014,
@@ -215,6 +662,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -261,7 +711,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-17T17:24:13+00:00",
+  "date": "2026-10-21T13:17:43+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -277,12 +727,12 @@
  },
  {
   "law": "SchemaWellFormed",
-  "cone": "sha256:227ee17c42c845c775dc67fb532a7e354850242b6dd18d1a206c743c26e07be6",
+  "cone": "sha256:6c59c550ccd964389c9254d9f137f52085aab6d957b019af4a47eb05c67a3e2d",
   "binding": [
    {
     "parameter": "t",
     "generator": "tables (Listed)",
-    "fingerprint": "sha256:43c9579b89119f83fecff7803600dd8edc66822040bfe9dd94de72a2833591c4,sha256:7ebf070238467e1c8a7989aa5c407e7895fe202dfaf12d2aac2699b8fd335b87,sha256:be4cb1cfbb23eec64772d6e4e588f5a4a76700a16aaa64bea17c0d34504694fb,sha256:95c035a99f86cb453fa0d860d0db0ed6a403f3c4cab8039fd26ac7b9fdaaa4e4,sha256:b6f3f6e92744ac0c39e96371aebb314de67ef3ac1c7f15a7581db329f47e7379"
+    "fingerprint": "sha256:43c9579b89119f83fecff7803600dd8edc66822040bfe9dd94de72a2833591c4,sha256:7ebf070238467e1c8a7989aa5c407e7895fe202dfaf12d2aac2699b8fd335b87,sha256:be4cb1cfbb23eec64772d6e4e588f5a4a76700a16aaa64bea17c0d34504694fb,sha256:95c035a99f86cb453fa0d860d0db0ed6a403f3c4cab8039fd26ac7b9fdaaa4e4,sha256:378b8284d11ac0dcb83a4c04d8857de1b38e70b66760ee824d8c1fe647617e13"
    }
   ],
   "seed": 20261014,
@@ -296,6 +746,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -342,7 +795,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-17T17:24:13+00:00",
+  "date": "2026-10-21T13:17:43+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -357,8 +810,281 @@
   "regions": []
  },
  {
+  "law": "TableIsAnObject",
+  "cone": "sha256:f7e6889095f4f52d518a6a3e2d434a9cacb2f1bac8661eaeec0b4ecfb2a81808",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "neverEqual (Listed)",
+    "fingerprint": "sha256:13d3d4cc7aef49ef91fc8f54c38e7ecd683ebc41865d179abeb24449f4620e78"
+   },
+   {
+    "parameter": "x",
+    "generator": "ofOneSchema (Listed)",
+    "fingerprint": "sha256:a818a76b56e6d86c2d4431cc9d87b86cd716caef73dd8793011fde317651a75d,sha256:02c364164e1382150e57f57767eb4a65d8661f4931257fddf75b7763dcc40373"
+   },
+   {
+    "parameter": "p",
+    "generator": "tablePairs (Listed)",
+    "fingerprint": "sha256:180c2349c44644393b0a0426ef04119eb0e4bd8696d36ff8a1400021d7074df4"
+   },
+   {
+    "parameter": "c",
+    "generator": "tableChains (Listed)",
+    "fingerprint": "sha256:7b1707301dce2ae3a8f8247c4f299e1d74cf7b5ee976a6c0ca499cda4defcc21"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := fn (t : Table) { fn (u : Table) { false } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "oneOfK"
+      },
+      {
+       "Printed": "otherOfK"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := oneOfK, y := oneOfK }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := oneOfK, y := oneOfK, z := oneOfK }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Reflexive Table (model).eq: model = { eq := fn (t : Table) { fn (u : Table) { false } } }, x = oneOfK"
+  },
+  "date": "2026-10-21T13:17:38+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "TableIsIndexed",
+  "cone": "sha256:a6821cee4b6e7c60739676cff905814e31df92f1234fd51390227b31db661c2d",
+  "binding": [
+   {
+    "parameter": "names",
+    "generator": "schemaNames (Listed)",
+    "fingerprint": "sha256:faadd7999a72a108b2aeabf5150c8e09e0cc11701ca218e05a81d3fb2dd5f95e"
+   },
+   {
+    "parameter": "kinds",
+    "generator": "schemaKinds (Listed)",
+    "fingerprint": "sha256:53464fc87989585fecc34af09d1bf896001a8d2f48ae1eec46276fe04e258fcc"
+   },
+   {
+    "parameter": "model",
+    "generator": "noRows (Listed)",
+    "fingerprint": "sha256:d45cabe56743636f88d70927dc839b961e3aa735fd9c33c3d752c8ed0b7f5476"
+   },
+   {
+    "parameter": "o",
+    "generator": "tableEquality (Listed)",
+    "fingerprint": "sha256:387f71d9726de44f5c7bdd718500eb82fd194f7a430ed9a1b86cc8bfafa3cdb1"
+   },
+   {
+    "parameter": "a",
+    "generator": "rowEquality (Listed)",
+    "fingerprint": "sha256:145de6ee9aaf9bead69c050a9af021d860f08ceb85c9b4a4e339b61afb93b697"
+   },
+   {
+    "parameter": "c",
+    "generator": "ofOneSchema (Listed)",
+    "fingerprint": "sha256:a818a76b56e6d86c2d4431cc9d87b86cd716caef73dd8793011fde317651a75d,sha256:02c364164e1382150e57f57767eb4a65d8661f4931257fddf75b7763dcc40373"
+   },
+   {
+    "parameter": "d",
+    "generator": "ofOneSchema (Listed)",
+    "fingerprint": "sha256:a818a76b56e6d86c2d4431cc9d87b86cd716caef73dd8793011fde317651a75d,sha256:02c364164e1382150e57f57767eb4a65d8661f4931257fddf75b7763dcc40373"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "names",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"k\") nil)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "kinds",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"int\") nil)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ size := fn (t : Table) { 0 }, at := fn (t : Table) { fn (r : (Fin (size t))) { fn (c : String) { (((t).cell c) r) } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := sameTable }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "a",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(rowObject ((cons \"k\") nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "oneOfK"
+      },
+      {
+       "Printed": "otherOfK"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "oneOfK"
+      },
+      {
+       "Printed": "otherOfK"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Extensional ((TableOf names) kinds) (_ : String) -> (Maybe { int : Int || real : Float64 || text : String }) model: names = ((cons \"k\") nil), kinds = ((cons \"int\") nil), model = { size := fn (t : Table) { 0 }, at := fn (t : Table) { fn (r : (Fin (size t))) { fn (c : String) { (((t).cell c) r) } } } }, o = { eq := sameTable }, a = (rowObject ((cons \"k\") nil)), c = oneOfK, d = otherOfK"
+  },
+  "date": "2026-10-21T13:17:38+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "c boundary"
+    },
+    "n": 4
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "d boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
   "law": "NoCellsOffSchema",
-  "cone": "sha256:87a030c1383cb92cf602af019a061aa301f9b5a5bf6b3f56a1e81a267c9cea96",
+  "cone": "sha256:14feb8f1e1a6956792b499c7446a2a4dcdc7d46317cf90f1d19ae9af5791820f",
   "binding": [
    {
     "parameter": "t",
@@ -387,6 +1113,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -437,7 +1166,7 @@
   "outcome": {
    "ControlRefuted": "t = answersAll, c = \"nope\", r = 0"
   },
-  "date": "2026-10-17T17:24:08+00:00",
+  "date": "2026-10-21T13:17:38+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
@@ -445,7 +1174,7 @@
  },
  {
   "law": "KindsKnown",
-  "cone": "sha256:a841bd96040ba80bd4153778cf5a23492328c167a0647a279f68f49dd32e7ced",
+  "cone": "sha256:6006edca6ea8f6f5cbe3a5b99159d5bf97ad9d59a697b08fffbcfa4b061fb744",
   "binding": [
    {
     "parameter": "t",
@@ -464,6 +1193,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -491,7 +1223,7 @@
   "outcome": {
    "ControlRefuted": "t = unknownKind"
   },
-  "date": "2026-10-17T17:24:08+00:00",
+  "date": "2026-10-21T13:17:38+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
@@ -499,7 +1231,7 @@
  },
  {
   "law": "SchemaWellFormed",
-  "cone": "sha256:227ee17c42c845c775dc67fb532a7e354850242b6dd18d1a206c743c26e07be6",
+  "cone": "sha256:6c59c550ccd964389c9254d9f137f52085aab6d957b019af4a47eb05c67a3e2d",
   "binding": [
    {
     "parameter": "t",
@@ -518,6 +1250,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -545,7 +1280,7 @@
   "outcome": {
    "ControlRefuted": "t = twiceNamed"
   },
-  "date": "2026-10-17T17:24:08+00:00",
+  "date": "2026-10-21T13:17:38+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
@@ -558,7 +1293,7 @@
    {
     "parameter": "c",
     "generator": "lenientList (Listed)",
-    "fingerprint": "sha256:431df993fd3f0a292f7a4c03bf8921fbe1d1b5f678ce0dd670ca33320d475473"
+    "fingerprint": "sha256:c34fb26b297a3ad280e97290e8dcba79e871a42c0977b94e2996cdb667b045d0"
    },
    {
     "parameter": "b",
@@ -577,6 +1312,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -617,7 +1355,7 @@
   "outcome": {
    "ControlRefuted": "c = lenient, b = { s := \"k:int,k:float\\n1,2.0\\n\" }"
   },
-  "date": "2026-10-17T17:24:08+00:00",
+  "date": "2026-10-21T13:17:37+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -639,12 +1377,12 @@
    {
     "parameter": "c",
     "generator": "dropsLastReadList (Listed)",
-    "fingerprint": "sha256:46c6aba1abefdc69f98e13e483c1d8b7b3b825011e6d84da65d6c4b83f0b4bba"
+    "fingerprint": "sha256:eb44112c74cf0d6b97f9af23bc90311902acd47659187d128ce11bd3d35e03bc"
    },
    {
     "parameter": "p",
     "generator": "perturbedSmall (Listed)",
-    "fingerprint": "sha256:afd2f20ba2c560eb9ec049f5c6388badfce20698ef30716d46152f026fe01546"
+    "fingerprint": "sha256:c44ab93819ff48f25af73fd3603a700b3a4837983a4f20ab58c68eee4473c4c1"
    }
   ],
   "seed": 20261015,
@@ -658,6 +1396,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -698,7 +1439,7 @@
   "outcome": {
    "ControlRefuted": "c = dropsLastRead, p = { table := (parsed smallText), text := \"a:int,b:float\\n1,2.5\\n-3,4.0\\n\" }"
   },
-  "date": "2026-10-17T17:24:08+00:00",
+  "date": "2026-10-21T13:17:37+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -720,12 +1461,12 @@
    {
     "parameter": "c",
     "generator": "dropsLastWrittenList (Listed)",
-    "fingerprint": "sha256:8305af84e23ab88de9a19c7ba87a700151880057f7bfd40fc7f23dc0bd711298"
+    "fingerprint": "sha256:0110baecd8612219a8ae1aaf0069b655e1d2d6cabadf3b6569673e5b73267bdf"
    },
    {
     "parameter": "p",
     "generator": "perturbedSmall (Listed)",
-    "fingerprint": "sha256:afd2f20ba2c560eb9ec049f5c6388badfce20698ef30716d46152f026fe01546"
+    "fingerprint": "sha256:c44ab93819ff48f25af73fd3603a700b3a4837983a4f20ab58c68eee4473c4c1"
    }
   ],
   "seed": 20261015,
@@ -739,6 +1480,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -779,7 +1523,7 @@
   "outcome": {
    "ControlRefuted": "c = dropsLastWritten, p = { table := (parsed smallText), text := \"a:int,b:float\\n1,2.5\\n-3,4.0\\n\" }"
   },
-  "date": "2026-10-17T17:24:08+00:00",
+  "date": "2026-10-21T13:17:37+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -796,17 +1540,17 @@
  },
  {
   "law": "RoundTrip",
-  "cone": "sha256:fc1638ffa216474eccd4e400771e913e9b334acae2f391d2dc8f8c1722cb924e",
+  "cone": "sha256:464906a9a65f783606cb536fcd1101ebbacaa8d035ecdd8a6f5d2a1800740d8a",
   "binding": [
    {
     "parameter": "c",
     "generator": "dropsLastWrittenList (Listed)",
-    "fingerprint": "sha256:8305af84e23ab88de9a19c7ba87a700151880057f7bfd40fc7f23dc0bd711298"
+    "fingerprint": "sha256:0110baecd8612219a8ae1aaf0069b655e1d2d6cabadf3b6569673e5b73267bdf"
    },
    {
     "parameter": "t",
     "generator": "tablesWithRows (Listed)",
-    "fingerprint": "sha256:be4cb1cfbb23eec64772d6e4e588f5a4a76700a16aaa64bea17c0d34504694fb,sha256:de33807b0e8e20306fb4644f00a95fd8a3ef36832c1d5464d3d6b25fde8fa228"
+    "fingerprint": "sha256:be4cb1cfbb23eec64772d6e4e588f5a4a76700a16aaa64bea17c0d34504694fb,sha256:5d4d3e65b0b757cf7677831658d6526d8f3374a8c4581b640144ba37c1aa237f"
    }
   ],
   "seed": 20261015,
@@ -820,6 +1564,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -860,7 +1607,7 @@
   "outcome": {
    "ControlRefuted": "c = dropsLastWritten, t = oneRow"
   },
-  "date": "2026-10-17T17:24:08+00:00",
+  "date": "2026-10-21T13:17:37+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -877,7 +1624,7 @@
  },
  {
   "law": "CellsOfTheirKind",
-  "cone": "sha256:5fe200cbb891502017d0fe7a0172c973fe4b9ae4667c068f529c3188879e3b1d",
+  "cone": "sha256:5ae23efbbba31cd1932286ab439db54c6eced8d83221c59b77dc9fb521ba6f73",
   "binding": [
    {
     "parameter": "t",
@@ -896,6 +1643,9 @@
    "levelRuns": 10,
    "seedsPerControl": 5,
    "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
    "specialMass": 0.05,
    "atomAtZero": 0.01
   },
@@ -923,7 +1673,7 @@
   "outcome": {
    "ControlRefuted": "t = holeT"
   },
-  "date": "2026-10-17T17:24:08+00:00",
+  "date": "2026-10-21T13:17:37+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
