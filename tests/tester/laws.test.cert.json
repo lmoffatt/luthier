@@ -1,0 +1,457 @@
+[
+ {
+  "law": "Small",
+  "cone": "sha256:119ea509a4f1171383dc69e2e93bcdbec696fd4dfcfb38d38da3c8efcc812ee9",
+  "binding": [
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000) over Int",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -1000.0,
+      1000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "Failed": "x = 552"
+  },
+  "date": "2026-10-21T06:23:58+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "Small",
+  "cone": "sha256:119ea509a4f1171383dc69e2e93bcdbec696fd4dfcfb38d38da3c8efcc812ee9",
+  "binding": [
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-21T06:23:58+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "IntPlusCommutes",
+  "cone": "sha256:27b7188bac774f6d76426d9625ddfdfe99b39104863a51775ed98147477e34f3",
+  "binding": [
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   }
+  ],
+  "seed": 7,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 7)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-21T06:23:58+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "IntPlusCommutes",
+  "cone": "sha256:27b7188bac774f6d76426d9625ddfdfe99b39104863a51775ed98147477e34f3",
+  "binding": [
+   {
+    "parameter": "x",
+    "generator": "ExhaustiveMode over Int",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "y",
+    "generator": "ExhaustiveMode over Int",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "x",
+    "reach": "Support"
+   },
+   {
+    "parameter": "y",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "NotRun": "x : Int: Int is infinite: ExhaustiveMode needs its bounds or a census (7.R3)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "x : Int: Int is infinite: ExhaustiveMode needs its bounds or a census (7.R3)"
+  },
+  "date": "2026-10-21T03:47:43+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
+  "law": "PlusCommutes",
+  "cone": "sha256:4535b03f3dbb99b0b9179670bf671b92aab882db7074f0af08bc3f3916a11a38",
+  "binding": [
+   {
+    "parameter": "x",
+    "generator": "ExhaustiveMode over Int",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "y",
+    "generator": "ExhaustiveMode over Int",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "x",
+    "reach": "Support"
+   },
+   {
+    "parameter": "y",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "NotRun": "x : Int: Int is infinite: ExhaustiveMode needs its bounds or a census (7.R3)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "x : Int: Int is infinite: ExhaustiveMode needs its bounds or a census (7.R3)"
+  },
+  "date": "2026-10-18T00:49:38+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
+  "law": "PlusCommutes",
+  "cone": "sha256:4535b03f3dbb99b0b9179670bf671b92aab882db7074f0af08bc3f3916a11a38",
+  "binding": [
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
+    "fingerprint": "sha256:3b1dd03bf97782270118e7a44e422bd55ac20e9bb0055f46a2e06779b63d6acb"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
+    "fingerprint": "sha256:3b1dd03bf97782270118e7a44e422bd55ac20e9bb0055f46a2e06779b63d6acb"
+   }
+  ],
+  "seed": 7,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 7)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-18T00:49:38+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "AndIsOr",
+  "cone": "sha256:de9e195a1b6388ec2b0abb6e222751745c2d66dfb939d47074d41dff94f8db29",
+  "binding": [
+   {
+    "parameter": "a",
+    "generator": "ExhaustiveMode over Bool",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "b",
+    "generator": "ExhaustiveMode over Bool",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "a",
+    "reach": "Support"
+   },
+   {
+    "parameter": "b",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Exhaustive",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "Failed": "a = true, b = false"
+  },
+  "date": "2026-10-18T00:49:38+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "NotInvolutive",
+  "cone": "sha256:b3df4bec91c93202322bbc226a5395491fe0bef7a69f111b2e423d9c994254e4",
+  "binding": [
+   {
+    "parameter": "b",
+    "generator": "ExhaustiveMode over Bool",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "b",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Exhaustive",
+    "verdict": "Confirmed"
+   }
+  },
+  "grade": "ExhaustiveGrade",
+  "outcome": "Passed",
+  "date": "2026-10-18T00:49:38+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ }
+]
