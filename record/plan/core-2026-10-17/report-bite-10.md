@@ -46,3 +46,45 @@ bite 10 is not separable.
 5. Commit bodies hold one line plus the co-author line, in two `-m` blocks.
 
 Follow-up (refusal-holes fix a37136b): term_model.lut's sum label `Selected` collided with the core alias `Selected`; it is `ArmSelected` (three uses). `check` clean on term_model.lut and certification_model.lut, `luthier test tests/tester/certification_laws.test.lut` exits 0.
+
+## Differential after a182ed5
+
+Run 2026-10-22 on HEAD (02c70e1) against 010d17c^ in a `git worktree` (386a5f0, "Bite 9"), both with
+`/home/lmoffatt/miniconda3/bin/luthier eval FILE TERM` (the same installed core, so only the library
+files differ). The old copy of term.lth and term_model.lut carried the three renames that bite 10 made
+after its main commit (`Beta` to `BetaReduces`, `ArmStep`'s `Selected` to `ArmSelected`; `Lists`
+does not occur in them) so the old files load; no other edit. 208 terms, each evaluated on both sides,
+first output line compared as text (list: /tmp/difft/terms.txt, results: /tmp/difft/out.tsv, script
+/tmp/difft/run.sh; scratch, not kept in the repo).
+
+Terms, by rewritten function (edge cases: empty lists, duplicate names, a binder that shadows or
+prefixes a name such as "y" and "y'", "x" and "x0"): term.lth `freeVars` (every constructor: Lam, Pi,
+Sigma, Subtype, Let, Match with empty and repeated pattern variables, Data with its own name among the
+constructors, Sum, Record, RecordValue, Proj, Inj), `patternVars`, `patternsVars`, `swap` (Match,
+Data, Record, Sum, Let, x = y), `swapPatterns`, `sameNames` (7 terms: empty, permutation,
+duplicates both ways, strict inclusion), `free` (7 programs); term_model.lut `textAppend`,
+`unqualified`, `freshName`, `allNames` (all constructors), `armNames`, `pairNames`, `recordNames`,
+`substTerm`, `substArms`, `substPairs`, `substTelescope`, `swapLocalPairs`, `canonicalTerm`,
+`nextBinder`, `canonBindings`, `linearBindings`, `bindingNames`, `bindingTermNames`,
+`applyBindings`, `stepPattern`, `stepTerm` (Match, Proj through RecordValue and through a definition,
+beta, equality), `constructorType`, `equalValues`.
+
+Result: 192 equal, 16 differ. The 16 are all the same print difference and not a disagreement:
+`textAppend`, `canonicalTerm`, `nextBinder` and `canonBindings` leave `textJoin (...)` of the two
+text lists unreduced on both sides (`textParts` is stuck, so `textJoin` never fires), and the old
+side prints `appendText (textParts "x") (textParts (natDecimal 0))` where the new one prints
+`{ neutral := nil, combine := combineList String }.combine (textParts "x") (textParts (natDecimal 0))`,
+which is the same call by `<>`'s definition. Of the 192 equal, 28 are equal only as the same
+`stuck match` or the same unreduced `textJoin`; these are the terms that need `freshName`,
+`unqualified` or `canonName` to reduce (freshName with a collision, substTerm and canonicalTerm that
+rename a binder, nextBinder and canonBindings with an `avoid` list that hits, applyBindings with two
+or more bindings). Neither side evaluates them, so for the `<>` in `lastComponent`, the `member` in
+`freshName` and `nextBinder`, and the `allNames`-fed `avoid` lists of the renaming paths the
+differential says nothing. The other 164 are values (lists of names, Bools, terms, Maybe, pairs)
+and agree; that covers every use of `remove`, `removeAll`, `<>` on names and bindings, `concat`,
+`map`, `all`, `distinct` and `lookup` outside those paths.
+
+Verdict: no disagreement found, no fix made. The open part is the stuck terms (28), which wait for
+`textParts` and `textJoin` to reduce in `luthier eval`; until then their correctness rests on `check`
+and the pytest selection, as before. The `foldList` obstacle of the first differential is gone: `all`,
+`distinct`, `removeAll` and `remove` reduce to values at a182ed5.
