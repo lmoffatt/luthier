@@ -47,10 +47,13 @@ kindOf (c : Maybe Cell) : String :=
   match c { nothing -> "" ; just v -> match v { int k -> "int" ; real x -> "float" ; text s -> "str" } }
 knownKind (k : String) : Bool := k == "int" or k == "float" or k == "str"
 
-listLength (A : U) (xs : List A) : Int := match xs { nil -> 0 ; cons x rest -> 1 + listLength A rest }
-memberStr (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or memberStr x rest }
-distinctColumns (xs : List String) : Bool := match xs { nil -> true ; cons a rest -> not (memberStr a rest) and distinctColumns rest }
-allKnown (ks : List String) : Bool := match ks { nil -> true ; cons k rest -> knownKind k and allKnown rest }
+-- [core bite 11, execution.md §5.2] The lists of names are the core's: `size`, `member`,
+-- `distinct`, `all`, `zip` (core/lists.lut), resolved at `List String`. `listLength`,
+-- `memberStr` and `distinctColumns` stay only as abbreviations of the core's for plot.lth's
+-- import, until bite 12 rewrites plot.lth.
+listLength (A : U) (xs : List A) : Int := lengthList A xs
+memberStr (x : String) (xs : List String) : Bool := member List String x xs
+distinctColumns (xs : List String) : Bool := distinct String (structural String) xs
 
 -- the first index from k below n where p fails, or -1: for messages that point at the row
 -- (v0.1 table.lut:30; the row numbers of validate_graph.lut count from 0)
@@ -63,26 +66,24 @@ firstFailing (k : Nat) (n : Int) (p : Fin n -> Bool) : Int :=
 Table : { nRows : Nat, names : List String, kinds : List String, cell : String -> Fin nRows -> Maybe Cell }
 
 -- the columns are named once each, with one kind each, every kind known
-SchemaWellFormed (t : Table) : Bool := distinctColumns t.names and listLength String t.names == listLength String t.kinds
-KindsKnown (t : Table) : Bool := allKnown t.kinds
--- every cell of a column is of the column's kind
-columnsOfKind (t : Table) (ns ks : List String) : Bool :=
-  match ns { nil -> true ; cons n rest -> match ks { nil -> false ; cons k more ->
-    forallBelow t.nRows (fn r { kindOf (t.cell n r) == k }) and columnsOfKind t rest more } }
-CellsOfTheirKind (t : Table) : Bool := columnsOfKind t t.names t.kinds
+SchemaWellFormed (t : Table) : Bool := distinct String (structural String) t.names and size t.names == size t.kinds
+KindsKnown (t : Table) : Bool := all List String knownKind t.kinds
+-- every cell of a column is of the column's kind (a name past the last kind is of none)
+CellsOfTheirKind (t : Table) : Bool :=
+  size t.names <= size t.kinds
+  and all List (String * String) (fn p { match p { (n, k) -> forallBelow t.nRows (fn r { kindOf (t.cell n r) == k }) } }) (zip String String t.names t.kinds)
 -- a name that is not a column has no cells
-NoCellsOffSchema (t : Table) (c : String) (r : Fin t.nRows) : Bool := memberStr c t.names or kindOf (t.cell c r) == ""
+NoCellsOffSchema (t : Table) (c : String) (r : Fin t.nRows) : Bool := member List String c t.names or kindOf (t.cell c r) == ""
 
 Table := SchemaWellFormed & KindsKnown & CellsOfTheirKind & NoCellsOffSchema
 
 -- ---------------------------------------------------------------- §3 The accessors
 
-nCols (t : Table) : Int := listLength String t.names
+nCols (t : Table) : Int := size t.names
 
-pairIn (ns ks : List String) (n k : String) : Bool :=
-  match ns { nil -> false ; cons a rest -> match ks { nil -> false ; cons b more -> (a == n and b == k) or pairIn rest more n k } }
 -- a column of this name and kind: "int", "float" or "str"
-hasColumn (t : Table) (name kind : String) : Bool := pairIn t.names t.kinds name kind
+hasColumn (t : Table) (name kind : String) : Bool :=
+  member List (String * String) (name, kind) (zip String String t.names t.kinds) (o <- structural (String * String))
 
 -- The cells of a column of a kind. The column is a precondition, refined in the argument; by
 -- the laws of `Table` its cells are then of that kind, and the other branches are unreachable
@@ -109,10 +110,23 @@ sameCell (a b : Maybe Cell) : Bool :=
         int k -> match y { int l -> k == l ; real q -> false ; text s -> false } ;
         real p -> match y { int l -> false ; real q -> p == q ; text s -> false } ;
         text r -> match y { int l -> false ; real q -> false ; text s -> r == s } } } }
-sameCells (t u : Table) (ns : List String) : Bool :=
-  match ns { nil -> true ; cons n rest -> forallBelow t.nRows (fn r { sameCell (t.cell n r) (u.cell n r) }) and sameCells t u rest }
 sameTable (t u : Table) : Bool :=
-  if t.nRows == u.nRows then t.names == u.names and t.kinds == u.kinds and sameCells t u t.names else false
+  if t.nRows == u.nRows then
+    t.names == u.names and t.kinds == u.kinds
+    and all List String (fn n { forallBelow t.nRows (fn r { sameCell (t.cell n r) (u.cell n r) }) }) t.names
+  else false
+
+-- [core bite 11, execution.md §6] A table is indexed by its rows (containers.lth's `Indexed`), a
+-- row the cells of a name; tables compare by `sameTable`, rows on the columns of the schema (off
+-- the schema a row has no cells, `NoCellsOffSchema`). The rows do not see the schema (two tables
+-- with no rows and different columns have the same rows), so the claim is at one schema, where
+-- the index is extensional, as arrays.lth's `MatShaped` is for the shape of a matrix.
+Row = String -> Maybe Cell
+rowsOf : Indexed Table Row := { size := fn (t : Table) { t.nRows }, at := fn (t : Table) r { fn c { t.cell c r } } }
+rowObject (names : List String) : Object Row := { eq := fn x y { all List String (fn n { sameCell (x n) (y n) }) names } }
+TableOf (names kinds : List String) : U := { t : Table | t.names == names and t.kinds == kinds }
+TableIsIndexed (names kinds : List String) (model : Indexed (TableOf names kinds) Row <- rowsOf) : Bool := Indexed (TableOf names kinds) Row model
+TableIsAnObject (model : Object Table <- { eq := sameTable }) : Bool := Object Table model
 
 -- ---------------------------------------------------------------- §4 The codec (4.S8, 4.S22)
 
