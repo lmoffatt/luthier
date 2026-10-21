@@ -256,14 +256,14 @@ def test_a_law_line_is_no_control_by_default():
 def test_a_control_its_law_holds_on_is_a_failed_control(tmp_path, capsys):
     path = tmp_path / "held.test.lut"
     path.write_text('import "test.lth" test ExhaustiveMode\n'
-                    'Reflexive (a : Bool) : Bool := a == a\n'
-                    'test "Reflexive" ExhaustiveMode (control <- true)\n', encoding="utf-8")
+                    'LocalReflexive (a : Bool) : Bool := a == a\n'
+                    'test "LocalReflexive" ExhaustiveMode (control <- true)\n', encoding="utf-8")
     outcome, = tester.run_tests(path)
     assert outcome.verdict == "Confirmed" and not tester.passes(outcome)
     assert outcome.entry["outcome"] == {"ControlConfirmed": "exhaustive"} and outcome.entry["grade"] is None
     code, lines = lines_of(capsys, path)
     assert code == 1
-    assert lines == ["control of Reflexive: exhaustive, 2 cases, CONTROL FAILED: the law held on the model "
+    assert lines == ["control of LocalReflexive: exhaustive, 2 cases, CONTROL FAILED: the law held on the model "
                      "broken on purpose, too weak to see the break (7.S19) (exhaustive) (ran)"]
 
 

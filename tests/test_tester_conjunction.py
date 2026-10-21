@@ -53,7 +53,7 @@ BARE = '''import "core/properties/relations.lth" Related Chain Reflexive Symmetr
 import "core/properties/operations.lth" Commutative
 import "core/structures/equality.lth" Object
 BareEquivalence (A : U) (r : A -> A -> Bool) := Reflexive A r & Symmetric A r & Transitive A r
-IntEquivalence (r : Int -> Int -> Bool) := BareEquivalence Int r
+LocalIntEquivalence (r : Int -> Int -> Bool) := BareEquivalence Int r
 boolEq : Object Bool := { eq := fn x y { x == y } }
 Mixed (r : Int -> Int -> Bool) := Commutative Bool Bool boolEq (fn a b { a and b }) & Reflexive Int r
 parity : Int -> Int -> Bool := fn a b { (a - b) mod 2 == 0 }
@@ -64,14 +64,14 @@ LINES = '''import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "bare.lut" IntEquivalence Mixed parity leq smallInts
+import "bare.lut" LocalIntEquivalence Mixed parity leq smallInts
 onParity : List Binding := [ { parameter := just "r", type := nothing, generator := "parity", coverage := Listed } ]
 onLeq : List Binding := [ { parameter := just "r", type := nothing, generator := "leq", coverage := Listed } ]
 onSmall : List Binding := [ { parameter := just "r", type := nothing, generator := "leq", coverage := Listed },
   { parameter := nothing, type := just "Int", generator := "smallInts", coverage := Listed } ]
-test "IntEquivalence" (SampledMode linear) (profile <- onParity)
-test "IntEquivalence" (SampledMode linear) (profile <- onLeq)
-test "IntEquivalence" (SampledMode linear) (profile <- onLeq) (control <- true)
+test "LocalIntEquivalence" (SampledMode linear) (profile <- onParity)
+test "LocalIntEquivalence" (SampledMode linear) (profile <- onLeq)
+test "LocalIntEquivalence" (SampledMode linear) (profile <- onLeq) (control <- true)
 test "Mixed" ExhaustiveMode (profile <- onSmall)
 '''
 
@@ -92,7 +92,7 @@ def test_a_conjunction_is_split_into_its_conjuncts_each_quantified_on_its_own(ba
     assert (holds.verdict, holds.grade, holds.evaluated) == ("Supported", "Sampled", 300) and tester.passes(holds)
     # each conjunct has its entry: the conjunction's law and cone, the conjunct named, apart in identity
     entries = [o.entry for o in holds.parts]
-    assert {e["law"] for e in entries} == {"IntEquivalence"} and len({e["cone"] for e in entries}) == 1
+    assert {e["law"] for e in entries} == {"LocalIntEquivalence"} and len({e["cone"] for e in entries}) == 1
     assert entries[0]["cone"] == holds.cone
     assert [e["conjunct"] for e in entries] == [o.conjunct for o in holds.parts]
     assert all(e["conjuncts"] == [o.conjunct for o in holds.parts] for e in entries)
@@ -109,7 +109,7 @@ def test_a_conjunction_is_split_into_its_conjuncts_each_quantified_on_its_own(ba
     assert certify.certificate_grade(graded, "Mixed", mixed.cone) == "Cases"
     assert certify.certificate_grade(graded, "Mixed", mixed.cone, "strongest") == "ExhaustiveGrade"
     lines = tester.line(holds).splitlines()
-    assert lines[0] == "IntEquivalence: conjunction of 3, 300 cases, sampled (3 of 3 ran)"
+    assert lines[0] == "LocalIntEquivalence: conjunction of 3, 300 cases, sampled (3 of 3 ran)"
     assert lines[2].startswith("  conjunct Symmetric Int r: sampled (seed 0, size 10")
 
 
@@ -118,7 +118,7 @@ def test_a_conjunction_is_refuted_when_a_conjunct_is_and_its_control_refutes_it(
     assert [o.verdict for o in refuted.parts] == ["Supported", "Refuted", "Supported"]
     assert refuted.verdict == "Refuted" and refuted.grade is None and not tester.passes(refuted)
     assert tester.line(refuted).splitlines()[0].startswith(
-        "IntEquivalence: conjunction of 3, 300 cases, refuted at Symmetric Int r: r = leq, p = ")
+        "LocalIntEquivalence: conjunction of 3, 300 cases, refuted at Symmetric Int r: r = leq, p = ")
     # a control refutes the conjunction when it refutes one conjunct: one entry, the conjunct named
     assert control.spec.control and control.verdict == "Refuted" and tester.passes(control)
     assert control.entry["kind"] == "Control" and "conjunct" not in control.entry
@@ -126,10 +126,10 @@ def test_a_conjunction_is_refuted_when_a_conjunct_is_and_its_control_refutes_it(
     assert [d["parameter"] for d in control.entry["binding"]] == ["r", "x", "p", "c"]
     result = certify.certify_file(str(bare), store=False)
     standing = dict((law, s) for law, _, s in result["laws"])
-    assert standing["IntEquivalence"].startswith("refuted at Symmetric Int r: r = leq")
+    assert standing["LocalIntEquivalence"].startswith("refuted at Symmetric Int r: r = leq")
     assert standing["Mixed"] == "cases"
-    cone = dict((law, c) for law, c, _ in result["laws"])["IntEquivalence"]
-    assert certify.control_status(result["control entries"], "IntEquivalence", cone).startswith("controlled")
+    cone = dict((law, c) for law, c, _ in result["laws"])["LocalIntEquivalence"]
+    assert certify.control_status(result["control entries"], "LocalIntEquivalence", cone).startswith("controlled")
 
 
 def test_the_conjuncts_entries_are_stored_and_known_and_grade_the_conjunction(bare):
@@ -141,7 +141,7 @@ def test_the_conjuncts_entries_are_stored_and_known_and_grade_the_conjunction(ba
     assert all(o.known is not None for o in again[0].parts) and again[0].known is not None
     assert tester.line(again[0]).splitlines()[0].endswith("sampled (known)")
     good = [e for e in entries if e.get("binding", [{}])[0].get("generator", "").startswith("parity")]
-    assert certify.certificate_grade(good, "IntEquivalence", first[0].cone) == "Sampled"
+    assert certify.certificate_grade(good, "LocalIntEquivalence", first[0].cone) == "Sampled"
     # a conjunct missing from the entries leaves the conjunction without a grade
-    assert certify.certificate_grade(good[1:], "IntEquivalence", first[0].cone) is None
-    assert certify.certificate_grade(good[:1], "IntEquivalence", first[0].cone) is None
+    assert certify.certificate_grade(good[1:], "LocalIntEquivalence", first[0].cone) is None
+    assert certify.certificate_grade(good[:1], "LocalIntEquivalence", first[0].cone) is None

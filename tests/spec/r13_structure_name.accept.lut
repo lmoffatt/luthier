@@ -1,3 +1,4 @@
+-- Bite 6: qualify the local interfaces where the core now supplies its own models.
 -- spec 4.R13 (D-2026-10-18-b; record/plan/core-2026-10-17/execution.md §2.2, rule 2.2): a name of
 -- a structure is resolved by the type of its argument, the model that type names. A claim `X : Bool
 -- := S T m` binds the model `m` of `S` at `T`. `size`, `map` and `eq` resolve at two types each:
@@ -13,10 +14,10 @@ Sized (C : U) : { size : C -> Int }
 SizeNotNegative (C : U) (m : Sized C) (c : C) : Bool := 0 <= m.size c
 Sized (C : U) := SizeNotNegative C
 
-Functor (F : U -> U) : { map : (A B : U) -> (A -> B) -> F A -> F B }
-MapKeepsSize (F : U -> U) (m : Functor F) (s : Sized (F Int)) (x : F Int) : Bool :=
+LocalFunctor (F : U -> U) : { map : (A B : U) -> (A -> B) -> F A -> F B }
+MapKeepsSize (F : U -> U) (m : LocalFunctor F) (s : Sized (F Int)) (x : F Int) : Bool :=
   s.size (m.map Int Int (fn k { k + 1 }) x) == s.size x
-Functor (F : U -> U) := MapKeepsSize F
+LocalFunctor (F : U -> U) := MapKeepsSize F
 
 lengthOf (A : U) (xs : List A) : Int := match xs { nil -> 0 ; cons x rest -> 1 + lengthOf A rest }
 mapList (A B : U) (f : A -> B) (xs : List A) : List B :=
@@ -27,13 +28,13 @@ IntHasAnEquality : Bool := Equality Int { eq := fn a b { a == b } }
 StringHasAnEquality : Bool := Equality String { eq := fn a b { a == b } }
 ListIsSized (A : U) : Bool := Sized (List A) { size := fn xs { lengthOf A xs } }
 MaybeIsSized (A : U) : Bool := Sized (Maybe A) { size := fn m { match m { nothing -> 0 ; just a -> 1 } } }
-ListIsAFunctor : Bool := Functor List { map := mapList }
-MaybeIsAFunctor : Bool := Functor Maybe { map := mapMaybe }
-Claims := IntHasAnEquality & StringHasAnEquality & ListIsSized & MaybeIsSized & ListIsAFunctor & MaybeIsAFunctor
+ListHasLocalFunctor : Bool := LocalFunctor List { map := mapList }
+MaybeHasLocalFunctor : Bool := LocalFunctor Maybe { map := mapMaybe }
+Claims := IntHasAnEquality & StringHasAnEquality & ListIsSized & MaybeIsSized & ListHasLocalFunctor & MaybeHasLocalFunctor
 
 numbers : List Int := [1, 2, 3]
 four : Maybe Int := just 4
-sizes : Int := size numbers + size four
-doubled : List Int := map (fn x { 2 * x }) numbers
-shifted : Maybe Int := map (fn x { x + 1 }) four
-same : Bool := eq 3 3 and eq "a" "a"
+sizes : Int := Sized.size numbers + Sized.size four
+doubled : List Int := LocalFunctor.map (fn (x : Int) { 2 * x }) numbers
+shifted : Maybe Int := LocalFunctor.map (fn (x : Int) { x + 1 }) four
+same : Bool := Equality.eq 3 3 and Equality.eq "a" "a"
