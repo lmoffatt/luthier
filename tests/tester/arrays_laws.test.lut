@@ -17,7 +17,7 @@ import "generators.lth" Binding byParameter
 import "laws.lth" Listed
 import "numbers.lth" Tolerance Doubles
 import "numbers_model.lut" doubles : Doubles
-import "arrays.lth" Arrays Vec Mat RankFloor mat vec identity zeroMat AddPointwise SubPointwise ScalePointwise
+import "arrays.lth" Arrays Vec Mat RankFloor mat vec identity zeroMat transposeDef AddPointwise SubPointwise ScalePointwise
   TransposePointwise MaddPointwise MsubPointwise MscalePointwise DotCommutative DotOnBasis DotAgrees NormOfBasis
   NormOfDot NormScales MatVecOnBasis MatVecAgrees MatMulNeutral MatMulByIdentity MatMulTransposes MatMulAgrees RankOfDiagonal
   RankOfZeroAndIdentity RankBounded RankScales RankUnderRotation TraceOfIdentity TraceAdditive TraceCyclic
@@ -260,6 +260,9 @@ onMatIsAFunctor : List Binding := [
   { parameter := just "h", type := nothing, generator := "negated", coverage := Listed },
   { parameter := just "xs", type := nothing, generator := "matrices", coverage := Listed } ]
 test "MatIsAFunctor" ExhaustiveMode (seed <- 20261021) (profile <- onMatIsAFunctor)
+goodSymmetricInclusion : Equalizer (Mat Float64) (Mat Float64) SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id (Mat Float64)) transposeDef :=
+  { include := fn s { s }, restrict := fn a { a } }
 onSymmetricIsAnEqualizer : List Binding := [
+  { parameter := just "model", type := nothing, generator := "goodSymmetricInclusion", coverage := Listed },
   { parameter := just "x", type := nothing, generator := "symmetricMatrices", coverage := Listed } ]
 test "SymmetricIsAnEqualizer" ExhaustiveMode (seed <- 20261021) (profile <- onSymmetricIsAnEqualizer)
