@@ -39,7 +39,7 @@ resolution : Resolution := { bindingOf := resolve }
 -- are its arguments, set here (P11). Each comes with the law its values must meet, quantified
 -- over the size and the seed; the type a generator gives is its validity, which the tester also
 -- checks on every value it draws (7.S1).
-import "arrays.lth" Vec Mat Dim MatOf Symmetric SymmetricOf ClearDiagonal RankFloor approxMat exact
+import "arrays.lth" Vec Mat Dim MatOf SymmetricMatrix SymmetricOf ClearDiagonal RankFloor approxMat exact
   transposeDef matMulDef mscaleDef identity forallBelow vec
 import "numbers.lth" Tolerance abs
 import "probability.lth" UnitList allUnit SourceIsUniform
@@ -48,11 +48,11 @@ import "arrays_model.lut" numpy : Arrays
 
 -- The host's families as one record, as a model file holds its externs (12.S23): check.py's 4.R5
 -- reads a standalone extern's type against the file's own definitions only, and refuses one
--- over an imported type (`Symmetric`); a record's fields are typed by the record's type.
+-- over an imported type (`SymmetricMatrix`); a record's fields are typed by the record's type.
 hostGenerators : {
-  symmetric : Gen Symmetric,
+  symmetric : Gen SymmetricMatrix,
   symmetricOf : (k : Dim) -> Gen (SymmetricOf k),
-  gram : Gen Symmetric,
+  gram : Gen SymmetricMatrix,
   orthogonal : (k : Dim) -> Gen (MatOf k k),
   unitListWith : Float64 -> Gen UnitList,
   uniformSample : Gen UnitList,
@@ -70,10 +70,10 @@ hostGenerators : {
 -- of dimensions (0, 1, 2, 3, 5, 10, those not above the size), entries in [-size, size], the zero
 -- and a rank-deficient matrix each with a share (generators.py's `degenerate`, 2026-10-17); and of
 -- k rows
-symmetric : Gen Symmetric := hostGenerators.symmetric
+symmetric : Gen SymmetricMatrix := hostGenerators.symmetric
 symmetricOf (k : Dim) : Gen (SymmetricOf k) := hostGenerators.symmetricOf k
 -- positive semidefinite: B^T B with B of fewer rows than columns in most draws (rank deficient)
-gram : Gen Symmetric := hostGenerators.gram
+gram : Gen SymmetricMatrix := hostGenerators.gram
 -- orthogonal, Haar: the QR of a Gaussian matrix with the signs of R's diagonal (7.S5, Mezzadri)
 orthogonal (k : Dim) : Gen (MatOf k k) := hostGenerators.orthogonal k
 -- lists of vectors of values in [0, 1], an entry an atom (0, 1 or a tie) with probability 0.2
@@ -99,11 +99,11 @@ symmetricGives (a : Mat Float64) : Bool := a.m == a.n and approxMat exact a (tra
 -- (report-mutants.md). A test binds the parameter to a census of one listing the family
 -- (generators_laws.test.lut's `families`): a binding naming a `Gen T` is drawn from, not passed.
 -- The type the family claims is what each law tests, as a model's leaves are tested (7.S1).
-SymmetricGivesSymmetric (g : Gen Symmetric) (size : Nat) (seed : Seed) : Bool := match g size seed { (a, next) -> symmetricGives a }
+SymmetricGivesSymmetric (g : Gen SymmetricMatrix) (size : Nat) (seed : Seed) : Bool := match g size seed { (a, next) -> symmetricGives a }
 SymmetricOfGivesItsSize (g : (k : Dim) -> Gen (SymmetricOf k)) (k : Dim) (size : Nat) (seed : Seed) : Bool :=
   match g k size seed { (a, next) -> a.m == k and symmetricGives a }
 -- positive semidefinite at a floor as arrays.lth's `PsdAt` reads it: nothing retained of `-a`
-GramGivesPsd (g : Gen Symmetric) (fl : RankFloor) (size : Nat) (seed : Seed) : Bool :=
+GramGivesPsd (g : Gen SymmetricMatrix) (fl : RankFloor) (size : Nat) (seed : Seed) : Bool :=
   match g size seed { (a, next) -> symmetricGives a and numpy.retainedRank fl (mscaleDef (0.0 - 1.0) a) == 0 }
 -- `transpose q * q == identity` within a tolerance, the demand's (P11)
 OrthogonalGivesOrthogonal (g : (k : Dim) -> Gen (MatOf k k)) (tol : Tolerance) (k : Dim) (size : Nat) (seed : Seed) : Bool :=

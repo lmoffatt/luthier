@@ -28,7 +28,7 @@ import "generators_model.lut" linear SymmetricGivesSymmetric SymmetricOfGivesIts
 import "generators.lth" Binding Gen
 import "laws.lth" Listed Sequential
 import "numbers.lth" Tolerance
-import "arrays.lth" RankFloor Dim MatOf Symmetric SymmetricOf ClearDiagonal
+import "arrays.lth" RankFloor Dim MatOf SymmetricMatrix SymmetricOf ClearDiagonal
 import "probability.lth" UnitList
 
 tolerance : Tolerance := 1.0e-12
@@ -40,9 +40,9 @@ cutoffs : List Binding := [
   { parameter := just "c", type := nothing, generator := "wald", coverage := Listed } ]
 
 -- the families, each a census of one bound to the law's `g`
-symmetricFamily : List (Gen Symmetric) := [symmetric]
+symmetricFamily : List (Gen SymmetricMatrix) := [symmetric]
 symmetricOfFamily : List ((k : Dim) -> Gen (SymmetricOf k)) := [symmetricOf]
-gramFamily : List (Gen Symmetric) := [gram]
+gramFamily : List (Gen SymmetricMatrix) := [gram]
 orthogonalFamily : List ((k : Dim) -> Gen (MatOf k k)) := [orthogonal]
 unitListFamily : List (Gen UnitList) := [unitList]
 clearDiagonalFamily : List (Gen ClearDiagonal) := [clearDiagonal]

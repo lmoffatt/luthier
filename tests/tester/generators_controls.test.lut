@@ -28,7 +28,7 @@ import "generators_model.lut" linear UniformSampleIsUniform skewedSample Symmetr
 import "generators.lth" Binding Seed Gen
 import "laws.lth" Listed Sequential
 import "numbers.lth" Tolerance
-import "arrays.lth" Vec Mat Dim RankFloor MatOf Symmetric SymmetricOf ClearDiagonal mat vec identity
+import "arrays.lth" Vec Mat Dim RankFloor MatOf SymmetricMatrix SymmetricOf ClearDiagonal mat vec identity
 import "probability.lth" UnitList
 import "probability_model.lut" lump
 
@@ -40,11 +40,11 @@ cutoffs : List Binding := [
 
 -- broken families, each typed as the family it impersonates and giving values outside that type
 -- symmetric: only the upper triangle filled, the mirror forgotten
-brokenSymmetric : Gen Symmetric := fn size seed { (mat Float64 (size + 2) (size + 2) (fn i j { if i <= j then 1.0 else 0.0 }), seed) }
+brokenSymmetric : Gen SymmetricMatrix := fn size seed { (mat Float64 (size + 2) (size + 2) (fn i j { if i <= j then 1.0 else 0.0 }), seed) }
 -- symmetric of k rows: one row too many
 brokenSymmetricOf (k : Dim) : Gen (SymmetricOf k) := fn size seed { (identity (k + 1), seed) }
 -- gram: negative diagonal, not positive semidefinite
-brokenGram : Gen Symmetric := fn size seed { (mat Float64 (size + 1) (size + 1) (fn i j { if i == j then 0.0 - 1.0 else 0.0 }), seed) }
+brokenGram : Gen SymmetricMatrix := fn size seed { (mat Float64 (size + 1) (size + 1) (fn i j { if i == j then 0.0 - 1.0 else 0.0 }), seed) }
 -- orthogonal: the identity scaled by 2
 brokenOrthogonal (k : Dim) : Gen (MatOf k k) := fn size seed { (mat Float64 k k (fn i j { if i == j then 2.0 else 0.0 }), seed) }
 -- unit list: values above 1
@@ -53,9 +53,9 @@ brokenUnitList : Gen UnitList := fn size seed { (cons (vec Float64 (size + 1) (f
 brokenClear : Gen ClearDiagonal := fn size seed { (vec Float64 (size + 1) (fn k { 0.5 }), seed) }
 
 -- each a census of one, bound to the law's `g`
-brokenSymmetricFamily : List (Gen Symmetric) := [brokenSymmetric]
+brokenSymmetricFamily : List (Gen SymmetricMatrix) := [brokenSymmetric]
 brokenSymmetricOfFamily : List ((k : Dim) -> Gen (SymmetricOf k)) := [brokenSymmetricOf]
-brokenGramFamily : List (Gen Symmetric) := [brokenGram]
+brokenGramFamily : List (Gen SymmetricMatrix) := [brokenGram]
 brokenOrthogonalFamily : List ((k : Dim) -> Gen (MatOf k k)) := [brokenOrthogonal]
 brokenUnitListFamily : List (Gen UnitList) := [brokenUnitList]
 brokenClearFamily : List (Gen ClearDiagonal) := [brokenClear]

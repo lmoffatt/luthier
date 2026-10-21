@@ -1,6 +1,6 @@
 -- tests/tester/regions_laws.test.lut: the laws of the regions (D-2026-10-16-i, D-2026-10-16-j) as
 -- listed cases: generators.lth §9's `Degeneracies` on the declared cases of `List Int`,
--- `Mat Float64` and `Symmetric` at a floor (arrays.lth §5, through numpy's leaves);
+-- `Mat Float64` and `SymmetricMatrix` at a floor (arrays.lth §5, through numpy's leaves);
 -- certification.lth §5's `Regioning` on certification_model.lut's `regioning` (the weakest, 5.S8's
 -- default) and `Deriving` on its `deriving`. Written 2026-10-17 by Claude Fable 5.1, an agent of
 -- the coordinating session, on record/IA/regions-2026-10-17/prompt-theory.md. The entries are of
@@ -17,7 +17,7 @@
 import "test.lth" test ExhaustiveMode Grade Cases Sampled Proved defaultBudgets
 import "generators.lth" Binding Degeneracies EachWitnessIsItsCase CaseNamesAreDistinct listDegeneracies
 import "laws.lth" Listed Cited
-import "arrays.lth" Mat Symmetric RankFloor matDegeneracies symmetricDegeneracies
+import "arrays.lth" Mat SymmetricMatrix RankFloor matDegeneracies symmetricDegeneracies
 import "arrays_model.lut" numpy
 import "certification.lth" orWeakest Certifying Entry Certificate Outcome Passed Failed NotRunFor Drawing Region FromType FromLaw
   FromCode Label BindingEvidence Regioning Deriving NoRegionsLeaveTheGrade RefutedInEveryRegion ALabelEntersNoGrade
@@ -33,8 +33,8 @@ listTypes : List U := [List Int]
 listDegs : List (Degeneracies (List Int)) := [listDegeneracies Int 7]
 matTypes : List U := [Mat Float64]
 matDegs : List (Degeneracies (Mat Float64)) := [matDegeneracies]
-symTypes : List U := [Symmetric]
-symDegs : List (Degeneracies Symmetric) := [symmetricDegeneracies numpy floor]
+symTypes : List U := [SymmetricMatrix]
+symDegs : List (Degeneracies SymmetricMatrix) := [symmetricDegeneracies numpy floor]
 onList : List Binding := [bind "T" "listTypes", bind "d" "listDegs"]
 onMat : List Binding := [bind "T" "matTypes", bind "d" "matDegs"]
 onSym : List Binding := [bind "T" "symTypes", bind "d" "symDegs"]
