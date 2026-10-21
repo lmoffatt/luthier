@@ -28,10 +28,15 @@
 -- (kernel_laws.lth), named in numbers_model.lut; `Int` is an ordered ring (algebra.lth), named
 -- there too; here is what the ring does not say, the quotient and the remainder.
 --
+-- Bite 8 revision, Claude Opus 5.5, 2026-10-21, prompt-bite-8.md at 1429de8: §2 states the exact laws
+-- by the core's properties and adds the within-bound laws of execution.md section 4 with their
+-- ranges (D-2026-10-17-f, D-2026-10-18-j); `within` and `withinOf` are balls of `absDistance`.
+--
 -- Index (all sections written in this draft):
 --   §1 Magnitude and tolerance: `abs`, `Tolerance`, `within`; the doubles of moderate size,
 --      where every operation of two is finite (11.S7, the range of 11.S13).              done
---   §2 The doubles: the four operations and the comparisons, their exact laws (11.S4).  done
+--   §2 The doubles: the four operations and the comparisons, their exact laws (11.S4)
+--      and those within a bound (D-2026-10-17-f).                                      done
 --   §3 Integer division: the quotient and the remainder of the host (11.S4).            done
 --   §4 The conversion from an integer (11.S5).                                           done
 --   §5 The elementary functions `sqrt`, `exp`, `log`, `erf`: exact cases, bounds,
@@ -41,16 +46,20 @@
 
 -- the magnitude: `x` or `-x`, whichever is not negative; exact, negation being exact
 abs (x : Float64) : Float64 := if x < 0.0 then 0.0 - x else x
+-- the distance of the real line as the doubles compute it, `|a - b|`: the subtraction rounds, so
+-- it is a metric only within a bound (`MetricWithin`, numbers_model.lut `AbsDistanceIsAMetricWithin`,
+-- D-2026-10-17-f)
+absDistance (a b : Float64) : Float64 := abs (a - b)
 
 -- a tolerance is a parameter of the demand (11.S18, D-2026-10-12-h, P11): a law that needs one
 -- takes a `Tolerance`, and the test binds it (7.R1); no law here holds a number of its own
 Tolerance : U := { tol : Float64 | 0.0 <= tol }
--- equal within a tolerance relative to the size of the values, `|a - b| <= tol (1 + |a| + |b|)`;
--- with tolerance zero it is exact equality
-within (tol : Tolerance) (a b : Float64) : Bool := abs (a - b) <= tol * (1.0 + abs a + abs b)
+-- equal within a tolerance relative to the size of the values, `|a - b| <= tol (1 + |a| + |b|)`:
+-- the ball of `absDistance` of that radius (D-2026-10-17-f); with tolerance zero it is equality
+within (tol : Tolerance) (a b : Float64) : Bool := Ball Float64 absDistance (fn x y { tol * (1.0 + abs x + abs y) }) a b
 -- the same, with the scale the law names: a sum of terms is compared relative to the sum of their
 -- magnitudes (11.S14), not to its own value, since the terms can cancel
-withinOf (tol : Tolerance) (scale a b : Float64) : Bool := abs (a - b) <= tol * scale
+withinOf (tol : Tolerance) (scale a b : Float64) : Bool := Ball Float64 absDistance (fn x y { tol * scale }) a b
 
 -- the doubles of moderate size, zero or of magnitude between 1e-150 and 1e150: a sum, a product
 -- or a quotient of two is finite (11.S7 makes an overflow an error, so a law over all doubles
@@ -59,6 +68,11 @@ withinOf (tol : Tolerance) (scale a b : Float64) : Bool := abs (a - b) <= tol * 
 Moderate : U := { x : Float64 | x == 0.0 or (1.0e-150 <= x and x <= 1.0e150) or (-1.0e150 <= x and x <= -1.0e-150) }
 NonNegative : U := { x : Moderate | 0.0 <= x }
 Positive : U := { x : Moderate | 0.0 < x }
+NonZero : U := { x : Moderate | not (x == 0.0) }
+-- the doubles whose products of three stay in the normal range, zero or of magnitude between
+-- 1e-100 and 1e100: the range where the product's rounding law holds for two products in a row
+-- (Higham 2002, section 2.2: the standard model assumes no underflow or overflow)
+Tame : U := { x : Float64 | x == 0.0 or (1.0e-100 <= x and x <= 1.0e100) or (-1.0e100 <= x and x <= -1.0e-100) }
 
 -- ---------------------------------------------------------------- §2 The doubles (11.S4)
 
@@ -72,31 +86,15 @@ Doubles : {
   epsilon : Float64,
 }
 
--- what is exact. Rounding is a function of the exact result, so an operation commutes exactly;
--- the identities and the negation are exact; and `x / x` is one, `x * 0` is zero.
--- spec 11.S4
-PlusCommutes (d : Doubles) (x y : Moderate) : Bool := d.plus x y == d.plus y x
-TimesCommutes (d : Doubles) (x y : Moderate) : Bool := d.times x y == d.times y x
-PlusZero (d : Doubles) (x : Moderate) : Bool := d.plus x 0.0 == x
-TimesOne (d : Doubles) (x : Moderate) : Bool := d.times x 1.0 == x
+-- What is exact (11.S4), stated by the core's properties in `Doubles`' claim below: rounding is a
+-- function of the exact result, so `plus` and `times` commute (over `Moderate`, where they are
+-- finite); zero and one are neutral and zero absorbs, over every double; negation is involutive;
+-- `leq` is a total order (core.lut's `FloatIsOrdered` claims it of `<=`). What has no core
+-- property, or needs a range the core's property cannot state, is stated here.
 DivideOne (d : Doubles) (x : Moderate) : Bool := d.divide x 1.0 == x
-TimesZero (d : Doubles) (x : Moderate) : Bool := d.times x 0.0 == 0.0
 MinusSelf (d : Doubles) (x : Moderate) : Bool := d.minus x x == 0.0
 DivideSelf (d : Doubles) (x : Positive) : Bool := d.divide x x == 1.0
 MinusIsPlusNegated (d : Doubles) (x y : Moderate) : Bool := d.minus x y == d.plus x (d.minus 0.0 y)
-NegateTwice (d : Doubles) (x : Moderate) : Bool := d.minus 0.0 (d.minus 0.0 x) == x
-
--- the order: total, antisymmetric and transitive on the pairs and chains it relates (7.S12);
--- the strict order, the reversed forms and `/=` are what they say
-LeqPair (d : Doubles) : U := { x y : Moderate | d.leq x y }
-LeqChain (d : Doubles) : U := { x y z : Moderate | d.leq x y and d.leq y z }
-LeqReflexive (d : Doubles) (x : Moderate) : Bool := d.leq x x
-LeqTotal (d : Doubles) (x y : Moderate) : Bool := d.leq x y or d.leq y x
--- antisymmetry by its contrapositive, over every pair: two distinct doubles are not each at most
--- the other. The filter `x <= y and y <= x` it replaces accepted almost no drawn pair, so the law
--- was not run (7.S6 asks a constructive subtype; 7.S12: no rare premise; the coordinator's item 5)
-LeqAntisymmetric (d : Doubles) (x y : Moderate) : Bool := x == y or not (d.leq x y and d.leq y x)
-LeqTransitive (d : Doubles) (c : LeqChain d) : Bool := d.leq c.x c.z
 -- [proposed, 2026-10-15, L9.14] the strict order differs from the order only at a tie, which two
 -- independent draws almost never give, so `less := a <= b` passed the law over every drawn pair
 -- (report-mutants.md); the law is stated over a pair that ties when `tie` holds, its second the
@@ -107,11 +105,13 @@ LessIsStrict (d : Doubles) (x y : Moderate) (tie : Bool) : Bool :=
 GreaterIsLessReversed (d : Doubles) (x y : Moderate) : Bool := d.greater x y == d.less y x
 GeqIsLeqReversed (d : Doubles) (x y : Moderate) : Bool := d.geq x y == d.leq y x
 UnequalIsNotEqual (d : Doubles) (x y : Moderate) : Bool := d.unequal x y == not (x == y)
-
--- rounding is monotone (11.S4, L13.3): a sum keeps the order of its terms, and so does a product
--- by a non-negative factor
-PlusMonotone (d : Doubles) (p : LeqPair d) (z : Moderate) : Bool := d.leq (d.plus p.x z) (d.plus p.y z)
-TimesMonotone (d : Doubles) (p : LeqPair d) (z : NonNegative) : Bool := d.leq (d.times p.x z) (d.times p.y z)
+-- a sum keeps the order of its terms, and so does a product by a non-negative factor (rounding is
+-- monotone, 11.S4, L13.3): `Monotone` of the operation with `z`, since `MonotoneIn` needs the
+-- operation closed on its carrier and a sum of moderate doubles need not be moderate
+PlusMonotone (d : Doubles) (z : Moderate) (p : Related Moderate d.leq) : Bool :=
+  Monotone Moderate Float64 d.leq d.leq (fn x { d.plus x z }) p
+TimesMonotone (d : Doubles) (z : NonNegative) (p : Related Moderate d.leq) : Bool :=
+  Monotone Moderate Float64 d.leq d.leq (fn x { d.times x z }) p
 
 -- `epsilon` is the ulp of one: adding it to one is seen and is undone exactly by the subtraction,
 -- adding half of it is not seen (ties to even)
@@ -119,9 +119,44 @@ EpsilonIsTheUlpOfOne (d : Doubles) : Bool :=
   d.minus (d.plus 1.0 d.epsilon) 1.0 == d.epsilon and d.greater (d.plus 1.0 d.epsilon) 1.0
   and d.plus 1.0 (d.divide d.epsilon 2.0) == 1.0
 
-Doubles := PlusCommutes & TimesCommutes & PlusZero & TimesOne & DivideOne & TimesZero & MinusSelf & DivideSelf
-  & MinusIsPlusNegated & NegateTwice & LeqReflexive & LeqTotal & LeqAntisymmetric & LeqTransitive & LessIsStrict
-  & GreaterIsLessReversed & GeqIsLeqReversed & UnequalIsNotEqual & PlusMonotone & TimesMonotone & EpsilonIsTheUlpOfOne
+-- What holds within a bound (D-2026-10-17-f, D-2026-10-18-j). Each law relates the exact
+-- property to the computed one by the bound error analysis proves, a function of the arguments
+-- written here from the model's `epsilon`, never a tolerance of the demand (P11), and states its
+-- range of validity as the type of its variables: outside it the law claims nothing. The unit
+-- roundoff is `u = epsilon / 2` and Higham's `gamma2 = 2u / (1 - 2u)` (Higham, Accuracy and
+-- Stability of Numerical Algorithms, 2002, section 3.1, Lemma 3.1). A sum of three is computed
+-- with two roundings, so each order of association is within `gamma2 (|x| + |y| + |z|)` of the
+-- exact sum, the two within twice that, and the difference itself is computed with a rounding:
+-- `3 gamma2` bounds it with room (D-2026-10-17-f as corrected on 2026-10-17; `gamma2` alone is
+-- refuted, numbers_controls.test.lut). Products: each order is within `gamma2 |x y z|` of the
+-- exact product, likewise. Distributivity: `x (y + z)` and `x y + x z` each carry two roundings
+-- of terms bounded by `|x| (|y| + |z|)`. The reciprocal: `1 / x` and the product by `x` round
+-- once each, so `x (1 / x)` is within `2u` of one (in fact within `u`, the spacing below one).
+gamma2 (epsilon : Float64) : Float64 := epsilon / (1.0 - epsilon)
+-- range: sums of moderate doubles are finite, and a sum that falls below the normal range is exact
+PlusAssociativeWithin (d : Doubles) (x y z : Moderate) : Bool :=
+  AssociativeWithin Float64 absDistance d.plus (fn a b c { 3.0 * gamma2 d.epsilon * (abs a + abs b + abs c) }) x y z
+-- range: `Tame`, so that neither product of two nor of three leaves the normal range
+TimesAssociativeWithin (d : Doubles) (x y z : Tame) : Bool :=
+  AssociativeWithin Float64 absDistance d.times (fn a b c { 3.0 * gamma2 d.epsilon * (abs a * abs b * abs c) }) x y z
+-- range: moderate doubles; a product that underflows errs by at most 2^-1075, below the bound of
+-- any moderate `x`, `y`, `z` that is not zero
+TimesDistributiveWithin (d : Doubles) (x y z : Moderate) : Bool :=
+  DistributiveWithin Float64 absDistance d.times d.plus (fn a b c { 3.0 * gamma2 d.epsilon * (abs a * (abs b + abs c)) }) x y z
+-- range: a moderate double that is not zero, whose reciprocal is a normal double
+DivideInvertibleWithin (d : Doubles) (x : NonZero) : Bool :=
+  InvertibleWithin Float64 absDistance d.times 1.0 (fn a { d.divide 1.0 a }) (fn a { d.epsilon }) x
+
+-- `Doubles`' claim (execution.md section 4): the exact properties by the core's names, then the
+-- laws above; the doubles are not a semiring (11.S15), so `Semiring` is not claimed
+Doubles (d : Doubles) :=
+  Commutative Moderate Float64 (structural Float64) d.plus & Commutative Moderate Float64 (structural Float64) d.times
+  & Neutral Float64 (structural Float64) d.plus 0.0 & Absorbing Float64 (structural Float64) d.times 0.0
+  & Neutral Float64 (structural Float64) d.times 1.0 & Involutive Float64 (structural Float64) (fn x { d.minus 0.0 x })
+  & Order Float64 (structural Float64) { leq := d.leq } & PlusMonotone d & TimesMonotone d
+  & DivideOne d & MinusSelf d & DivideSelf d & MinusIsPlusNegated d & LessIsStrict d
+  & GreaterIsLessReversed d & GeqIsLeqReversed d & UnequalIsNotEqual d & EpsilonIsTheUlpOfOne d
+  & PlusAssociativeWithin d & TimesAssociativeWithin d & TimesDistributiveWithin d & DivideInvertibleWithin d
 
 -- ---------------------------------------------------------------- §3 Integer division (11.S4)
 
@@ -173,8 +208,8 @@ ErfOfZero (e : Elementary) : Bool := e.erf 0.0 == 0.0
 -- the square root is correctly rounded (IEEE 754 §5.4.1), hence monotone; and in radix 2, with
 -- no overflow or underflow, the root of a rounded square is the magnitude [proposed: a theorem of
 -- binary floating point, Muller et al., Handbook of Floating-Point Arithmetic, to cite if kept]
-SqrtMonotone (e : Elementary) (p : LeqPair doublesOrder) : Bool :=
-  not (0.0 <= p.x) or e.sqrt p.x <= e.sqrt p.y
+SqrtMonotone (e : Elementary) (p : Related NonNegative (fn a b { a <= b })) : Bool :=
+  Monotone NonNegative Float64 (fn a b { a <= b }) (fn a b { a <= b }) e.sqrt p
 SqrtOfSquare (e : Elementary) (x : Moderate) : Bool := e.sqrt (x * x) == abs x
 -- `exp` is positive, `erf` is odd and bounded by one in magnitude
 ExpPositive (e : Elementary) (x : ExpDomain) : Bool := 0.0 < e.exp x
@@ -188,14 +223,6 @@ ExpAdds (e : Elementary) (tol : Tolerance) (x y : ExpDomain) : Bool :=
   within tol (e.exp (x + y)) (e.exp x * e.exp y)
 LogMultiplies (e : Elementary) (tol : Tolerance) (x y : Positive) : Bool :=
   within tol (e.log (x * y)) (e.log x + e.log y)
-
--- the order the square root is monotone in: the core's, as `Doubles` reads it
-doublesOrder : Doubles := {
-  plus := fn a b { a + b }, minus := fn a b { a - b }, times := fn a b { a * b }, divide := fn a b { a / b },
-  less := fn a b { a < b }, leq := fn a b { a <= b }, greater := fn a b { a > b }, geq := fn a b { a >= b },
-  unequal := fn a b { a /= b },
-  epsilon := 2.220446049250313e-16,
-}
 
 Elementary := SqrtOfSquares & ExpOfZero & LogOfOne & ErfOfZero & SqrtMonotone & SqrtOfSquare & ExpPositive
   & ErfOdd & ErfBounded & SqrtSquares & ExpOfLog & LogOfExp & ExpAdds & LogMultiplies

@@ -1,5 +1,6 @@
 -- Bite 6 revision, Codex, 2026-10-21, prompt-bite-6.md at 2859815:
 -- Int's ring and String's monoid now live in core.lut; the remaining numeric models follow.
+-- Bite 8, Claude Opus 5.5, 2026-10-21: the computed distance's `MetricWithin` claim.
 -- numbers_model.lut: the core's numbers as models of algebra.lth and numbers.lth, the structure
 -- of `Real` as an axiom, and the elementary functions as routes to the host's library.
 --
@@ -11,7 +12,7 @@
 -- 10.S8): Python's `math`, which is what v0.1's real_python.lut bound (tag v0.1-final).
 
 import "algebra.lth" CompleteOrderedField
-import "numbers.lth" Doubles IntegerDivision Conversion Elementary
+import "numbers.lth" Doubles IntegerDivision Conversion Elementary absDistance abs
 
 -- Int's quotient and remainder are the host's floor division (numbers.lth §3)
 integerDivision : IntegerDivision := { quotient := fn a b { a / b }, remainder := fn a b { a mod b } }
@@ -30,6 +31,17 @@ doubles : Doubles := {
   unequal := fn a b { a /= b },
   epsilon := 2.220446049250313e-16,
 }
+
+-- the computed distance `|a - b|` is a metric within a bound (D-2026-10-17-f; execution.md section
+-- 4): the subtraction rounds once, `fl(a - b) = (a - b)(1 + delta)` with `|delta| <= u` (Higham
+-- 2002, section 2.2, the standard model; exact when it falls below the normal range), and the
+-- magnitude is exact, so the computed distance is within `u |a - b| <= u (|a| + |b|)` of the
+-- exact one; `u = epsilon / 2` is the unit roundoff of the format (1.S9), not a criterion
+absDistanceIsAMetricWithinModel : MetricWithin Float64 (structural Float64) :=
+  { d := absDistance, bound := fn a b { doubles.epsilon / 2.0 * (abs a + abs b) } }
+AbsDistanceIsAMetricWithin (model : MetricWithin Float64 (structural Float64) <-
+    { d := absDistance, bound := fn a b { doubles.epsilon / 2.0 * (abs a + abs b) } }) : Bool :=
+  MetricWithin Float64 (structural Float64) model
 
 -- the nearest double to an integer (11.S5)
 conversion : Conversion := { convert := toFloat64 }

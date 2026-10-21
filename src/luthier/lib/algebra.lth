@@ -16,6 +16,7 @@
 -- The remaining sections 3-5 build fields and ordered fields on the core's CommutativeRing.
 -- Iso and its inverse-law aliases remain for positions.lut until bite 12.
 -- Float64 is not asserted to be a field; numbers.lth states its bounded laws.
+-- Bite 8, Claude Opus 5.5, 2026-10-21: §4 over the core's Order, MonotoneIn and PositiveClosed.
 
 import "laws.lth" Law Forall Exists Then Case
 
@@ -36,39 +37,19 @@ Field (F : U) := Reciprocal F
 
 -- ---------------------------------------------------------------- §4 Order
 
--- A total order on a ring that addition respects and that positive multiplication respects.
--- The pairs and chains the order relates are drawn by their generators (7.S12), as in
--- kernel_laws.lth §5; `leq` is the order, `x <= y`.
+-- A total order on a ring that addition respects and that the product of two non-negatives
+-- respects: the core's `Order`, `MonotoneIn` and `PositiveClosed` (core/structures/order.lth),
+-- written bare (D-2026-10-18-f); the pairs and chains the order relates are the core's `Related`
+-- and `Chain`, drawn by their generators (7.S12).
 OrderedRing (R : U) : { ring : CommutativeRing R (structural R), leq : R -> R -> Bool }
-LeqPair (R : U) (o : OrderedRing R) : U := { x y : R | o.leq x y }
-LeqChain (R : U) (o : OrderedRing R) : U := { x y z : R | o.leq x y and o.leq y z }
-LeqBoth (R : U) (o : OrderedRing R) : U := { x y : R | o.leq x y and o.leq y x }
+OrderedRing (R : U) (o : OrderedRing R) :=
+  Order R (structural R) { leq := o.leq } & MonotoneIn R o.leq o.ring.plus
+  & PositiveClosed R o.leq o.ring.times o.ring.zero
 
-LeqTotal (R : U) (o : OrderedRing R) (x y : R) : Bool := o.leq x y or o.leq y x
-LeqAntisymmetric (R : U) (o : OrderedRing R) (p : LeqBoth R o) : Bool := p.x == p.y
-LeqTransitive (R : U) (o : OrderedRing R) (c : LeqChain R o) : Bool := o.leq c.x c.z
-PlusMonotone (R : U) (o : OrderedRing R) (p : LeqPair R o) (z : R) : Bool :=
-  o.leq (o.ring.plus p.x z) (o.ring.plus p.y z)
-TimesPositive (R : U) (o : OrderedRing R) (p : NonNegativePair R o.leq o.ring.zero) : Bool :=
-  o.leq (o.ring.zero) (o.ring.times p.x p.y)
-OrderedRing (R : U) := LeqTotal R & LeqAntisymmetric R & LeqTransitive R & PlusMonotone R & TimesPositive R
-
--- an ordered field: a field whose ring is ordered; the order's laws are the ordered ring's. The
--- ordered ring `{ ring := o.field.ring, leq := o.leq }` is written in the law itself, so the law
--- reads `field` and `leq`: by 4.S15 a law depends on the names in it "without unfolding
--- definitions", and a helper that built it was not read (report of the leftovers agent, f8c5f40).
+-- an ordered field: a field whose ring is ordered; its laws are the ordered ring's, at the ring of
+-- its field
 OrderedField (F : U) : { field : Field F, leq : F -> F -> Bool }
-FieldIsOrdered (F : U) (o : OrderedField F) (x y : F)
-               (p : LeqPair F { ring := o.field.ring, leq := o.leq })
-               (c : LeqChain F { ring := o.field.ring, leq := o.leq })
-               (b : LeqBoth F { ring := o.field.ring, leq := o.leq })
-               (q : NonNegativePair F o.leq o.field.ring.zero) : Bool :=
-  LeqTotal F { ring := o.field.ring, leq := o.leq } x y
-  and LeqAntisymmetric F { ring := o.field.ring, leq := o.leq } b
-  and LeqTransitive F { ring := o.field.ring, leq := o.leq } c
-  and PlusMonotone F { ring := o.field.ring, leq := o.leq } p x
-  and TimesPositive F { ring := o.field.ring, leq := o.leq } q
-OrderedField (F : U) := FieldIsOrdered F
+OrderedField (F : U) (o : OrderedField F) := OrderedRing F { ring := o.field.ring, leq := o.leq }
 
 -- ---------------------------------------------------------------- §5 Completeness (11.R3)
 
