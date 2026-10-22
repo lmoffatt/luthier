@@ -1029,8 +1029,34 @@ def provisionalExtern(p, n):
     return any(isinstance(a.body, s.TermBody) and head(a.body.term) == s.Name('extern') and provisional(a.body.term) for a in acts(p, n, s.Define))
 
 
+def theoryNames(p):
+    """[core bite 13b] The names the theories of a file name: a theory is a name declared or defined
+    with a record type, and it names the fields of that record and every name in the bodies of its
+    definitions (its `T := laws` list). A function a theory names is absorbed by it (4.S17)."""
+    isRecord = lambda u: isinstance(u, s.Record)
+    theories = {a.name for a in p if isinstance(a, (s.Declare, s.Define)) and isRecord(a.type)}
+    named = set()
+    for a in p:
+        if isinstance(a, (s.Declare, s.Define)) and a.name in theories and isRecord(a.type):
+            named |= {x for f in a.type.fields for x in f.names}
+        if isinstance(a, s.Define) and a.name in theories:
+            named |= {x.name for x in walk_nodes(a.body) if isinstance(x, s.Name)}
+    return named
+
+
+def walk_nodes(u):
+    yield u
+    if isinstance(u, tuple):
+        for x in u: yield from walk_nodes(x)
+    elif is_dataclass(u):
+        for f in fields(u): yield from walk_nodes(getattr(u, f.name))
+
+
 def looseFunction(p, n):
-    return any(a.binders or isinstance(a.type, s.Binop) and a.type.operator == '->' for a in acts(p, n, s.Define))
+    """4.S17, narrowed [core bite 13b]: a top-level function at a bare exponential that no theory of
+    the file names (a function a theory's field or its laws' bodies mention is that theory's, and
+    waits to be absorbed by it)."""
+    return n not in theoryNames(p) and any(a.binders or isinstance(a.type, s.Binop) and a.type.operator == '->' for a in acts(p, n, s.Define))
 
 
 def term_nodes(u):

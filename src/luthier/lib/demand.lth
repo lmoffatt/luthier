@@ -174,6 +174,7 @@ recorded (d : Demand) (h : Hash) : RunRecord :=
 Stored (K : U) = { key : K, result : String }
 agreesWith (K : U) (eq : K -> K -> Bool) (r : Stored K) (rs : List (Stored K)) : Bool :=
   all List (Stored K) (fn (q : Stored K) { not (eq r.key q.key) or r.result == q.result }) rs
+-- kept as a recursion (bite 13b): each stored run is compared with the later ones, a pairwise walk over the tails
 determined (K : U) (eq : K -> K -> Bool) (rs : List (Stored K)) : Bool :=
   match rs { nil -> true ; cons r rest -> agreesWith K eq r rest and determined K eq rest }
 

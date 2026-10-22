@@ -155,7 +155,9 @@ onHammingListIsAMetric : List Binding := [
   { parameter := just "z", type := nothing, generator := "boolVectors", coverage := Listed } ]
 test "HammingListIsAMetric" ExhaustiveMode (seed <- 20261021) (profile <- onHammingListIsAMetric) (control <- true)
 
+-- kept as a recursion (bite 13b): a broken control that ignores the list; 4.R3 asks its match to touch nil and cons
 emptyPredicate : List Int -> Bool := fn xs { match xs { nil -> true ; cons x rest -> true } }
+-- kept as a recursion (bite 13b): a broken control that ignores the list; 4.R3 asks its match to touch nil and cons
 distinctPredicate : List Int -> Bool := fn xs { match xs { nil -> true ; cons x rest -> true } }
 
 onListEmptiness : List Binding := [
