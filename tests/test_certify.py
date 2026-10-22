@@ -1397,3 +1397,26 @@ def test_a_law_without_a_model_parameter_is_served_only_by_the_run_s_model(tmp_p
     assert main(["run", str(tmp_path / "other.run.lut")]) != 0
     err = capsys.readouterr().err
     assert "other: Commutative: uncertified" in err and "other: Neutral: uncertified" in err
+
+
+# D-2026-10-22-a: a law's controls are the law's; a run on a model needs that model's passes, not
+# controls run at that model. `ops` is certified by its passes; the only control refutes `Ops` on
+# `wrong`, another model: the law reads controlled and the run on `ops` is not refused.
+CONTROL_MODELS = CONJ_MODELS + 'wrong : Ops := { plus := fn a b { a - b } }\n'
+CONTROL_TEST = CONJ_TEST.replace('import "ops.lut" ops', 'import "ops.lut" ops wrong') + '''onWrong : List Binding := [ { parameter := just "o", type := nothing, generator := "wrong", coverage := Listed },
+  { parameter := nothing, type := just "Int", generator := "smallInts", coverage := Listed } ]
+test "Ops" ExhaustiveMode (profile <- onWrong) (control <- true)
+'''
+
+
+def test_a_model_certified_by_its_passes_needs_no_control_at_that_model(tmp_path, capsys):
+    for name, text in [("ops.lth", CONJ_THEORY), ("ops.lut", CONTROL_MODELS), ("ops.test.lut", CONTROL_TEST),
+                       ("ops.run.lut", CONJ_RUN_OPS)]:
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    main(["certify", str(tmp_path / "ops.test.lut")])
+    out = capsys.readouterr().out
+    assert "controlled (refuted on its control" in out and "control of Ops on wrong" in out, out
+    entries = json.loads((tmp_path / "ops.cert.json").read_text(encoding="utf-8"))
+    controls = [e for e in entries if certify.is_control(e)]
+    assert controls and all("wrong" in json.dumps(e["binding"]) for e in controls)
+    assert main(["run", str(tmp_path / "ops.run.lut")]) == 0, capsys.readouterr()
