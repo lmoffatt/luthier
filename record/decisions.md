@@ -3296,6 +3296,16 @@ for a > 0, while sup(a + ∅) = 0). Lawvere's base takes the opposite order, ([0
 the empty join is ∞ and a + ∞ = ∞. The decision stands with that orientation; the original wording
 is kept above.
 
+Correction to D-2026-10-18-i (the coordinator's, 2026-10-23, from the audit of the algebras,
+record/plan/audit-algebras-2026-10-22/report.md, 5b1a05e, 4.4 and 12): "resources (+ in sequence, max
+in parallel: the tropical semiring)" does not hold. Resources are a typed vector (work, span, peak
+memory), no one semiring. Work adds in sequence and in parallel; span adds in sequence and takes the
+max in parallel; peak memory takes the max in sequence and adds in parallel (Blumofe and Leiserson's
+work and span, the audit's reference). The name "tropical semiring" does not fit either: max with
+neutral 0 on the nonnegatives and + has no absorbing zero. The rest of the decision stands; the
+original wording is kept above. Offered to Luciano as a question if he wants it as one
+(record/plan/audit-algebras-2026-10-22/decisions.md, last paragraph).
+
 D-2026-10-18-j  Q1 of the three levels' exploration (record/plan/three-levels-2026-10-18/report.md),
                 reformulated: a numerical law relates an input tolerance δ to an output tolerance ε,
                 and that relation is the law's content. The fixed `tol` matched exactly leaves (as the
