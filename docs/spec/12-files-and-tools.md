@@ -83,7 +83,12 @@ to: a declaration, a definition, an alias, a constructor of a data, a label of a
 binds with `as`, and an `operator` act that binds a core operator to another function at the type of
 the core's binding (4.R13's same declared type, across the core); another type is an overload. A
 record's field, a parameter and a pattern variable stay free, since D-2026-10-18-b is about top-level
-names (the coordinator, 2026-10-21, on review-bite-5.md finding 2d).
+names (the coordinator, 2026-10-21, on review-bite-5.md finding 2d). [proposed, core bite 12a] An
+`operator` act travels with its file: a file that imports from it, directly or through another
+import, writes the operator at the type the act binds without listing the act or its function, since
+the operators of a type are those of the model the type names (4.R13); arrays_model.lut's `operator *
+:= matMul` gives `a * a` in an importer. This clause was silent before; the alternative, an operator
+reaching only the file that binds it, would leave a type's arithmetic unusable outside its model file.
 
 **12.S23. Theory files and model files.** [decided D-2026-10-13-n] A theory file, extension `.lth`,
 holds types, declarations and laws; the checker rejects an `extern`, an action or a model value in

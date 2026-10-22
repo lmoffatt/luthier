@@ -1741,8 +1741,15 @@ def runtime_slice(acts, main, roots=(), *, theory_laws=False):
             if isinstance(h, s.Name) and any(h.name in owners for owners in fields_of.values()):
                 claims.setdefault(h.name, []).append(act.name)
 
+    # [proposed, core bite 12a] an `operator` act travels with its file (check.py's `load_imports`):
+    # a file's acts outside the core are kept with the function each binds, so that the elaborator
+    # resolves `a * a` at the type the act binds; the core's bindings are the prelude's
+    from .elaborate import prelude
+    core_bound = {b.name for bs in prelude().bindings.values() for b in bs}
+    operators = tuple(a for a in acts if isinstance(a, s.OperatorAct) and isinstance(a.value, s.Name)
+                      and a.value.name not in core_bound and a.value.name in by_name)
     needed = set()
-    pending = [main, *roots]
+    pending = [main, *roots, *(a.value.name for a in operators)]
     while pending:
         name = pending.pop()
         if name in needed:
@@ -1778,7 +1785,7 @@ def runtime_slice(acts, main, roots=(), *, theory_laws=False):
             return replace(value, **{f.name: projections(getattr(value, f.name)) for f in fields(value)})
         return value
     return tuple(projections(a) for a in acts
-                 if a in by_name.get(getattr(a, "name", None), ()) and a.name in needed)
+                 if a in by_name.get(getattr(a, "name", None), ()) and a.name in needed) + operators
 
 
 def _bound_names(value):

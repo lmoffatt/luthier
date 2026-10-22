@@ -575,8 +575,8 @@ def load_imports(program, path, seen=None):
     writes (as a definition, a free name or a binder) is called `name@file` and so never resolves a
     name of the importer, nor the importer's definition a name of the imported file
     (prompt-scope.md item 1); a name listed under another (`as`, or re-exported under another name)
-    becomes an alias. Unreadable files are skipped (4.R2 names what is missing); operators and data
-    are left out, being the imported file's own business. A definition does not take the name of a
+    becomes an alias. Unreadable files are skipped (4.R2 names what is missing); data are left out,
+    being the imported file's own business; its `operator` acts travel (core bite 12a). A definition does not take the name of a
     constructor or a label of a sum (prompt-10.md, 12.S22, as run.py's `Loaded` keeps them apart):
     an imported definition of such a name is left out, unless the file lists it in an import of its
     file and has no constructor or label of that name itself. So is an alias: kernel_laws.lth's
@@ -590,9 +590,12 @@ def load_imports(program, path, seen=None):
     brought = [(target, scope.scoped(f, a)) for target, f in files.items() for a in f.acts]
     own = _constructors_of(program)
     taken = own | _constructors_of(tuple(a for _, a in brought))
+    # [proposed, core bite 12a] an `operator` act travels with its file: the operators of a type
+    # are those of the model the type names (4.R13), wherever a value of the type is written
+    operators = tuple(scope.scoped(f, a) for f in files.values() for a in f.operators)
     return tuple(a for target, a in brought
                  if not isinstance(a, (s.Declare, s.Define, s.Alias)) or a.name not in taken
-                 or (target, a.name) in scope.listed and a.name not in own) + scope.aliases
+                 or (target, a.name) in scope.listed and a.name not in own) + scope.aliases + operators
 
 
 def hidden_constructors(program, imported):
@@ -614,8 +617,8 @@ def hidden_constructors(program, imported):
 class _File:
     """An imported file as load_imports reads it: its acts, the names it defines, its imports (the
     name it writes -> (file, the name there))."""
-    def __init__(self, path, acts, imports):
-        self.path, self.acts, self.imports = path, acts, imports
+    def __init__(self, path, acts, imports, operators=()):
+        self.path, self.acts, self.imports, self.operators = path, acts, imports, operators
         self.defined = {a.name for a in acts}
         self.constructors = _constructors_of(acts)
 
@@ -638,7 +641,8 @@ def _brought(program, path, seen, files):
             if isinstance(parsed, s.Parsed):
                 _brought(parsed.program, target, seen, files)
                 files[target] = _File(target, tuple(a for a in parsed.program if isinstance(a, (s.Declare, s.Define, s.Alias))),
-                                      _imports_of(parsed.program, target))
+                                      _imports_of(parsed.program, target),
+                                      tuple(a for a in parsed.program if isinstance(a, s.OperatorAct)))
 
 
 def _written(program):
@@ -780,7 +784,7 @@ def typing_of(p):
     if not isinstance(p, Program) or not p.imported: return _typing(tuple(p), _with_core[0])
     if p.typing is None:
         own = {a.name for a in p if hasattr(a, 'name')}
-        imported = tuple(a for a in p.imported if a.name not in own)
+        imported = tuple(a for a in p.imported if getattr(a, 'name', None) not in own)
         p.typing = typed(Typing, imported, tuple(p), p.hidden)
     return p.typing
 

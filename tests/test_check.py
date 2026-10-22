@@ -665,3 +665,25 @@ def test_a_field_a_parameter_and_a_pattern_variable_stay_free(tmp_path):
                     'f (compose : Int) : Int := compose\ng (x : Int) : Int := match x { compose -> compose }\n',
                     encoding='utf-8')
     assert main(['check', str(path)]) == 0
+
+
+# Core bite 12a, item 4 ([proposed] 12.S22): an `operator` act travels with its file, so an importer
+# writes `o + o` at the type the act binds, listing the type alone (report-bite-11.md: arrays_model's
+# `a * a` refused in an importing file).
+OPERATOR_MODEL = '''Pt : U := { x : Int, y : Int }
+addPt (a b : Pt) : Pt := { x := a.x + b.x, y := a.y + b.y }
+operator + := addPt
+'''
+OPERATOR_USE = '''import "pts.lut" Pt
+o : Pt := { x := 1, y := 2 }
+two : Pt := o + o
+'''
+
+
+def test_an_operator_act_is_exported_with_its_file(tmp_path, capsys):
+    (tmp_path / "pts.lut").write_text(OPERATOR_MODEL, encoding="utf-8")
+    (tmp_path / "use.lut").write_text(OPERATOR_USE, encoding="utf-8")
+    assert main(["check", str(tmp_path / "use.lut")]) == 0, capsys.readouterr()
+    capsys.readouterr()
+    main(["eval", str(tmp_path / "use.lut"), "two.y"])
+    assert capsys.readouterr().out.startswith("4 : Int")
