@@ -517,10 +517,65 @@ def _failed(entry):
     return isinstance(entry["outcome"], dict) and "Failed" in entry["outcome"]
 
 
+# certification.lth's `admits` over the coverage of `Points` (test.lth's `grade` of a confirming or a
+# supporting verdict): the grades each coverage admits, `None` for evidence with no coverage
+ADMITTED = {"Exhaustive": {"ExhaustiveGrade", "Cases"}, "Bounded": {"ExhaustiveGrade"}, "Listed": {"Cases"},
+            "Drawn": {"Cases", "Sampled"}, None: {"Cases"}}
+
+
+def _coverage(evidence):
+    """The constructor of the coverage of a `Points` evidence (`Drawn 3` is `Drawn`), else None."""
+    points = evidence.get("Points") if isinstance(evidence, dict) else None
+    coverage = points.get("coverage") if isinstance(points, dict) else None
+    return coverage.strip("()").split(" ", 1)[0] if isinstance(coverage, str) else None
+
+
+def admits(evidence, grade):
+    """certification.lth's `admits`: the grades a pass's evidence admits. A citation proved, an
+    assumption assumed, a not-run none, a statistical pass a `Holds` graded sampled, and points
+    the grades their coverage admits (`ADMITTED`)."""
+    if isinstance(evidence, dict):
+        if "Cited" in evidence:
+            return grade == "Proved"
+        if "Assumed" in evidence:
+            return grade == "AssumedGrade"
+        if "NotRun" in evidence:
+            return False
+        if "Tested" in evidence:
+            return evidence["Tested"].get("verdict") == "Holds" and grade == "Sampled"
+    elif evidence == "Assumed":
+        return grade == "AssumedGrade"
+    return grade in ADMITTED[_coverage(evidence)]
+
+
+def held_as_listed(entry):
+    """certification.lth's `censusOfAtMost` for a pass over listed cases: each parameter reaches a
+    census of no more values than the cases evaluated (6.S7). [proposed, bite 13c] Two readings the
+    theory's text does not state yet, both met by what the tester writes: a parameter enumerated
+    whole (`ExhaustiveMode`) reaches its support, and a pass that evaluated no case (a domain with
+    an empty parameter, `x : Empty`) bounds no census by its count."""
+    points = entry["evidence"]["Points"]
+    n = points.get("evaluated")
+    whole = {b["parameter"] for b in entry["binding"]
+             if isinstance(b, dict) and str(b.get("generator", "")).startswith("ExhaustiveMode")}
+    for r in entry.get("reach") or ():
+        reach = r["reach"]
+        if reach == "Support" and r["parameter"] in whole:
+            continue
+        if not (isinstance(reach, dict) and "Members" in reach):
+            return False
+        if n and len(reach["Members"]) > n:
+            return False
+    return True
+
+
 def store_errors(entries):
     """What breaks `Store`'s predicate: a grade without a pass or a pass without a grade
-    (`gradedAsOutcome`). Two entries of one identity that disagree are a disagreement the store
-    records (D-2026-10-15-f), read by `disputes`, not an error of the store."""
+    (`gradedAsOutcome`); a grade the pass's evidence does not admit, or a pass over listed cases
+    whose reach is more than the cases it evaluated (`heldAsRun`, `admits`, `held_as_listed`; bite
+    13c, on the audit of 2026-10-22, 1.8). Two entries of one identity that disagree are a
+    disagreement the store records (D-2026-10-15-f), read by `disputes`, not an error of the store.
+    [proposed] `latestInFront` stays unchecked here, as in the theory, whose `notBefore` is a hole."""
     errors = []
     for k, e in enumerate(entries):
         missing = [f for f in IDENTITY + ("outcome", "grade") if f not in e]
@@ -529,9 +584,17 @@ def store_errors(entries):
             continue
         if passed(e) != (e["grade"] is not None):
             errors.append(f"entry {k} ({e['law']}): a grade exactly when passed")
-        tested = _tested(e)
-        if passed(e) and tested and not (tested.get("verdict") == "Holds" and e["grade"] == "Sampled"):
+            continue
+        if e["grade"] is None:
+            continue
+        if e["grade"] not in GRADE_RANK:
+            errors.append(f"entry {k} ({e['law']}): no grade {e['grade']!r}")
+        elif _tested(e) and not admits(e.get("evidence"), e["grade"]):
             errors.append(f"entry {k} ({e['law']}): a statistical pass is a Holds graded sampled")
+        elif not admits(e.get("evidence"), e["grade"]):
+            errors.append(f"entry {k} ({e['law']}): its evidence does not admit the grade {e['grade']}")
+        elif _coverage(e.get("evidence")) == "Listed" and not held_as_listed(e):
+            errors.append(f"entry {k} ({e['law']}): a pass over listed cases reaches more than its cases")
     return errors
 
 

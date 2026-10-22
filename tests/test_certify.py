@@ -1460,3 +1460,39 @@ def test_a_control_binding_another_library_model_is_kept_with_the_law(tmp_path, 
     main(["certify", str(tmp_path / "laws.test.lut")])
     out = capsys.readouterr().out
     assert "OpsWith: cases; controlled (refuted on its control" in out, out
+
+
+# ---------------------------------------------------------------------- bite 13c (the audit of 2026-10-22)
+
+def _points(coverage, evaluated=10):
+    return {"Points": {"evaluated": evaluated, "raised": 0, "coverage": coverage, "verdict": "Supported"}}
+
+
+def test_the_store_reader_refuses_a_grade_the_evidence_does_not_admit(tmp_path):
+    """Audit 1.8: `heldAsRun`'s `admits`. Drawn points graded proved break the store's predicate."""
+    bad = dict(_entry(), evidence=_points("Drawn 0"), grade="Proved")
+    assert certify.store_errors([bad]) and "does not admit" in certify.store_errors([bad])[0]
+    for coverage, grade in [("Drawn 0", "Sampled"), ("Drawn 0", "Cases"), ("Listed", "Cases"),
+                            ("Exhaustive", "ExhaustiveGrade"), ("Bounded 4", "ExhaustiveGrade")]:
+        assert certify.store_errors([dict(_entry(), evidence=_points(coverage), grade=grade)]) == [], coverage
+    for coverage, grade in [("Listed", "ExhaustiveGrade"), ("Bounded 4", "Cases"), ("Exhaustive", "Proved")]:
+        assert certify.store_errors([dict(_entry(), evidence=_points(coverage), grade=grade)]), coverage
+    assert certify.store_errors([dict(_entry(), evidence={"NotRun": "x"}, grade="Cases")])
+    (tmp_path / "x.cert.json").write_text(json.dumps([bad]))
+    with pytest.raises(certify.StoreError):
+        certify.read_store(tmp_path / "x.lut")
+
+
+def test_the_store_reader_bounds_a_listed_pass_by_its_cases():
+    """`heldAsRun`'s census: a pass over listed cases reaches no more values than it evaluated; a
+    parameter enumerated whole reaches its support; a pass over an empty domain bounds nothing."""
+    def listed(reach, evaluated=2, binding=None):
+        return dict(_entry(), evidence=_points("Listed", evaluated), binding=binding or [], reach=reach)
+    three = {"parameter": "x", "reach": {"Members": [{"Number": 1}, {"Number": 2}, {"Number": 3}]}}
+    assert certify.store_errors([listed([three])])
+    assert certify.store_errors([listed([three], evaluated=3)]) == []
+    support = {"parameter": "k", "reach": "Support"}
+    assert certify.store_errors([listed([support])])
+    whole = [{"parameter": "k", "generator": "ExhaustiveMode over (Fin n)", "fingerprint": ""}]
+    assert certify.store_errors([listed([support], binding=whole)]) == []
+    assert certify.store_errors([listed([three], evaluated=0)]) == []
