@@ -1154,6 +1154,11 @@ def served(demand, entries):
     """Whether the entries serve the demand of a law (`serves_over`): one of them does, or, for a law
     whose body is a conjunction of laws (D-2026-10-18-f), one entry of each conjunct its entries at
     the demand's hash list does; a conjunct's entry never serves the conjunction alone."""
+    if demand.get("byModel"):
+        # a law of the model's theory that takes no model parameter (`doubles: Commutative`): an
+        # entry of the law itself is about whatever model its line bound, so only the theory's
+        # entries about the run's model serve it (the coordinator, 2026-10-22, on report-bite-12a.md)
+        return "conjunction" in demand and _served_by_conjuncts(demand["conjunction"], entries)
     at_hash = [e for e in _laws_own(entries) if e["law"] == demand["law"] and at(demand, e)]
     conjuncts = list(dict.fromkeys(c for e in at_hash for c in e.get("conjuncts") or ()))
     if not conjuncts:
@@ -1221,6 +1226,16 @@ def refuse(entries, cone):
             refusals.append({"name": c["name"], "law": None, "state": ("Provisional", None)})
             continue
         for d in c["laws"]:
+            if d.get("byModel"):
+                # read against the theory's entries about the run's model (`served`); the law's own
+                # entries are about other models, so neither their failures nor their states count
+                if not served(d, entries):
+                    m = d.get("conjunction")
+                    mine = [e for e in entries if m is not None and covers_all(e.get("reach") or [], m["given"])]
+                    refusals.append({"name": c["name"], "law": d["law"],
+                                     "state": state_of(m, mine) if m is not None else ("Uncertified", None),
+                                     "demand": m if m is not None else d})
+                continue
             dispute = dispute_of(entries, d["law"], lambda e: at(d, e))
             failure = next((e for e in _laws_own(entries) if e["law"] == d["law"] and at(d, e) and _failed(e)),
                            None)

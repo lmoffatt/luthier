@@ -1374,3 +1374,26 @@ def test_a_theory_s_laws_are_served_by_its_conjunction_s_entries(tmp_path, capsy
     main(["eval", str(tmp_path / "use.lut"), "four"])
     out = capsys.readouterr().out
     assert "other: Neutral: uncertified" in out and "other: Unital: uncertified" in out
+
+
+# The coordinator, 2026-10-22, on report-bite-12a.md's question: a law demanded without a model
+# parameter (`Commutative`, `Neutral` over `o.plus`) is served only by entries about the model the run
+# gives; a passed entry of the law about another model (core's own `Commutative` lines) no longer
+# serves it. A certificate means the model that runs was tested.
+CONJ_RUN_OTHER = '''import "ops.lut" other
+main (w : W) : W * Unit := if other.plus 2 2 == 4 then (w, unit) else (w, unit)
+'''
+CONJ_RUN_OPS = CONJ_RUN_OTHER.replace("other", "ops")
+
+
+def test_a_law_without_a_model_parameter_is_served_only_by_the_run_s_model(tmp_path, capsys):
+    for name, text in [("ops.lth", CONJ_THEORY), ("ops.lut", CONJ_MODELS), ("ops.test.lut", CONJ_TEST),
+                       ("other.run.lut", CONJ_RUN_OTHER), ("ops.run.lut", CONJ_RUN_OPS)]:
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    main(["certify", str(tmp_path / "ops.test.lut")])
+    capsys.readouterr()
+    assert main(["run", str(tmp_path / "ops.run.lut")]) == 0, capsys.readouterr()
+    capsys.readouterr()
+    assert main(["run", str(tmp_path / "other.run.lut")]) != 0
+    err = capsys.readouterr().err
+    assert "other: Commutative: uncertified" in err and "other: Neutral: uncertified" in err
