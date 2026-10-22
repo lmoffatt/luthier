@@ -36,7 +36,7 @@ import "world.lth" Persistence
 import "world_model.lut" State theWorld
 
 dropFile (fs : List (String * String)) (p : String) : List (String * String) :=
-  match fs { nil -> nil ; cons (q, c) rest -> if p == q then dropFile rest p else cons (q, c) (dropFile rest p) }
+  filter List (String * String) (fn (f : String * String) { match f { (q, c) -> not (p == q) } }) fs
 
 -- the representation's store: a write puts the content at the path, first, and drops what was there
 files : Persistence State := {

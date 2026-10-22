@@ -29,7 +29,7 @@ writesNothing : Persistence State := { world := theWorld, write := fn st p c { s
 noFile : Drawing State := { store := writesNothing, formats := matplotlibDrawing.formats,
   rasters := matplotlibDrawing.rasters, image := matplotlibDrawing.image, formatOf := matplotlibDrawing.formatOf }
 -- the format reader reads every image as a PNG (FormatByExtension)
-allPng : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
+pngAlways : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
   image := matplotlibDrawing.image, formatOf := fn b { "png" } }
 -- the image reads a cell at a name the schema does not have (ImageOfTheValue): two tables with the
 -- same cells may differ there
@@ -57,7 +57,7 @@ writesEmpty : Persistence State := { world := theWorld, write := fn st p c { fil
 keepsOnlyIt : Persistence State := { world := theWorld, write := fn st p c { { stdout := st.stdout, files := [(p, c)] } } }
 
 noFileList : List (Drawing State) := [noFile]
-allPngList : List (Drawing State) := [allPng]
+pngAlwaysList : List (Drawing State) := [pngAlways]
 readsOffSchemaList : List (Drawing State) := [readsOffSchema]
 firstRowApartList : List (Drawing State) := [firstRowApart]
 layerOrderedList : List (Drawing State) := [layerOrdered]
@@ -74,7 +74,7 @@ leakyPlots : List Plot := [pointsAndLine (leaky (parsed obsText))]
 
 test "FileExistsAfter" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "d" "noFileList",
   bind "p" "plots", bind "stem" "stems", bind "ext" "exts", bind "st" "worlds"]) (control <- true)
-test "FormatByExtension" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "d" "allPngList",
+test "FormatByExtension" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "d" "pngAlwaysList",
   bind "p" "plots", bind "ext" "exts"]) (control <- true)
 test "ImageOfTheValue" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "d" "readsOffSchemaList",
   bind "p" "plainPlots", bind "q" "leakyPlots", bind "ext" "exts"]) (control <- true)
