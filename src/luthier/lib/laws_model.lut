@@ -1,0 +1,61 @@
+-- laws_model.lut: a model of laws.lth's `Settling`, by its reference definition.
+--
+-- Core bite 13b, 2026-10-22, by Claude Sonnet 5.5 on record/plan/core-2026-10-17/prompt-bite-13b.md.
+-- Sources: the sixteen laws of `Settling` in laws.lth §3 (each cited there to its review item). The
+-- model settles a law by the evidence that follows its form, as those laws say, and combines the
+-- verdicts of a conjunction by: a refutation absorbs, confirmation is neutral, anything else
+-- unsettled (the weakest of 5.S8, L10.9: no grade is raised without evidence).
+--
+-- `At A a e` carries a value of the quantified type of a `forall`; the model reads it as the
+-- law's argument, which the kernel does not check against `A` (a model of laws.lth is host
+-- territory, the evidence is built by the certifier from the law's own type).
+
+import "laws.lth" Settling Law Evidence Verdict Case Forall Exists Conjunction Either Not Then Statistical
+  Evaluated At Points EvidencePair Side Cited Assumed NotRun Tested Coverage Exhaustive StatisticalVerdict
+  Confirmed Refuted Supported Unsettled Cites Assumes Holds Fails Unresolved
+  isRefuted isConfirmed isSupported isConfirmedOrSupported reversedVerdict existsVerdict
+
+-- a refutation absorbs, confirmation is neutral, the rest is unsettled
+combineVerdicts (u v : Verdict) : Verdict :=
+  if isRefuted u or isRefuted v then Refuted
+  else if isConfirmed u then v
+  else if isConfirmed v then u
+  else Unsettled
+
+-- the verdicts of the law at each point of a census
+pointSettles (A B : U) (p : A -> Law) (pts : List (B * Evidence)) : List Verdict :=
+  map (B * Evidence) Verdict (fn (pt : B * Evidence) { match pt { (a, f) -> settle (p a) f } }) pts
+
+-- `Then` is `Not (Conjunction p (Not q))` and `Not` reverses what it reads, except on a citation or
+-- an assumption, which model any law whole
+settle (l : Law) (e : Evidence) : Verdict := match e {
+  Cited r -> Cites r ;
+  Assumed -> Assumes ;
+  NotRun r -> Unsettled ;
+  _ -> match l {
+    Case c -> match e { Evaluated b -> (if b == c then (if c then Confirmed else Refuted) else Unsettled) ; _ -> Unsettled } ;
+    Forall A p -> match e {
+      At B a f -> (if isRefuted (settle (p a) f) then Refuted else Unsettled) ;
+      Points B pts cov ->
+        (if any List Verdict isRefuted (pointSettles A B p pts) then Refuted
+         else if all List Verdict isConfirmed (pointSettles A B p pts)
+           then (match cov { Exhaustive -> Confirmed ; _ -> Supported })
+         else if all List Verdict isConfirmedOrSupported (pointSettles A B p pts)
+           then Supported
+         else Unsettled) ;
+      _ -> Unsettled } ;
+    Exists A p -> match e {
+      At B a f -> (if isConfirmed (settle (p a) f) then Confirmed else Unsettled) ;
+      Points B pts cov -> existsVerdict (pointSettles A B p pts) cov ;
+      _ -> Unsettled } ;
+    Conjunction p q -> match e { EvidencePair f g -> combineVerdicts (settle p f) (settle q g) ; _ -> Unsettled } ;
+    Either p q -> match e {
+      Side s f -> (if isConfirmed (settle (if s then p else q) f) then Confirmed
+                   else if isSupported (settle (if s then p else q) f) then Supported else Unsettled) ;
+      EvidencePair f g -> (if isRefuted (settle p f) and isRefuted (settle q g) then Refuted else Unsettled) ;
+      _ -> Unsettled } ;
+    Not p -> reversedVerdict (settle p e) ;
+    Then p q -> settle (Not (Conjunction p (Not q))) e ;
+    Statistical S T sl draw c -> match e { Tested v -> (match v { Holds r -> Supported ; Fails r -> Refuted ; Unresolved r -> Unsettled }) ; _ -> Unsettled } } }
+
+settling : Settling := { settles := settle, combine := combineVerdicts }

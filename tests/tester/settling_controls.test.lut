@@ -1,0 +1,130 @@
+-- tests/tester/settling_controls.test.lut: the controls of settling_laws.test.lut (core bite 13b). Each
+-- line is the law's line written `(control <- true)`, with the model replaced by one broken on
+-- purpose in the way one conjunct forbids, and is expected to be refuted: a case settled without
+-- the value it evaluated to, a `forall` at one point that never refutes, a sample that confirms a
+-- `forall`, an `exists` refuted by one counterexample, a sample that confirms an `exists`, a
+-- conjunction that reads its first part only, an `or` by a side that settles nothing, an `or`
+-- refuted by one side, a `not` that does not flip, a `then` read as `and`, a citation or an
+-- assumption that confirms, a run that did not run that refutes, a sequential test that confirms,
+-- and four combinations (the first argument, one that is not associative, the strongest, and one
+-- that confirms two supported parts). The censuses are settling_laws.test.lut's.
+-- Written 2026-10-22 by Claude Sonnet 5.5 on record/plan/core-2026-10-17/prompt-bite-13b.md.
+
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed Settling Law Evidence Verdict Case Forall Exists Conjunction Either Not Then Statistical Evaluated At Points
+  EvidencePair Side Cited Assumed NotRun Tested Coverage Exhaustive Bounded Drawn Confirmed Refuted Supported Unsettled Cites
+  Assumes StatisticalVerdict Rates Holds Fails Unresolved byPValue StatisticalLaw Sequential isRefuted isConfirmed isSupported
+import "laws_model.lut" settling settle combineVerdicts
+
+bools : List Bool := [true, false]
+strings : List String := ["a", "b"]
+ints : List Int := [0, 1]
+types : List U := [Int]
+laws : List Law := [Case true, Case false, Not (Case true), Conjunction (Case true) (Case false), Either (Case false) (Case true)]
+quantified : List (Int -> Law) := [fn n { Case (n == 0) }, fn n { Case true }, fn n { Not (Case (n == 0)) }]
+points : List (List (Int * Evidence)) := [nil, [(0, Evaluated true)], [(0, Evaluated true), (1, Evaluated true)],
+  [(0, Evaluated true), (1, Evaluated false)], [(1, Evaluated false), (0, Cited "c")]]
+coverages : List Coverage := [Exhaustive, Listed, Drawn 3, Bounded 2]
+evidences : List Evidence := [Evaluated true, Evaluated false, At Int 0 (Evaluated true), At Int 1 (Evaluated false),
+  Points Int [(0, Evaluated true), (1, Evaluated true)] Exhaustive, Points Int [(0, Evaluated true), (1, Evaluated true)] (Drawn 3),
+  Points Int [(0, Evaluated true), (1, Evaluated false)] Exhaustive, EvidencePair (Evaluated true) (Evaluated false),
+  EvidencePair (Evaluated false) (Evaluated false), Side true (Evaluated true), Side false (Evaluated false),
+  Cited "c", Assumed, NotRun "r"]
+verdicts : List Verdict := [Confirmed, Refuted, Supported, Unsettled, Cites "c", Assumes]
+cutoffs : List Sequential := [{ alpha := 0.05, beta := 0.05, delta := 0.5, initial := 1, budget := 10 }]
+pvalueLaws : List (StatisticalLaw Int) := [byPValue Int (fn n { 0.5 })]
+draws : List (Nat -> Nat -> Int * Nat) := [fn n t { (0, t + 1) }]
+scalarTypes : List U := [Int]
+nats : List U := [Nat]
+aRate : Rates := { alpha := 0.05, beta := 0.05, delta := 0.5, spent := 1 }
+treated : List StatisticalVerdict := [Holds aRate, Fails aRate, Unresolved aRate]
+
+-- the broken models: the good one's settling with one shape of law or evidence read wrongly
+with (f : Law -> Evidence -> Maybe Verdict) (c : Verdict -> Verdict -> Verdict) : Settling :=
+  { settles := fn l e { match f l e { just v -> v ; nothing -> settle l e } }, combine := c }
+good (u v : Verdict) : Verdict := combineVerdicts u v
+noFlaw (l : Law) (e : Evidence) : Maybe Verdict := nothing
+
+caseIgnoresTheValue (l : Law) (e : Evidence) : Maybe Verdict :=
+  match l { Case c -> (match e { Evaluated b -> just (if c then Confirmed else Refuted) ; _ -> nothing }) ; _ -> nothing }
+forallNeverRefutesAtAPoint (l : Law) (e : Evidence) : Maybe Verdict :=
+  match l { Forall A body -> (match e { At B a f -> just Unsettled ; _ -> nothing }) ; _ -> nothing }
+sampleConfirmsAForall (l : Law) (e : Evidence) : Maybe Verdict :=
+  match l { Forall A body -> (match e { Points B pts cov -> (match settle l e { Supported -> just Confirmed ; _ -> nothing }) ; _ -> nothing }) ; _ -> nothing }
+oneCounterexampleRefutesAnExists (l : Law) (e : Evidence) : Maybe Verdict :=
+  match l { Exists A body -> (match e { At B a f -> (match settle (body a) f { Refuted -> just Refuted ; _ -> nothing }) ; _ -> nothing }) ; _ -> nothing }
+sampleConfirmsAnExists (l : Law) (e : Evidence) : Maybe Verdict :=
+  match l { Exists A body -> (match e { Points B pts cov -> (match cov { Exhaustive -> nothing ; _ -> just Confirmed }) ; _ -> nothing }) ; _ -> nothing }
+conjunctionReadsTheFirstPart (l : Law) (e : Evidence) : Maybe Verdict :=
+  match l { Conjunction p q -> (match e { EvidencePair f g -> just (settle p f) ; _ -> nothing }) ; _ -> nothing }
+eitherBySideSettlesNothing (l : Law) (e : Evidence) : Maybe Verdict :=
+  match l { Either p q -> (match e { Side s f -> just Unsettled ; _ -> nothing }) ; _ -> nothing }
+eitherRefutedByOneSide (l : Law) (e : Evidence) : Maybe Verdict :=
+  match l { Either p q -> (match e { EvidencePair f g -> just (if isRefuted (settle p f) or isRefuted (settle q g) then Refuted else Unsettled) ; _ -> nothing }) ; _ -> nothing }
+notDoesNotFlip (l : Law) (e : Evidence) : Maybe Verdict :=
+  match l { Not p -> (match e { Cited r -> nothing ; Assumed -> nothing ; _ -> just (settle p e) }) ; _ -> nothing }
+thenIsAnd (l : Law) (e : Evidence) : Maybe Verdict :=
+  match l { Then p q -> just (settle (Conjunction p q) e) ; _ -> nothing }
+citationConfirms (l : Law) (e : Evidence) : Maybe Verdict := match e { Cited r -> just Confirmed ; _ -> nothing }
+assumptionConfirms (l : Law) (e : Evidence) : Maybe Verdict := match e { Assumed -> just Confirmed ; _ -> nothing }
+notRunRefutes (l : Law) (e : Evidence) : Maybe Verdict := match e { NotRun r -> just Refuted ; _ -> nothing }
+testConfirms (l : Law) (e : Evidence) : Maybe Verdict :=
+  match l { Statistical S T sl draw c -> (match e { Tested v -> (match v { Holds r -> just Confirmed ; _ -> nothing }) ; _ -> nothing }) ; _ -> nothing }
+
+firstArgument (u v : Verdict) : Verdict := u
+-- distinct verdicts combine to the third of Confirmed, Supported, Unsettled: commutative, not associative
+thirdOfThree (u v : Verdict) : Verdict :=
+  if u == v then u
+  else if (isConfirmed u and isSupported v) or (isSupported u and isConfirmed v) then Unsettled
+  else if (isConfirmed u and v == Unsettled) or (u == Unsettled and isConfirmed v) then Supported
+  else if (isSupported u and v == Unsettled) or (u == Unsettled and isSupported v) then Confirmed
+  else Unsettled
+strongest (u v : Verdict) : Verdict := if isConfirmed u then u else if isConfirmed v then v else combineVerdicts u v
+twoSupportedConfirm (u v : Verdict) : Verdict := if isSupported u and isSupported v then Confirmed else combineVerdicts u v
+
+bCase : List Settling := [with caseIgnoresTheValue good]
+bForallAt : List Settling := [with forallNeverRefutesAtAPoint good]
+bForallPoints : List Settling := [with sampleConfirmsAForall good]
+bExistsAt : List Settling := [with oneCounterexampleRefutesAnExists good]
+bExistsPoints : List Settling := [with sampleConfirmsAnExists good]
+bConjunction : List Settling := [with conjunctionReadsTheFirstPart good]
+bEitherSide : List Settling := [with eitherBySideSettlesNothing good]
+bEitherBoth : List Settling := [with eitherRefutedByOneSide good]
+bNot : List Settling := [with notDoesNotFlip good]
+bThen : List Settling := [with thenIsAnd good]
+bCited : List Settling := [with citationConfirms good]
+bAssumed : List Settling := [with assumptionConfirms good]
+bNotRun : List Settling := [with notRunRefutes good]
+bTest : List Settling := [with testConfirms good]
+bFirst : List Settling := [with noFlaw firstArgument]
+bThird : List Settling := [with noFlaw thirdOfThree]
+bStrongest : List Settling := [with noFlaw strongest]
+bTwoSupported : List Settling := [with noFlaw twoSupportedConfirm]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+ofType (t g : String) : Binding := { parameter := nothing, type := just t, generator := g, coverage := Listed }
+profile (m : String) : List Binding := [bind "m" m, ofType "Bool" "bools",
+  bind "r" "strings", bind "A" "types", bind "a" "ints", ofType "Law" "laws", bind "body" "quantified",
+  ofType "Evidence" "evidences", bind "pts" "points", ofType "Coverage" "coverages", ofType "Verdict" "verdicts",
+  bind "S" "scalarTypes", bind "T" "nats", bind "l" "pvalueLaws", bind "draw" "draws",
+  ofType "Sequential" "cutoffs", ofType "StatisticalVerdict" "treated"]
+
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bCase") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bForallAt") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bForallPoints") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bExistsAt") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bExistsPoints") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bConjunction") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bEitherSide") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bEitherBoth") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bNot") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bThen") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bCited") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bAssumed") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bNotRun") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bTest") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bFirst") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bThird") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bStrongest") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bTwoSupported") (control <- true)

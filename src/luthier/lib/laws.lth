@@ -165,8 +165,8 @@ CaseIsEvaluated (m : Settling) (c b : Bool) : Bool :=
   m.settles (Case c) (Evaluated b) == (if not (b == c) then Unsettled else if c then Confirmed else Refuted)
 -- a `forall` is refuted exactly by a counterexample: evidence at one point refutes it when it
 -- refutes the law there, and otherwise settles nothing
-ForallAtOnePoint (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : Bool :=
-  m.settles (Forall A p) (At A a e) == (if isRefuted (m.settles (p a) e) then Refuted else Unsettled)
+ForallAtOnePoint (m : Settling) (A : U) (body : A -> Law) (a : A) (e : Evidence) : Bool :=
+  m.settles (Forall A body) (At A a e) == (if isRefuted (m.settles (body a) e) then Refuted else Unsettled)
 -- a `forall` on points: refuted by any counterexample; confirmed only when the points are all of
 -- the type and each confirms; supported when every point confirms or is supported and the points
 -- are a census or a sample, or are all of the type with some point only supported. Written out in
@@ -178,17 +178,17 @@ ForallAtOnePoint (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : 
 -- parameter was settled, where 7.S10 grades it by the weakest reach.
 isSupported (v : Verdict) : Bool := match v { Supported -> true ; _ -> false }
 isConfirmedOrSupported (v : Verdict) : Bool := isConfirmed v or isSupported v
-ForallOnPoints (m : Settling) (A : U) (p : A -> Law) (pts : List (A * Evidence)) (c : Coverage) : Bool :=
-  m.settles (Forall A p) (Points A pts c)
-    == (if any List Verdict isRefuted (pointVerdicts m A p pts) then Refuted
-        else if all List Verdict isConfirmed (pointVerdicts m A p pts) then (match c { Exhaustive -> Confirmed ; _ -> Supported })
-        else if all List Verdict isConfirmedOrSupported (pointVerdicts m A p pts) then Supported
+ForallOnPoints (m : Settling) (A : U) (body : A -> Law) (pts : List (A * Evidence)) (c : Coverage) : Bool :=
+  m.settles (Forall A body) (Points A pts c)
+    == (if any List Verdict isRefuted (pointVerdicts m A body pts) then Refuted
+        else if all List Verdict isConfirmed (pointVerdicts m A body pts) then (match c { Exhaustive -> Confirmed ; _ -> Supported })
+        else if all List Verdict isConfirmedOrSupported (pointVerdicts m A body pts) then Supported
         else Unsettled)
 -- an `exists` is confirmed by a witness, and a failing instance does not refute it
-ExistsAtOnePoint (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : Bool :=
-  m.settles (Exists A p) (At A a e) == (if isConfirmed (m.settles (p a) e) then Confirmed else Unsettled)
-ExistsOnPoints (m : Settling) (A : U) (p : A -> Law) (pts : List (A * Evidence)) (c : Coverage) : Bool :=
-  m.settles (Exists A p) (Points A pts c) == existsVerdict (pointVerdicts m A p pts) c
+ExistsAtOnePoint (m : Settling) (A : U) (body : A -> Law) (a : A) (e : Evidence) : Bool :=
+  m.settles (Exists A body) (At A a e) == (if isConfirmed (m.settles (body a) e) then Confirmed else Unsettled)
+ExistsOnPoints (m : Settling) (A : U) (body : A -> Law) (pts : List (A * Evidence)) (c : Coverage) : Bool :=
+  m.settles (Exists A body) (Points A pts c) == existsVerdict (pointVerdicts m A body pts) c
 -- `and` by a pair, its verdicts combined; `or` by either side, which confirms when its side does
 -- and supports when its side is supported (the same review item: a sampled side was dropped), or
 -- by a pair of refutations
