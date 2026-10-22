@@ -41,26 +41,26 @@ sampledPass : Entry := entry "L" "sha256:cccc" (just Sampled) Passed
 provedPass : Entry := entry "L" "sha256:cccc" (just Proved) Passed
 failed : Entry := entry "L" "sha256:cccc" nothing (Failed "x = 1")
 assumedElsewhere : Entry := entry "M" "sha256:cccc" (just AssumedGrade) Passed
-anyEntries : List Entry := [assumedPass, sampledPass, provedPass, failed, assumedElsewhere]
+entriesOfEveryKind : List Entry := [assumedPass, sampledPass, provedPass, failed, assumedElsewhere]
 entriesFor : List Entry := [assumedPass, sampledPass, provedPass, failed]
 
 -- serves any pass of the law at its hash, whatever its grade
-anyPass (d : LawDemand) (e : Entry) : Bool := e.law == d.law and e.cone == d.cone and e.outcome == Passed
+servesAPass (d : LawDemand) (e : Entry) : Bool := e.law == d.law and e.cone == d.cone and e.outcome == Passed
 servesAnyPass : Certifying := { identity := certifying.identity, stale := certifying.stale, grade := certifying.grade,
-  contains := certifying.contains, serves := anyPass, refuse := certifying.refuse, transport := certifying.transport }
+  contains := certifying.contains, serves := servesAPass, refuse := certifying.refuse, transport := certifying.transport }
 -- serves a pass only at the grade the demand accepts, not above it
-exactly (d : LawDemand) (e : Entry) : Bool := anyPass d e and e.grade == just d.accepts
+exactly (d : LawDemand) (e : Entry) : Bool := servesAPass d e and e.grade == just d.accepts
 servesAtExactly : Certifying := { identity := certifying.identity, stale := certifying.stale, grade := certifying.grade,
   contains := certifying.contains, serves := exactly, refuse := certifying.refuse, transport := certifying.transport }
-anyPassModels : List Certifying := [servesAnyPass]
+servesAPassModels : List Certifying := [servesAnyPass]
 exactlyModels : List Certifying := [servesAtExactly]
 
 bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
 
 test "OneIdentityOneResult" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "K" "keyTypes", bind "eq" "keyEqs",
   bind "st" "brokenStores"]) (control <- true)
-test "NoPriceRefusesAssumed" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "k" "anyPassModels",
-  bind "d" "demands", bind "law" "laws", bind "cone" "cones", bind "e" "anyEntries"]) (control <- true)
+test "NoPriceRefusesAssumed" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "k" "servesAPassModels",
+  bind "d" "demands", bind "law" "laws", bind "cone" "cones", bind "e" "entriesOfEveryKind"]) (control <- true)
 test "LoweringLosesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "k" "exactlyModels",
   bind "d" "demands", bind "law" "laws", bind "cone" "cones", bind "e" "entriesFor"]) (control <- true)
 

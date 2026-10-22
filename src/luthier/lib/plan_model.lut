@@ -31,8 +31,7 @@ byNeed (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (entry : String) : Sche
 placeable (ns : List Node) (live before : List String) (n : String) : Bool :=
   not (member List String n before) and subset (keep live (readsOf ns n)) before
 round (ns : List Node) (live before placed candidates : List String) : List String :=
-  match candidates { nil -> placed ; cons n rest ->
-    round ns live before (if placeable ns live before n then placed <> [n] else placed) rest }
+  placed <> filter List String (fn n { placeable ns live before n }) candidates
 rounds (ns : List Node) (live placed : List String) (k : Nat) : List String :=
   if k == 0 then placed else rounds ns live (round ns live placed placed live) (k - 1)
 forward (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (live : List String) : Schedule := rounds d.nodes live nil (1 + size d.nodes)

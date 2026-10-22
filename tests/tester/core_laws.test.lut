@@ -24,7 +24,7 @@ import "laws.lth" Listed
 import "core_instances.lut" leq less equal parity plus minus times smallerInt largerInt firstInt second zero intOne
   identityInt negate succ pred double squareInt clamp timesZero remainder2 nonNegative
   succThenPred zeroConst flippedMinus reversedMinus
-  boolAnd boolOr boolNot top bottom append empty
+  boolAnd boolOr boolNot top bottom joinStrings empty
   fplus ftimes fzero fnegate fclamp tenth byTen sumBound productBound scaleBound noBound1 noBound2 noBound3
 -- ---------------------------------------------------------------- the profiles
 
@@ -81,7 +81,7 @@ onOrOverAnd : List Binding := [
 onNot : List Binding := [ { parameter := just "f", type := nothing, generator := "boolNot", coverage := Listed } ]
 
 onAppend : List Binding := [
-  { parameter := just "op", type := nothing, generator := "append", coverage := Listed },
+  { parameter := just "op", type := nothing, generator := "joinStrings", coverage := Listed },
   { parameter := just "e", type := nothing, generator := "empty", coverage := Listed } ]
 
 onFloatPlus : List Binding := [

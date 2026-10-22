@@ -14,7 +14,7 @@ import "laws.lth" Listed Cited
 import "certification.lth" Certifying Recording Entry Certificate ConeDemand ConeName Refusal Outcome Passed Failed NotRunFor
   fuelSpent outOfFuel known recordEntry failureAt Current agree disputedAt
   ANewIdentityGoesInFront AnAgreeingReplayAddsNothing AnAgreeingPairSettles ADisagreeingReplayIsKept AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused
-import "certification_model.lut" certifying anyFailure passes weakestOfBests serves stateOf
+import "certification_model.lut" certifying hasFailure passes weakestOfBests serves stateOf
 import "term.lth" Term Act Program Alpha Substitution Reduction Var Lit Lam App Pi Pair Match Let Define
   IntConst PVar PPair
 import "term_model.lut" alpha substitute stepper
@@ -69,7 +69,7 @@ fuelModels : List (Recording certifying) := [keepingFuel]
 -- a `certifying` blind to a disagreement: the grade and the refusal of certification_model.lut's
 -- draft 1
 blindGrade (c : Certificate) : Maybe Grade :=
-  if anyFailure c c.entries then nothing else weakestOfBests (passes c c.entries) (passes c c.entries) nothing
+  if hasFailure c c.entries then nothing else weakestOfBests (passes c c.entries) (passes c c.entries) nothing
 blindLaw (es : List Entry) (n : String) (d : ConeDemand) : List Refusal :=
   match failureAt d.law d.cone es {
     just f -> [{ name := n, law := just d.law, state := Current f.outcome }] ;

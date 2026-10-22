@@ -71,9 +71,8 @@ hiddenSchedules : List Schedule := [["a", "b", "c", "d", "f"], ["a", "b", "d", "
 choices : List (List Nat) := [nil, [1], [1, 1], [0, 1, 0], [2, 1, 1], [5]]
 
 -- broken planners
-reverseStrs (xs : List String) (acc : List String) : List String :=
-  match xs { nil -> acc ; cons x rest -> reverseStrs rest (cons x acc) }
-tailStrs (xs : List String) : List String := match xs { nil -> nil ; cons x rest -> rest }
+reverseStrs (xs : List String) (acc : List String) : List String := reverse String xs <> acc
+tailStrs (xs : List String) : List String := drop String 1 xs
 -- the live set is every name of the graph, not what the entry reaches
 wholePlan (A : U) (eq : A -> A -> Bool) (st : Strategy) (d : Dataflow A eq) (e : String) : Plan A :=
   { strategy := st, entry := e, live := names d.nodes, schedule := (plan A eq st d e).schedule }

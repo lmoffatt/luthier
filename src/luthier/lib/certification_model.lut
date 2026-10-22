@@ -55,24 +55,24 @@ reachContains (r : Reach) (v : Value) : Bool := match r {
 -- hash; a failure among them, or a disagreement (D-2026-10-15-f), leaves no grade; under one
 -- binding the strongest pass, across bindings the weakest.
 counts (c : Certificate) (e : Entry) : Bool := e.law == c.law and e.cone == c.cone
-anyFailure (c : Certificate) (es : List Entry) : Bool := any List Entry (fn (e : Entry) { counts c e and entryFailed e }) es
+hasFailure (c : Certificate) (es : List Entry) : Bool := any List Entry (fn (e : Entry) { counts c e and entryFailed e }) es
 entryFailed (e : Entry) : Bool := match e.outcome { Failed x -> true ; _ -> false }
 -- the passes that count, each with its grade
 passes (c : Certificate) (es : List Entry) : List (List DrawnParameter * Grade) :=
-  match es { nil -> nil ; cons e rest ->
-    if counts c e and e.outcome == Passed
-    then (match e.grade { just g -> cons (e.binding, g) (passes c rest) ; nothing -> passes c rest })
-    else passes c rest }
+  concat (List DrawnParameter * Grade) (map Entry (List (List DrawnParameter * Grade))
+    (fn (e : Entry) { match e.grade { just g -> [(e.binding, g)] ; nothing -> nil } })
+    (filter List Entry (fn (e : Entry) { counts c e and e.outcome == Passed }) es))
 -- the strongest grade under one binding
 bestUnder (b : List DrawnParameter) (ps : List (List DrawnParameter * Grade)) (g : Grade) : Grade :=
-  match ps { nil -> g ; cons (b2, h) rest -> bestUnder b rest (if b2 == b then stronger g h else g) }
+  fold (List DrawnParameter * Grade) Grade stronger g (fn (bh : List DrawnParameter * Grade) { match bh { (b2, h) -> if b2 == b then h else g } }) ps
 -- the weakest of the bindings' bests
 weakestOfBests (all ps : List (List DrawnParameter * Grade)) (acc : Maybe Grade) : Maybe Grade :=
-  match ps { nil -> acc ; cons (b, g) rest ->
-    weakestOfBests all rest (just (match acc { nothing -> bestUnder b all g ; just h -> weakest h (bestUnder b all g) })) }
+  fold (List DrawnParameter * Grade) (Maybe Grade)
+    (fn (x y : Maybe Grade) { match x { nothing -> y ; just a -> (match y { nothing -> x ; just b -> just (weakest a b) }) } })
+    acc (fn (bg : List DrawnParameter * Grade) { match bg { (b, g) -> just (bestUnder b all g) } }) ps
 certificateDisputed (c : Certificate) : Bool := match disputeAt entryIdentity c.law c.cone c.entries { just p -> true ; nothing -> false }
 certificateGrade (c : Certificate) : Maybe Grade :=
-  if anyFailure c c.entries or certificateDisputed c then nothing else weakestOfBests (passes c c.entries) (passes c c.entries) nothing
+  if hasFailure c c.entries or certificateDisputed c then nothing else weakestOfBests (passes c c.entries) (passes c c.entries) nothing
 
 -- 6.S15, 7.S15: an entry serves a demand when it is the law's at the current hash, passed, at or
 -- above the cutoff, and its reach covers what the run gives
@@ -110,9 +110,8 @@ meet (r s : Reach) : Reach := match r {
                                 Members vs -> Members (keepWithin r vs) }) ;
   Members vs -> Members (keepWithin s vs) }
 meetReaches (bs is : List ParameterReach) : List ParameterReach :=
-  match bs { nil -> nil ; cons r rest ->
-    (match reachOf r.parameter is { just s -> cons { parameter := r.parameter, reach := meet r.reach s } (meetReaches rest is) ;
-                                    nothing -> meetReaches rest is }) }
+  concat ParameterReach (map ParameterReach (List ParameterReach)
+    (fn (r : ParameterReach) { match reachOf r.parameter is { just s -> [{ parameter := r.parameter, reach := meet r.reach s }] ; nothing -> nil } }) bs)
 transport (b : Standing) (l : Link) : Maybe Standing :=
   if l.from == b.law then just { law := l.to, on := meetReaches b.on l.standing.on, grade := weakest b.grade l.standing.grade }
   else nothing

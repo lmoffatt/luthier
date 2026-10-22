@@ -29,11 +29,11 @@ failure : Entry := drawn 4 100 nothing (Failed "x = 1")
 notRun : Entry := drawn 5 100 nothing (NotRunFor "no generator")
 
 -- a union that sums every stretch's size, a replay counted again
-sumSizes (ps : List (Maybe Int * Nat)) : Nat := match ps { nil -> 0 ; cons (k, n) rest -> n + sumSizes rest }
+sumSizes (ps : List (Maybe Int * Nat)) : Nat := fold (Maybe Int * Nat) Nat (fn (a b : Nat) { a + b }) 0 (fn (kn : Maybe Int * Nat) { match kn { (k, n) -> n } }) ps
 everyEntry (c : Certificate) (b : List DrawnParameter) : Nat := sumSizes (stretchesUnder c.law c.cone b c.entries)
 counting : Pooling certifying := { pooled := everyEntry }
 -- a union that counts the latest stretch only
-firstSize (ps : List (Maybe Int * Nat)) : Nat := match ps { nil -> 0 ; cons (k, n) rest -> n }
+firstSize (ps : List (Maybe Int * Nat)) : Nat := match nth (Maybe Int * Nat) ps 0 { just kn -> (match kn { (k, n) -> n }) ; nothing -> 0 }
 latestOnly (c : Certificate) (b : List DrawnParameter) : Nat := firstSize (stretchesUnder c.law c.cone b c.entries)
 forgetting : Pooling certifying := { pooled := latestOnly }
 

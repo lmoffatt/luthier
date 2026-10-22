@@ -14,7 +14,7 @@
 -- `printDescription`, `readFileDescription`, `observeDescription`) by the laws of `Host` over the
 -- cases `agreement` gathers along one chain of tokens (world.lth §5).
 
-import "world.lth" ReadableWorld Console Host appendStr lineOf
+import "world.lth" ReadableWorld Console Host lineOf
 
 -- the representation: the standard output so far, and the files by path
 WorldState = { stdout : String, files : List (String * String) }
@@ -30,7 +30,7 @@ theWorld : ReadableWorld WorldState := {
 -- of the host's actions read it from here.
 console : Console WorldState := {
   world := theWorld,
-  printLine := fn s st { ({ stdout := appendStr st.stdout (lineOf s), files := st.files }, unit) },
+  printLine := fn s st { ({ stdout := (st.stdout <> lineOf s), files := st.files }, unit) },
   readFile := fn p st { (st, lookup List String String p st.files) },
   stdout := "stdout",
 }

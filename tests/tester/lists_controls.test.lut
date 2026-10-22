@@ -42,7 +42,7 @@ badMonoid : Monoid (List Int) (structural (List Int)) := { neutral := nil, combi
 shortAppend : List Int -> List Int -> List Int := fn xs ys { xs }
 shortReverse : List Int -> List Int := fn xs { drop Int 1 xs }
 -- Fixing the head still gives an involution; it refutes ReversesEntries instead.
-fixedHead (xs : List Int) : List Int := match xs { nil -> nil ; cons x rest -> cons x (reverse Int rest) }
+fixedHead (xs : List Int) : List Int := take Int 1 xs <> reverse Int (drop Int 1 xs)
 noFilter : List Int -> List Int := id (List Int)
 noSort : List Int -> List Int := id (List Int)
 uniqueSort (xs : List Int) : List Int := sortBy Int ordered (foldList Int (List Int) (fn front tail { if member List Int (atList Int front 0) tail then tail else combineList Int front tail }) nil (singleton Int) xs)

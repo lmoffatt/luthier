@@ -25,7 +25,7 @@ import "generators.lth" Binding
 import "laws.lth" Listed
 import "core_instances.lut" leq less equal parity plus minus times firstInt second zero intOne
   identityInt negate succ pred double squareInt timesZero nonNegative flippedMinus
-  boolAnd boolOr boolNot top bottom append
+  boolAnd boolOr boolNot top bottom joinStrings
   fplus ftimes fzero fnegate noBound1 noBound2 noBound3
 -- ---------------------------------------------------------------- the wrong instances
 
@@ -37,7 +37,7 @@ leqSameParity : Int -> Int -> Bool := fn a b { a <= b and a mod 2 == b mod 2 }
 half : Int -> Int := fn y { y / 2 }
 boolImplies : Bool -> Bool -> Bool := fn a b { if a then b else true }
 constTrue : Bool -> Bool := fn b { b or not b }
-appendMarked : String -> String -> String := fn a b { a <> b <> "x" }
+joinMarked : String -> String -> String := fn a b { a <> b <> "x" }
 marker : String := "x"
 fminus : Float64 -> Float64 -> Float64 := fn a b { a - b }
 fone : Float64 := 1.0
@@ -92,12 +92,12 @@ onImpliesOverAnd : List Binding := [
   { parameter := just "join", type := nothing, generator := "boolAnd", coverage := Listed } ]
 onConstTrue : List Binding := [ { parameter := just "f", type := nothing, generator := "constTrue", coverage := Listed } ]
 
-onAppend : List Binding := [ { parameter := just "op", type := nothing, generator := "append", coverage := Listed } ]
+onAppend : List Binding := [ { parameter := just "op", type := nothing, generator := "joinStrings", coverage := Listed } ]
 onAppendMarked : List Binding := [
-  { parameter := just "op", type := nothing, generator := "appendMarked", coverage := Listed },
+  { parameter := just "op", type := nothing, generator := "joinMarked", coverage := Listed },
   { parameter := just "e", type := nothing, generator := "marker", coverage := Listed } ]
 onAppendWithMarker : List Binding := [
-  { parameter := just "op", type := nothing, generator := "append", coverage := Listed },
+  { parameter := just "op", type := nothing, generator := "joinStrings", coverage := Listed },
   { parameter := just "e", type := nothing, generator := "marker", coverage := Listed } ]
 
 onFloatPlusUnbounded : List Binding := [

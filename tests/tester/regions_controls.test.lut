@@ -75,26 +75,26 @@ models : List Certifying := [certifying]
 -- broken regionings
 -- a label graded as a region: the fold of `overRegions` without passing labels over
 overAll (c : Certificate) (b : List DrawnParameter) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
-  match rs { nil -> certifying.grade { law := c.law, cone := c.cone, entries := underOnly b c.entries } ;
-    cons r rest -> orWeakest (regionGrade certifying c b r ev) (overAll c b rest ev) }
+  fold Region (Maybe Grade) orWeakest (certifying.grade { law := c.law, cone := c.cone, entries := underOnly b c.entries })
+    (fn (r : Region) { regionGrade certifying c b r ev }) rs
 underOnly (b : List DrawnParameter) (es : List Entry) : List Entry :=
-  match es { nil -> nil ; cons e rest -> if e.binding == b then cons e (underOnly b rest) else underOnly b rest }
-allBindings (c : Certificate) (bs : List (List DrawnParameter)) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
-  match bs { nil -> nothing ; cons b rest -> orWeakest (overAll c b rs ev) (allBindings c rest rs ev) }
+  filter List Entry (fn (e : Entry) { e.binding == b }) es
+overEveryBinding (c : Certificate) (bs : List (List DrawnParameter)) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
+  fold (List DrawnParameter) (Maybe Grade) orWeakest nothing (fn (b : List DrawnParameter) { overAll c b rs ev }) bs
 labelGraded (c : Certificate) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
-  if standsOnNothing certifying c then nothing else allBindings c (bindingsOf c) rs ev
+  if standsOnNothing certifying c then nothing else overEveryBinding c (bindingsOf c) rs ev
 labelsCount : Regioning certifying := { combine := orWeakest, graded := labelGraded }
 -- no region read: the certificate's grade whatever the regions
 ignoringEmpty : Regioning certifying := { combine := orWeakest, graded := fn c rs ev { certifying.grade c } }
 -- the failures dropped before grading
 keepPasses (es : List Entry) : List Entry :=
-  match es { nil -> nil ; cons e rest -> if e.outcome == Passed then cons e (keepPasses rest) else keepPasses rest }
+  filter List Entry (fn (e : Entry) { e.outcome == Passed }) es
 passesOnly (c : Certificate) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
   regionedGrade certifying orWeakest { law := c.law, cone := c.cone, entries := keepPasses c.entries } rs ev
 blindToFailure : Regioning certifying := { combine := orWeakest, graded := passesOnly }
 -- nothing without regions
 nothingAlone (c : Certificate) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
-  match rs { nil -> nothing ; cons r rest -> regionedGrade certifying orWeakest c rs ev }
+  if isEmpty Region rs then nothing else regionedGrade certifying orWeakest c rs ev
 gradingNothingAlone : Regioning certifying := { combine := orWeakest, graded := nothingAlone }
 -- only the first binding read
 firstBinding (c : Certificate) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=

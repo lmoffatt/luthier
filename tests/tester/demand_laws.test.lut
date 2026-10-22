@@ -52,7 +52,7 @@ sampledPass : Entry := entry "L" "sha256:cccc" (just Sampled) Passed
 provedPass : Entry := entry "L" "sha256:cccc" (just Proved) Passed
 failed : Entry := entry "L" "sha256:cccc" nothing (Failed "x = 1")
 assumedElsewhere : Entry := entry "M" "sha256:cccc" (just AssumedGrade) Passed
-anyEntries : List Entry := [assumedPass, sampledPass, provedPass, failed, assumedElsewhere]
+entriesOfEveryKind : List Entry := [assumedPass, sampledPass, provedPass, failed, assumedElsewhere]
 -- of the law at its hash (`EntryFor (lawDemand d law cone)`)
 entriesFor : List Entry := [assumedPass, sampledPass, provedPass, failed]
 
@@ -61,7 +61,7 @@ bind (p g : String) : Binding := { parameter := just p, type := nothing, generat
 test "OneIdentityOneResult" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "K" "keyTypes", bind "eq" "keyEqs",
   bind "st" "stores"])
 test "NoPriceRefusesAssumed" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "k" "models", bind "d" "demands",
-  bind "law" "laws", bind "cone" "cones", bind "e" "anyEntries"])
+  bind "law" "laws", bind "cone" "cones", bind "e" "entriesOfEveryKind"])
 test "LoweringLosesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "k" "models", bind "d" "demands",
   bind "law" "laws", bind "cone" "cones", bind "e" "entriesFor"])
 

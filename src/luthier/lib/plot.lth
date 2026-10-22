@@ -505,6 +505,7 @@ layersApart (margin : Margin) (p : Plot) (a b : Layer) : Bool :=
       just bx -> apart margin ax bx or (match layerRange p a "y" {
         nothing -> true ;
         just ay -> match layerRange p b "y" { nothing -> true ; just by -> apart margin ay by } }) } }
+-- kept as a recursion (bite 13b): a positional swap that no core function does
 swapAt (ls : List Layer) (i : Int) : List Layer :=
   match ls {
     nil -> nil ;

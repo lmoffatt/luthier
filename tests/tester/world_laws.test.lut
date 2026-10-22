@@ -68,7 +68,7 @@ lockWrite : Described WorldState Unit theWorld := {
   describe := fn st { ({ stdout := st.stdout, files := cons ("luthier.lock", "pinned") (dropFile "luthier.lock" st.files) }, unit) },
   own := true, places := ["luthier.lock"] }
 dropFile (p : String) (fs : List (String * String)) : List (String * String) :=
-  match fs { nil -> nil ; cons (q, c) rest -> if p == q then dropFile p rest else cons (q, c) (dropFile p rest) }
+  filter List (String * String) (fn (qc : String * String) { match qc { (q, c) -> not (p == q) } }) fs
 unitDescriptions : List (Described WorldState Unit theWorld) := [printDescription WorldState console "",
   printDescription WorldState console "hello, world", lockWrite]
 readDescriptions : List (Described WorldState (Maybe String) theWorld) := [readFileDescription WorldState console "input.txt",
@@ -95,10 +95,8 @@ lawless : Term := Var "Float64"
 lawsOfType (t : Term) : List String := if t == lawful then ["TangentShapes", "ScoreIsGradient"] else nil
 -- the grade of the validation of the bytes at each hash; a hash not listed was refuted or not run
 validations : List (String * Grade) := [("sha256:h1", Sampled), ("sha256:h2", Cases), ("sha256:h3", Proved)]
-lookupGrade (h : String) (vs : List (String * Grade)) : Maybe Grade :=
-  match vs { nil -> nothing ; cons (k, g) rest -> if k == h then just g else lookupGrade h rest }
 gradeOfRoute (r : Route) (h : String) : Maybe Grade :=
-  if isProvisional r then just AssumedGrade else if lawsOfType r.declared == nil then nothing else lookupGrade h validations
+  if isProvisional r then just AssumedGrade else if lawsOfType r.declared == nil then nothing else lookup List String Grade h validations
 validator : Externs := {
   lawsOf := lawsOfType,
   gradeOf := gradeOfRoute,
@@ -132,11 +130,9 @@ test "IdentityCarriesHash" ExhaustiveMode (seed <- 20261015) (whereBindings <- [
   bind "h" "hashes", bind "k" "hashes"])
 
 -- §3 the crossing of a callback and of a record of functions
-fieldOf (fs : List (String * (Int -> Int))) (l : String) : Maybe (Int -> Int) :=
-  match fs { nil -> nothing ; cons (k, g) rest -> if k == l then just g else fieldOf rest l }
 bridge : Crossing Int Int := {
   callBack := fn f xs { (map Int Int f xs, size xs) },
-  callField := fn fs l xs { match fieldOf fs l { just f -> (map Int Int f xs, size xs) ; nothing -> (nil, 0) } },
+  callField := fn fs l xs { match lookup List String (Int -> Int) l fs { just f -> (map Int Int f xs, size xs) ; nothing -> (nil, 0) } },
 }
 bridges : List (Crossing Int Int) := [bridge]
 ints : List Concrete := [Int]

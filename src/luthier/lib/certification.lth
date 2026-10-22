@@ -209,10 +209,12 @@ agree (e f : Entry) : Bool := e.outcome == f.outcome and e.grade == f.grade
 -- an entry as an argument (a model's `identity`, `k.identity` in the laws), so that a model can
 -- read its store with them.
 latestWith (ident : Entry -> Identity) (i : Identity) (es : List Entry) : Maybe Entry :=
-  match es { nil -> nothing ; cons e rest -> if ident e == i then just e else latestWith ident i rest }
+  nth Entry (filter List Entry (fn (e : Entry) { ident e == i }) es) 0
+-- kept as a recursion (bite 13b): the entries after the first of an identity: a position, not a per-element map
 behind (ident : Entry -> Identity) (i : Identity) (es : List Entry) : List Entry :=
   match es { nil -> nil ; cons e rest -> if ident e == i then rest else behind ident i rest }
 seenIdentity (i : Identity) (is : List Identity) : Bool := any List Identity (fn (j : Identity) { i == j }) is
+-- kept as a recursion (bite 13b): an identity is seen once, a seen list threaded left to right
 disputes (ident : Entry -> Identity) (seen : List Identity) (es : List Entry) : List (Entry * Entry) :=
   match es { nil -> nil ; cons e rest ->
     if seenIdentity (ident e) seen then disputes ident seen rest
@@ -228,7 +230,7 @@ disputedAt (ident : Entry -> Identity) (i : Identity) (es : List Entry) : Bool :
 entriesAt (l : String) (h : Hash) (es : List Entry) : List Entry :=
   filter List Entry (fn (e : Entry) { e.law == l and e.cone == h }) es
 disputeAt (ident : Entry -> Identity) (l : String) (h : Hash) (es : List Entry) : Maybe (Entry * Entry) :=
-  match disputes ident nil (entriesAt l h es) { nil -> nothing ; cons p rest -> just p }
+  nth (Entry * Entry) (disputes ident nil (entriesAt l h es)) 0
 gradedAsOutcome (es : List Entry) : Bool :=
   all List Entry (fn (e : Entry) { (e.outcome == Passed) == not (e.grade == nothing) }) es
 -- the grades a pass's evidence admits: test.lth's `grade` of a confirming or a supporting verdict
@@ -255,8 +257,7 @@ heldAsRun (es : List Entry) : Bool :=
 -- `String`; until it is filled, a store's predicate on two entries or more is not evaluated
 notBefore : String -> String -> Bool
 latestInFront (es : List Entry) : Bool :=
-  match es { nil -> true ; cons e rest ->
-    (match rest { nil -> true ; cons f more -> notBefore e.date f.date }) and latestInFront rest }
+  all List (Entry * Entry) (fn (ef : Entry * Entry) { match ef { (e, f) -> notBefore e.date f.date } }) (zip Entry Entry es (drop Entry 1 es))
 Store (k : Certifying) : U := { es : List Entry | gradedAsOutcome es and heldAsRun es and latestInFront es }
 
 -- A known outcome is not recomputed (7.S13): the latest entry with the identity asked, whatever
@@ -299,6 +300,7 @@ stronger (g h : Grade) : Grade := if gradeRank g <= gradeRank h then h else g
 -- certificate; its entries under one binding, and the others; whether a failure at its hash refutes
 -- it, and the latest such failure; the weakest of two grades where `nothing` (no pass yet) is the
 -- unit, and the stronger of a grade and a binding's grade so far.
+-- kept as a recursion (bite 13b): a right fold into a function (entries applied last to first); the recursion is the clearer form
 prepend (es : List Entry) (c : Certificate) : Certificate := match es { nil -> c ; cons e rest -> withEntry (prepend rest c) e }
 keepUnder (keep : Bool) (b : List DrawnParameter) (es : List Entry) : List Entry :=
   filter List Entry (fn (e : Entry) { (e.binding == b) == keep }) es
@@ -306,7 +308,7 @@ only (b : List DrawnParameter) (c : Certificate) : Certificate := { law := c.law
 without (b : List DrawnParameter) (c : Certificate) : Certificate := { law := c.law, cone := c.cone, entries := keepUnder false b c.entries }
 isFailure (o : Outcome) : Bool := match o { Failed x -> true ; _ -> false }
 failureAt (l : String) (h : Hash) (es : List Entry) : Maybe Entry :=
-  match es { nil -> nothing ; cons e rest -> if e.law == l and e.cone == h and isFailure e.outcome then just e else failureAt l h rest }
+  nth Entry (filter List Entry (fn (e : Entry) { e.law == l and e.cone == h and isFailure e.outcome }) es) 0
 refuted (c : Certificate) : Bool := match failureAt c.law c.cone c.entries { just f -> true ; nothing -> false }
 -- [D-2026-10-15-f] a disagreement among its entries at its hash leaves a certificate with no
 -- grade, as a failure does: the law is refused until the disagreement is resolved
@@ -361,8 +363,9 @@ stretchesUnder (l : String) (h : Hash) (b : List DrawnParameter) (es : List Entr
 hasKey (k : Maybe Seed) (ps : List (Maybe Seed * Nat)) : Bool :=
   any List (Maybe Seed * Nat) (fn (jn : Maybe Seed * Nat) { match jn { (j, n) -> j == k } }) ps
 largestAt (k : Maybe Seed) (ps : List (Maybe Seed * Nat)) (m : Nat) : Nat :=
-  match ps { nil -> m ; cons (j, n) rest -> largestAt k rest (if j == k and m < n then n else m) }
+  fold (Maybe Seed * Nat) Nat (fn (a b : Nat) { if a > b then a else b }) m (fn (jn : Maybe Seed * Nat) { match jn { (j, n) -> if j == k then n else 0 } }) ps
 seenKey (k : Maybe Seed) (ks : List (Maybe Seed)) : Bool := any List (Maybe Seed) (fn (j : Maybe Seed) { j == k }) ks
+-- kept as a recursion (bite 13b): each key counted once through a seen list threaded left to right
 sumOfLargest (seen : List (Maybe Seed)) (all ps : List (Maybe Seed * Nat)) : Nat :=
   match ps { nil -> 0 ; cons (k, n) rest ->
     if seenKey k seen then sumOfLargest seen all rest else largestAt k all 0 + sumOfLargest (cons k seen) all rest }
@@ -437,12 +440,14 @@ orStrongest (m n : Maybe Grade) : Maybe Grade :=
 regionGrade (k : Certifying) (c : Certificate) (b : List DrawnParameter) (r : Region) (ev : List BindingEvidence) : Maybe Grade :=
   if standsOnNothing k c then nothing
   else if casesAt b r ev == 0 then capped (k.grade (only b c)) else k.grade (only b c)
+-- kept as a recursion (bite 13b): a region that does not grade is skipped without a neutral element for the combination
 overRegions (k : Certifying) (comb : Maybe Grade -> Maybe Grade -> Maybe Grade) (c : Certificate) (b : List DrawnParameter)
             (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
   match rs { nil -> k.grade (only b c) ; cons r rest ->
     if grades r then comb (regionGrade k c b r ev) (overRegions k comb c b rest ev) else overRegions k comb c b rest ev }
 -- the bindings of the passes that count, each once, in the order of the entries
 bindingSeen (b : List DrawnParameter) (bs : List (List DrawnParameter)) : Bool := any List (List DrawnParameter) (fn (x : List DrawnParameter) { x == b }) bs
+-- kept as a recursion (bite 13b): the bindings met are threaded left to right to list each once
 bindingsFrom (c : Certificate) (es : List Entry) (seen : List (List DrawnParameter)) : List (List DrawnParameter) :=
   match es { nil -> nil ; cons e rest ->
     if e.law == c.law and e.cone == c.cone and e.outcome == Passed and not (e.grade == nothing) and not (bindingSeen e.binding seen)
@@ -450,7 +455,7 @@ bindingsFrom (c : Certificate) (es : List Entry) (seen : List (List DrawnParamet
 bindingsOf (c : Certificate) : List (List DrawnParameter) := bindingsFrom c c.entries nil
 overBindings (k : Certifying) (comb : Maybe Grade -> Maybe Grade -> Maybe Grade) (c : Certificate) (bs : List (List DrawnParameter))
              (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
-  match bs { nil -> nothing ; cons b rest -> comb (overRegions k comb c b rs ev) (overBindings k comb c rest rs ev) }
+  fold (List DrawnParameter) (Maybe Grade) comb nothing (fn (b : List DrawnParameter) { overRegions k comb c b rs ev }) bs
 regionedGrade (k : Certifying) (comb : Maybe Grade -> Maybe Grade -> Maybe Grade) (c : Certificate) (rs : List Region)
               (ev : List BindingEvidence) : Maybe Grade :=
   if standsOnNothing k c then nothing else overBindings k comb c (bindingsOf c) rs ev
@@ -486,6 +491,7 @@ Link = { from : String, to : String, standing : Standing }
 -- [proposed, C7] Each step names the next name and the standing of its identity with the last, so
 -- the link starts where the path stands; a link the model refuses ends the path with nothing.
 linkFrom (b : Standing) (a : String) (i : Standing) : Link := { from := b.law, to := a, standing := i }
+-- kept as a recursion (bite 13b): stops at the first link the transport refuses
 along (k : Certifying) (b : Standing) (path : List (String * Standing)) : Maybe Standing :=
   match path { nil -> just b ; cons (a, i) rest ->
     (match k.transport b (linkFrom b a i) { nothing -> nothing ; just s -> along k s rest }) }
@@ -505,10 +511,9 @@ withAccepts (d : ConeDemand) (g : Grade) : ConeDemand := { law := d.law, cone :=
 -- the reach recorded for a parameter, and whether the reaches cover what the run gives
 -- [proposed: a value given to a parameter the entry records no reach for is not covered]
 reachOf (p : String) (rs : List ParameterReach) : Maybe Reach :=
-  match rs { nil -> nothing ; cons r rest -> if r.parameter == p then just r.reach else reachOf p rest }
+  match nth ParameterReach (filter List ParameterReach (fn (r : ParameterReach) { r.parameter == p }) rs) 0 { just r -> just r.reach ; nothing -> nothing }
 coversAll (contains : Reach -> Value -> Bool) (rs : List ParameterReach) (given : List (String * Value)) : Bool :=
-  match given { nil -> true ; cons (p, v) rest ->
-    (match reachOf p rs { just r -> contains r v ; nothing -> false }) and coversAll contains rs rest }
+  all List (String * Value) (fn (pv : String * Value) { match pv { (p, v) -> match reachOf p rs { just r -> contains r v ; nothing -> false } } }) given
 -- [proposed, C2 of the round-1 review] An entry of a demand's law with the reach, outcome and
 -- grade given, the rest as drawn; and the reach that covers whatever a demand gives, the support of
 -- each parameter it names, in front of a reach drawn. The laws of §5 draw the entries that would
@@ -519,7 +524,7 @@ reshape (e : Entry) (l : String) (r : List ParameterReach) (o : Outcome) (g : Ma
     conjuncts := e.conjuncts, budgets := e.budgets, reach := r,
     evidence := e.evidence, grade := g, outcome := o, date := e.date, interpreter := e.interpreter, hosts := e.hosts }
 withSupport (given : List (String * Value)) (rs : List ParameterReach) : List ParameterReach :=
-  match given { nil -> rs ; cons (p, v) rest -> cons { parameter := p, reach := Support } (withSupport rest rs) }
+  (map (String * Value) ParameterReach (fn (pv : String * Value) { match pv { (p, v) -> { parameter := p, reach := Support } } }) given) <> rs
 toward (d : ConeDemand) (e : Entry) (o : Outcome) (g : Maybe Grade) : Entry := reshape e d.law (withSupport d.given e.reach) o g
 
 -- The dependency cone of the entry of a run (6.S14, 12.S17): each name, whether it is provisional
@@ -528,10 +533,9 @@ toward (d : ConeDemand) (e : Entry) (o : Outcome) (g : Maybe Grade) : Entry := r
 ConeName = { name : String, provisional : Bool, laws : List ConeDemand }
 Refusal = { name : String, law : Maybe String, state : State }
 -- the latest entry of a law, and the latest at a hash
-latestOf (l : String) (es : List Entry) : Maybe Entry :=
-  match es { nil -> nothing ; cons e rest -> if e.law == l then just e else latestOf l rest }
+latestOf (l : String) (es : List Entry) : Maybe Entry := nth Entry (filter List Entry (fn (e : Entry) { e.law == l }) es) 0
 latestAt (l : String) (h : Hash) (es : List Entry) : Maybe Entry :=
-  match es { nil -> nothing ; cons e rest -> if e.law == l and e.cone == h then just e else latestAt l h rest }
+  nth Entry (filter List Entry (fn (e : Entry) { e.law == l and e.cone == h }) es) 0
 
 -- What a run requires (7.S15, 12.S17, 6.S14): a cone the store refuses nothing of. `run` starts
 -- only on a value of this type, and otherwise lists each refusal with its state; there is no flag
@@ -611,9 +615,8 @@ erasePairs (kvs : List (String * Term)) : List (String * Term) :=
 
 Erasure (a : Alpha) (sb : Substitution a) (m : Reduction a sb) : { erase : Term -> Term }
 -- a program with each definition's type and body erased, and each declaration's type
-eraseProgram (f : Term -> Term) (p : Program) : Program := match p { nil -> nil ;
-  cons act rest -> cons (match act { Define x ty b -> Define x (f ty) (f b) ; Declare x ty -> Declare x (f ty) ;
-                                     Datum v -> Datum v }) (eraseProgram f rest) }
+eraseProgram (f : Term -> Term) (p : Program) : Program :=
+  map Act Act (fn (act : Act) { match act { Define x ty b -> Define x (f ty) (f b) ; Declare x ty -> Declare x (f ty) ; Datum v -> Datum v } }) p
 ErasureKeepsTheStep (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (e : Erasure a sb m) (p : Program) (t : Term) : Bool :=
   match m.step p t {
     nothing -> isNormal (m.step (eraseProgram e.erase p) (e.erase t)) ;

@@ -265,6 +265,7 @@ kolmogorovDistanceDef (vs : List (Vec Float64)) : Float64 :=
 unitVec (v : Vec Float64) : Bool := forallBelow v.n (fn k { 0.0 <= v.f k and v.f k <= 1.0 })
 -- [core bite 12] `allUnit` is the core's `all unitVec`; the name stays while generators_model.lut
 -- and tests/test_tester.py import it
+-- kept as a recursion (bite 13b): its body is the core's all; the name stays because generators_model.lut and tests/test_tester.py import it (report-bite-12b finding 7)
 allUnit (vs : List (Vec Float64)) : Bool := all List (Vec Float64) unitVec vs
 UnitList : U := { vs : List (Vec Float64) | allUnit vs }
 UnitValue : U := { u : Float64 | 0.0 <= u and u <= 1.0 }

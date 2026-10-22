@@ -12,7 +12,7 @@ import "test.lth" test ExhaustiveMode Grade Proved Cases Sampled AssumedGrade
 import "generators.lth" Binding
 import "laws.lth" Listed
 import "term.lth" Term Var App
-import "world.lth" Console appendStr lineOf PrintAppendsALine PrintChangesOnlyStdout ReadGivesThePlace
+import "world.lth" Console lineOf PrintAppendsALine PrintChangesOnlyStdout ReadGivesThePlace
   ReadChangesNothing ReadableWorld Described OwnIsIdempotent ChangesOnlyDeclared Externs Route routeOf isProvisional settled
   AppliedWhenSettled NoLawNoGrade ProvisionalIsAssumed IdentityCarriesHash Crossing
   CallbackGivesTheFunction CallsAreCounted RecordCrossesByField Host Observed Held held printDescription
@@ -29,11 +29,11 @@ places : List String := ["stdout", "input.txt", "empty.txt", "other.txt"]
 
 -- print forgets the newline: the line is appended without its end
 noNewline : Console WorldState := { world := theWorld,
-  printLine := fn s st { ({ stdout := appendStr st.stdout s, files := st.files }, unit) },
+  printLine := fn s st { ({ stdout := (st.stdout <> s), files := st.files }, unit) },
   readFile := console.readFile, stdout := console.stdout }
 -- print clears the files as it writes the standard output
 dropsFiles : Console WorldState := { world := theWorld,
-  printLine := fn s st { ({ stdout := appendStr st.stdout (lineOf s), files := nil }, unit) },
+  printLine := fn s st { ({ stdout := (st.stdout <> lineOf s), files := nil }, unit) },
   readFile := console.readFile, stdout := console.stdout }
 -- readFile always answers that there is no file
 readsNothing : Console WorldState := { world := theWorld, printLine := console.printLine,
@@ -82,7 +82,7 @@ appendsLock : Described WorldState Unit theWorld := {
   own := true, places := ["luthier.lock"] }
 -- print, declared at the standard output, also writes log.txt
 printLogs : Described WorldState Unit theWorld := {
-  describe := fn st { ({ stdout := appendStr st.stdout (lineOf "hello, world"), files := cons ("log.txt", "printed") st.files }, unit) },
+  describe := fn st { ({ stdout := (st.stdout <> lineOf "hello, world"), files := cons ("log.txt", "printed") st.files }, unit) },
   own := false, places := ["stdout"] }
 appendsLockList : List (Described WorldState Unit theWorld) := [appendsLock]
 printLogsList : List (Described WorldState Unit theWorld) := [printLogs]
@@ -97,20 +97,18 @@ lawful : Term := App (Var "Likelihood") (Var "3")
 lawless : Term := Var "Float64"
 lawsOfType (t : Term) : List String := if t == lawful then ["TangentShapes", "ScoreIsGradient"] else nil
 validations : List (String * Grade) := [("sha256:h1", Sampled), ("sha256:h2", Cases), ("sha256:h3", Proved)]
-lookupGrade (h : String) (vs : List (String * Grade)) : Maybe Grade :=
-  match vs { nil -> nothing ; cons (k, g) rest -> if k == h then just g else lookupGrade h rest }
 gradeOfRoute (r : Route) (h : String) : Maybe Grade :=
-  if isProvisional r then just AssumedGrade else if lawsOfType r.declared == nil then nothing else lookupGrade h validations
+  if isProvisional r then just AssumedGrade else if lawsOfType r.declared == nil then nothing else lookup List String Grade h validations
 -- applies every extern, validated or not
 appliesEvery : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute, applied := fn a ns r h { true },
   identity := fn r h { r.route <> " at " <> h } }
 -- grades by the hash whether or not the type states a law
-gradesLawless (r : Route) (h : String) : Maybe Grade := if isProvisional r then just AssumedGrade else lookupGrade h validations
+gradesLawless (r : Route) (h : String) : Maybe Grade := if isProvisional r then just AssumedGrade else lookup List String Grade h validations
 gradesWithoutLaws : Externs := { lawsOf := lawsOfType, gradeOf := gradesLawless,
   applied := fn a ns r h { if isProvisional r then member List String r.name ns else settled a (gradesLawless r h) },
   identity := fn r h { r.route <> " at " <> h } }
 -- validates a provisional extern as any other
-validatesAll (r : Route) (h : String) : Maybe Grade := if lawsOfType r.declared == nil then nothing else lookupGrade h validations
+validatesAll (r : Route) (h : String) : Maybe Grade := if lawsOfType r.declared == nil then nothing else lookup List String Grade h validations
 validatesProvisional : Externs := { lawsOf := lawsOfType, gradeOf := validatesAll,
   applied := fn a ns r h { if isProvisional r then member List String r.name ns else settled a (validatesAll r h) },
   identity := fn r h { r.route <> " at " <> h } }
@@ -152,22 +150,20 @@ test "IdentityCarriesHash" ExhaustiveMode (seed <- 20261015) (whereBindings <- [
   bind "r" "routes", bind "h" "hashes", bind "k" "hashes"]) (control <- true)
 
 -- §3 the crossing, broken
-fieldOf (fs : List (String * (Int -> Int))) (l : String) : Maybe (Int -> Int) :=
-  match fs { nil -> nothing ; cons (k, g) rest -> if k == l then just g else fieldOf rest l }
-reverseInts (xs acc : List Int) : List Int := match xs { nil -> acc ; cons x rest -> reverseInts rest (cons x acc) }
 callRight (f : Int -> Int) (xs : List Int) : List Int * Nat := (map Int Int f xs, size xs)
 -- the values given back in reverse order
 reversesCalls : Crossing Int Int := {
-  callBack := fn f xs { (reverseInts (map Int Int f xs) nil, size xs) },
-  callField := fn fs l xs { match fieldOf fs l { just f -> (reverseInts (map Int Int f xs) nil, size xs) ; nothing -> (nil, 0) } },
+  callBack := fn f xs { (reverse Int (map Int Int f xs), size xs) },
+  callField := fn fs l xs { match lookup List String (Int -> Int) l fs { just f -> (reverse Int (map Int Int f xs), size xs) ; nothing -> (nil, 0) } },
 }
 -- one call counted per crossing, whatever the host asked
 countsOnce : Crossing Int Int := {
   callBack := fn f xs { (map Int Int f xs, 1) },
-  callField := fn fs l xs { match fieldOf fs l { just f -> (map Int Int f xs, 1) ; nothing -> (nil, 0) } },
+  callField := fn fs l xs { match lookup List String (Int -> Int) l fs { just f -> (map Int Int f xs, 1) ; nothing -> (nil, 0) } },
 }
 -- the first field called whatever the label
-firstField (fs : List (String * (Int -> Int))) : Maybe (Int -> Int) := match fs { nil -> nothing ; cons (k, g) rest -> just g }
+firstField (fs : List (String * (Int -> Int))) : Maybe (Int -> Int) :=
+  match nth (String * (Int -> Int)) fs 0 { just kg -> (match kg { (k, g) -> just g }) ; nothing -> nothing }
 callsFirstField : Crossing Int Int := {
   callBack := callRight,
   callField := fn fs l xs { match firstField fs { just f -> callRight f xs ; nothing -> (nil, 0) } },
