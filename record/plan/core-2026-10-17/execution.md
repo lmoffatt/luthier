@@ -881,6 +881,11 @@ unchecked old against new. Settled by report-eval-text.md (4282df8): they are ho
 and the differential with a scratch text model on both sides gave 241 of 241 equal. Open for
 Luciano after the core: whether the kernel gets string primitives (split into scalars, join,
 decimal of a Nat), which would make those holes definitions (P10, spec 11's "String is text").
+From report-bite-12a.md (2026-10-22): operator bindings still resolve through a subtype's bases
+unrestricted (item 2's leftover), to close like the claims; and the kernel's substitution is the
+cost of exhaustive cases (about 30,000 steps a case, 475 of 711 s in `kernel.substitute`; bite 9's
+folds doubled it), so test_certify's regions test is LUTHIER_SLOW: a faster substitution is a task
+of its own, after the core, and the marker comes off with it.
 Bite 9's question answered: `Regioning`'s commutativity graded by the core's `Commutative` at
 `Maybe Grade` is accepted (D-2026-10-18-b, D-2026-10-18-f).
 
