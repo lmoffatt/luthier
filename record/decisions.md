@@ -3357,3 +3357,29 @@ Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-22; the line un
             export)
 Kind:       certify.py (`served`, `refuse`), run.py (`byModel`), spec 7.S22, the stores' meaning
 Status:     current
+
+D-2026-10-22-b  A value's derivation, and its crossing of languages, enter the principles as
+                proposed clauses: L5.22 (a value has a derivation, the trace of the run up to his
+                equality of consequence, which the identity of L5.6 already keeps), L5.23 (the
+                demand selects the projection carried; a requirement on it is a law, L8.5), L10.13
+                (a certificate is about a law, a derivation about one value: three records apart),
+                L11.10 (a crossing erases nothing a bridge does not declare lost), L11.11 (what
+                orchestrating means in mechanics); O13 holds the representation and the quotient.
+                No new organizer and no new principle: the commitment derives from G0 (the demand
+                selects what is produced, a law gives a quotient) and G1 (a value is known by its
+                description with its evidence), as GPT suggested and the record bears out (L5.13,
+                L5.14, L5.16, L5.6, L11.1 already carry its halves). No term in Terms until settled
+                (Terms holds nothing proposed). No syntax, no `History<T>`, no kernel change: the
+                decoration waits for O5, the composition across hosts for the planner
+                (D-2026-10-13-ad). GPT's version numbers 0.2 to 0.4 not adopted: the record's
+                roadmap names stages, not those numbers.
+Author:     Luciano for the idea and for its entering the principles; GPT for the proposal; the
+            model for the placement and the wording
+Quote:      "el tipo tiene un poco la historia del cómputo y que este tipo con la historia del
+            cómputo tendría que poder atravesar las fronteras de lenguajes"
+            "me parecen buenas propuestas para cambiar los principios"
+Source:     record/IA/gpt-2026-10-22/dialogo.md (c312464), lines 296, 546 and 755; his words on the
+            dialogue relayed by the brief record/plan/principles/prompt-derivation-2026-10-22.md
+            (eb59936)
+Kind:       principles (L5, L10, L11, O13); his marks pending on the five clauses
+Status:     current
