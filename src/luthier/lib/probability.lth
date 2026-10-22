@@ -264,7 +264,10 @@ kolmogorovDistanceDef (vs : List (Vec Float64)) : Float64 :=
 -- the values the distance is stated on: in [0, 1], where it is bounded by one; a list of such
 -- vectors is a subtype of the list (not a list of a subtype), so that it refines the leaf's domain
 unitVec (v : Vec Float64) : Bool := forallBelow v.n (fn k { 0.0 <= v.f k and v.f k <= 1.0 })
-UnitList : U := { vs : List (Vec Float64) | all List (Vec Float64) unitVec vs }
+-- [core bite 12] `allUnit` is the core's `all unitVec`; the name stays while generators_model.lut
+-- and tests/test_tester.py import it
+allUnit (vs : List (Vec Float64)) : Bool := all List (Vec Float64) unitVec vs
+UnitList : U := { vs : List (Vec Float64) | allUnit vs }
 UnitValue : U := { u : Float64 | 0.0 <= u and u <= 1.0 }
 single (u : Float64) : List (Vec Float64) := cons (vec Float64 1 (fn k { u })) nil
 
