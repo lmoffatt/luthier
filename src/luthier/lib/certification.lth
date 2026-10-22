@@ -319,8 +319,8 @@ stronger (g h : Grade) : Grade := if gradeRank g <= gradeRank h then h else g
 -- certificate; its entries under one binding, and the others; whether a failure at its hash refutes
 -- it, and the latest such failure; the weakest of two grades where `nothing` (no pass yet) is the
 -- unit, and the stronger of a grade and a binding's grade so far.
--- kept as a recursion (bite 13b): a right fold into a function (entries applied last to first); the recursion is the clearer form
-prepend (es : List Entry) (c : Certificate) : Certificate := match es { nil -> c ; cons e rest -> withEntry (prepend rest c) e }
+prepend (es : List Entry) (c : Certificate) : Certificate :=
+  fold Entry (Certificate -> Certificate) (compose Certificate Certificate Certificate) (id Certificate) (fn (e : Entry) { fn (x : Certificate) { withEntry x e } }) es c
 keepUnder (keep : Bool) (b : List DrawnParameter) (es : List Entry) : List Entry :=
   filter List Entry (fn (e : Entry) { (e.binding == b) == keep }) es
 only (b : List DrawnParameter) (c : Certificate) : Certificate := { law := c.law, cone := c.cone, entries := keepUnder true b c.entries }
@@ -459,11 +459,9 @@ orStrongest (m n : Maybe Grade) : Maybe Grade :=
 regionGrade (k : Certifying) (c : Certificate) (b : List DrawnParameter) (r : Region) (ev : List BindingEvidence) : Maybe Grade :=
   if standsOnNothing k c then nothing
   else if casesAt b r ev == 0 then capped (k.grade (only b c)) else k.grade (only b c)
--- kept as a recursion (bite 13b): a region that does not grade is skipped without a neutral element for the combination
 overRegions (k : Certifying) (comb : Maybe Grade -> Maybe Grade -> Maybe Grade) (c : Certificate) (b : List DrawnParameter)
             (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
-  match rs { nil -> k.grade (only b c) ; cons r rest ->
-    if grades r then comb (regionGrade k c b r ev) (overRegions k comb c b rest ev) else overRegions k comb c b rest ev }
+  fold Region (Maybe Grade) comb (k.grade (only b c)) (fn (r : Region) { regionGrade k c b r ev }) (filter List Region grades rs)
 -- the bindings of the passes that count, each once, in the order of the entries
 bindingSeen (b : List DrawnParameter) (bs : List (List DrawnParameter)) : Bool := any List (List DrawnParameter) (fn (x : List DrawnParameter) { x == b }) bs
 -- kept as a recursion (bite 13b): the bindings met are threaded left to right to list each once
