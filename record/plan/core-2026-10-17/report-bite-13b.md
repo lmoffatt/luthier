@@ -145,3 +145,122 @@ spec's chapter 7 may cite laws_model.lut.
 
 The 1343 real loose functions and the missing conjunction route in `refuse` are the two things the
 core leaves: do they go in the queue before the tag, or after it?
+
+## Before the tag: refuse's route and witness
+
+Brief: `record/plan/core-2026-10-17/prompt-refuse-theory.md`. Agent: Claude Sonnet 5.5, 2026-10-22.
+Python: `/home/lmoffatt/miniconda3/bin/python`. Scratch: `~/.cache/luthier-refuse/` (the comparison
+script `compare.py`, the certify outputs). Commits: 4f24573 (the theory), c05fbf9 (the model), 55a05d7 (laws,
+controls and stores), be84185 (the rework that kept core_metrics' counts down), 79f606d (the lines moved
+into their own files), 46da7ee (their stores).
+
+### What was missing
+
+13c's items 3 and 4 and D-2026-10-22-d put in certify.py a route (a demand resolved to its subject
+and obligations), a witness (one entry per obligation) and a veto (read once over every subject,
+scoped by reach, with the refuted-consequence exception). `certification.lth` said nothing of
+them: `refuse` takes a `ConeDemand`, which has no place for the theory's conjunction or the model the
+run gives. [proposed] Rather than widen `ConeDemand` (every law of §5 builds one), §6 is a theory
+beside `Certifying`: `Routing k` with `headOf`, `witness : Routed -> List Entry -> Maybe (List Entry)`
+and `veto : Routed -> List Entry -> Maybe Veto`, where `Routed` holds a `ConeDemand`, `byModel`, the
+model parameters and the theory's conjunction (`Theory`: its demand and the names that head the
+conjuncts the law stands for).
+
+### The laws (certification.lth §6, `Routing`; the specification is `routeSpec`, one record of
+operations with local helpers)
+
+1. `AWitnessCoversEveryObligation`: each obligation the demand resolves to has, in the witness, an
+   entry of the store that serves it (and carries its conjunct); a demand with no open route is
+   never witnessed.
+2. `AWitnessIsOneEntryPerObligation`: the witness has as many entries as the demand has obligations.
+3. `AnEntryForEveryObligationWitnesses`: a demand whose obligations each have an entry is witnessed;
+   one with an obligation without an entry, or with no route, is not.
+4. `AVetoNamesItsCause`: a veto is a disagreement between two entries of a subject, or a failure of
+   one (or, for the exception, of the law's own entry at its hash).
+5. `AFailureInASubjectVetoes`: a failure in any subject, the law's own or the theory's for the run's
+   model, vetoes whatever route would serve.
+6. `ADisagreementInASubjectVetoesFirst`: a disagreement in any subject is read before any failure.
+7. `AnEntryAboutAnotherModelVetoesNothing`: an entry of the law whose reach excludes the run's model
+   adds nothing, unless the law is refuted as a consequence (D-2026-10-22-d's scope).
+8. `AConsequenceRefutesEveryModel`: a failure on a model that passes the theory's defining laws vetoes
+   every model's run (D-2026-10-22-d's exception).
+
+Resolution (`routeSpec.obligations`): the law's own conjuncts when its entries at the hash list
+some; else the law itself when an entry serves it (not for `byModel`); else the theory's conjuncts
+headed by one of the law's names. Admission is "the witness is something"; the run's record lists
+the witnesses of its demands and the result key hashes that record (L5.6, 8.S8), so the one set is
+read by all three: that last link lives in run.py, the theory states the set.
+
+The laws are in `tests/tester/certification_route.test.lut` (a file of its own: test_certify lists
+the lines of certification_laws.test.lut one by one, and adding to it broke that list), over 7 listed
+demands (two `byModel`, `T` whole, `P` direct, `L` on `M` with and without its theory, `L` on `N`)
+and 16 stores (passes, a conjunct failing, in disagreement, a failure on another model, with the
+other model passing the theory, failing it, passing another version of it). All eight laws are
+graded `cases` (ExhaustiveMode over the listed cases) and controlled.
+
+### The controls (`certification_route_controls.test.lut`), each refuted
+
+| wrong model | law refuted | first counterexample |
+|---|---|---|
+| a witness that keeps the first entry only (drops an obligation) | `AWitnessCoversEveryObligation` | `T` whole over `[tpM, tqM]` |
+| a witness that serves `byModel` from the law's own entries | `AWitnessCoversEveryObligation` | `P` byModel over `[pM]` |
+| a witness that adds an entry the demand does not need | `AWitnessIsOneEntryPerObligation` | `P` byModel over `[tpM, tqM]` |
+| a witness that never serves | `AnEntryForEveryObligationWitnesses` | `P` byModel over `[tpM, tqM]` |
+| a veto that invents a failure | `AVetoNamesItsCause` | the empty store |
+| a route that skips a veto (reads only the law's own entries) | `AFailureInASubjectVetoes` | `P` byModel, `P M` fails on `M` |
+| a veto that reads failures before disagreements | `ADisagreementInASubjectVetoesFirst` | `P` byModel, `P M` in disagreement |
+| a veto not scoped by reach | `AnEntryAboutAnotherModelVetoesNothing` | `T` on `M`, a failure of `T` on `N` |
+| a veto scoped by reach with no exception: it passes the defining laws of `N` and still refutes only `N`'s runs | `AConsequenceRefutesEveryModel` | `L` on `M`, `L` fails on `N` and `T` passes on `N` |
+
+### The model (certification_model.lut, `routing`) and its agreement with certify.py
+
+`routing` follows certify.py's `witness`, `_each`, `_obligations`, `_conjunct_witness` and `veto`,
+`_about`, `_passes_theory`, in the order the code reads them, written as a record with the helpers
+local (so the section adds no loose function). `headOf` is the host's `certify._text_head` through
+`extern`. Compared on the 16 demand/store pairs of tests/test_certify.py that exercise these paths
+(`_by_model`, `whole`, `_direct`, with the stores of the 13c and 13c follow-up tests), the model and
+`certify.witness`/`certify.veto` agree on all 16: whether the demand is witnessed, how many entries
+the witness holds (1,1,1,1,1,1,1,0,2,0,1,1,1,1,1,1 in both), and what the veto is (none, Current,
+Disagrees, or the exception, whose flag is the "why" certify.py words). Cases: the 5 of 13c's item 3
+(passes only, the conjunct failing, another conjunct failing, a failure on another model, a
+disagreement), the 5 of item 4 (`P`, `Q`, `Q` lacking its entry, `T` whole, `T` whole lacking one),
+the 6 of D-2026-10-22-d (a failure on `N` with the run on `M`, on `M`, on `N`; the exception; `N`
+failing `T`; another version of `N`).
+
+Where they differ, by design, and the theory says so in its header:
+- fingerprints: certify.py's `at` compares the fingerprints of the models a demand names, and
+  `_passes_theory` intersects the comma-separated sets of a census; the theory reads an entry's hash
+  only (as `serves` does) and compares a fingerprint whole.
+- regions: certify.py's witness reads an entry's grade over the law's regions (`serves_over`); the
+  model reads the entry's own grade (`Regioning` states the other).
+- a control's entries (`_laws_own`) are not entries in the theory; the demand a refusal names and
+  the words of the exception are not modelled.
+- `witness` order: the model lists the entries in the order of the conjuncts, as certify.py does;
+  the laws do not constrain the order.
+
+### Checks
+
+- `luthier check`: clean on certification.lth, certification_model.lut, certification_route.test.lut
+  and certification_route_controls.test.lut (and on the two older certification test files).
+- Certified twice (laws, then controls, then both again): second pass 0 lines ran on all of
+  certification_laws, certification_controls, certification_route and certification_route_controls.
+- `python -m pytest -q tests/test_certify.py tests/test_tester.py`: 94 passed, 3 skipped (7 min 57 s; run on the tree before the last rename of a helper in the two route files, which test_certify and test_tester do not read).
+- core_metrics (before c44d0e5 / after): homonyms 0 / 0; executive shadows 113 / 113; list helpers
+  48 / 48; unclaimed 7 / 7; loose 1411 / 1408 (real 1343 / 1331, the rest 68 / 77: the rest are the
+  functions a theory names, and the new `routeSpec` and `routing` records name some that were real).
+  No count is up except the "rest" part of loose, whose total is down.
+
+### Decisions taken on my own (one commit undoes each)
+
+1. A theory beside `Certifying` (`Routing`) rather than a wider `ConeDemand` or a change to `refuse`.
+2. The specification (`routeSpec`) and the model (`routing`) written as records with local helpers,
+   after a first version with top-level helpers raised core_metrics' loose count by 43 and the
+   list-helper and homonym counts: the cost is less readable code, the gain is that no count rises.
+3. A fingerprint is opaque and compared whole in the theory (certify.py intersects sets).
+4. The laws and their controls live in `certification_route.test.lut` and
+   `certification_route_controls.test.lut`, not in the two existing files, because test_certify.py
+   enumerates those files' lines (I was told to touch only certification_* files, so I did not edit it).
+5. The exception law and the scope law quantify over listed stores that contain the case (N passing
+   `T` at the fingerprint the failure recorded); a store the census does not name is not drawn.
+6. Gaps (fingerprints, regions, controls' entries, the refusal's `by` and `why`) left out of the theory
+   and named in its header and in the model's.
