@@ -14,14 +14,14 @@
 
 import "arrays.lth" Vec Mat VecOf vec mat
 import "probability.lth" MeanModel
-import "positions.lut" PositionsOf Node Design pairDistances Separated distanceJacobian
+import "positions.lut" PositionsOf NodeOf Design pairDistances Separated distanceJacobian
 
 -- The mean model of a design: the distances of its pairs, on the positions of its nodes, the
 -- vectors of dimension 3 n. Where a measured pair coincides the distances have no derivative:
 -- the model has no Jacobian to give there and gives zero, and a fit says whether it ended at such
 -- a point (experiment_zero.lut). The nodes of the design are the nodes of its positions; a vector
 -- of them is rebuilt entry by entry to be read as one.
-nodesOf (d : Design) (t : PositionsOf d.nodes) (v : Vec (Fin d.nodes)) : Vec (Node t) := vec (Node t) v.n (fn k { v.f k })
+nodesOf (d : Design) (t : PositionsOf d.nodes) (v : Vec (Fin d.nodes)) : Vec (NodeOf t) := vec (NodeOf t) v.n (fn k { v.f k })
 positionsModel (d : Design) : MeanModel (3 * d.nodes) := {
   k := d.i.n,
   mean := fn t { pairDistances t (nodesOf d t d.i) (nodesOf d t d.j) },

@@ -14,18 +14,12 @@
 -- Bite 6 revision, Codex, 2026-10-21, prompt-bite-6.md at 2859815:
 -- Sections 0-2 moved to core/structures/; Int and String models moved to core.lut.
 -- The remaining sections 3-5 build fields and ordered fields on the core's CommutativeRing.
--- Iso and its inverse-law aliases remain for positions.lut until bite 12.
+-- Core bite 12, Claude Opus 5.5, 2026-10-22: the `Iso` alias and its two laws removed; positions.lut
+-- claims the core's `Isomorphism` (`LayoutIsAnIsomorphism`).
 -- Float64 is not asserted to be a field; numbers.lth states its bounded laws.
 -- Bite 8, Claude Opus 5.5, 2026-10-21: §4 over the core's Order, MonotoneIn and PositiveClosed.
 
 import "laws.lth" Law Forall Exists Then Case
-
--- Compatibility for positions.lut until bite 12; the laws are the core's Isomorphism.
-Iso (A B : U) : { eqA : A -> A -> Bool, eqB : B -> B -> Bool, to : A -> B, from : B -> A }
-Iso (A B : U) (i : Iso A B) := Isomorphism A B { eq := i.eqA } { eq := i.eqB } i.to i.from
-
-FromUndoesTo (A B : U) (i : Iso A B) := Inverse A B { eq := i.eqA } i.to i.from
-ToUndoesFrom (A B : U) (i : Iso A B) := Inverse B A { eq := i.eqB } i.from i.to
 
 -- ---------------------------------------------------------------- §3 Field
 

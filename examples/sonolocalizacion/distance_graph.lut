@@ -27,7 +27,7 @@ import "tables.lth" Table Codec Cell hasColumn intAt realAt textAt firstFailing
 import "tables_model.lut" csv : Codec
 import "arrays.lth" Arrays Vec Mat MatOf MatRows VecOf RankFloor vec mat
 import "arrays_model.lut" numpy : Arrays
-import "positions.lut" Node pairDistance distanceJacobian flatten Design PairsAmong
+import "positions.lut" NodeOf pairDistance distanceJacobian flatten Design PairsAmong
 
 DistanceGraph = { nodes : Table, measurements : Table }
 
@@ -204,7 +204,7 @@ designOf (m : MapInput) : Design := { nodes := m.x0.n, i := m.i, j := m.j }
 unseenDirections (floor : RankFloor) (g : ValidDistanceGraph) : Int := {
   m := toMapInput g
   p := flatten m.x0
-  jac := distanceJacobian p (vec (Node p) m.i.n (fn k { m.i.f k })) (vec (Node p) m.j.n (fn k { m.j.f k }))
+  jac := distanceJacobian p (vec (NodeOf p) m.i.n (fn k { m.i.f k })) (vec (NodeOf p) m.j.n (fn k { m.j.f k }))
   3 * g.nodes.nRows - numpy.retainedRank floor (numpy.matMul (numpy.transpose jac) jac)
 }
 -- fact: the rigid motions of the plane, two translations and a rotation

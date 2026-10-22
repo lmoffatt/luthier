@@ -72,11 +72,11 @@ embed (t : HasFree) : PositionsOf nodes := vec Float64 (3 * nodes) (fn c { if is
 -- the model of the design on the positions, read on the free coordinates: the distances at the
 -- embedded positions, and d h_k / d t_f, the column of the coordinate f stands for, zero on u, which
 -- the mean does not depend on
-positions : MeanModel (3 * nodes) := positionsModel design
+meanOfDesign : MeanModel (3 * nodes) := positionsModel design
 
-meanDist (t : HasFree) : Vec Float64 := positions.mean (embed t)
+meanDist (t : HasFree) : Vec Float64 := meanOfDesign.mean (embed t)
 jacDist (t : HasFree) : Mat Float64 := {
-  jp := positions.jac (embed t)
+  jp := meanOfDesign.jac (embed t)
   mat Float64 jp.m t.n (fn k f { if f >= freeDim then 0.0 else jp.f k (freeCoord f) }) }
 
 -- ---------------------------------------------------------------- parameter spaces
@@ -84,9 +84,10 @@ jacDist (t : HasFree) : Mat Float64 := {
 FreeCoords = VecOf freeDim
 FullCoords = VecOf (freeDim + 1)
 
--- the last entry of a vector that has one, and a vector with one entry appended (v0.1 array.lut:46-50)
+-- the last entry of a vector that has one, and a vector with one entry appended (v0.1 array.lut:46-50;
+-- `pushEntry` was `append`, core bite 12: a list's concatenation is the core's `<>`)
 last (v : { w : Vec Float64 | 1 <= w.n }) : Float64 := v.f (v.n - 1)
-append (v : Vec Float64) (x : Float64) : Vec Float64 := vec Float64 (v.n + 1) (fn k { if k < v.n then v.f k else x })
+pushEntry (v : Vec Float64) (x : Float64) : Vec Float64 := vec Float64 (v.n + 1) (fn k { if k < v.n then v.f k else x })
 
 -- ---------------------------------------------------------------- where the laws are tested
 -- The layouts and the errors the laws of the model are certified at: free coordinates within
@@ -146,6 +147,9 @@ ProfileAgrees (l : Likelihood freeDim) (tol : Tolerance) (t : TestedFree) (y : V
 -- and there the score of the full likelihood in u vanishes.
 ProfileIsFullAtItsSigma (l : Likelihood freeDim) (tol : Tolerance) (t : TestedFree) (y : VecOf nPairs) : Bool := {
   r := sub y (meanDist t)
-  tf := append t (0.5 * elementary.log (dot r r / toFloat64 nPairs))
+  tf := pushEntry t (0.5 * elementary.log (dot r r / toFloat64 nPairs))
   within (agreeTol tol (toFloat64 nPairs)) (l.loglik y t) (nativeFull.loglik y tf)
   and abs (last (nativeFull.score y tf)) < agreeTol tol (toFloat64 nPairs) }
+-- [core bite 12] the three laws, gathered so that this file claims them (4.S14), as arrays.lth
+-- gathers `ArrayContainers`
+DistanceLaws := FullAgrees & ProfileAgrees & ProfileIsFullAtItsSigma

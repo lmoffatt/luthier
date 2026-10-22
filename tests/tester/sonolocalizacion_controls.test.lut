@@ -14,10 +14,9 @@ import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
 import "numbers.lth" Tolerance
-import "arrays.lth" Dim MatOf VecOf mat
-import "algebra.lth" Iso FromUndoesTo ToUndoesFrom
+import "arrays.lth" Dim Mat Vec MatOf VecOf mat
 import "probability.lth" Likelihood log2pi
-import "../../examples/sonolocalizacion/positions.lut" layout LayoutFromUndoesTo LayoutToUndoesFrom
+import "../../examples/sonolocalizacion/positions.lut" LayoutIsAnIsomorphism flatten
 import "../../examples/sonolocalizacion/distances.lut" FullAgrees ProfileAgrees ProfileIsFullAtItsSigma nativeFull nativeProfile
   freeDim nPairs
 import "../../examples/sonolocalizacion/distance_graph.lut" DistanceGraph Violation ReportsValidity graphOf parseTable
@@ -28,13 +27,12 @@ tolerance : Tolerance := 1.0e-12
 cutoffs : List Binding := [ { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
 
 -- positions.lut: the vector read row by row
-rowMajor (n : Dim) : Iso (MatOf 3 n) (VecOf (3 * n)) :=
-  { eqA := (layout n).eqA, eqB := (layout n).eqB, to := (layout n).to,
-    from := fn p { mat Float64 3 (p.n / 3) (fn a k { p.f (a * (p.n / 3) + k) }) } }
-rowMajors : List ((n : Dim) -> Iso (MatOf 3 n) (VecOf (3 * n))) := [rowMajor]
-onRowMajor : List Binding := [ { parameter := just "lay", type := nothing, generator := "rowMajors", coverage := Listed } ]
-test "LayoutFromUndoesTo" (SampledMode linear) (seed <- 20261014) (whereBindings <- onRowMajor) (control <- true)
-test "LayoutToUndoesFrom" (SampledMode linear) (seed <- 20261014) (whereBindings <- onRowMajor) (control <- true)
+flattens : List (Mat Float64 -> Vec Float64) := [fn m { flatten m }]
+rowMajors : List (Vec Float64 -> Mat Float64) := [fn p { mat Float64 3 (p.n / 3) (fn a k { p.f (a * (p.n / 3) + k) }) }]
+onRowMajor : List Binding := [
+  { parameter := just "to", type := nothing, generator := "flattens", coverage := Listed },
+  { parameter := just "from", type := nothing, generator := "rowMajors", coverage := Listed } ]
+test "LayoutIsAnIsomorphism" (SampledMode linear) (seed <- 20261014) (whereBindings <- onRowMajor) (control <- true)
 
 -- distances.lut: the log-likelihoods without their constant
 dropped : Float64 := 0.5 * toFloat64 nPairs * log2pi

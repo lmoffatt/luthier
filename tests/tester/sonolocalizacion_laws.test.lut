@@ -1,9 +1,8 @@
 -- tests/tester/sonolocalizacion_laws.test.lut: the laws of the port (examples/sonolocalizacion:
 -- positions.lut, distances.lut, distance_graph.lut) run through `luthier test`, on the brief
--- record/IA/evidence-2026-10-14/prompt.md. positions.lut's `layout` is an `Iso` (algebra.lth),
--- whose laws take the two types as parameters (7.R2): `LayoutFromUndoesTo` and
--- `LayoutToUndoesFrom` [proposed] are the laws at the layout's types, for a drawn number of nodes
--- (stated in positions.lut since 2026-10-16, so that this test program keeps no store, L10.12).
+-- record/IA/evidence-2026-10-14/prompt.md. positions.lut's layout is `LayoutIsAnIsomorphism`, the
+-- core's `Isomorphism` of `flatten` and `unflatten` at the layout's types for a drawn number of
+-- nodes (core bite 12, 2026-10-22; before, algebra.lth's `Iso` and its two laws).
 -- distances.lut's three laws compare an implementation of the likelihoods with the native ones;
 -- the implementations live in sonolocalización (P7), so here the native ones are the models
 -- (`nativeFull`, `nativeProfile`), which makes `FullAgrees` and `ProfileAgrees` a check of the
@@ -19,9 +18,8 @@ import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
 import "numbers.lth" Tolerance
-import "arrays.lth" Dim MatOf VecOf
-import "algebra.lth" Iso FromUndoesTo ToUndoesFrom
-import "../../examples/sonolocalizacion/positions.lut" layout LayoutFromUndoesTo LayoutToUndoesFrom
+import "arrays.lth" Dim Mat Vec MatOf VecOf
+import "../../examples/sonolocalizacion/positions.lut" LayoutIsAnIsomorphism flatten unflatten
 import "../../examples/sonolocalizacion/distances.lut" FullAgrees ProfileAgrees ProfileIsFullAtItsSigma nativeFull nativeProfile
 import "../../examples/sonolocalizacion/distance_graph.lut" DistanceGraph Violation ReportsValidity firstViolation graphOf parseTable
 import "../../examples/sonolocalizacion/session_a.lut" nodesTextA measurementsTextA the graphA
@@ -29,14 +27,14 @@ import "../../examples/sonolocalizacion/session_a.lut" nodesTextA measurementsTe
 tolerance : Tolerance := 1.0e-12
 cutoffs : List Binding := [ { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
 
--- positions.lut: the layout's two round trips, exact. [proposed] The layout is a parameter, a family
--- over the number of nodes bound to positions.lut's `layout` (2026-10-15, Claude Opus 5.5, on
--- record/IA/v04-2026-10-15/prompt-e.md: with `layout` named in the body no wrong layout could be
--- passed, so the laws had no control, L9.14; sonolocalizacion_controls.test.lut passes one)
-layouts : List ((n : Dim) -> Iso (MatOf 3 n) (VecOf (3 * n))) := [layout]
-onLayout : List Binding := [ { parameter := just "lay", type := nothing, generator := "layouts", coverage := Listed } ]
-test "LayoutFromUndoesTo" (SampledMode linear) (seed <- 20261014) (whereBindings <- onLayout)
-test "LayoutToUndoesFrom" (SampledMode linear) (seed <- 20261014) (whereBindings <- onLayout)
+-- positions.lut: the layout's two round trips, exact. The two functions are bound, as the
+-- controls bind a wrong one (sonolocalizacion_controls.test.lut, L9.14)
+flattens : List (Mat Float64 -> Vec Float64) := [fn m { flatten m }]
+unflattens : List (Vec Float64 -> Mat Float64) := [fn p { unflatten p }]
+onLayout : List Binding := [
+  { parameter := just "to", type := nothing, generator := "flattens", coverage := Listed },
+  { parameter := just "from", type := nothing, generator := "unflattens", coverage := Listed } ]
+test "LayoutIsAnIsomorphism" (SampledMode linear) (seed <- 20261014) (whereBindings <- onLayout)
 
 -- distances.lut: the native likelihoods as the implementations
 onFull : List Binding := [ { parameter := just "l", type := nothing, generator := "nativeFull", coverage := Listed } ]
