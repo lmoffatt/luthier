@@ -8,17 +8,17 @@
 -- D-2026-10-15-g); and a `certifying` whose grade and refusal do not see a disagreement. The
 -- entries, stores and censuses are certification_laws.test.lut's.
 
-import "test.lth" test ExhaustiveMode Grade Proved Cases defaultBudgets
+import "test.lth" test ExhaustiveMode Grade Proved Cases Sampled defaultBudgets Budgets
 import "generators.lth" Binding
 import "laws.lth" Listed Cited
 import "certification.lth" Certifying Recording Entry Certificate ConeDemand ConeName Refusal Outcome Passed Failed NotRunFor
   fuelSpent outOfFuel known recordEntry failureAt Current agree disputedAt
   ANewIdentityGoesInFront AnAgreeingReplayAddsNothing AnAgreeingPairSettles ADisagreeingReplayIsKept AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused
-import "certification_model.lut" certifying hasFailure passes weakestOfBests serves stateOf
+import "certification_model.lut" certifying hasFailure passes weakestOfBests serves stateOf entryFailed
 import "term.lth" Term Act Program Alpha Substitution Reduction Var Lit Lam App Pi Pair Match Let Define
   IntConst PVar PPair
 import "term_model.lut" alpha substitute stepper
-import "certification.lth" Erasure ErasureKeepsTheStep eraseBinders erased
+import "certification.lth" Erasure ErasureKeepsTheStep eraseBinders erased samplingOf Identity Pruning Hash
 
 entry (l : String) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
   { law := l, cone := "sha256:cccc", binding := nil, seed := s, cases := 1, conjunct := nothing, conjuncts := nil, budgets := defaultBudgets, reach := nil,
@@ -111,6 +111,57 @@ test "AnAgreeingReplayAddsNothing" ExhaustiveMode (seed <- 20261016) (whereBindi
   bind "r" "agreeingModels", bind "e" "entries", bind "es" "stores"]) (control <- true)
 test "AnAgreeingPairSettles" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
   bind "r" "disputeModels", bind "e" "entries", bind "es" "stores"]) (control <- true)
+
+-- The controls of `IdentityIsTheKey` and of the retention law (core bite 13b, on bite 13c's items 1
+-- and 2). An identity that reads no budget; a pruning that keeps the four latest entries and
+-- forgets a failure behind them (what certify.py did before bite 13c); one that also drops the two
+-- entries of a disagreement; one that keeps what was never in the store. The entries and stores
+-- are certification_laws.test.lut's.
+otherSampling : Budgets := { tries := 2000, redraws := 50, probes := 5, drawsPerCase := 10, coveringAbove := 20000,
+                             levelRuns := 10, seedsPerControl := 5, distributionDraws := 10000, fuel := 3000000,
+                             regionNumbers := 4000, regionEntries := 400, specialMass := 0.45, atomAtZero := 0.01 }
+passUnderOther : Entry :=
+  { law := "L", cone := "sha256:cccc", binding := nil, seed := 1, cases := 1, conjunct := nothing, conjuncts := nil, budgets := otherSampling, reach := nil,
+    evidence := Cited "listed", grade := just Cases, outcome := Passed, date := "2026-10-16", interpreter := "listed", hosts := nil }
+identityEntries : List Entry := [passOne, passUnderOther, failOne, passOther]
+noBudgetIdentity (e : Entry) : Identity :=
+  { law := e.law, cone := e.cone, binding := e.binding, seed := e.seed, cases := e.cases, conjunct := e.conjunct,
+    sampling := samplingOf defaultBudgets }
+ignoresSampling : Certifying := { identity := noBudgetIdentity, stale := certifying.stale, grade := certifying.grade,
+  contains := certifying.contains, serves := certifying.serves, refuse := certifying.refuse, transport := certifying.transport }
+ignoringModels : List Certifying := [ignoresSampling]
+test "IdentityIsTheKey" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "ignoringModels", bind "e" "identityEntries"])
+  (control <- true)
+
+pass3 : Entry := entry "L" 3 (just Cases) Passed
+pass4 : Entry := entry "L" 4 (just Cases) Passed
+pass5 : Entry := entry "L" 5 (just Cases) Passed
+pass6 : Entry := entry "L" 6 (just Cases) Passed
+oldFailure : Entry := entry "L" 7 nothing (Failed "x = 7")
+disagreeing : Entry := entry "L" 1 (just Sampled) Passed
+pruneStores : List (List Entry) := [nil, [passOne], [failOne, passOne], [pass6, pass5, pass4, pass3, passTwo, oldFailure],
+  [pass6, pass5, pass4, pass3, passTwo, passOne], [pass6, pass5, pass4, pass3, disagreeing, passOne]]
+pruneHashes : List Hash := ["sha256:cccc", "sha256:dddd"]
+pruneCertificates : List Certificate := [{ law := "L", cone := "sha256:cccc", entries := nil },
+  { law := "L", cone := "sha256:cccc", entries := [pass6, pass5, pass4, pass3, passTwo, oldFailure] },
+  { law := "L", cone := "sha256:cccc", entries := [pass6, pass5, pass4, pass3, passTwo, passOne] },
+  { law := "L", cone := "sha256:cccc", entries := [pass6, pass5, pass4, pass3, disagreeing, passOne] }]
+pruneEntries : List Entry := [passOne, failOne, oldFailure, pass6, disagreeing]
+forgetsFailures (h : Hash) (es : List Entry) : List Entry :=
+  filter List Entry (fn (e : Entry) { e.cone == h }) (take Entry 4 es)
+forgetsDisagreements (h : Hash) (es : List Entry) : List Entry :=
+  filter List Entry (fn (e : Entry) { e.cone == h and (entryFailed e
+    or any List Entry (fn (f : Entry) { f == e }) (take Entry 4 (filter List Entry (fn (x : Entry) { x.cone == h and not (entryFailed x) }) es))) }) es
+inventsEntries (h : Hash) (es : List Entry) : List Entry := cons passOther es
+forgettingPrunings : List (Pruning certifying) := [{ prune := forgetsFailures }]
+undisputingPrunings : List (Pruning certifying) := [{ prune := forgetsDisagreements }]
+inventingPrunings : List (Pruning certifying) := [{ prune := inventsEntries }]
+test "PruningKeepsACurrentFailure" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models",
+  bind "p" "forgettingPrunings", bind "h" "pruneHashes", bind "es" "pruneStores", bind "e" "pruneEntries"]) (control <- true)
+test "PruningNeverRaisesAGrade" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models",
+  bind "p" "undisputingPrunings", bind "c" "pruneCertificates"]) (control <- true)
+test "PruningOnlyDrops" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models",
+  bind "p" "inventingPrunings", bind "h" "pruneHashes", bind "es" "pruneStores"]) (control <- true)
 
 -- The control of `ErasureKeepsTheStep` (D-2026-10-15-e), added 2026-10-18 by Claude Opus 5.5 on
 -- record/plan/core-2026-10-17/prompt-bite-1.md: an erasure that also erases the binder of a lambda

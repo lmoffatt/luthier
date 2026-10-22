@@ -28,7 +28,7 @@
 -- weakest (5.S8's default), the reference model of `Regioning`; `deriving` is the theory's
 -- `lawRegions`, the reference model of `Deriving`.
 
-import "certification.lth" Certifying ConeHashing Erasure eraseBinders Store Entry Identity Certificate ConeDemand ConeName Refusal
+import "certification.lth" samplingOf Pruning disputes Certifying ConeHashing Erasure eraseBinders Store Entry Identity Certificate ConeDemand ConeName Refusal
   Standing Link ParameterReach Reach Value Hash Support Interval Members Number Printed Passed Failed State Current Stale
   Uncertified Provisional Disagrees DrawnParameter stronger reachOf coversAll latestOf latestAt failureAt
   disputeAt Recording recordEntry Pooling pooledCases Regioning regionedGrade orWeakest Deriving lawRegions
@@ -40,7 +40,7 @@ emptyStore : Store certifying := nil
 
 -- 7.S9, 7.S13: the identity of an outcome
 entryIdentity (e : Entry) : Identity := { law := e.law, cone := e.cone, binding := e.binding, seed := e.seed, cases := e.cases,
-                                     conjunct := e.conjunct }
+                                     conjunct := e.conjunct, sampling := samplingOf e.budgets }
 
 -- 12.S11: stale against the current hash of the cone
 stale (h : Hash) (e : Entry) : Bool := not (e.cone == h)
@@ -123,6 +123,18 @@ certifying : Certifying := {
 
 -- D-2026-10-15-f, D-2026-10-15-g: the store law's reference, the theory's own `recordEntry`
 recording : Recording certifying := { record := fn e es { recordEntry certifying e es } }
+
+-- [core bite 13b, bite 13c's item 1] the retention law's reference: at the hash given, the four most
+-- recent entries that did not fail stay, every failure stays, and the entries of a disagreement
+-- stay; a store with no entry at that hash keeps its latest entry. (certify.py's `prune` is per
+-- group of law and binding; this one is of one law's store, which is what the laws read.)
+keepCurrent (h : Hash) (es : List Entry) : List Entry :=
+  if isEmpty Entry (filter List Entry (fn (e : Entry) { e.cone == h }) es) then take Entry 1 es
+  else filter List Entry (fn (e : Entry) {
+    e.cone == h and (entryFailed e
+      or any List Entry (fn (f : Entry) { f == e }) (take Entry 4 (filter List Entry (fn (x : Entry) { x.cone == h and not (entryFailed x) }) es))
+      or any List (Entry * Entry) (fn (p : Entry * Entry) { match p { (a, b) -> a == e or b == e } }) (disputes entryIdentity nil es)) }) es
+pruning : Pruning certifying := { prune := keepCurrent }
 
 -- D-2026-10-16-g: the union of the stretches' reference, the theory's own `pooledCases`
 pooling : Pooling certifying := { pooled := pooledCases }

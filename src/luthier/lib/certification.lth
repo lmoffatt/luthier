@@ -142,7 +142,17 @@ outOfFuel (o : Outcome) : Bool := o == NotRunFor fuelSpent
 -- D-2026-10-18-f] A law whose body is a conjunction of laws is tested conjunct by conjunct, each
 -- conjunct's entry under the law's name and cone: the conjunct (`just "Symmetric Int r"`, as the law
 -- applies it) is part of the identity, `nothing` for a law's own entry and for a control's.
-Identity = { law : String, cone : Hash, binding : List DrawnParameter, seed : Seed, cases : Nat, conjunct : Maybe String }
+-- [core bite 13b, on bite 13c's item 2, audit 1.4 B; spec 7.S8 and 7.S13 [proposed]] The budgets that
+-- change the distribution a run draws from, or what the classifier reads, are part of the identity:
+-- two runs of one seed under another `specialMass` are two samples, not a replay. The others
+-- (`tries`, `redraws`, `probes`, `drawsPerCase`, `fuel`) only bound the work of finding a value, and
+-- the same value found within fewer tries is the same value, so they stay out.
+Sampling = { specialMass atomAtZero : Float64, coveringAbove levelRuns seedsPerControl distributionDraws regionNumbers regionEntries : Nat }
+samplingOf (b : Budgets) : Sampling :=
+  { specialMass := b.specialMass, atomAtZero := b.atomAtZero, coveringAbove := b.coveringAbove, levelRuns := b.levelRuns,
+    seedsPerControl := b.seedsPerControl, distributionDraws := b.distributionDraws, regionNumbers := b.regionNumbers,
+    regionEntries := b.regionEntries }
+Identity = { law : String, cone : Hash, binding : List DrawnParameter, seed : Seed, cases : Nat, conjunct : Maybe String, sampling : Sampling }
 
 -- An entry: its identity; what it holds, the budgets (7.S8), the reach of each parameter (7.S10),
 -- the evidence of laws.lth, the grade of test.lth (`nothing` unless it passed), its outcome, the
@@ -245,13 +255,22 @@ admits (ev : Evidence) (g : Grade) : Bool := match ev {
   -- price of that grade (D-2026-10-15-b), so a passed entry carries alpha, beta, delta and spent
   Tested v -> (match v { Holds r -> g == Sampled ; _ -> false }) ;
   _ -> grade Confirmed (coverageOf ev) == just g or grade Supported (coverageOf ev) == just g }
-censusOfAtMost (n : Nat) (rs : List ParameterReach) : Bool :=
-  all List ParameterReach (fn (r : ParameterReach) { match r.reach { Members vs -> size vs <= n ; _ -> false } }) rs
+-- [core bite 13b, on bite 13c's item 5 and certify.py's `held_as_listed`] Two readings the census
+-- needed to hold of what the tester writes, taken [proposed]: a parameter enumerated whole, bound by
+-- `ExhaustiveMode` (the binding's generator text begins so: a hole, as strings are opaque to the
+-- kernel), reaches its support; and a pass that evaluated no case (`x : Empty`) bounds no census by
+-- its count.
+enumeratedWhole : String -> Bool
+wasEnumeratedWhole (b : List DrawnParameter) (p : String) : Bool :=
+  any List DrawnParameter (fn (d : DrawnParameter) { d.parameter == p and enumeratedWhole d.generator }) b
+censusOfAtMost (n : Nat) (b : List DrawnParameter) (rs : List ParameterReach) : Bool :=
+  all List ParameterReach (fn (r : ParameterReach) {
+    match r.reach { Members vs -> n == 0 or size vs <= n ; Support -> wasEnumeratedWhole b r.parameter ; _ -> false } }) rs
 heldAsRun (es : List Entry) : Bool :=
   all List Entry (fn (e : Entry) {
     match e.grade { nothing -> true ; just g ->
        admits e.evidence g
-         and (not (coverageOf e.evidence == just Listed) or censusOfAtMost (pointCount e.evidence) e.reach) } }) es
+         and (not (coverageOf e.evidence == just Listed) or censusOfAtMost (pointCount e.evidence) e.binding e.reach) } }) es
 -- the order of two dates as the store writes them (ISO 8601 in UTC, whose order is the order of
 -- the text), the first not before the second: a hole, since the kernel orders numbers and not
 -- `String`; until it is filled, a store's predicate on two entries or more is not evaluated
@@ -660,7 +679,7 @@ Certifying : {
 -- besides
 IdentityIsTheKey (k : Certifying) (e : Entry) : Bool :=
   k.identity e == { law := e.law, cone := e.cone, binding := e.binding, seed := e.seed, cases := e.cases,
-                    conjunct := e.conjunct }
+                    conjunct := e.conjunct, sampling := samplingOf e.budgets }
 -- 12.S11: an entry is stale when its hash differs from the current hash of its cone
 StaleIsAnotherHash (k : Certifying) (h : Hash) (e : Entry) : Bool := k.stale h e == not (e.cone == h)
 
@@ -871,6 +890,24 @@ AnExhaustionIsNeverStored (k : Certifying) (r : Recording k) (e : Entry) (es : L
   not (outOfFuel e.outcome) or r.record e es == es
 Recording (k : Certifying) := ANewIdentityGoesInFront k & AnAgreeingReplayAddsNothing k & ADisagreeingReplayIsKept k
   & AnAgreeingPairSettles k & AnExhaustionIsNeverStored k
+
+-- [core bite 13b, on bite 13c's item 1 and the audit's 1.4 A; 6.S8 "up to four", 6.S15, 12.S11] The
+-- law of retention: how a store is bounded at the current hash of its cone. A model is a way of
+-- bounding one; certification_model's `pruning` is the reference and certify.py's `prune` its
+-- specimen. Only a current refutation refuses a law, so pruning keeps every current failure
+-- however many passes follow, takes nothing out that was not in the store, and never raises the
+-- grade of a certificate: a failure dropped behind four passes gave `Sampled` back, and so did one
+-- of the two entries of a disagreement. (A confirmed control, which certify.py also keeps, is an
+-- outcome of the controls' own store and is not an `Outcome` here.)
+Pruning (k : Certifying) : { prune : Hash -> List Entry -> List Entry }
+PruningKeepsACurrentFailure (k : Certifying) (p : Pruning k) (h : Hash) (es : List Entry) (e : Entry) : Bool :=
+  not (e.cone == h and isFailure e.outcome and any List Entry (fn (f : Entry) { f == e }) es)
+    or any List Entry (fn (f : Entry) { f == e }) (p.prune h es)
+PruningOnlyDrops (k : Certifying) (p : Pruning k) (h : Hash) (es : List Entry) : Bool :=
+  all List Entry (fn (f : Entry) { any List Entry (fn (e : Entry) { e == f }) es }) (p.prune h es)
+PruningNeverRaisesAGrade (k : Certifying) (p : Pruning k) (c : Certificate) : Bool :=
+  atMost (k.grade { law := c.law, cone := c.cone, entries := p.prune c.cone c.entries }) (k.grade c)
+Pruning (k : Certifying) := PruningKeepsACurrentFailure k & PruningOnlyDrops k & PruningNeverRaisesAGrade k
 
 -- The law of the union (D-2026-10-16-g; L10.3, 7.S13): how many cases the union of a law's
 -- stretches under a binding counts. A model is a way of counting them; `pooledCases` (§2) is the

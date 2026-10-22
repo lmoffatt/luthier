@@ -10,14 +10,14 @@
 -- later agreeing pair, and another law's. Seed 20261016 (the censuses are listed; the seed only
 -- names the run).
 
-import "test.lth" test ExhaustiveMode Grade Proved Cases defaultBudgets
+import "test.lth" test ExhaustiveMode Grade Proved Cases defaultBudgets Budgets
 import "generators.lth" Binding
 import "laws.lth" Listed Cited
-import "certification.lth" Certifying Recording Entry Certificate ConeDemand Outcome Passed Failed NotRunFor fuelSpent
+import "certification.lth" Certifying Recording Pruning IdentityIsTheKey PruningKeepsACurrentFailure PruningOnlyDrops PruningNeverRaisesAGrade Entry Certificate ConeDemand Outcome Passed Failed NotRunFor fuelSpent Hash
   ANewIdentityGoesInFront AnAgreeingReplayAddsNothing ADisagreeingReplayIsKept AnAgreeingPairSettles
   AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused NoCutoffAcceptsAFailure
 import "test.lth" ExhaustiveGrade Sampled AssumedGrade
-import "certification_model.lut" certifying recording
+import "certification_model.lut" certifying recording pruning
 import "term.lth" Term Act Program Alpha Substitution Reduction Var Lit Lam App Pi Pair Match Let Define
   IntConst PVar PPair
 import "term_model.lut" alpha substitute stepper
@@ -96,3 +96,41 @@ erasures : List (Erasure alpha substitute stepper) := [erasure]
 test "ErasureKeepsTheStep" ExhaustiveMode (seed <- 20261018) (whereBindings <- [bind "a" "alphas",
   bind "sb" "substitutions", bind "m" "steppers", bind "e" "erasures", bind "p" "erasurePrograms",
   bind "t" "erasureTerms"])
+
+-- The identity enters the budgets that change the distribution (core bite 13b, on bite 13c's item 2):
+-- the entries of one seed under the default budgets and under another `specialMass`, which are two
+-- samples. `IdentityIsTheKey` over them; its control, an identity that reads no budget, is in
+-- certification_controls.test.lut.
+otherSampling : Budgets := { tries := 2000, redraws := 50, probes := 5, drawsPerCase := 10, coveringAbove := 20000,
+                             levelRuns := 10, seedsPerControl := 5, distributionDraws := 10000, fuel := 3000000,
+                             regionNumbers := 4000, regionEntries := 400, specialMass := 0.45, atomAtZero := 0.01 }
+passUnderOther : Entry :=
+  { law := "L", cone := "sha256:cccc", binding := nil, seed := 1, cases := 1, conjunct := nothing, conjuncts := nil, budgets := otherSampling, reach := nil,
+    evidence := Cited "listed", grade := just Cases, outcome := Passed, date := "2026-10-16", interpreter := "listed", hosts := nil }
+identityEntries : List Entry := [passOne, passUnderOther, failOne, passOther]
+test "IdentityIsTheKey" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models", bind "e" "identityEntries"])
+
+-- The retention law (core bite 13b, on bite 13c's item 1): stores that hold a failure behind five
+-- passes, a disagreement, and a store with nothing at the hash. Its controls are in
+-- certification_controls.test.lut.
+pass3 : Entry := entry "L" 3 (just Cases) Passed
+pass4 : Entry := entry "L" 4 (just Cases) Passed
+pass5 : Entry := entry "L" 5 (just Cases) Passed
+pass6 : Entry := entry "L" 6 (just Cases) Passed
+oldFailure : Entry := entry "L" 7 nothing (Failed "x = 7")
+disagreeing : Entry := entry "L" 1 (just Sampled) Passed
+pruneStores : List (List Entry) := [nil, [passOne], [failOne, passOne], [pass6, pass5, pass4, pass3, passTwo, oldFailure],
+  [pass6, pass5, pass4, pass3, passTwo, passOne], [pass6, pass5, pass4, pass3, disagreeing, passOne]]
+pruneHashes : List Hash := ["sha256:cccc", "sha256:dddd"]
+prunings : List (Pruning certifying) := [pruning]
+pruneCertificates : List Certificate := [{ law := "L", cone := "sha256:cccc", entries := nil },
+  { law := "L", cone := "sha256:cccc", entries := [pass6, pass5, pass4, pass3, passTwo, oldFailure] },
+  { law := "L", cone := "sha256:cccc", entries := [pass6, pass5, pass4, pass3, passTwo, passOne] },
+  { law := "L", cone := "sha256:cccc", entries := [pass6, pass5, pass4, pass3, disagreeing, passOne] }]
+pruneEntries : List Entry := [passOne, failOne, oldFailure, pass6, disagreeing]
+test "PruningKeepsACurrentFailure" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models",
+  bind "p" "prunings", bind "h" "pruneHashes", bind "es" "pruneStores", bind "e" "pruneEntries"])
+test "PruningOnlyDrops" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models",
+  bind "p" "prunings", bind "h" "pruneHashes", bind "es" "pruneStores"])
+test "PruningNeverRaisesAGrade" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models",
+  bind "p" "prunings", bind "c" "pruneCertificates"])
