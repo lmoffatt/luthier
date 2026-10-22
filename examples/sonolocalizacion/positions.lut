@@ -89,3 +89,5 @@ flatten (m : MatRows 3) : Vec Float64 := vec Float64 (m.m * m.n) (fn c { m.f (c 
 unflatten (p : Positions) : Mat Float64 := mat Float64 3 (p.n / 3) (fn a n { p.f (3 * n + a) })
 LayoutIsAnIsomorphism (n : Dim) (to : MatOf 3 n -> VecOf (3 * n) <- fn m { flatten m }) (from : VecOf (3 * n) -> MatOf 3 n <- fn p { unflatten p }) : Bool :=
   Isomorphism (MatOf 3 n) (VecOf (3 * n)) (matObject Float64) (vecObject Float64) to from
+-- [core bite 12] gathered so that this file claims it (4.S14)
+LayoutClaims := LayoutIsAnIsomorphism

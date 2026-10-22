@@ -253,8 +253,8 @@ valueSums (vs : List (Vec Float64)) : Float64 * Float64 * Int :=
 -- `lengthOf`, `reverseOnto` gone). A vector's entries are `Vec`'s `fold` into a list: the core's
 -- `toList Vec` does not find `VecIsFoldable` (it takes the vector for the model; report-bite-12b.md).
 larger (a b : Float64) : Float64 := if a > b then a else b
-entries (v : Vec Float64) : List Float64 := fold Float64 (List Float64) (fn a b { a <> b }) nil (fn x { singleton Float64 x }) v
-pooled (vs : List (Vec Float64)) : List Float64 := concat Float64 (map entries vs)
+vecEntries (v : Vec Float64) : List Float64 := fold Float64 (List Float64) (fn a b { a <> b }) nil (fn x { singleton Float64 x }) v
+pooled (vs : List (Vec Float64)) : List Float64 := concat Float64 (map vecEntries vs)
 kolmogorovDistanceDef (vs : List (Vec Float64)) : Float64 :=
   { us := sortBy Float64 (fn a b { a <= b }) (pooled vs)
     n := size us

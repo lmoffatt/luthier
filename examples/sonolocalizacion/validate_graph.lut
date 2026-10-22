@@ -27,7 +27,7 @@ import "distance_graph.lut" DistanceGraph ValidDistanceGraph ValidGraph firstVio
 -- is v0.1's so that the count is the same.
 rankFloor (g : DistanceGraph) : RankFloor := toFloat64 (3 * g.nodes.nRows) * doubles.epsilon
 
-summary (g : ValidDistanceGraph) : String :=
+graphSummary (g : ValidDistanceGraph) : String :=
   "valid: " <> intToString g.nodes.nRows <> " nodes, " <> intToString g.measurements.nRows <> " measurements, "
   <> intToString (distinctPairs g) <> " distinct pairs; directions the distances do not see: "
   <> intToString (unseenDirections (rankFloor g) g) <> " (of which " <> intToString g.nodes.nRows <> " are the heights and "
@@ -37,5 +37,5 @@ summary (g : ValidDistanceGraph) : String :=
 -- by the law of a check (ReportsValidity), which the branch states again
 report (g : DistanceGraph) : String :=
   match firstViolation g {
-    nothing -> (if ValidGraph g then summary g else "the check reported nothing on a graph that is not valid") ;
+    nothing -> (if ValidGraph g then graphSummary g else "the check reported nothing on a graph that is not valid") ;
     just v -> describe g v }

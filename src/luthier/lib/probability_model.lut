@@ -47,3 +47,6 @@ LumpIsUniform (c : Sequential) : Law := SourceIsUniform numpySort lump c
 pushGen (A B : U) (f : A -> B) (g : Gen A) : Gen B := fn n s { match g n s { (x, s1) -> (f x, s1) } }
 PushingDraws (A : U) (B : Concrete) (f : A -> B) (model : Pushforward A B f <- { push := pushGen A B f }) : Bool :=
   Pushforward A B f model
+-- [core bite 12] the claims of this file, gathered so that it claims them (4.S14), as
+-- numbers_model.lut gathers `NumberModels`
+ProbabilityModels := PushingDraws

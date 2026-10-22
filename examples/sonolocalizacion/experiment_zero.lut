@@ -224,7 +224,7 @@ transformTable (g : ValidDistanceGraph) (lev z u : Vec Float64) : Table := {
 }
 
 -- ---------------------------------------------------------------- the program
-summary (settings : Settings) (n : Int) (f : Fit n) (t : Transform) (g : DistanceGraph) : String :=
+fitSummary (settings : Settings) (n : Int) (f : Fit n) (t : Transform) (g : DistanceGraph) : String :=
   "nodes " <> intToString g.nodes.nRows <> ", measurements " <> intToString g.measurements.nRows
   <> ", sigma " <> realToString f.sigma <> " m, nu " <> realToString f.nu
   <> ", transform of the residuals: Kolmogorov distance " <> realToString t.distance <> " over " <> intToString t.count
@@ -235,16 +235,16 @@ summary (settings : Settings) (n : Int) (f : Fit n) (t : Transform) (g : Distanc
 -- What a run writes and says, from a valid graph: the tables of the positions, the residuals and
 -- their transforms, and the summary. A function of the graph, so its laws are tested on graphs drawn
 -- valid; the run reads the graph and writes what this gives.
-Report = { positions : Table, residuals : Table, transform : Table, summary : String }
+FitReport = { positions : Table, residuals : Table, transform : Table, summary : String }
 
-reportOf (settings : Settings) (g : ValidDistanceGraph) (c : Widening) (st : SigmaTreatment) : Report :=
+reportOf (settings : Settings) (g : ValidDistanceGraph) (c : Widening) (st : SigmaTreatment) : FitReport :=
   match fit settings g c st { f ->
   match transformOf g c st f { t ->
   match posteriorSd (3 * g.nodes.nRows) f.posterior { sd ->
     { positions := positionsTable g f.posterior.mean sd (flatten (toMapInput g).x0),
       residuals := residualsTable g f.predicted f.sigma,
       transform := transformTable g t.leverage t.z t.u,
-      summary := summary settings (3 * g.nodes.nRows) f t g } } } }
+      summary := fitSummary settings (3 * g.nodes.nRows) f t g } } } }
 
 -- A table as text (tables_model.lut's codec), at a path. The host has no write action yet
 -- (world_model.lut), so the text goes to the standard output after a header line naming the path.

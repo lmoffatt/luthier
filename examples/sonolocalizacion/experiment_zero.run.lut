@@ -27,7 +27,7 @@ import "plot.lth" Canvas
 import "plot_model.lut" matplotlib
 import "figures.lut" Style positionsPlot residualsPlot transformPlot keptCount
 import "distance_graph.lut" DistanceGraph ValidGraph readGraph realToString
-import "experiment_zero.lut" SigmaTreatment Widening Report reportOf writeTable bandHalfWidth
+import "experiment_zero.lut" SigmaTreatment Widening FitReport reportOf writeTable bandHalfWidth
 
 -- ---------------------------------------------------------------- parameters
 -- run parameters: declared holes that `run --set name=value` fills (3.S9, 8.S1, 12.S18). The graph
@@ -62,7 +62,7 @@ highlightedNode : String := "parlante_A2"
 pairColours : List String := ["#0072B2", "#D55E00"]
 bandLevel : Float64 := 0.05
 
-writeReport (w : W) (r : Report) : W * Unit := {
+writeReport (w : W) (r : FitReport) : W * Unit := {
   (w1, u1) <- writeTable w (outDir <> "/positions.csv") r.positions
   (w2, u2) <- writeTable w1 (outDir <> "/residuals.csv") r.residuals
   (w3, u3) <- writeTable w2 (outDir <> "/transform.csv") r.transform

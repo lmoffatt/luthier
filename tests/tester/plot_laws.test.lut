@@ -25,24 +25,24 @@ import "plot.lth" Plot Canvas Mapping Drawing Margin plot table point line addLa
 import "world.lth" Persistence WriteThenRead WriteChangesOnlyItsPlace
 import "world_model.lut" State
 import "plot_model.lut" matplotlibDrawing files
-import "plot_cases.lut" states plots again exts stems worlds names obsTables perms margins positions titles paths
-  contents bind
+import "plot_cases.lut" states plots again exts stems worlds tableNames obsTables perms margins positions titles paths
+  contents bindTo
 
 drawings : List (Drawing State) := [matplotlibDrawing]
 stores : List (Persistence State) := [files]
 
-onExists : List Binding := [bind "S" "states", bind "d" "drawings", bind "p" "plots", bind "stem" "stems",
-  bind "ext" "exts", bind "st" "worlds"]
-onFormat : List Binding := [bind "S" "states", bind "d" "drawings", bind "p" "plots", bind "ext" "exts"]
-onValue : List Binding := [bind "S" "states", bind "d" "drawings", bind "p" "plots", bind "q" "again", bind "ext" "exts"]
-onRows : List Binding := [bind "S" "states", bind "d" "drawings", bind "p" "plots", bind "name" "names",
-  bind "t" "obsTables", bind "f" "perms", bind "ext" "exts"]
-onLayers : List Binding := [bind "S" "states", bind "d" "drawings", bind "margin" "margins", bind "p" "plots",
-  bind "i" "positions", bind "ext" "exts"]
-onTitle : List Binding := [bind "S" "states", bind "d" "drawings", bind "p" "plots", bind "s" "titles", bind "ext" "exts"]
-onWrite : List Binding := [bind "S" "states", bind "s" "stores", bind "st" "worlds", bind "p" "paths", bind "c" "contents"]
-onOthers : List Binding := [bind "S" "states", bind "s" "stores", bind "st" "worlds", bind "p" "paths", bind "c" "contents",
-  bind "q" "paths"]
+onExists : List Binding := [bindTo "S" "states", bindTo "d" "drawings", bindTo "p" "plots", bindTo "stem" "stems",
+  bindTo "ext" "exts", bindTo "st" "worlds"]
+onFormat : List Binding := [bindTo "S" "states", bindTo "d" "drawings", bindTo "p" "plots", bindTo "ext" "exts"]
+onValue : List Binding := [bindTo "S" "states", bindTo "d" "drawings", bindTo "p" "plots", bindTo "q" "again", bindTo "ext" "exts"]
+onRows : List Binding := [bindTo "S" "states", bindTo "d" "drawings", bindTo "p" "plots", bindTo "name" "tableNames",
+  bindTo "t" "obsTables", bindTo "f" "perms", bindTo "ext" "exts"]
+onLayers : List Binding := [bindTo "S" "states", bindTo "d" "drawings", bindTo "margin" "margins", bindTo "p" "plots",
+  bindTo "i" "positions", bindTo "ext" "exts"]
+onTitle : List Binding := [bindTo "S" "states", bindTo "d" "drawings", bindTo "p" "plots", bindTo "s" "titles", bindTo "ext" "exts"]
+onWrite : List Binding := [bindTo "S" "states", bindTo "s" "stores", bindTo "st" "worlds", bindTo "p" "paths", bindTo "c" "contents"]
+onOthers : List Binding := [bindTo "S" "states", bindTo "s" "stores", bindTo "st" "worlds", bindTo "p" "paths", bindTo "c" "contents",
+  bindTo "q" "paths"]
 
 test "FileExistsAfter" ExhaustiveMode (seed <- 20261015) (whereBindings <- onExists)
 test "FormatByExtension" ExhaustiveMode (seed <- 20261015) (whereBindings <- onFormat)
