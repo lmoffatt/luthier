@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 f7e258cf763a, commit b267ece) by `scripts/project_principles.py` (project_principles v2) on 2026-10-22; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 c68594456fcb, commit b267ece (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-22; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -332,7 +332,12 @@ object is consumed or stable: kept; with G1 for what is derived (the former L6).
   1.0` and `a + b` have one derivation where no law separates them (GPT's example); it is not the
   trace itself, and it is not a certificate (L10.13). What clause 6 identifies a result by is the
   identity of its derivation, and the derivation is that key read as a value: the record already keeps
-  it, and this clause names what it keeps. [proposed]
+  it, and this clause names what it keeps. (His reading, D-2026-10-22-c) The derivation is the
+  realization, f applied to a, read as a value, a point of an intensional exponential (O13), and not a
+  fourth object beside the three of clause 10. The word is his choice over "history" ("derivation
+  suena a que podemos simplificar la historia a lo invariante"; in proof theory a derivation is
+  identified up to normalization, the coordinator's note); "derivative", the differential of clause 4,
+  is a different word, and neither is ever shortened to "deriv". [proposed]
 - L5.23 (GPT's rule, on his idea) A value carries no more of its derivation than the demand asks:
   the demand selects the projection of the derivation that is materialized and carried, as it selects
   the cone (clause 13) and the decoration (clause 4), so a `Float64` stays a `Float64` until a demand
@@ -925,6 +930,17 @@ blocks; the done and implemented items are in the record's drafts table.
   to be one for a demand, and whether a certified summary may stand for an ancestry discarded; and
   the form of a bridge's declaration of what it preserves and loses (L11.10). Raised by GPT on his
   idea of 2026-10-22 (`record/IA/gpt-2026-10-22/`); the specification does not force the answer.
+  His reading (D-2026-10-22-c): "la derivación yo la veo como un objeto categórico exponencial,
+  ¿tiene sentido?" The coordinator's elaboration, which he accepted ("Sí, dale"): the exponential
+  B^A is the space of procedures from A to B, the specimens of a function; a value's derivation is
+  a point of it with its input, (f, a) with ev(f, a) = v, an element of the fibre of the
+  evaluation map ev : B^A × A → B over v; internal composition C^B × B^A → C^A composes
+  derivations; a cone's derivation is a diagram ending in v (an object of the slice over B, or of
+  the category of elements). Since a cartesian closed category's B^A is extensional and Luthier
+  must tell apart algorithms with the same function (error, cost, evidence), the exponential is
+  intensional: programs as arrows, the planner's certified identities as 2-cells, the derivation
+  carried a class modulo the demand's equality of consequence (L5.22). So the question is how to
+  represent a derivation as a point of an intensional exponential, quotiented by the demand.
   Blocks L5.22, L5.23, L10.13, L11.10, L11.11.
 
 ## His marks pending
@@ -941,8 +957,11 @@ blocks; the done and implemented items are in the record's drafts table.
   L5.17 and L5.18, the cutoff and the policy constants; L6.5, 6, 7; L12.3, 5; L9.1.
 - The two faces defined in Terms, and the shape of this draft (D-2026-10-12-g, -s).
 - L5.22, L5.23, L10.13, L11.10 and L11.11, the derivation of a value and its crossing of languages
-  (his idea of 2026-10-22, GPT's proposal, the clauses the model's wording; D-2026-10-22-b); with
-  them, whether "derivation" enters Terms.
+  (his idea of 2026-10-22, GPT's proposal, the clauses the model's wording; D-2026-10-22-b). The
+  word is his (D-2026-10-22-c) and enters Terms when the clauses settle, as "derivation", whole,
+  beside "derivative" kept whole for the differential; the reading of a derivation as the
+  realization read as a value is his, and so is keeping clause 23's requirement as a law over the
+  derivation; what waits is his mark on the wording of the five clauses.
 
 ## Keys
 
