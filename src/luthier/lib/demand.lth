@@ -51,7 +51,7 @@
 --   §5 The laws of `Certifying` at the demand passed down (6.S10, 6.S16).                   done
 --   §6 The strategy that ran: a specimen of the one asked (8.S4, D-2026-10-16-d).           done
 
-import "certification.lth" Certifying Entry EntryFor Value Hash ServesIsMonotoneInTheCutoff
+import "certification.lth" Certifying Entry EntryFor Value Hash C ServesIsMonotoneInTheCutoff
 import "test.lth" Grade Sampled AssumedGrade gradeRank
 import "term.lth" Term
 
@@ -61,8 +61,7 @@ import "term.lth" Term
 -- evidence cost in `C`; 6.S10: the evidence cost it assigns to assumptions, with no default):
 -- holes. D-2026-10-13-m, after the slice's failures. In this draft the cutoff is the weakest
 -- grade accepted (`accepts`, D-2026-10-14-c) and the price of an assumption is whether that grade
--- admits `AssumedGrade` (§2).
-C : U
+-- admits `AssumedGrade` (§2). `C` is certification.lth's hole, the same cost type (core bite 13b).
 bound : Demand -> C
 evidence : Demand -> C
 assumed : Demand -> Maybe C
@@ -153,10 +152,10 @@ inner (d : Demand) (entry : String) : Demand :=
 -- states of the cone are the run's, not the demand's, and are not here. [proposed,
 -- D-2026-10-15-h] The decoration is recorded (B1 of summary-BCD.md): the key of a result reads it
 -- (8.S8, `KeyReadsTheType`), and the key is a function of the record (plan.lth's `keyOf`).
-Record = { entry : String, cone : Hash, parameters : List (String * Value), accept : Grade, assumes : List String,
+RunRecord = { entry : String, cone : Hash, parameters : List (String * Value), accept : Grade, assumes : List String,
            delta : Maybe Float64, fuel : Maybe Nat, timeLimit : Maybe Float64, checked : Bool, lock : Maybe String,
            decoration : Maybe Decoration, strategy : Strategy, fresh : Bool }
-recorded (d : Demand) (h : Hash) : Record :=
+recorded (d : Demand) (h : Hash) : RunRecord :=
   { entry := d.entry, cone := h, parameters := d.sets, accept := d.accepts, assumes := d.assumes, delta := d.delta,
     fuel := d.fuel, timeLimit := d.timeLimit, checked := d.checked, lock := d.pinned, decoration := d.decoration,
     strategy := d.strategy, fresh := d.fresh }
@@ -180,9 +179,9 @@ determined (K : U) (eq : K -> K -> Bool) (rs : List (Stored K)) : Bool :=
 
 -- 8.S3, 8.S9: two runs with one identity have one result. The value of the theory is the store;
 -- run.py reads `x.results.json` back (8.S10), and no model file gives one.
-Store (K : U) (eq : K -> K -> Bool) : { runs : List (Stored K) }
-OneIdentityOneResult (K : U) (eq : K -> K -> Bool) (st : Store K eq) : Bool := determined K eq st.runs
-Store (K : U) (eq : K -> K -> Bool) := OneIdentityOneResult K eq
+RunStore (K : U) (eq : K -> K -> Bool) : { runs : List (Stored K) }
+OneIdentityOneResult (K : U) (eq : K -> K -> Bool) (st : RunStore K eq) : Bool := determined K eq st.runs
+RunStore (K : U) (eq : K -> K -> Bool) := OneIdentityOneResult K eq
 
 -- ---------------------------------------------------------------- §5 Certifying at the demand passed down
 

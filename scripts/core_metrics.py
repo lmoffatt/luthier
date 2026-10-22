@@ -35,7 +35,7 @@ Counts at the tree after ded76d4 (9a3d665 plus bite 3's files), 24 s:
                     loose 1737 (real 1116, the rest 621)
 The 70 unclaimed of the library are `check -v`'s own; the loose total differs from the 1675 of the
 plan's survey because this one counts the .lut files and the data constructors the survey did not.
-ACCEPTED_HOMONYMS is empty: no homonym is required by the language.
+ACCEPTED_HOMONYMS lists the two the host forces, each with its reason (core bite 13b).
 """
 from __future__ import annotations
 
@@ -57,7 +57,13 @@ SUFFIXES = (".lth", ".lut")
 LISTS_FILE = "core/lists.lut"
 # names defined in more than one file that the language requires, each with its reason; empty:
 # no homonym is required by the language (a rename removes each one, 12.S4)
-ACCEPTED_HOMONYMS: dict[str, str] = {}
+ACCEPTED_HOMONYMS: dict[str, str] = {
+    "Unresolved": "a constructor the host's Python reads in two places: laws.lth's verdict of a sequential test "
+                  "(tester.py SETTLED_BY_TEST) and certification.lth's outcome stored in the certificates (certify.py); "
+                  "renaming one changes the store format (core bite 13b)",
+    "scale": "arrays_model.lut's `scale` is the name the `Arrays` record gives its python extern; plot.lth's `scale` "
+             "is a public name of the plots, which wait for G1 to G5 (D-2026-10-17-h)",
+}
 FAMILIES = re.compile(r"^(all|any|append|member|lookup|concat)([A-Z0-9_].*)?$|^(lengthOf|listLength|mapList)$")
 
 

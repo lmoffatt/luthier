@@ -84,14 +84,14 @@ Action (A : U) = W -> W * A
 -- before and after). What is read at a place of it is `read`; the places are any string (a file
 -- path, "stdout", "clock"), so an action that writes where nothing was declared is seen (the
 -- review's world.6).
-World (S : Concrete) : { read : S -> String -> Maybe String }
+ReadableWorld (S : Concrete) : { read : S -> String -> Maybe String }
 
 -- An action's description: what it does to the representation, a function `S -> S * A`, with
 -- whether it concerns Luthier's own store (10.S6, `own`, from the declaration and not from the
 -- effect; what declares nothing is a world action, the safer reading) and the places it declares
 -- it changes or reads (10.S7; what `agreement` observes). The token is used exactly once (D4): an action whose new token nobody uses is
 -- not demanded; that is the checker's over blocks (program.lth), not a law here.
-Described (S : Concrete) (A : U) (m : World S) : {
+Described (S : Concrete) (A : U) (m : ReadableWorld S) : {
   describe : S -> S * A,
   own : Bool,
   places : List String,
@@ -104,7 +104,7 @@ resultOf (S : Concrete) (A : U) (p : S * A) : A := match p { (s, x) -> x }
 -- memoized result differ from a second run's). `d` is the model under certification, so `d.own`
 -- is its declaration and not a draw: the law is vacuous on a world action and tested on every own
 -- one (the review's W4, as Fable reads it).
-OwnIsIdempotent (S : Concrete) (A : U) (m : World S) (d : Described S A m) (s : S) : Bool :=
+OwnIsIdempotent (S : Concrete) (A : U) (m : ReadableWorld S) (d : Described S A m) (s : S) : Bool :=
   not d.own or d.describe (stateAfter S A (d.describe s)) == d.describe s
 
 -- ---------------------------------------------------------------- §2 Places and what an action changes
@@ -113,17 +113,17 @@ OwnIsIdempotent (S : Concrete) (A : U) (m : World S) (d : Described S A m) (s : 
 -- not a binding of another block. In the world it changes only the places it declares: at any other
 -- place, what is read after is what was read before. Quantified over every place, so a random path
 -- is one the action must leave alone, which is the case to test.
-ChangesOnlyDeclared (S : Concrete) (A : U) (m : World S) (d : Described S A m) (s : S) (p : String) : Bool :=
+ChangesOnlyDeclared (S : Concrete) (A : U) (m : ReadableWorld S) (d : Described S A m) (s : S) (p : String) : Bool :=
   member List String p d.places or m.read (stateAfter S A (d.describe s)) p == m.read s p
 
-Described (S : Concrete) (A : U) (m : World S) := OwnIsIdempotent S A m & ChangesOnlyDeclared S A m
+Described (S : Concrete) (A : U) (m : ReadableWorld S) := OwnIsIdempotent S A m & ChangesOnlyDeclared S A m
 
 -- What cannot be tested is assumed, so that the certificate of a run says under what hypotheses it
 -- holds (10.S13, 6.S10): what is written at a place is read back at it, and a write changes no
 -- other place (the disk persists). Stated as laws of the representation; their evidence for the
 -- host is a citation or an assumption (laws.lth, `Assumes`), never a sample.
 Persistence (S : Concrete) : {
-  world : World S,
+  world : ReadableWorld S,
   write : S -> String -> String -> S,
 }
 WriteThenRead (S : Concrete) (s : Persistence S) (st : S) (p c : String) : Bool :=
@@ -246,7 +246,7 @@ Crossing (A B : Concrete) := CallbackGivesTheFunction A B & CallsAreCounted A B 
 -- review, record/IA/review-naive-2026-10-15/].
 appendStr (a b : String) : String := a <> b
 Console (S : Concrete) : {
-  world : World S,
+  world : ReadableWorld S,
   printLine : String -> S -> S * Unit,
   readFile : String -> S -> S * Maybe String,
   stdout : String,
@@ -311,8 +311,8 @@ observeDescription (S : Concrete) (c : Console S) (ps : List String) : Described
 -- case at the first application serves the rest of the run, at other arguments, is Luciano's
 -- question (10.S10 says it does today; the review's W10), left as it stands.
 Observed (S : Concrete) (A : Concrete) = { before : S, result : A, after : S }
-Held (S : Concrete) (A : Concrete) (m : World S) = { act : Action A, described : Described S A m }
-held (S : Concrete) (A : Concrete) (m : World S) (act : Action A) (d : Described S A m) : Held S A m :=
+Held (S : Concrete) (A : Concrete) (m : ReadableWorld S) = { act : Action A, described : Described S A m }
+held (S : Concrete) (A : Concrete) (m : ReadableWorld S) (act : Action A) (d : Described S A m) : Held S A m :=
   { act := act, described := d }
 
 -- The host's side of the console: its actions, routes to the host (world_model.lut), its
@@ -324,25 +324,25 @@ Host (S : Concrete) : {
   print : W -> String -> W * Unit,
   readFile : W -> String -> W * Maybe String,
 }
-agreement (S : Concrete) (A : Concrete) (m : World S) (o : Host S) (h : Held S A m) (extra : List String) (w0 : W) : W * Observed S A :=
+agreement (S : Concrete) (A : Concrete) (m : ReadableWorld S) (o : Host S) (h : Held S A m) (extra : List String) (w0 : W) : W * Observed S A :=
   match o.observe w0 (extra <> h.described.places) { (w1, before) ->
   match h.act w1 { (w2, x) ->
   match o.observe w2 (extra <> h.described.places) { (w3, after) ->
     (w3, { before := before, result := x, after := after }) } } }
 
 -- what is read at each of the places is the same in two states
-readsAlike (S : Concrete) (m : World S) (a b : S) (ps : List String) : Bool :=
+readsAlike (S : Concrete) (m : ReadableWorld S) (a b : S) (ps : List String) : Bool :=
   all List String (fn (p : String) { m.read a p == m.read b p }) ps
 -- the case agrees with the description: the result is the described one, and at each declared
 -- place the world after reads as the description says it does (the runner names the places that
 -- differ, 10.S10)
-agrees (S : Concrete) (A : Concrete) (m : World S) (h : Held S A m) (c : Observed S A) : Bool :=
+agrees (S : Concrete) (A : Concrete) (m : ReadableWorld S) (h : Held S A m) (c : Observed S A) : Bool :=
   match h.described.describe c.before { (described, x) ->
     x == c.result and readsAlike S m described c.after h.described.places }
 -- an observation's case: its result reads at the places as the world read before it, and the
 -- world reads the same after it. Not `agrees`, whose result is compared whole: the observation
 -- gives the world at its places, and the case's `before` holds the places added too.
-observes (S : Concrete) (m : World S) (h : Held S S m) (c : Observed S S) : Bool :=
+observes (S : Concrete) (m : ReadableWorld S) (h : Held S S m) (c : Observed S S) : Bool :=
   readsAlike S m c.result c.before h.described.places and readsAlike S m c.before c.after h.described.places
 -- the places observed that the action did not declare
 undeclared (declared ps : List String) : List String :=

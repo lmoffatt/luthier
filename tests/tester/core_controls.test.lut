@@ -23,8 +23,8 @@ import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "core_instances.lut" leq less equal parity plus minus times first second zero intOne
-  identity negate succ pred double square timesZero nonNegative flippedMinus
+import "core_instances.lut" leq less equal parity plus minus times firstInt second zero intOne
+  identityInt negate succ pred double squareInt timesZero nonNegative flippedMinus
   boolAnd boolOr boolNot top bottom append
   fplus ftimes fzero fnegate noBound1 noBound2 noBound3
 -- ---------------------------------------------------------------- the wrong instances
@@ -63,9 +63,9 @@ onPlusWithOne : List Binding := [
 onPlusWithIdentity : List Binding := [
   { parameter := just "op", type := nothing, generator := "plus", coverage := Listed },
   { parameter := just "e", type := nothing, generator := "zero", coverage := Listed },
-  { parameter := just "inv", type := nothing, generator := "identity", coverage := Listed } ]
+  { parameter := just "inv", type := nothing, generator := "identityInt", coverage := Listed } ]
 onFirst : List Binding := [
-  { parameter := just "op", type := nothing, generator := "first", coverage := Listed },
+  { parameter := just "op", type := nothing, generator := "firstInt", coverage := Listed },
   { parameter := just "e", type := nothing, generator := "zero", coverage := Listed } ]
 onSecond : List Binding := [
   { parameter := just "op", type := nothing, generator := "second", coverage := Listed },
@@ -117,7 +117,7 @@ onFloatTimesOverPlusUnbounded : List Binding := [
 onSucc : List Binding := [ { parameter := just "f", type := nothing, generator := "succ", coverage := Listed } ]
 succAgainstIdentity : List Binding := [
   { parameter := just "f", type := nothing, generator := "succ", coverage := Listed },
-  { parameter := just "g", type := nothing, generator := "identity", coverage := Listed } ]
+  { parameter := just "g", type := nothing, generator := "identityInt", coverage := Listed } ]
 minusAgainstFlipped : List Binding := [
   { parameter := just "f", type := nothing, generator := "minus", coverage := Listed },
   { parameter := just "g", type := nothing, generator := "flippedMinus", coverage := Listed } ]
@@ -137,10 +137,10 @@ negateOverLeq : List Binding := [
 squareOverPlus : List Binding := [
   { parameter := just "opA", type := nothing, generator := "plus", coverage := Listed },
   { parameter := just "opB", type := nothing, generator := "plus", coverage := Listed },
-  { parameter := just "f", type := nothing, generator := "square", coverage := Listed } ]
+  { parameter := just "f", type := nothing, generator := "squareInt", coverage := Listed } ]
 identityOverParity : List Binding := [
   { parameter := just "rA", type := nothing, generator := "parity", coverage := Listed },
-  { parameter := just "f", type := nothing, generator := "identity", coverage := Listed } ]
+  { parameter := just "f", type := nothing, generator := "identityInt", coverage := Listed } ]
 succInNonNegative : List Binding := [
   { parameter := just "f", type := nothing, generator := "succ", coverage := Listed },
   { parameter := just "inside", type := nothing, generator := "nonNegative", coverage := Listed } ]

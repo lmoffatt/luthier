@@ -19,51 +19,51 @@ import "tables.lth" Table int real
 import "plot.lth" Plot Drawing Layer retitle FileExistsAfter FormatByExtension ImageOfTheValue
   RowOrderInvariant LayerOrderInvariant ImageSeesTheTitle
 import "world.lth" Persistence WriteThenRead WriteChangesOnlyItsPlace
-import "world_model.lut" State theWorld
+import "world_model.lut" WorldState theWorld
 import "plot_model.lut" matplotlibDrawing files
 import "plot_cases.lut" parsed obsText pointsAndLine states plots again exts stems worlds tableNames obsTables perms
   margins positions titles paths contents bindTo
 
 -- the store writes nothing: drawing leaves no file (FileExistsAfter)
-writesNothing : Persistence State := { world := theWorld, write := fn st p c { st } }
-noFile : Drawing State := { store := writesNothing, formats := matplotlibDrawing.formats,
+writesNothing : Persistence WorldState := { world := theWorld, write := fn st p c { st } }
+noFile : Drawing WorldState := { store := writesNothing, formats := matplotlibDrawing.formats,
   rasters := matplotlibDrawing.rasters, image := matplotlibDrawing.image, formatOf := matplotlibDrawing.formatOf }
 -- the format reader reads every image as a PNG (FormatByExtension)
-pngAlways : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
+pngAlways : Drawing WorldState := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
   image := matplotlibDrawing.image, formatOf := fn b { "png" } }
 -- the image reads a cell at a name the schema does not have (ImageOfTheValue): two tables with the
 -- same cells may differ there
 offCell (p : Plot) : String :=
   match lookup List String Table "obs" p.tables { nothing -> "" ; just t -> match t.cell "zz" 0 { nothing -> "" ; just c -> "zz" } }
-readsOffSchema : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
+readsOffSchema : Drawing WorldState := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
   image := fn p e { matplotlibDrawing.image p e <> offCell p }, formatOf := matplotlibDrawing.formatOf }
 -- the image marks the first row of obs apart (RowOrderInvariant): the off-by-one of a reader that
 -- takes the first row for something else
 firstRow (p : Plot) : String :=
   match lookup List String Table "obs" p.tables { nothing -> "" ; just t -> if t.cell "x" 0 == just (real 1.0) then "first" else "" }
-firstRowApart : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
+firstRowApart : Drawing WorldState := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
   image := fn p e { matplotlibDrawing.image p e <> firstRow p }, formatOf := matplotlibDrawing.formatOf }
 -- the image depends on which table the first layer draws (LayerOrderInvariant), apart or not
 firstLayer (p : Plot) : String := match nth Layer p.layers 0 { nothing -> "" ; just l -> l.table }
-layerOrdered : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
+layerOrdered : Drawing WorldState := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
   image := fn p e { matplotlibDrawing.image p e <> firstLayer p }, formatOf := matplotlibDrawing.formatOf }
 -- the image drops the title (ImageSeesTheTitle)
-noTitle : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
+noTitle : Drawing WorldState := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
   image := fn p e { matplotlibDrawing.image (retitle p "") e }, formatOf := matplotlibDrawing.formatOf }
 
 -- the store writes an empty file (WriteThenRead)
-writesEmpty : Persistence State := { world := theWorld, write := fn st p c { files.write st p "" } }
+writesEmpty : Persistence WorldState := { world := theWorld, write := fn st p c { files.write st p "" } }
 -- the store keeps only the file it writes (WriteChangesOnlyItsPlace)
-keepsOnlyIt : Persistence State := { world := theWorld, write := fn st p c { { stdout := st.stdout, files := [(p, c)] } } }
+keepsOnlyIt : Persistence WorldState := { world := theWorld, write := fn st p c { { stdout := st.stdout, files := [(p, c)] } } }
 
-noFileList : List (Drawing State) := [noFile]
-pngAlwaysList : List (Drawing State) := [pngAlways]
-readsOffSchemaList : List (Drawing State) := [readsOffSchema]
-firstRowApartList : List (Drawing State) := [firstRowApart]
-layerOrderedList : List (Drawing State) := [layerOrdered]
-noTitleList : List (Drawing State) := [noTitle]
-writesEmptyList : List (Persistence State) := [writesEmpty]
-keepsOnlyItList : List (Persistence State) := [keepsOnlyIt]
+noFileList : List (Drawing WorldState) := [noFile]
+pngAlwaysList : List (Drawing WorldState) := [pngAlways]
+readsOffSchemaList : List (Drawing WorldState) := [readsOffSchema]
+firstRowApartList : List (Drawing WorldState) := [firstRowApart]
+layerOrderedList : List (Drawing WorldState) := [layerOrdered]
+noTitleList : List (Drawing WorldState) := [noTitle]
+writesEmptyList : List (Persistence WorldState) := [writesEmpty]
+keepsOnlyItList : List (Persistence WorldState) := [keepsOnlyIt]
 
 -- the second plot for ImageOfTheValue: obs with a cell at a name off its schema, the same plot by
 -- `samePlot` (its cells compared at the schema's names)

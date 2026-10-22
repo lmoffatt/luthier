@@ -21,8 +21,8 @@ import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "core_instances.lut" leq less equal parity plus minus times smaller larger first second zero intOne
-  identity negate succ pred double square clamp timesZero remainder2 nonNegative
+import "core_instances.lut" leq less equal parity plus minus times smallerInt largerInt firstInt second zero intOne
+  identityInt negate succ pred double squareInt clamp timesZero remainder2 nonNegative
   succThenPred zeroConst flippedMinus reversedMinus
   boolAnd boolOr boolNot top bottom append empty
   fplus ftimes fzero fnegate fclamp tenth byTen sumBound productBound scaleBound noBound1 noBound2 noBound3
@@ -43,19 +43,19 @@ onTimes : List Binding := [
   { parameter := just "op", type := nothing, generator := "times", coverage := Listed },
   { parameter := just "e", type := nothing, generator := "intOne", coverage := Listed },
   { parameter := just "z", type := nothing, generator := "zero", coverage := Listed } ]
-onSmaller : List Binding := [ { parameter := just "op", type := nothing, generator := "smaller", coverage := Listed } ]
+onSmaller : List Binding := [ { parameter := just "op", type := nothing, generator := "smallerInt", coverage := Listed } ]
 onSecond : List Binding := [
   { parameter := just "op", type := nothing, generator := "second", coverage := Listed },
   { parameter := just "e", type := nothing, generator := "intOne", coverage := Listed } ]
 onFirst : List Binding := [
-  { parameter := just "op", type := nothing, generator := "first", coverage := Listed },
+  { parameter := just "op", type := nothing, generator := "firstInt", coverage := Listed },
   { parameter := just "e", type := nothing, generator := "intOne", coverage := Listed } ]
 onTimesOverPlus : List Binding := [
   { parameter := just "product", type := nothing, generator := "times", coverage := Listed },
   { parameter := just "sum", type := nothing, generator := "plus", coverage := Listed } ]
 onMinMax : List Binding := [
-  { parameter := just "meet", type := nothing, generator := "smaller", coverage := Listed },
-  { parameter := just "join", type := nothing, generator := "larger", coverage := Listed } ]
+  { parameter := just "meet", type := nothing, generator := "smallerInt", coverage := Listed },
+  { parameter := just "join", type := nothing, generator := "largerInt", coverage := Listed } ]
 zeroAndOne : List Binding := [
   { parameter := just "a", type := nothing, generator := "zero", coverage := Listed },
   { parameter := just "b", type := nothing, generator := "intOne", coverage := Listed } ]
@@ -108,7 +108,7 @@ onClamp : List Binding := [ { parameter := just "f", type := nothing, generator 
 onTimesZero : List Binding := [ { parameter := just "f", type := nothing, generator := "timesZero", coverage := Listed } ]
 composedAgainstIdentity : List Binding := [
   { parameter := just "f", type := nothing, generator := "succThenPred", coverage := Listed },
-  { parameter := just "g", type := nothing, generator := "identity", coverage := Listed } ]
+  { parameter := just "g", type := nothing, generator := "identityInt", coverage := Listed } ]
 constantAgainstTimesZero : List Binding := [
   { parameter := just "f", type := nothing, generator := "zeroConst", coverage := Listed },
   { parameter := just "g", type := nothing, generator := "timesZero", coverage := Listed } ]
@@ -131,7 +131,7 @@ remainderOverParity : List Binding := [
   { parameter := just "rA", type := nothing, generator := "parity", coverage := Listed },
   { parameter := just "f", type := nothing, generator := "remainder2", coverage := Listed } ]
 squareInNonNegative : List Binding := [
-  { parameter := just "f", type := nothing, generator := "square", coverage := Listed },
+  { parameter := just "f", type := nothing, generator := "squareInt", coverage := Listed },
   { parameter := just "inside", type := nothing, generator := "nonNegative", coverage := Listed } ]
 onFloatClamp : List Binding := [
   { parameter := just "f", type := nothing, generator := "fclamp", coverage := Listed },

@@ -14,13 +14,13 @@
 -- `printDescription`, `readFileDescription`, `observeDescription`) by the laws of `Host` over the
 -- cases `agreement` gathers along one chain of tokens (world.lth §5).
 
-import "world.lth" World Console Host appendStr lineOf
+import "world.lth" ReadableWorld Console Host appendStr lineOf
 
 -- the representation: the standard output so far, and the files by path
-State = { stdout : String, files : List (String * String) }
+WorldState = { stdout : String, files : List (String * String) }
 
 -- the observable world: what is read at a place of the representation
-theWorld : World State := {
+theWorld : ReadableWorld WorldState := {
   read := fn st p { if p == "stdout" then just st.stdout else lookup List String String p st.files },
 }
 
@@ -28,7 +28,7 @@ theWorld : World State := {
 -- nothing else; `readFile` gives what is at the path and changes nothing. The standard output's
 -- place is `stdout`, the one `theWorld.read` answers from `st.stdout`; world.lth's descriptions
 -- of the host's actions read it from here.
-console : Console State := {
+console : Console WorldState := {
   world := theWorld,
   printLine := fn s st { ({ stdout := appendStr st.stdout (lineOf s), files := st.files }, unit) },
   readFile := fn p st { (st, lookup List String String p st.files) },
@@ -45,7 +45,7 @@ console : Console State := {
 -- never a case. `Host`'s laws hold each action to the console's description; run.py validates an
 -- action at its first application in a run (10.S10, L11.2), the case gathered by `agreement`, and
 -- keeps the entry in world_model.cert.json.
-HostConsole = Host State
+HostConsole = Host WorldState
 host : HostConsole := {
   console := console,
   observe := extern "python:luthier.host.observe",

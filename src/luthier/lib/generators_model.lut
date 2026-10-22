@@ -10,7 +10,7 @@
 -- laws.lth §4 (7.S17, L9.15, D-2026-10-15-b), with its control `skewedSample`; the controls of
 -- `Random`'s statistical laws, sources broken on purpose (L9.14).
 
-import "generators.lth" Placement LinearPlacement LogPlacement Support Filter Resolution Gen power pick resolve filtered Seed
+import "generators.lth" Placement LinearPlacement LogPlacement WeightedSupport Filter Resolution Gen power pick resolve filtered Seed
   Random DrawsAreUniform DrawsAreIndependent nextSeed
 import "laws.lth" Law Sequential
 
@@ -22,7 +22,7 @@ logarithmic : Placement := { place := fn lo hi v { lo * power (hi / lo) v } }
 logPlacement : LogPlacement := { placement := logarithmic }
 
 -- a support drawn by the reference inversion
-supportOf (T : Concrete) (ws : List (T * Float64)) : Support T := { weights := ws, pick := fn u { pick T ws u } }
+supportOf (T : Concrete) (ws : List (T * Float64)) : WeightedSupport T := { weights := ws, pick := fn u { pick T ws u } }
 -- a filter drawn by the reference redraw
 filterOf (T : U) (g : Gen T) (p : T -> Bool) : Filter T :=
   { base := g, keep := p, draw := fn tries n s { filtered T g p tries n s } }

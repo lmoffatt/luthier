@@ -19,7 +19,7 @@ import "generators.lth" Binding Degeneracies EachWitnessIsItsCase CaseNamesAreDi
 import "laws.lth" Listed Cited
 import "arrays.lth" Mat SymmetricMatrix RankFloor matDegeneracies symmetricDegeneracies
 import "arrays_model.lut" numpy
-import "certification.lth" orWeakest Certifying Entry Certificate Outcome Passed Failed NotRunFor Drawing Region FromType FromLaw
+import "certification.lth" orWeakest Certifying Entry Certificate Outcome Passed Failed NotRunFor DrawnParameter Region FromType FromLaw
   FromCode Label BindingEvidence Regioning Deriving NoRegionsLeaveTheGrade RefutedInEveryRegion ALabelEntersNoGrade
   AnEmptyRegionLeavesBelowCases TheThreeSourcesGrade CombinesOverRegions CombinesAcrossBindings
   NothingIsTheUnit CombineNeverRaises EachCutoffGivesTwoSides EachPremiseGivesItsBoundary OnlyTheLawsRegions
@@ -47,8 +47,8 @@ test "CaseNamesAreDistinct" ExhaustiveMode (seed <- 20261017) (whereBindings <- 
 test "CaseNamesAreDistinct" ExhaustiveMode (seed <- 20261017) (whereBindings <- onSym)
 
 -- certification.lth §5, `Regioning`: the entries, certificates, regions and evidence
-bB : List Drawing := [{ parameter := "x", generator := "g", fingerprint := "f" }]
-entry (b : List Drawing) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
+bB : List DrawnParameter := [{ parameter := "x", generator := "g", fingerprint := "f" }]
+entry (b : List DrawnParameter) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
   { law := "L", cone := "sha256:cccc", binding := b, seed := s, cases := 1, conjunct := nothing, conjuncts := nil, budgets := defaultBudgets, reach := nil,
     evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-17", interpreter := "listed", hosts := nil }
 passA : Entry := entry nil 1 (just Cases) Passed

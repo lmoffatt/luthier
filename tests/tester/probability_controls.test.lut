@@ -31,7 +31,7 @@ import "generators.lth" Binding byParameter Gen Seed nextSeed
 import "laws.lth" Listed Sequential StatisticalLaw NoAlternativeAtZero RatioNonNegative
 import "numbers.lth" Tolerance
 import "arrays.lth" Vec Mat vec mat
-import "probability.lth" Resolution Kolmogorov MeanModel ScaledModel Likelihood UnitList uniformPValue
+import "probability.lth" StepResolution Kolmogorov MeanModel ScaledModel Likelihood UnitList kolmogorovPValue
   GaussianConstruction GaussianPeaksAtMean ProfiledIsGaussianAtItsSigma gaussian profiled pi
 import "probability_model.lut" PushingDraws pushGen numpySort
 import "probability.lth" Pushforward
@@ -231,8 +231,8 @@ wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.5, initial := 50,
 
 -- the statistic of probability.lth with its ratio broken: 2 at distance zero; negative at 0.5
 unitListType : List U := [UnitList]
-twoAtZero : StatisticalLaw UnitList := { statistic := fn vs { uniformPValue numpySort vs }, ratio := fn delta p { 2.0 } }
-negativeAtHalf : StatisticalLaw UnitList := { statistic := fn vs { uniformPValue numpySort vs },
+twoAtZero : StatisticalLaw UnitList := { statistic := fn vs { kolmogorovPValue numpySort vs }, ratio := fn delta p { 2.0 } }
+negativeAtHalf : StatisticalLaw UnitList := { statistic := fn vs { kolmogorovPValue numpySort vs },
                                               ratio := fn delta p { 1.0 - 3.0 * delta } }
 ratioTwo : List (StatisticalLaw UnitList) := [twoAtZero]
 ratioNegative : List (StatisticalLaw UnitList) := [negativeAtHalf]

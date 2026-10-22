@@ -12,18 +12,18 @@ import "generators.lth" Binding
 import "laws.lth" Listed
 import "term.lth" Term Var App
 import "world.lth" Console PrintAppendsALine PrintChangesOnlyStdout ReadGivesThePlace ReadChangesNothing
-  World Described OwnIsIdempotent ChangesOnlyDeclared printDescription readFileDescription observeDescription
+  ReadableWorld Described OwnIsIdempotent ChangesOnlyDeclared printDescription readFileDescription observeDescription
   Externs Route routeOf isProvisional settled AppliedWhenSettled NoLawNoGrade ProvisionalIsAssumed IdentityCarriesHash
   Crossing CallbackGivesTheFunction CallsAreCounted RecordCrossesByField
   Host Observed Held held HostAgreesPrint HostAgreesReadFile HostObserveChangesNothing HostChangesOnlyDeclared
-import "world_model.lut" State console theWorld host
+import "world_model.lut" WorldState console theWorld host
 
-states : List Concrete := [State]
-consoles : List (Console State) := [console]
-blank : State := { stdout := "", files := nil }
-printed : State := { stdout := "one\n", files := nil }
-withFiles : State := { stdout := "", files := [("input.txt", "first\nsecond\n"), ("empty.txt", "")] }
-worlds : List State := [blank, printed, withFiles]
+states : List Concrete := [WorldState]
+consoles : List (Console WorldState) := [console]
+blank : WorldState := { stdout := "", files := nil }
+printed : WorldState := { stdout := "one\n", files := nil }
+withFiles : WorldState := { stdout := "", files := [("input.txt", "first\nsecond\n"), ("empty.txt", "")] }
+worlds : List WorldState := [blank, printed, withFiles]
 lines : List String := ["", "hello, world", "two\nlines"]
 places : List String := ["stdout", "input.txt", "empty.txt", "other.txt"]
 
@@ -61,22 +61,22 @@ test "ReadChangesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- on
 -- §1, §2 descriptions
 unitTypes : List U := [Unit]
 maybeTypes : List U := [Maybe String]
-stateTypes : List U := [State]
-worldModels : List (World State) := [theWorld]
+stateTypes : List U := [WorldState]
+worldModels : List (ReadableWorld WorldState) := [theWorld]
 -- an own action: Luthier's lock written with the revision pinned, the same whatever was there
-lockWrite : Described State Unit theWorld := {
+lockWrite : Described WorldState Unit theWorld := {
   describe := fn st { ({ stdout := st.stdout, files := cons ("luthier.lock", "pinned") (dropFile "luthier.lock" st.files) }, unit) },
   own := true, places := ["luthier.lock"] }
 dropFile (p : String) (fs : List (String * String)) : List (String * String) :=
   match fs { nil -> nil ; cons (q, c) rest -> if p == q then dropFile p rest else cons (q, c) (dropFile p rest) }
-unitDescriptions : List (Described State Unit theWorld) := [printDescription State console "",
-  printDescription State console "hello, world", lockWrite]
-readDescriptions : List (Described State (Maybe String) theWorld) := [readFileDescription State console "input.txt",
-  readFileDescription State console "other.txt", readFileDescription State console "stdout"]
-observeDescriptions : List (Described State State theWorld) := [observeDescription State console ["stdout", "input.txt"],
-  observeDescription State console nil]
-locked : State := { stdout := "", files := [("luthier.lock", "old"), ("input.txt", "first\n")] }
-moreWorlds : List State := [blank, printed, withFiles, locked]
+unitDescriptions : List (Described WorldState Unit theWorld) := [printDescription WorldState console "",
+  printDescription WorldState console "hello, world", lockWrite]
+readDescriptions : List (Described WorldState (Maybe String) theWorld) := [readFileDescription WorldState console "input.txt",
+  readFileDescription WorldState console "other.txt", readFileDescription WorldState console "stdout"]
+observeDescriptions : List (Described WorldState WorldState theWorld) := [observeDescription WorldState console ["stdout", "input.txt"],
+  observeDescription WorldState console nil]
+locked : WorldState := { stdout := "", files := [("luthier.lock", "old"), ("input.txt", "first\n")] }
+moreWorlds : List WorldState := [blank, printed, withFiles, locked]
 morePlaces : List String := ["stdout", "input.txt", "empty.txt", "other.txt", "luthier.lock"]
 onDescribed (a d : String) : List Binding := [bind "S" "states", bind "A" a, bind "m" "worldModels", bind "d" d,
   bind "s" "moreWorlds"]
@@ -158,31 +158,31 @@ test "RecordCrossesByField" ExhaustiveMode (seed <- 20261015) (whereBindings <- 
   bind "xs" "arguments"])
 
 -- §5 the host, over the cases a faithful host gathers along one chain of tokens
-listedHost : Host State := { console := console, observe := host.observe, print := host.print, readFile := host.readFile }
-hosts : List (Host State) := [listedHost]
-HostState = State
+listedHost : Host WorldState := { console := console, observe := host.observe, print := host.print, readFile := host.readFile }
+hosts : List (Host WorldState) := [listedHost]
+HostState = WorldState
 hostStates : List Concrete := [HostState]
 case (S A : U) (b : S) (x : A) (a : S) : Observed S A := { before := b, result := x, after := a }
-after (st : State) (out : String) : State := { stdout := out, files := st.files }
+after (st : WorldState) (out : String) : WorldState := { stdout := out, files := st.files }
 hello : List String := ["hello, world"]
-helloCases : List (Observed State Unit) := [case State Unit blank unit (after blank "hello, world\n"),
-  case State Unit printed unit (after printed "one\nhello, world\n"), case State Unit withFiles unit (after withFiles "hello, world\n")]
+helloCases : List (Observed WorldState Unit) := [case WorldState Unit blank unit (after blank "hello, world\n"),
+  case WorldState Unit printed unit (after printed "one\nhello, world\n"), case WorldState Unit withFiles unit (after withFiles "hello, world\n")]
 empty : List String := [""]
-emptyCases : List (Observed State Unit) := [case State Unit blank unit (after blank "\n"),
-  case State Unit printed unit (after printed "one\n\n")]
+emptyCases : List (Observed WorldState Unit) := [case WorldState Unit blank unit (after blank "\n"),
+  case WorldState Unit printed unit (after printed "one\n\n")]
 input : List String := ["input.txt"]
-inputCases : List (Observed State (Maybe String)) := [case State (Maybe String) withFiles (just "first\nsecond\n") withFiles,
-  case State (Maybe String) blank nothing blank]
+inputCases : List (Observed WorldState (Maybe String)) := [case WorldState (Maybe String) withFiles (just "first\nsecond\n") withFiles,
+  case WorldState (Maybe String) blank nothing blank]
 otherFile : List String := ["other.txt"]
-otherCases : List (Observed State (Maybe String)) := [case State (Maybe String) withFiles nothing withFiles,
-  case State (Maybe String) printed nothing printed]
+otherCases : List (Observed WorldState (Maybe String)) := [case WorldState (Maybe String) withFiles nothing withFiles,
+  case WorldState (Maybe String) printed nothing printed]
 observed : List (List String) := [["stdout", "input.txt"]]
-observeCases : List (Observed State State) := [case State State withFiles withFiles withFiles,
-  case State State printed printed printed, case State State blank blank blank]
-helloHeld : List (Held State Unit theWorld) := [held State Unit theWorld (fn w { listedHost.print w "hello, world" })
-  (printDescription State console "hello, world")]
-inputHeld : List (Held State (Maybe String) theWorld) := [held State (Maybe String) theWorld
-  (fn w { listedHost.readFile w "input.txt" }) (readFileDescription State console "input.txt")]
+observeCases : List (Observed WorldState WorldState) := [case WorldState WorldState withFiles withFiles withFiles,
+  case WorldState WorldState printed printed printed, case WorldState WorldState blank blank blank]
+helloHeld : List (Held WorldState Unit theWorld) := [held WorldState Unit theWorld (fn w { listedHost.print w "hello, world" })
+  (printDescription WorldState console "hello, world")]
+inputHeld : List (Held WorldState (Maybe String) theWorld) := [held WorldState (Maybe String) theWorld
+  (fn w { listedHost.readFile w "input.txt" }) (readFileDescription WorldState console "input.txt")]
 extras : List (List String) := [["stdout"], ["stdout", "input.txt", "other.txt"]]
 test "HostAgreesPrint" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "hostStates", bind "o" "hosts",
   bind "s" "hello", bind "c" "helloCases"])

@@ -12,7 +12,7 @@ import "laws.lth" Listed
 import "tables.lth" Table
 import "tables_model.lut" csv
 import "plot.lth" Plot Canvas Mapping Margin plot table point line addLayer texts abline scale labels linear auto palette
-import "world_model.lut" State
+import "world_model.lut" WorldState
 
 parsed (s : String) : Table := match csv.parse s { just t -> t }
 canvas : Canvas := { width := 4.0, height := 3.0, dpi := 50.0 }
@@ -39,7 +39,7 @@ apartLayers (obs notes : Table) : Plot :=
     (addLayer (point "obs" nil 4.0 (table "notes" notes (plot canvas "obs" obs xy)))
       { geom := texts { size := 8.0 }, mapping := [("label", "name")], table := "notes" })))
 
-states : List Concrete := [State]
+states : List Concrete := [WorldState]
 plots : List Plot := [
   pointsAndLine (parsed obsText),
   coloured (parsed obsText) (parsed notesText),
@@ -48,9 +48,9 @@ plots : List Plot := [
 again : List Plot := [ pointsAndLine (parsed obsText), coloured (parsed obsText) (parsed notesText) ]
 exts : List String := ["png", "svg"]
 stems : List String := ["plot"]
-blank : State := { stdout := "", files := nil }
-withFile : State := { stdout := "", files := [("plot.png", "old"), ("other.txt", "kept")] }
-worlds : List State := [blank, withFile]
+blank : WorldState := { stdout := "", files := nil }
+withFile : WorldState := { stdout := "", files := [("plot.png", "old"), ("other.txt", "kept")] }
+worlds : List WorldState := [blank, withFile]
 tableNames : List String := ["obs"]
 obsTables : List Table := [parsed obsText]
 -- the six permutations of three rows

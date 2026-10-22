@@ -13,7 +13,7 @@
 import "test.lth" test ExhaustiveMode Grade Cases Sampled Proved defaultBudgets
 import "generators.lth" Binding Degeneracies EachWitnessIsItsCase CaseNamesAreDistinct
 import "laws.lth" Listed Cited
-import "certification.lth" Certifying Entry Certificate Outcome Passed Failed NotRunFor Drawing Region FromType FromLaw
+import "certification.lth" Certifying Entry Certificate Outcome Passed Failed NotRunFor DrawnParameter Region FromType FromLaw
   FromCode Label BindingEvidence Regioning Deriving NoRegionsLeaveTheGrade RefutedInEveryRegion ALabelEntersNoGrade
   AnEmptyRegionLeavesBelowCases TheThreeSourcesGrade CombinesOverRegions CombinesAcrossBindings
   NothingIsTheUnit CombineNeverRaises EachCutoffGivesTwoSides EachPremiseGivesItsBoundary OnlyTheLawsRegions
@@ -39,8 +39,8 @@ test "CaseNamesAreDistinct" ExhaustiveMode (seed <- 20261017) (whereBindings <- 
   bind "d" "twiceNameds"]) (control <- true)
 
 -- the entries, certificates, regions and evidence of regions_laws.test.lut
-bB : List Drawing := [{ parameter := "x", generator := "g", fingerprint := "f" }]
-entry (b : List Drawing) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
+bB : List DrawnParameter := [{ parameter := "x", generator := "g", fingerprint := "f" }]
+entry (b : List DrawnParameter) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
   { law := "L", cone := "sha256:cccc", binding := b, seed := s, cases := 1, conjunct := nothing, conjuncts := nil, budgets := defaultBudgets, reach := nil,
     evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-17", interpreter := "listed", hosts := nil }
 passA : Entry := entry nil 1 (just Cases) Passed
@@ -74,12 +74,12 @@ models : List Certifying := [certifying]
 
 -- broken regionings
 -- a label graded as a region: the fold of `overRegions` without passing labels over
-overAll (c : Certificate) (b : List Drawing) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
+overAll (c : Certificate) (b : List DrawnParameter) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
   match rs { nil -> certifying.grade { law := c.law, cone := c.cone, entries := underOnly b c.entries } ;
     cons r rest -> orWeakest (regionGrade certifying c b r ev) (overAll c b rest ev) }
-underOnly (b : List Drawing) (es : List Entry) : List Entry :=
+underOnly (b : List DrawnParameter) (es : List Entry) : List Entry :=
   match es { nil -> nil ; cons e rest -> if e.binding == b then cons e (underOnly b rest) else underOnly b rest }
-allBindings (c : Certificate) (bs : List (List Drawing)) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
+allBindings (c : Certificate) (bs : List (List DrawnParameter)) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
   match bs { nil -> nothing ; cons b rest -> orWeakest (overAll c b rs ev) (allBindings c rest rs ev) }
 labelGraded (c : Certificate) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
   if standsOnNothing certifying c then nothing else allBindings c (bindingsOf c) rs ev

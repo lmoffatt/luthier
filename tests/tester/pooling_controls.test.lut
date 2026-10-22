@@ -9,7 +9,7 @@
 import "test.lth" test ExhaustiveMode Grade Cases Sampled defaultBudgets
 import "generators.lth" Binding
 import "laws.lth" Listed Cited Points Drawn
-import "certification.lth" Certifying Entry Certificate Outcome Passed Failed NotRunFor Pooling Drawing
+import "certification.lth" Certifying Entry Certificate Outcome Passed Failed NotRunFor Pooling DrawnParameter
   stretchesUnder TheUnionIsMonotone AReplayIsNotANewStretch
 import "certification_model.lut" certifying
 
@@ -30,11 +30,11 @@ notRun : Entry := drawn 5 100 nothing (NotRunFor "no generator")
 
 -- a union that sums every stretch's size, a replay counted again
 sumSizes (ps : List (Maybe Int * Nat)) : Nat := match ps { nil -> 0 ; cons (k, n) rest -> n + sumSizes rest }
-everyEntry (c : Certificate) (b : List Drawing) : Nat := sumSizes (stretchesUnder c.law c.cone b c.entries)
+everyEntry (c : Certificate) (b : List DrawnParameter) : Nat := sumSizes (stretchesUnder c.law c.cone b c.entries)
 counting : Pooling certifying := { pooled := everyEntry }
 -- a union that counts the latest stretch only
 firstSize (ps : List (Maybe Int * Nat)) : Nat := match ps { nil -> 0 ; cons (k, n) rest -> n }
-latestOnly (c : Certificate) (b : List Drawing) : Nat := firstSize (stretchesUnder c.law c.cone b c.entries)
+latestOnly (c : Certificate) (b : List DrawnParameter) : Nat := firstSize (stretchesUnder c.law c.cone b c.entries)
 forgetting : Pooling certifying := { pooled := latestOnly }
 
 models : List Certifying := [certifying]

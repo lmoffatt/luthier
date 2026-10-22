@@ -44,6 +44,9 @@ ExtendedMetric (A : U) (o : Object A) : { d : A -> A -> Extended }
 -- Declared only, as execution.md §3.1 requests; no extended arithmetic or model is claimed.
 
 Ball (A : U) (d : A -> A -> Float64) (radius : A -> A -> Float64) (x y : A) : Bool := d x y <= radius x y
+-- the join and the meet of Float64's order (core bite 13b: one definition, plan 5.1); no NaN is drawn
+larger (a b : Float64) : Float64 := if a > b then a else b
+smaller (a b : Float64) : Float64 := if a > b then b else a
 -- An epsilon threshold gives a tolerance, not an equivalence (D-2026-10-18-c correction).
 ToleranceRelation (A : U) : { relates : A -> A -> Bool }
 ToleranceRelation (A : U) (t : ToleranceRelation A) := Reflexive A t.relates & Symmetric A t.relates

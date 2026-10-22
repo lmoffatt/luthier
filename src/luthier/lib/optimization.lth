@@ -42,7 +42,7 @@
 import "numbers.lth" Tolerance Positive within withinOf abs
 import "arrays.lth" Vec Mat VecOf MatOf Dim vec mat identity approxVec approxMat exact RankFloor
 import "arrays_model.lut" numpy : Arrays add sub scale dot norm matVec matMul madd mscale transpose pinvSym
-import "probability.lth" Resolution IsGradient
+import "probability.lth" StepResolution IsGradient
 import "belief.lth" Settings Posterior decrement quadratic
 
 -- ---------------------------------------------------------------- §1 The objective (D-2026-10-14-a)
@@ -55,7 +55,7 @@ import "belief.lth" Settings Posterior decrement quadratic
 -- optimization.lut:18-24). Certified per objective (7.R4), and on the quadratic family below.
 Objective (n : Nat) : { value : VecOf n -> Float64, grad : VecOf n -> Vec Float64, stepMatrix : VecOf n -> Mat Float64 }
 -- spec 7.R2, 11.S18
-GradIsGradient (n : Nat) (o : Objective n) (r : Resolution) (x v : VecOf n) : Bool := IsGradient n r o.value o.grad x v
+GradIsGradient (n : Nat) (o : Objective n) (r : StepResolution) (x v : VecOf n) : Bool := IsGradient n r o.value o.grad x v
 StepMatrixSymmetric (n : Nat) (o : Objective n) (tol : Tolerance) (x : VecOf n) : Bool :=
   approxMat tol (o.stepMatrix x) (transpose (o.stepMatrix x))
 StepMatrixNonNegative (n : Nat) (o : Objective n) (tol : Tolerance) (x v : VecOf n) : Bool :=

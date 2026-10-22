@@ -44,7 +44,7 @@
 --   §4 The key of a result (8.S8, 8.S9, 8.S10, L5.6).                                       done
 --   §5 The theory `Planning`, the laws of §2 to §4 claimed.                                  done
 
-import "demand.lth" Demand Decoration Record Stored determined Strategy ForwardOnDemand CallByNeed
+import "demand.lth" Demand Decoration RunRecord Stored determined Strategy ForwardOnDemand CallByNeed
 import "certification.lth" Value Hash
 import "generators.lth" Seed
 import "term.lth" Term Program
@@ -250,7 +250,7 @@ withCertificates (k : MemoKey) (hs : List Hash) : MemoKey :=
 -- changes when any input of 8.S8 changes): two keys that differ in one input have different
 -- hashes. [proposed] As in certification.lth §4, a collision of the hash function is the host's,
 -- and a sample that finds one refutes the model.
-Keying (A : U) : { key : MemoKey -> Hash, planHash : Plan A -> Hash, runKey : Record -> Seed -> Plan A -> List Hash -> Hash }
+Keying (A : U) : { key : MemoKey -> Hash, planHash : Plan A -> Hash, runKey : RunRecord -> Seed -> Plan A -> List Hash -> Hash }
 
 -- The key of a run from what it records (D-2026-10-15-h: the record says how to reproduce a run,
 -- the key when two results are the same result): of its record (demand.lth's `Record`), the type
@@ -262,8 +262,8 @@ Keying (A : U) : { key : MemoKey -> Hash, planHash : Plan A -> Hash, runKey : Re
 -- schedule follows from the cone and the values the rest of the key holds (`ByNeedIsFirstDemand`),
 -- so leaving it out of the key distinguishes no two results the rest does not.
 chosen (A : U) (p : Plan A) : Plan A := { strategy := p.strategy, entry := p.entry, live := p.live, schedule := nil }
-modeOf (r : Record) : String := if r.checked then "checked" else "plain"
-keyOf (A : U) (h : Keying A) (r : Record) (s : Seed) (p : Plan A) (cs : List Hash) : MemoKey :=
+modeOf (r : RunRecord) : String := if r.checked then "checked" else "plain"
+keyOf (A : U) (h : Keying A) (r : RunRecord) (s : Seed) (p : Plan A) (cs : List Hash) : MemoKey :=
   { demand := { decoration := r.decoration, values := keepRead p.live r.parameters }, cone := r.cone,
     mode := modeOf r, seed := s, plan := h.planHash (chosen A p), certificates := cs }
 KeySeesTheDemand (A : U) (h : Keying A) (k : MemoKey) (dk : DemandKey) : Bool := dk == k.demand or not (h.key (withDemand k dk) == h.key k)
@@ -277,7 +277,7 @@ PlanHashSeesTheSchedule (A : U) (h : Keying A) (p : Plan A) (s : Schedule) : Boo
   s == p.schedule or not (h.planHash { strategy := p.strategy, entry := p.entry, live := p.live, schedule := s } == h.planHash p)
 -- D-2026-10-15-h: the key a run computes is the hash of `keyOf` of what it records, so a model
 -- that hashed the fuel, the time or the lock, or left out a field of the key, fails it
-KeyIsOfTheRecord (A : U) (h : Keying A) (r : Record) (s : Seed) (p : Plan A) (cs : List Hash) : Bool :=
+KeyIsOfTheRecord (A : U) (h : Keying A) (r : RunRecord) (s : Seed) (p : Plan A) (cs : List Hash) : Bool :=
   h.runKey r s p cs == h.key (keyOf A h r s p cs)
 Keying (A : U) := KeySeesTheDemand A & KeySeesTheCone A & KeySeesTheMode A & KeySeesTheSeed A & KeySeesThePlan A
   & KeySeesTheCertificates A & PlanHashSeesTheSchedule A & KeyIsOfTheRecord A

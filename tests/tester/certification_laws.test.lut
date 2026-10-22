@@ -13,7 +13,7 @@
 import "test.lth" test ExhaustiveMode Grade Proved Cases defaultBudgets
 import "generators.lth" Binding
 import "laws.lth" Listed Cited
-import "certification.lth" Certifying Recording Entry Certificate Demand Outcome Passed Failed NotRunFor fuelSpent
+import "certification.lth" Certifying Recording Entry Certificate ConeDemand Outcome Passed Failed NotRunFor fuelSpent
   ANewIdentityGoesInFront AnAgreeingReplayAddsNothing ADisagreeingReplayIsKept AnAgreeingPairSettles
   AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused NoCutoffAcceptsAFailure
 import "test.lth" ExhaustiveGrade Sampled AssumedGrade
@@ -48,7 +48,7 @@ ofTheLaw : List Entry := [passOne, failOne, passTwo, notRunOne]
 outcomes : List Outcome := [Passed, Failed "x = 2", NotRunFor "no generator"]
 grades : List (Maybe Grade) := [nothing, just Cases, just Proved]
 behindStores : List (List Entry) := [nil, [passTwo]]
-demands : List Demand := [{ law := "L", cone := "sha256:cccc", given := nil, accepts := Cases }]
+demands : List ConeDemand := [{ law := "L", cone := "sha256:cccc", given := nil, accepts := Cases }]
 names : List String := ["n"]
 
 bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }

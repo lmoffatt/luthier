@@ -46,7 +46,7 @@ CostScale (C : U) := ZeroIsExact C & TopIsNotExact C & VerdictsAreExact C
 -- `lift` reads a Boolean law as a cost, `exact` reads a cost back as whether it holds exactly
 -- (5.S5); `exact (lift b) == b` follows from the two laws above
 lift (C : U) (s : CostScale C) (b : Bool) : C := if b then s.zero else s.top
-exact (C : U) (s : CostScale C) (c : C) : Bool := s.leq c s.zero
+holdsExactly (C : U) (s : CostScale C) (c : C) : Bool := s.leq c s.zero
 
 -- What the core asks of a law's value (5.S3): a verdict in `C`. For `Bool` it is `lift`; for `C`
 -- the identity; for a check, `lift` of whether it holds (5.S9). These are definitions, not a
@@ -59,7 +59,7 @@ verdictOfCheck (C : U) (s : CostScale C) (E : U) (fs : Failures E) : C := lift C
 -- What characterizes a verdict is its retraction: reading it back as whether it holds exactly
 -- gives what the law said (5.S5). Claimed by `CostScale`, whose two laws make it hold.
 VerdictsAreExact (C : U) (s : CostScale C) (b : Bool) (E : U) (fs : Failures E) : Bool :=
-  exact C s (verdictOfBool C s b) == b and exact C s (verdictOfCheck C s E fs) == isEmpty E fs
+  holdsExactly C s (verdictOfBool C s b) == b and holdsExactly C s (verdictOfCheck C s E fs) == isEmpty E fs
 
 -- ---------------------------------------------------------------- §3 A law as a theory
 
@@ -120,7 +120,7 @@ Evidence : U := data {
   Evaluated : Bool -> Evidence ;
   At : (A : U) -> A -> Evidence -> Evidence ;
   Points : (A : U) -> List (A * Evidence) -> Coverage -> Evidence ;
-  Pair : Evidence -> Evidence -> Evidence ;
+  EvidencePair : Evidence -> Evidence -> Evidence ;
   Side : Bool -> Evidence -> Evidence ;
   Cited : String -> Evidence ;
   Assumed : Evidence ;
@@ -193,13 +193,13 @@ ExistsOnPoints (m : Settling) (A : U) (p : A -> Law) (pts : List (A * Evidence))
 -- and supports when its side is supported (the same review item: a sampled side was dropped), or
 -- by a pair of refutations
 ConjunctionByPair (m : Settling) (p q : Law) (e f : Evidence) : Bool :=
-  m.settles (Conjunction p q) (Pair e f) == m.combine (m.settles p e) (m.settles q f)
+  m.settles (Conjunction p q) (EvidencePair e f) == m.combine (m.settles p e) (m.settles q f)
 EitherBySide (m : Settling) (p q : Law) (side : Bool) (e : Evidence) : Bool :=
   m.settles (Either p q) (Side side e)
     == (if isConfirmed (m.settles (if side then p else q) e) then Confirmed
         else if isSupported (m.settles (if side then p else q) e) then Supported else Unsettled)
 EitherRefutedByBoth (m : Settling) (p q : Law) (e f : Evidence) : Bool :=
-  m.settles (Either p q) (Pair e f)
+  m.settles (Either p q) (EvidencePair e f)
     == (if isRefuted (m.settles p e) and isRefuted (m.settles q f) then Refuted else Unsettled)
 -- `not` exchanges confirmation and refutation; what is only supported or unsettled stays unsettled.
 -- [proposed, L1 of summary-BCD.md, Fable's one-line fix] Not on a citation or an assumption, which

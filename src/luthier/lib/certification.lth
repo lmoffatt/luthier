@@ -93,7 +93,7 @@ Hash = String
 -- functor with its parameters (printed) or as a name, with its fingerprint. A `Binding` of
 -- generators.lth (by parameter or by type, in `where` or in a profile) resolved for one parameter
 -- (`resolve`) gives one of these.
-Drawing = { parameter : String, generator : String, fingerprint : String }
+DrawnParameter = { parameter : String, generator : String, fingerprint : String }
 
 -- A value a run gives a parameter (7.S15: the holes filled by `--set`): a number, or any other
 -- value by its printed canonical form. [proposed] Two kinds suffice to compare with a reach: an
@@ -142,7 +142,7 @@ outOfFuel (o : Outcome) : Bool := o == NotRunFor fuelSpent
 -- D-2026-10-18-f] A law whose body is a conjunction of laws is tested conjunct by conjunct, each
 -- conjunct's entry under the law's name and cone: the conjunct (`just "Symmetric Int r"`, as the law
 -- applies it) is part of the identity, `nothing` for a law's own entry and for a control's.
-Identity = { law : String, cone : Hash, binding : List Drawing, seed : Seed, cases : Nat, conjunct : Maybe String }
+Identity = { law : String, cone : Hash, binding : List DrawnParameter, seed : Seed, cases : Nat, conjunct : Maybe String }
 
 -- An entry: its identity; what it holds, the budgets (7.S8), the reach of each parameter (7.S10),
 -- the evidence of laws.lth, the grade of test.lth (`nothing` unless it passed), its outcome, the
@@ -153,7 +153,7 @@ Identity = { law : String, cone : Hash, binding : List Drawing, seed : Seed, cas
 -- otherwise), so that a conjunct with no entry leaves the law without a grade (tester.py's
 -- `_run_conjunction`, certify.py's `certificate_grade_and_empty`; the store omits both fields when
 -- the entry is no conjunct's).
-Entry = { law : String, cone : Hash, binding : List Drawing, seed : Seed, cases : Nat, conjunct : Maybe String,
+Entry = { law : String, cone : Hash, binding : List DrawnParameter, seed : Seed, cases : Nat, conjunct : Maybe String,
           conjuncts : List String,
           budgets : Budgets, reach : List ParameterReach, evidence : Evidence, grade : Maybe Grade,
           outcome : Outcome, date : String, interpreter : String, hosts : List (String * Hash) }
@@ -229,8 +229,6 @@ entriesAt (l : String) (h : Hash) (es : List Entry) : List Entry :=
   filter List Entry (fn (e : Entry) { e.law == l and e.cone == h }) es
 disputeAt (ident : Entry -> Identity) (l : String) (h : Hash) (es : List Entry) : Maybe (Entry * Entry) :=
   match disputes ident nil (entriesAt l h es) { nil -> nothing ; cons p rest -> just p }
--- one outcome per identity: no disagreement recorded
-determined (k : Certifying) (es : List Entry) : Bool := match disputes k.identity nil es { nil -> true ; cons p rest -> false }
 gradedAsOutcome (es : List Entry) : Bool :=
   all List Entry (fn (e : Entry) { (e.outcome == Passed) == not (e.grade == nothing) }) es
 -- the grades a pass's evidence admits: test.lth's `grade` of a confirming or a supporting verdict
@@ -302,10 +300,10 @@ stronger (g h : Grade) : Grade := if gradeRank g <= gradeRank h then h else g
 -- it, and the latest such failure; the weakest of two grades where `nothing` (no pass yet) is the
 -- unit, and the stronger of a grade and a binding's grade so far.
 prepend (es : List Entry) (c : Certificate) : Certificate := match es { nil -> c ; cons e rest -> withEntry (prepend rest c) e }
-keepUnder (keep : Bool) (b : List Drawing) (es : List Entry) : List Entry :=
+keepUnder (keep : Bool) (b : List DrawnParameter) (es : List Entry) : List Entry :=
   filter List Entry (fn (e : Entry) { (e.binding == b) == keep }) es
-only (b : List Drawing) (c : Certificate) : Certificate := { law := c.law, cone := c.cone, entries := keepUnder true b c.entries }
-without (b : List Drawing) (c : Certificate) : Certificate := { law := c.law, cone := c.cone, entries := keepUnder false b c.entries }
+only (b : List DrawnParameter) (c : Certificate) : Certificate := { law := c.law, cone := c.cone, entries := keepUnder true b c.entries }
+without (b : List DrawnParameter) (c : Certificate) : Certificate := { law := c.law, cone := c.cone, entries := keepUnder false b c.entries }
 isFailure (o : Outcome) : Bool := match o { Failed x -> true ; _ -> false }
 failureAt (l : String) (h : Hash) (es : List Entry) : Maybe Entry :=
   match es { nil -> nothing ; cons e rest -> if e.law == l and e.cone == h and isFailure e.outcome then just e else failureAt l h rest }
@@ -319,11 +317,11 @@ orWeakest (m n : Maybe Grade) : Maybe Grade :=
   match m { nothing -> n ; just g -> (match n { nothing -> m ; just h -> just (weakest g h) }) }
 orStronger (g : Grade) (m : Maybe Grade) : Grade := match m { nothing -> g ; just h -> stronger g h }
 -- an entry moved under a binding, and a list of them (how the fold's laws put passes under one)
-under (b : List Drawing) (e : Entry) : Entry :=
+under (b : List DrawnParameter) (e : Entry) : Entry :=
   { law := e.law, cone := e.cone, binding := b, seed := e.seed, cases := e.cases, conjunct := e.conjunct,
     conjuncts := e.conjuncts, budgets := e.budgets, reach := e.reach,
     evidence := e.evidence, grade := e.grade, outcome := e.outcome, date := e.date, interpreter := e.interpreter, hosts := e.hosts }
-underAll (b : List Drawing) (es : List Entry) : List Entry := map Entry Entry (under b) es
+underAll (b : List DrawnParameter) (es : List Entry) : List Entry := map Entry Entry (under b) es
 
 -- [D-2026-10-16-g] The union of a law's stretches. A stretch is one run of a law under one binding
 -- and one seed; its entry keeps its seed and its `n`. The seed names a sample of cases, and the
@@ -357,7 +355,7 @@ stretchKey (e : Entry) : Maybe Seed := if drawnStretch e then just e.seed else n
 stretchSize (e : Entry) : Nat := match e.evidence { Tested v -> spentOf v ; _ -> e.cases }
 inTheUnion (e : Entry) : Bool := match e.outcome { Passed -> true ; Unresolved r -> true ; _ -> false }
 -- the stretches of a law at a hash under a binding, each by its key and its size
-stretchesUnder (l : String) (h : Hash) (b : List Drawing) (es : List Entry) : List (Maybe Seed * Nat) :=
+stretchesUnder (l : String) (h : Hash) (b : List DrawnParameter) (es : List Entry) : List (Maybe Seed * Nat) :=
   map Entry (Maybe Seed * Nat) (fn (e : Entry) { (stretchKey e, stretchSize e) })
     (filter List Entry (fn (e : Entry) { e.law == l and e.cone == h and e.binding == b and inTheUnion e }) es)
 hasKey (k : Maybe Seed) (ps : List (Maybe Seed * Nat)) : Bool :=
@@ -369,7 +367,7 @@ sumOfLargest (seen : List (Maybe Seed)) (all ps : List (Maybe Seed * Nat)) : Nat
   match ps { nil -> 0 ; cons (k, n) rest ->
     if seenKey k seen then sumOfLargest seen all rest else largestAt k all 0 + sumOfLargest (cons k seen) all rest }
 -- the size of the union: each key once, at its largest
-pooledCases (c : Certificate) (b : List Drawing) : Nat :=
+pooledCases (c : Certificate) (b : List DrawnParameter) : Nat :=
   sumOfLargest nil (stretchesUnder c.law c.cone b c.entries) (stretchesUnder c.law c.cone b c.entries)
 -- one grade at most another, where `nothing` (no grade) is below every grade
 atMost (m n : Maybe Grade) : Bool :=
@@ -395,19 +393,19 @@ Region = { source : Source, name : String }
 grades (r : Region) : Bool := match r.source { Label -> false ; _ -> true }
 RegionEvidence = { region : Region, n : Nat }
 regionBound : RegionEvidence -> C
-BindingEvidence = { binding : List Drawing, regions : List RegionEvidence }
+BindingEvidence = { binding : List DrawnParameter, regions : List RegionEvidence }
 -- the cases of a region recorded under a binding, none when none is recorded
 casesIn (r : Region) (rs : List RegionEvidence) : Nat :=
   fold RegionEvidence Nat (fn m n { m + n }) 0 (fn (e : RegionEvidence) { if e.region == r then e.n else 0 }) rs
-casesAt (b : List Drawing) (r : Region) (ev : List BindingEvidence) : Nat :=
+casesAt (b : List DrawnParameter) (r : Region) (ev : List BindingEvidence) : Nat :=
   fold BindingEvidence Nat (fn m n { m + n }) 0 (fn (x : BindingEvidence) { if x.binding == b then casesIn r x.regions else 0 }) ev
 -- the evidence with a region's cases under a binding added, or removed (how the laws of §5 build
 -- the evidence they quantify over)
-withCases (b : List Drawing) (r : Region) (n : Nat) (ev : List BindingEvidence) : List BindingEvidence :=
+withCases (b : List DrawnParameter) (r : Region) (n : Nat) (ev : List BindingEvidence) : List BindingEvidence :=
   cons { binding := b, regions := [{ region := r, n := n }] } ev
 dropIn (r : Region) (rs : List RegionEvidence) : List RegionEvidence :=
   filter List RegionEvidence (fn (e : RegionEvidence) { not (e.region == r) }) rs
-dropCases (b : List Drawing) (r : Region) (ev : List BindingEvidence) : List BindingEvidence :=
+dropCases (b : List DrawnParameter) (r : Region) (ev : List BindingEvidence) : List BindingEvidence :=
   map BindingEvidence BindingEvidence (fn (x : BindingEvidence) { if x.binding == b then { binding := x.binding, regions := dropIn r x.regions } else x }) ev
 -- The law's regions, the second source: each cutoff parameter its two sides, each premise its
 -- boundary, named by the parameter as the law writes it. Which parameters are cutoffs
@@ -436,21 +434,21 @@ lawRegions (cutoffs premises : List String) : List Region := cutoffRegions cutof
 capped (m : Maybe Grade) : Maybe Grade := match m { nothing -> nothing ; just g -> just (weakest g Sampled) }
 orStrongest (m n : Maybe Grade) : Maybe Grade :=
   match m { nothing -> n ; just g -> (match n { nothing -> m ; just h -> just (stronger g h) }) }
-regionGrade (k : Certifying) (c : Certificate) (b : List Drawing) (r : Region) (ev : List BindingEvidence) : Maybe Grade :=
+regionGrade (k : Certifying) (c : Certificate) (b : List DrawnParameter) (r : Region) (ev : List BindingEvidence) : Maybe Grade :=
   if standsOnNothing k c then nothing
   else if casesAt b r ev == 0 then capped (k.grade (only b c)) else k.grade (only b c)
-overRegions (k : Certifying) (comb : Maybe Grade -> Maybe Grade -> Maybe Grade) (c : Certificate) (b : List Drawing)
+overRegions (k : Certifying) (comb : Maybe Grade -> Maybe Grade -> Maybe Grade) (c : Certificate) (b : List DrawnParameter)
             (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
   match rs { nil -> k.grade (only b c) ; cons r rest ->
     if grades r then comb (regionGrade k c b r ev) (overRegions k comb c b rest ev) else overRegions k comb c b rest ev }
 -- the bindings of the passes that count, each once, in the order of the entries
-bindingSeen (b : List Drawing) (bs : List (List Drawing)) : Bool := any List (List Drawing) (fn (x : List Drawing) { x == b }) bs
-bindingsFrom (c : Certificate) (es : List Entry) (seen : List (List Drawing)) : List (List Drawing) :=
+bindingSeen (b : List DrawnParameter) (bs : List (List DrawnParameter)) : Bool := any List (List DrawnParameter) (fn (x : List DrawnParameter) { x == b }) bs
+bindingsFrom (c : Certificate) (es : List Entry) (seen : List (List DrawnParameter)) : List (List DrawnParameter) :=
   match es { nil -> nil ; cons e rest ->
     if e.law == c.law and e.cone == c.cone and e.outcome == Passed and not (e.grade == nothing) and not (bindingSeen e.binding seen)
     then cons e.binding (bindingsFrom c rest (cons e.binding seen)) else bindingsFrom c rest seen }
-bindingsOf (c : Certificate) : List (List Drawing) := bindingsFrom c c.entries nil
-overBindings (k : Certifying) (comb : Maybe Grade -> Maybe Grade -> Maybe Grade) (c : Certificate) (bs : List (List Drawing))
+bindingsOf (c : Certificate) : List (List DrawnParameter) := bindingsFrom c c.entries nil
+overBindings (k : Certifying) (comb : Maybe Grade -> Maybe Grade -> Maybe Grade) (c : Certificate) (bs : List (List DrawnParameter))
              (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
   match bs { nil -> nothing ; cons b rest -> comb (overRegions k comb c b rs ev) (overBindings k comb c rest rs ev) }
 regionedGrade (k : Certifying) (comb : Maybe Grade -> Maybe Grade -> Maybe Grade) (c : Certificate) (rs : List Region)
@@ -501,8 +499,8 @@ along (k : Certifying) (b : Standing) (path : List (String * Standing)) : Maybe 
 -- assumptions, with no default). [proposed] The run gives each law its values by parameter name;
 -- values computed during the run are compared at each call under `--checked` (7.S15), not here.
 -- The cost cutoff of 6.S15 (a bound and an evidence cost in `C`) is the hole above.
-Demand = { law : String, cone : Hash, given : List (String * Value), accepts : Grade }
-withAccepts (d : Demand) (g : Grade) : Demand := { law := d.law, cone := d.cone, given := d.given, accepts := g }
+ConeDemand = { law : String, cone : Hash, given : List (String * Value), accepts : Grade }
+withAccepts (d : ConeDemand) (g : Grade) : ConeDemand := { law := d.law, cone := d.cone, given := d.given, accepts := g }
 
 -- the reach recorded for a parameter, and whether the reaches cover what the run gives
 -- [proposed: a value given to a parameter the entry records no reach for is not covered]
@@ -522,12 +520,12 @@ reshape (e : Entry) (l : String) (r : List ParameterReach) (o : Outcome) (g : Ma
     evidence := e.evidence, grade := g, outcome := o, date := e.date, interpreter := e.interpreter, hosts := e.hosts }
 withSupport (given : List (String * Value)) (rs : List ParameterReach) : List ParameterReach :=
   match given { nil -> rs ; cons (p, v) rest -> cons { parameter := p, reach := Support } (withSupport rest rs) }
-toward (d : Demand) (e : Entry) (o : Outcome) (g : Maybe Grade) : Entry := reshape e d.law (withSupport d.given e.reach) o g
+toward (d : ConeDemand) (e : Entry) (o : Outcome) (g : Maybe Grade) : Entry := reshape e d.law (withSupport d.given e.reach) o g
 
 -- The dependency cone of the entry of a run (6.S14, 12.S17): each name, whether it is provisional
 -- (4.R5), and the demands on its laws. A name whose type states no law is certified with nothing
 -- to run [proposed, 6.S1: certified when each law its type states has a passing entry].
-ConeName = { name : String, provisional : Bool, laws : List Demand }
+ConeName = { name : String, provisional : Bool, laws : List ConeDemand }
 Refusal = { name : String, law : Maybe String, state : State }
 -- the latest entry of a law, and the latest at a hash
 latestOf (l : String) (es : List Entry) : Maybe Entry :=
@@ -649,7 +647,7 @@ Certifying : {
   stale : Hash -> Entry -> Bool,
   grade : Certificate -> Maybe Grade,
   contains : Reach -> Value -> Bool,
-  serves : Demand -> Entry -> Bool,
+  serves : ConeDemand -> Entry -> Bool,
   refuse : List Entry -> List ConeName -> List Refusal,
   transport : Standing -> Link -> Maybe Standing,
 }
@@ -676,12 +674,12 @@ CurrentPass (c : Certificate) : U :=
   { e : Entry | e.law == c.law and e.cone == c.cone and e.outcome == Passed and not (e.grade == nothing) }
 CurrentFailure (c : Certificate) : U := { e : Entry | e.law == c.law and e.cone == c.cone and isFailure e.outcome }
 EntryOfLaw (l : String) : U := { e : Entry | e.law == l }
-EntryFor (d : Demand) : U := { e : Entry | e.law == d.law and e.cone == d.cone }
-FailureFor (d : Demand) : U := { e : Entry | e.law == d.law and e.cone == d.cone and isFailure e.outcome }
+EntryFor (d : ConeDemand) : U := { e : Entry | e.law == d.law and e.cone == d.cone }
+FailureFor (d : ConeDemand) : U := { e : Entry | e.law == d.law and e.cone == d.cone and isFailure e.outcome }
 -- a list of these read as a list of entries (the inclusion, element by element)
 passEntries (c : Certificate) (ps : List (CurrentPass c)) : List Entry := map (CurrentPass c) Entry (fn (e : CurrentPass c) { e }) ps
 withPasses (c : Certificate) (ps : List (CurrentPass c)) : Certificate := prepend (passEntries c ps) c
-entriesFor (d : Demand) (xs : List (EntryFor d)) : List Entry := map (EntryFor d) Entry (fn (e : EntryFor d) { e }) xs
+entriesFor (d : ConeDemand) (xs : List (EntryFor d)) : List Entry := map (EntryFor d) Entry (fn (e : EntryFor d) { e }) xs
 entriesOfLaw (l : String) (ys : List (EntryOfLaw l)) : List Entry := map (EntryOfLaw l) Entry (fn (e : EntryOfLaw l) { e }) ys
 
 -- §2. 6.S7, 7.S10: a certificate with no entry has no grade; a failure at the current hash
@@ -756,36 +754,36 @@ ReachesAsSets (k : Certifying) (x lo hi : Float64) (s : String) (vs : List Value
     and k.contains (Members vs) (Printed s) == any List Value (fn (w : Value) { w == Printed s }) vs
 -- 12.S11: a stale entry certifies nothing, drawn as a pass of the demand's law at the highest
 -- grade, covering what the demand gives, at a drawn hash
-StaleCertifiesNothing (k : Certifying) (d : Demand) (e : EntryOfLaw d.law) : Bool :=
+StaleCertifiesNothing (k : Certifying) (d : ConeDemand) (e : EntryOfLaw d.law) : Bool :=
   not (k.stale d.cone (toward d e Passed (just Proved))) or not (k.serves d (toward d e Passed (just Proved)))
 -- 6.S3: only a pass certifies, drawn as an entry of the demand's law at its hash, graded and
 -- covering, with any outcome
-OnlyAPassServes (k : Certifying) (d : Demand) (e : EntryFor d) : Bool :=
+OnlyAPassServes (k : Certifying) (d : ConeDemand) (e : EntryFor d) : Bool :=
   not (k.serves d (toward d e e.outcome (just Proved))) or e.outcome == Passed
 -- 7.S9, 7.S15: an entry certifies its law only under its binding, on the reach it drew, so it serves
 -- a run only when that reach covers what the run gives the law: for any entry, and for a pass of
 -- the demand's law at its hash with the reach it drew
-CertifiesOnlyUnderItsBinding (k : Certifying) (d : Demand) (e : Entry) (f : EntryFor d) : Bool :=
+CertifiesOnlyUnderItsBinding (k : Certifying) (d : ConeDemand) (e : Entry) (f : EntryFor d) : Bool :=
   (not (k.serves d e) or (e.law == d.law and coversAll k.contains e.reach d.given))
     and (not (k.serves d (reshape f d.law f.reach Passed (just Proved))) or coversAll k.contains f.reach d.given)
 -- 6.S15, D-2026-10-14-c: it serves only at or above the grade the demand accepts, drawn as a
 -- covering pass of the demand's law at its hash with the grade it drew
-ServesAtTheCutoff (k : Certifying) (d : Demand) (e : EntryFor d) : Bool :=
+ServesAtTheCutoff (k : Certifying) (d : ConeDemand) (e : EntryFor d) : Bool :=
   not (k.serves d (toward d e Passed e.grade)) or (match e.grade { just g -> gradeRank d.accepts <= gradeRank g ; nothing -> false })
 -- and an entry that meets all of these serves (6.S15: a certificate serves every demand it meets)
-ACoveringPassServes (k : Certifying) (d : Demand) (e : EntryFor d) (g : Grade) : Bool :=
+ACoveringPassServes (k : Certifying) (d : ConeDemand) (e : EntryFor d) (g : Grade) : Bool :=
   not (gradeRank d.accepts <= gradeRank g) or k.serves d (toward d e Passed (just g))
 -- 6.S5, D-2026-10-16-h (item 16): no cutoff accepts a failure, the top. Drawn as an entry of the
 -- demand's law at its hash, covering and graded proved, at every cutoff `g`: a failure serves none.
 -- Its control is a model whose weakest cutoff accepts a failure (tests/tester/cutoff_controls.test.lut).
-NoCutoffAcceptsAFailure (k : Certifying) (d : Demand) (e : EntryFor d) (g : Grade) : Bool :=
+NoCutoffAcceptsAFailure (k : Certifying) (d : ConeDemand) (e : EntryFor d) (g : Grade) : Bool :=
   not (isFailure e.outcome) or not (k.serves (withAccepts d g) (toward d e e.outcome (just Proved)))
 -- 6.S16: `serves` is monotone in the cutoff
-ServesIsMonotoneInTheCutoff (k : Certifying) (d : Demand) (e : EntryFor d) (g : Grade) : Bool :=
+ServesIsMonotoneInTheCutoff (k : Certifying) (d : ConeDemand) (e : EntryFor d) (g : Grade) : Bool :=
   not (k.serves d (toward d e Passed e.grade) and gradeRank g <= gradeRank d.accepts)
     or k.serves (withAccepts d g) (toward d e Passed e.grade)
 -- 6.S14, 12.S17: a provisional name is refused whole [proposed: its laws not listed]
-ProvisionalIsRefused (k : Certifying) (es : List Entry) (n : String) (ds : List Demand) : Bool :=
+ProvisionalIsRefused (k : Certifying) (es : List Entry) (n : String) (ds : List ConeDemand) : Bool :=
   k.refuse es [{ name := n, provisional := true, laws := ds }] == [{ name := n, law := nothing, state := Provisional }]
 -- 7.S15, 12.S17, 6.S3 [proposed, C5 of the round-1 review]: a disagreement at the current hash
 -- (D-2026-10-15-f) refuses the law whatever serves, listed with the first the store holds, its two
@@ -794,7 +792,7 @@ ProvisionalIsRefused (k : Certifying) (es : List Entry) (n : String) (ds : List 
 -- current hash, stale when there is none there, uncertified when there is none at all. The store is
 -- drawn with entries of the law at the current hash (`xs`) and at drawn hashes (`ys`) in front, so
 -- that each branch is met.
-RefusalSaysWhy (k : Certifying) (n : String) (d : Demand) (xs : List (EntryFor d)) (ys : List (EntryOfLaw d.law)) (es : List Entry) : Bool :=
+RefusalSaysWhy (k : Certifying) (n : String) (d : ConeDemand) (xs : List (EntryFor d)) (ys : List (EntryOfLaw d.law)) (es : List Entry) : Bool :=
   k.refuse (drawnStore d xs ys es) [{ name := n, provisional := false, laws := [d] }]
     == (match disputeAt k.identity d.law d.cone (drawnStore d xs ys es) {
          just (a, b) -> [{ name := n, law := just d.law, state := Disagrees a b }] ;
@@ -805,12 +803,12 @@ RefusalSaysWhy (k : Certifying) (n : String) (d : Demand) (xs : List (EntryFor d
                     state := (match latestAt d.law d.cone (drawnStore d xs ys es) { just e -> Current e.outcome ;
                                 nothing -> (match latestOf d.law (drawnStore d xs ys es) { just f -> Stale f.cone ;
                                                                                          nothing -> Uncertified }) }) }] }) })
-drawnStore (d : Demand) (xs : List (EntryFor d)) (ys : List (EntryOfLaw d.law)) (es : List Entry) : List Entry :=
+drawnStore (d : ConeDemand) (xs : List (EntryFor d)) (ys : List (EntryOfLaw d.law)) (es : List Entry) : List Entry :=
   entriesFor d xs <> entriesOfLaw d.law ys <> es
 -- [proposed, C5 of the round-1 review] whatever serves: a store with a failure at the current hash
 -- and, in front of it, a pass made to serve the demand refuses the law, listed with the failure
 -- (unless the store records a disagreement there, which is listed first, D-2026-10-15-f)
-ACurrentFailureIsRefused (k : Certifying) (n : String) (d : Demand) (f : FailureFor d) (p : EntryFor d) (es : List Entry) : Bool :=
+ACurrentFailureIsRefused (k : Certifying) (n : String) (d : ConeDemand) (f : FailureFor d) (p : EntryFor d) (es : List Entry) : Bool :=
   not (disputeAt k.identity d.law d.cone (cons (toward d p Passed (just Proved)) (cons f es)) == nothing)
     or k.refuse (cons (toward d p Passed (just Proved)) (cons f es)) [{ name := n, provisional := false, laws := [d] }]
          == [{ name := n, law := just d.law, state := Current f.outcome }]
@@ -820,12 +818,12 @@ ACurrentFailureIsRefused (k : Certifying) (n : String) (d : Demand) (f : Failure
 replayOf (e : Entry) (o : Outcome) (g : Maybe Grade) : Entry := reshape e e.law e.reach o g
 ADisagreementRefutes (k : Certifying) (c : Certificate) (e : EntryOf c) (o : Outcome) (g : Maybe Grade) (es : List Entry) : Bool :=
   agree (replayOf e o g) e or k.grade (withEntry (withEntry (prepend es c) e) (replayOf e o g)) == nothing
-ADisagreementIsRefused (k : Certifying) (n : String) (d : Demand) (e : EntryFor d) (o : Outcome) (g : Maybe Grade) (es : List Entry) : Bool :=
+ADisagreementIsRefused (k : Certifying) (n : String) (d : ConeDemand) (e : EntryFor d) (o : Outcome) (g : Maybe Grade) (es : List Entry) : Bool :=
   agree (replayOf e o g) e
     or k.refuse (cons (replayOf e o g) (cons e es)) [{ name := n, provisional := false, laws := [d] }]
          == [{ name := n, law := just d.law, state := Disagrees (replayOf e o g) e }]
 -- each name and each law is refused on its own, and a cone with nothing in it is refused nothing
-RefusalIsPerLaw (k : Certifying) (es : List Entry) (c : ConeName) (rest : List ConeName) (n : String) (d : Demand) (ds : List Demand) : Bool :=
+RefusalIsPerLaw (k : Certifying) (es : List Entry) (c : ConeName) (rest : List ConeName) (n : String) (d : ConeDemand) (ds : List ConeDemand) : Bool :=
   k.refuse es nil == nil
     and k.refuse es (cons c rest) == k.refuse es [c] <> k.refuse es rest
     and k.refuse es [{ name := n, provisional := false, laws := cons d ds }]
@@ -874,7 +872,7 @@ Recording (k : Certifying) := ANewIdentityGoesInFront k & AnAgreeingReplayAddsNo
 -- The law of the union (D-2026-10-16-g; L10.3, 7.S13): how many cases the union of a law's
 -- stretches under a binding counts. A model is a way of counting them; `pooledCases` (§2) is the
 -- reference, certification_model's `pooling`, and certify.py's `pooled` its specimen.
-Pooling (k : Certifying) : { pooled : Certificate -> List Drawing -> Nat }
+Pooling (k : Certifying) : { pooled : Certificate -> List DrawnParameter -> Nat }
 -- the grade of the union is monotone in the stretches: a pass whose seed (its key) the binding has
 -- no stretch of adds its cases to the union and, where no failure or disagreement stands, lowers
 -- no grade under its binding

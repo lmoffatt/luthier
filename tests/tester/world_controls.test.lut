@@ -13,38 +13,38 @@ import "generators.lth" Binding
 import "laws.lth" Listed
 import "term.lth" Term Var App
 import "world.lth" Console appendStr lineOf PrintAppendsALine PrintChangesOnlyStdout ReadGivesThePlace
-  ReadChangesNothing World Described OwnIsIdempotent ChangesOnlyDeclared Externs Route routeOf isProvisional settled
+  ReadChangesNothing ReadableWorld Described OwnIsIdempotent ChangesOnlyDeclared Externs Route routeOf isProvisional settled
   AppliedWhenSettled NoLawNoGrade ProvisionalIsAssumed IdentityCarriesHash Crossing
   CallbackGivesTheFunction CallsAreCounted RecordCrossesByField Host Observed Held held printDescription
   readFileDescription HostAgreesPrint HostAgreesReadFile HostObserveChangesNothing HostChangesOnlyDeclared
-import "world_model.lut" State console theWorld host
+import "world_model.lut" WorldState console theWorld host
 
-states : List Concrete := [State]
-blank : State := { stdout := "", files := nil }
-printed : State := { stdout := "one\n", files := nil }
-withFiles : State := { stdout := "", files := [("input.txt", "first\nsecond\n"), ("empty.txt", "")] }
-worlds : List State := [blank, printed, withFiles]
+states : List Concrete := [WorldState]
+blank : WorldState := { stdout := "", files := nil }
+printed : WorldState := { stdout := "one\n", files := nil }
+withFiles : WorldState := { stdout := "", files := [("input.txt", "first\nsecond\n"), ("empty.txt", "")] }
+worlds : List WorldState := [blank, printed, withFiles]
 lines : List String := ["", "hello, world", "two\nlines"]
 places : List String := ["stdout", "input.txt", "empty.txt", "other.txt"]
 
 -- print forgets the newline: the line is appended without its end
-noNewline : Console State := { world := theWorld,
+noNewline : Console WorldState := { world := theWorld,
   printLine := fn s st { ({ stdout := appendStr st.stdout s, files := st.files }, unit) },
   readFile := console.readFile, stdout := console.stdout }
 -- print clears the files as it writes the standard output
-dropsFiles : Console State := { world := theWorld,
+dropsFiles : Console WorldState := { world := theWorld,
   printLine := fn s st { ({ stdout := appendStr st.stdout (lineOf s), files := nil }, unit) },
   readFile := console.readFile, stdout := console.stdout }
 -- readFile always answers that there is no file
-readsNothing : Console State := { world := theWorld, printLine := console.printLine,
+readsNothing : Console WorldState := { world := theWorld, printLine := console.printLine,
   readFile := fn p st { (st, nothing) }, stdout := console.stdout }
 -- readFile gives the right answer but empties the standard output
-readClears : Console State := { world := theWorld, printLine := console.printLine,
+readClears : Console WorldState := { world := theWorld, printLine := console.printLine,
   readFile := fn p st { ({ stdout := "", files := st.files }, lookup List String String p st.files) }, stdout := console.stdout }
-noNewlines : List (Console State) := [noNewline]
-dropsFilesList : List (Console State) := [dropsFiles]
-readsNothingList : List (Console State) := [readsNothing]
-readClearsList : List (Console State) := [readClears]
+noNewlines : List (Console WorldState) := [noNewline]
+dropsFilesList : List (Console WorldState) := [dropsFiles]
+readsNothingList : List (Console WorldState) := [readsNothing]
+readClearsList : List (Console WorldState) := [readClears]
 
 bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
 onPrint (c : String) : List Binding := [bind "S" "states", bind "c" c, bind "st" "worlds", bind "s" "lines"]
@@ -75,17 +75,17 @@ test "ReadChangesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- on
 
 -- §1, §2 descriptions
 unitTypes : List U := [Unit]
-worldModels : List (World State) := [theWorld]
+worldModels : List (ReadableWorld WorldState) := [theWorld]
 -- the lock appended to, not set: a second write leaves two entries
-appendsLock : Described State Unit theWorld := {
+appendsLock : Described WorldState Unit theWorld := {
   describe := fn st { ({ stdout := st.stdout, files := cons ("luthier.lock", "pinned") st.files }, unit) },
   own := true, places := ["luthier.lock"] }
 -- print, declared at the standard output, also writes log.txt
-printLogs : Described State Unit theWorld := {
+printLogs : Described WorldState Unit theWorld := {
   describe := fn st { ({ stdout := appendStr st.stdout (lineOf "hello, world"), files := cons ("log.txt", "printed") st.files }, unit) },
   own := false, places := ["stdout"] }
-appendsLockList : List (Described State Unit theWorld) := [appendsLock]
-printLogsList : List (Described State Unit theWorld) := [printLogs]
+appendsLockList : List (Described WorldState Unit theWorld) := [appendsLock]
+printLogsList : List (Described WorldState Unit theWorld) := [printLogs]
 logPlaces : List String := ["stdout", "log.txt"]
 test "OwnIsIdempotent" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "A" "unitTypes",
   bind "m" "worldModels", bind "d" "appendsLockList", bind "s" "worlds"]) (control <- true)
@@ -195,25 +195,25 @@ test "RecordCrossesByField" ExhaustiveMode (seed <- 20261015) (whereBindings <- 
   bind "f" "intFunctions", bind "xs" "arguments"]) (control <- true)
 
 -- §5 the cases broken hosts gather
-listedHost : Host State := { console := console, observe := host.observe, print := host.print, readFile := host.readFile }
-hosts : List (Host State) := [listedHost]
+listedHost : Host WorldState := { console := console, observe := host.observe, print := host.print, readFile := host.readFile }
+hosts : List (Host WorldState) := [listedHost]
 maybeTypes : List U := [Maybe String]
 case (S A : U) (b : S) (x : A) (a : S) : Observed S A := { before := b, result := x, after := a }
-after (st : State) (out : String) : State := { stdout := out, files := st.files }
+after (st : WorldState) (out : String) : WorldState := { stdout := out, files := st.files }
 hello : List String := ["hello, world"]
 -- print forgets the newline
-noNewlineCases : List (Observed State Unit) := [case State Unit blank unit (after blank "hello, world")]
+noNewlineCases : List (Observed WorldState Unit) := [case WorldState Unit blank unit (after blank "hello, world")]
 input : List String := ["input.txt"]
 -- readFile finds nothing where the file is
-readsNothingCases : List (Observed State (Maybe String)) := [case State (Maybe String) withFiles nothing withFiles]
+readsNothingCases : List (Observed WorldState (Maybe String)) := [case WorldState (Maybe String) withFiles nothing withFiles]
 observed : List (List String) := [["stdout", "input.txt"]]
 -- the observation empties the standard output
-clearsCases : List (Observed State State) := [case State State printed printed blank]
+clearsCases : List (Observed WorldState WorldState) := [case WorldState WorldState printed printed blank]
 -- print also writes input.txt
-clobbered : State := { stdout := "hello, world\n", files := [("input.txt", "overwritten"), ("empty.txt", "")] }
-clobbersCases : List (Observed State Unit) := [case State Unit withFiles unit clobbered]
-helloHeld : List (Held State Unit theWorld) := [held State Unit theWorld (fn w { listedHost.print w "hello, world" })
-  (printDescription State console "hello, world")]
+clobbered : WorldState := { stdout := "hello, world\n", files := [("input.txt", "overwritten"), ("empty.txt", "")] }
+clobbersCases : List (Observed WorldState Unit) := [case WorldState Unit withFiles unit clobbered]
+helloHeld : List (Held WorldState Unit theWorld) := [held WorldState Unit theWorld (fn w { listedHost.print w "hello, world" })
+  (printDescription WorldState console "hello, world")]
 extras : List (List String) := [["stdout", "input.txt", "other.txt"]]
 test "HostAgreesPrint" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
   bind "s" "hello", bind "c" "noNewlineCases"]) (control <- true)

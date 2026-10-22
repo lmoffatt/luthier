@@ -23,13 +23,13 @@ import "plot.lth" Plot Canvas Mapping Drawing Margin plot table point line addLa
   auto palette FileExistsAfter FormatByExtension ImageOfTheValue RowOrderInvariant LayerOrderInvariant
   ImageSeesTheTitle
 import "world.lth" Persistence WriteThenRead WriteChangesOnlyItsPlace
-import "world_model.lut" State
+import "world_model.lut" WorldState
 import "plot_model.lut" matplotlibDrawing files
 import "plot_cases.lut" states plots again exts stems worlds tableNames obsTables perms margins positions titles paths
   contents bindTo
 
-drawings : List (Drawing State) := [matplotlibDrawing]
-stores : List (Persistence State) := [files]
+drawings : List (Drawing WorldState) := [matplotlibDrawing]
+stores : List (Persistence WorldState) := [files]
 
 onExists : List Binding := [bindTo "S" "states", bindTo "d" "drawings", bindTo "p" "plots", bindTo "stem" "stems",
   bindTo "ext" "exts", bindTo "st" "worlds"]

@@ -64,7 +64,7 @@ forwardPlan : Plan Nat := plan Nat eqNat ForwardOnDemand example "d"
 bothLinearize : Bool := LinearizesOn Nat eqNat example needPlan.live needPlan.schedule
   and LinearizesOn Nat eqNat example forwardPlan.live forwardPlan.schedule
 -- and a third linearization by hand, c before b, gives the same values (8.S5)
-agree : Bool := Confluent Nat eqNat example needPlan.live needPlan.schedule ["a", "c", "b", "d"]
+schedulesAgree : Bool := Confluent Nat eqNat example needPlan.live needPlan.schedule ["a", "c", "b", "d"]
   and EquivalentOn Nat eqNat example needPlan.live needPlan.schedule forwardPlan.schedule
 -- the schedule that computes d before what it reads is not a linearization (it gave d = 0)
 readersFirstRefused : Bool := not (LinearizesOn Nat eqNat example needPlan.live ["d", "b", "c", "a"])

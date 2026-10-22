@@ -48,7 +48,7 @@
 import "numbers.lth" Tolerance Positive within withinOf abs
 import "arrays.lth" Vec Mat VecOf MatOf Dim vec mat identity approxVec approxMat exact RankFloor
 import "arrays_model.lut" numpy : Arrays add sub scale dot norm matVec matMul madd mscale transpose pinvSym
-import "probability.lth" Likelihood Resolution IsGradient
+import "probability.lth" Likelihood StepResolution IsGradient
 
 -- ---------------------------------------------------------------- §1 Gaussian beliefs
 
@@ -92,7 +92,7 @@ MaxResult (n : Nat) = { x : VecOf n, converged : Bool }
 -- of an objective, so optimization.lth's `negate` was not total (summary-BCD.md, runner-up).
 -- Certified per posterior (7.R4).
 Posterior (n : Nat) : { logp : VecOf n -> Float64, score : VecOf n -> Vec Float64, info : VecOf n -> Mat Float64 }
-PosteriorScoreIsGradient (n : Nat) (p : Posterior n) (r : Resolution) (t v : VecOf n) : Bool := IsGradient n r p.logp p.score t v
+PosteriorScoreIsGradient (n : Nat) (p : Posterior n) (r : StepResolution) (t v : VecOf n) : Bool := IsGradient n r p.logp p.score t v
 PosteriorInfoSymmetric (n : Nat) (p : Posterior n) (tol : Tolerance) (t : VecOf n) : Bool := approxMat tol (p.info t) (transpose (p.info t))
 PosteriorInfoNonNegative (n : Nat) (p : Posterior n) (tol : Tolerance) (t v : VecOf n) : Bool :=
   { q := dot v (matVec (p.info t) v)

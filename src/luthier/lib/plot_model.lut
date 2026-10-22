@@ -33,19 +33,19 @@
 
 import "plot.lth" Drawing Renderer
 import "world.lth" Persistence
-import "world_model.lut" State theWorld
+import "world_model.lut" WorldState theWorld
 
 dropFile (fs : List (String * String)) (p : String) : List (String * String) :=
   filter List (String * String) (fn (f : String * String) { match f { (q, c) -> not (p == q) } }) fs
 
 -- the representation's store: a write puts the content at the path, first, and drops what was there
-files : Persistence State := {
+files : Persistence WorldState := {
   world := theWorld,
   write := fn st p c { { stdout := st.stdout, files := cons (p, c) (dropFile st.files p) } },
 }
 
 -- the description: the image and the format reader are the host's pure functions, routes to Python
-matplotlibDrawing : Drawing State := {
+matplotlibDrawing : Drawing WorldState := {
   store := files,
   formats := ["png", "svg"],
   rasters := ["png"],
@@ -54,7 +54,7 @@ matplotlibDrawing : Drawing State := {
 }
 
 -- the renderer: the drawing and the action, `render w p path`, a route to Python (G1)
-matplotlib : Renderer State := {
+matplotlib : Renderer WorldState := {
   drawing := matplotlibDrawing,
   render := extern "python:luthier.plots.render",
 }

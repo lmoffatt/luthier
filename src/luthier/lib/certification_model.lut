@@ -28,9 +28,9 @@
 -- weakest (5.S8's default), the reference model of `Regioning`; `deriving` is the theory's
 -- `lawRegions`, the reference model of `Deriving`.
 
-import "certification.lth" Certifying ConeHashing Erasure eraseBinders Store Entry Identity Certificate Demand ConeName Refusal
+import "certification.lth" Certifying ConeHashing Erasure eraseBinders Store Entry Identity Certificate ConeDemand ConeName Refusal
   Standing Link ParameterReach Reach Value Hash Support Interval Members Number Printed Passed Failed State Current Stale
-  Uncertified Provisional Disagrees Drawing stronger reachOf coversAll latestOf latestAt failureAt
+  Uncertified Provisional Disagrees DrawnParameter stronger reachOf coversAll latestOf latestAt failureAt
   disputeAt Recording recordEntry Pooling pooledCases Regioning regionedGrade orWeakest Deriving lawRegions
 import "test.lth" Grade gradeRank weakest
 import "term_model.lut" alpha canonical substitute stepper
@@ -39,14 +39,14 @@ import "term_model.lut" alpha canonical substitute stepper
 emptyStore : Store certifying := nil
 
 -- 7.S9, 7.S13: the identity of an outcome
-identity (e : Entry) : Identity := { law := e.law, cone := e.cone, binding := e.binding, seed := e.seed, cases := e.cases,
+entryIdentity (e : Entry) : Identity := { law := e.law, cone := e.cone, binding := e.binding, seed := e.seed, cases := e.cases,
                                      conjunct := e.conjunct }
 
 -- 12.S11: stale against the current hash of the cone
 stale (h : Hash) (e : Entry) : Bool := not (e.cone == h)
 
 -- 7.S10, 7.S15: a reach as a set of values
-contains (r : Reach) (v : Value) : Bool := match r {
+reachContains (r : Reach) (v : Value) : Bool := match r {
   Support -> true ;
   Interval lo hi -> (match v { Number x -> lo <= x and x <= hi ; Printed s -> false }) ;
   Members vs -> any List Value (fn (w : Value) { w == v }) vs }
@@ -55,47 +55,47 @@ contains (r : Reach) (v : Value) : Bool := match r {
 -- hash; a failure among them, or a disagreement (D-2026-10-15-f), leaves no grade; under one
 -- binding the strongest pass, across bindings the weakest.
 counts (c : Certificate) (e : Entry) : Bool := e.law == c.law and e.cone == c.cone
-anyFailure (c : Certificate) (es : List Entry) : Bool := any List Entry (fn (e : Entry) { counts c e and isFailure e }) es
-isFailure (e : Entry) : Bool := match e.outcome { Failed x -> true ; _ -> false }
+anyFailure (c : Certificate) (es : List Entry) : Bool := any List Entry (fn (e : Entry) { counts c e and entryFailed e }) es
+entryFailed (e : Entry) : Bool := match e.outcome { Failed x -> true ; _ -> false }
 -- the passes that count, each with its grade
-passes (c : Certificate) (es : List Entry) : List (List Drawing * Grade) :=
+passes (c : Certificate) (es : List Entry) : List (List DrawnParameter * Grade) :=
   match es { nil -> nil ; cons e rest ->
     if counts c e and e.outcome == Passed
     then (match e.grade { just g -> cons (e.binding, g) (passes c rest) ; nothing -> passes c rest })
     else passes c rest }
 -- the strongest grade under one binding
-bestUnder (b : List Drawing) (ps : List (List Drawing * Grade)) (g : Grade) : Grade :=
+bestUnder (b : List DrawnParameter) (ps : List (List DrawnParameter * Grade)) (g : Grade) : Grade :=
   match ps { nil -> g ; cons (b2, h) rest -> bestUnder b rest (if b2 == b then stronger g h else g) }
 -- the weakest of the bindings' bests
-weakestOfBests (all ps : List (List Drawing * Grade)) (acc : Maybe Grade) : Maybe Grade :=
+weakestOfBests (all ps : List (List DrawnParameter * Grade)) (acc : Maybe Grade) : Maybe Grade :=
   match ps { nil -> acc ; cons (b, g) rest ->
     weakestOfBests all rest (just (match acc { nothing -> bestUnder b all g ; just h -> weakest h (bestUnder b all g) })) }
-disputed (c : Certificate) : Bool := match disputeAt identity c.law c.cone c.entries { just p -> true ; nothing -> false }
-grade (c : Certificate) : Maybe Grade :=
-  if anyFailure c c.entries or disputed c then nothing else weakestOfBests (passes c c.entries) (passes c c.entries) nothing
+certificateDisputed (c : Certificate) : Bool := match disputeAt entryIdentity c.law c.cone c.entries { just p -> true ; nothing -> false }
+certificateGrade (c : Certificate) : Maybe Grade :=
+  if anyFailure c c.entries or certificateDisputed c then nothing else weakestOfBests (passes c c.entries) (passes c c.entries) nothing
 
 -- 6.S15, 7.S15: an entry serves a demand when it is the law's at the current hash, passed, at or
 -- above the cutoff, and its reach covers what the run gives
 atLeast (accepts : Grade) (g : Maybe Grade) : Bool := match g { just h -> gradeRank accepts <= gradeRank h ; nothing -> false }
-serves (d : Demand) (e : Entry) : Bool :=
+serves (d : ConeDemand) (e : Entry) : Bool :=
   e.law == d.law and e.cone == d.cone and e.outcome == Passed and atLeast d.accepts e.grade
-    and coversAll contains e.reach d.given
+    and coversAll reachContains e.reach d.given
 
 -- 6.S14, 7.S15, 12.S17, 6.S3: what a cone is refused, each with its state; a law with a
 -- disagreement at the current hash is refused whatever serves, with the first the store holds
 -- (D-2026-10-15-f); else a law with a failure there, with the latest such failure as its state
-stateOf (d : Demand) (es : List Entry) : State :=
+stateOf (d : ConeDemand) (es : List Entry) : State :=
   match latestAt d.law d.cone es { just e -> Current e.outcome ;
     nothing -> (match latestOf d.law es { just f -> Stale f.cone ; nothing -> Uncertified }) }
-refuseLaw (es : List Entry) (n : String) (d : Demand) : List Refusal :=
-  match disputeAt identity d.law d.cone es {
+refuseLaw (es : List Entry) (n : String) (d : ConeDemand) : List Refusal :=
+  match disputeAt entryIdentity d.law d.cone es {
     just (a, b) -> [{ name := n, law := just d.law, state := Disagrees a b }] ;
     nothing -> (match failureAt d.law d.cone es {
       just f -> [{ name := n, law := just d.law, state := Current f.outcome }] ;
       nothing -> if any List Entry (fn (e : Entry) { serves d e }) es then nil
                  else [{ name := n, law := just d.law, state := stateOf d es }] }) }
-refuseLaws (es : List Entry) (n : String) (ds : List Demand) : List Refusal :=
-  concat Refusal (map Demand (List Refusal) (refuseLaw es n) ds)
+refuseLaws (es : List Entry) (n : String) (ds : List ConeDemand) : List Refusal :=
+  concat Refusal (map ConeDemand (List Refusal) (refuseLaw es n) ds)
 refuseName (es : List Entry) (c : ConeName) : List Refusal :=
   if c.provisional then [{ name := c.name, law := nothing, state := Provisional }] else refuseLaws es c.name c.laws
 refuse (es : List Entry) (cs : List ConeName) : List Refusal :=
@@ -103,9 +103,7 @@ refuse (es : List Entry) (cs : List ConeName) : List Refusal :=
 
 -- 6.S11: transport along a Boolean identity: the intersection of the reaches, the weaker grade, and
 -- only along a link from the law carried (C7 of the round-1 review)
-larger (x y : Float64) : Float64 := if x <= y then y else x
-smaller (x y : Float64) : Float64 := if x <= y then x else y
-keepWithin (r : Reach) (vs : List Value) : List Value := filter List Value (contains r) vs
+keepWithin (r : Reach) (vs : List Value) : List Value := filter List Value (reachContains r) vs
 meet (r s : Reach) : Reach := match r {
   Support -> s ;
   Interval lo hi -> (match s { Support -> r ; Interval lo2 hi2 -> Interval (larger lo lo2) (smaller hi hi2) ;
@@ -120,7 +118,7 @@ transport (b : Standing) (l : Link) : Maybe Standing :=
   else nothing
 
 certifying : Certifying := {
-  identity := identity, stale := stale, grade := grade, contains := contains, serves := serves,
+  identity := entryIdentity, stale := stale, grade := certificateGrade, contains := reachContains, serves := serves,
   refuse := refuse, transport := transport,
 }
 

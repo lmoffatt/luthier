@@ -729,17 +729,17 @@ def _mentions(value, names):
 # choice 8 and "Findings for others"), with the files that define them, and a file that uses each
 # meaning. Since 993f200 generators.lth's theory is `Enumeration` and since aef8d2c test.lth's
 # grade is `AssumedGrade`, so those two are no longer clashes; `LeqBoth` is gone from numbers.lth
-# (4a158b0), and `LeqPair`, `LeqChain` from numbers.lth and algebra.lth (the core's bite 8, which
+# (4a158b0), `NonNegative` of generators.lth is `SupportNonNegative` (core bite 13b), and `LeqPair`, `LeqChain` from numbers.lth and algebra.lth (the core's bite 8, which
 # states their laws by the core's `Related` and `Chain`).
 CLASHES = {
-    "NonNegative": ("generators.lth", "numbers.lth"),
+    "Unresolved": ("laws.lth", "certification.lth"),
 }
 SEEN_FROM = {}
 
 
 @pytest.fixture(scope="module")
 def numbers_laws():
-    return Loaded(ROOT / "tests" / "tester" / "numbers_laws.test.lut")
+    return Loaded(ROOT / "tests" / "tester" / "certification_laws.test.lut")
 
 
 @pytest.mark.parametrize("name", CLASHES)

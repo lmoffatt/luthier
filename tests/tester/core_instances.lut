@@ -46,21 +46,21 @@ parity : Int -> Int -> Bool := fn a b { a mod 2 == b mod 2 }
 plus : Int -> Int -> Int := fn a b { a + b }
 minus : Int -> Int -> Int := fn a b { a - b }
 times : Int -> Int -> Int := fn a b { a * b }
-smaller : Int -> Int -> Int := fn a b { if a <= b then a else b }
-larger : Int -> Int -> Int := fn a b { if a <= b then b else a }
+smallerInt : Int -> Int -> Int := fn a b { if a <= b then a else b }
+largerInt : Int -> Int -> Int := fn a b { if a <= b then b else a }
 -- the projections: `second` is left-neutral for every element and `first` right-neutral
-first : Int -> Int -> Int := fn a b { a }
+firstInt : Int -> Int -> Int := fn a b { a }
 second : Int -> Int -> Int := fn a b { b }
 zero : Int := 0
 intOne : Int := 1
 
 -- functions on Int
-identity : Int -> Int := id Int
+identityInt : Int -> Int := id Int
 negate : Int -> Int := fn x { 0 - x }
 succ : Int -> Int := fn x { x + 1 }
 pred : Int -> Int := fn x { x - 1 }
 double : Int -> Int := fn x { x * 2 }
-square : Int -> Int := fn x { x * x }
+squareInt : Int -> Int := fn x { x * x }
 clamp : Int -> Int := fn x { if x < 0 then 0 else x }
 timesZero : Int -> Int := fn x { x * 0 }
 remainder2 : Int -> Int := fn x { x mod 2 }
@@ -98,12 +98,12 @@ fclamp : Float64 -> Float64 := fn x { if x < 0.0 then 0.0 else x }
 tenth : Float64 -> Float64 := fn x { x * 0.1 }
 byTen : Float64 -> Float64 := fn x { x / 10.0 }
 absolute : Float64 -> Float64 := fn x { if x < 0.0 then 0.0 - x else x }
-absDistance : Float64 -> Float64 -> Float64 := fn a b { absolute (a - b) }
+absDistanceFloat : Float64 -> Float64 -> Float64 := fn a b { absolute (a - b) }
 unitRoundoff : Float64 := 1.0 / 9007199254740992.0
-gamma2 : Float64 := 2.0 * unitRoundoff / (1.0 - 2.0 * unitRoundoff)
-sumBound : Float64 -> Float64 -> Float64 -> Float64 := fn x y z { 3.0 * gamma2 * (absolute x + absolute y + absolute z) }
-productBound : Float64 -> Float64 -> Float64 -> Float64 := fn x y z { 3.0 * gamma2 * absolute x * (absolute y + absolute z) }
-scaleBound : Float64 -> Float64 := fn x { gamma2 * absolute x }
+gamma2Float : Float64 := 2.0 * unitRoundoff / (1.0 - 2.0 * unitRoundoff)
+sumBound : Float64 -> Float64 -> Float64 -> Float64 := fn x y z { 3.0 * gamma2Float * (absolute x + absolute y + absolute z) }
+productBound : Float64 -> Float64 -> Float64 -> Float64 := fn x y z { 3.0 * gamma2Float * absolute x * (absolute y + absolute z) }
+scaleBound : Float64 -> Float64 := fn x { gamma2Float * absolute x }
 noBound1 : Float64 -> Float64 := fn x { 0.0 }
 noBound2 : Float64 -> Float64 -> Float64 := fn x y { 0.0 }
 noBound3 : Float64 -> Float64 -> Float64 -> Float64 := fn x y z { 0.0 }

@@ -63,7 +63,7 @@ import "laws.lth" Law Statistical StatisticalLaw Sequential byPValue
 -- and the tolerance of the comparison. Both are the demand's (P11, 11.S18): v0.1 held
 -- `fdStep := cbrt eps` and `fdTol := sqrt eps` as constants (array.lut:181-182), the truncation
 -- and the rounding of the difference being each of order eps^(2/3) at that step.
-Resolution : U := { step : Float64, tol : Tolerance | 0.0 < step and 0.0 <= tol }
+StepResolution : U := { step : Float64, tol : Tolerance | 0.0 < step and 0.0 <= tol }
 
 -- g is the gradient of f at t: g t is a vector of the dimension, and along a drawn direction v
 -- the central difference of f at the resolution's step is the inner product of g t with the unit
@@ -72,7 +72,7 @@ Resolution : U := { step : Float64, tol : Tolerance | 0.0 < step and 0.0 <= tol 
 -- as `IsJacobian`'s is: v0.1 measured along g t itself, which a zero gradient passes for every f
 -- (record/IA/layer-3-review-2026-10-15/summary-BCD.md, item 1).
 -- spec 7.R2
-IsGradient (n : Nat) (r : Resolution) (f : VecOf n -> Float64) (g : VecOf n -> Vec Float64) (t v : VecOf n) : Bool :=
+IsGradient (n : Nat) (r : StepResolution) (f : VecOf n -> Float64) (g : VecOf n -> Vec Float64) (t v : VecOf n) : Bool :=
   { gt := g t
     nv := norm v
     if gt.n /= n then false
@@ -84,7 +84,7 @@ IsGradient (n : Nat) (r : Resolution) (f : VecOf n -> Float64) (g : VecOf n -> V
 
 -- j is the Jacobian of m at t: along a drawn direction v, the central difference of m at the
 -- resolution's step is j t applied to the unit vector of v, entry by entry within the tolerance
-IsJacobian (n : Nat) (r : Resolution) (m : VecOf n -> Vec Float64) (j : VecOf n -> Mat Float64) (t v : VecOf n) : Bool :=
+IsJacobian (n : Nat) (r : StepResolution) (m : VecOf n -> Vec Float64) (j : VecOf n -> Mat Float64) (t v : VecOf n) : Bool :=
   { nv := norm v
     if nv == 0.0 then true
     else {
@@ -101,7 +101,7 @@ MeanModel (n : Nat) : { k : Nat, mean : VecOf n -> Vec Float64, jac : VecOf n ->
 -- spec 7.R2: the shapes are the model's, and the Jacobian is the derivative of the mean
 MeanShape (n : Nat) (m : MeanModel n) (t : VecOf n) : Bool := (m.mean t).n == m.k
 JacShape (n : Nat) (m : MeanModel n) (t : VecOf n) : Bool := (m.jac t).m == m.k and (m.jac t).n == n
-JacIsJacobian (n : Nat) (m : MeanModel n) (r : Resolution) (t v : VecOf n) : Bool := IsJacobian n r m.mean m.jac t v
+JacIsJacobian (n : Nat) (m : MeanModel n) (r : StepResolution) (t v : VecOf n) : Bool := IsJacobian n r m.mean m.jac t v
 MeanModel (n : Nat) := MeanShape n & JacShape n & JacIsJacobian n
 
 -- A scaled model: a mean model whose parameter also carries u = log sigma, a homogeneous error,
@@ -109,7 +109,7 @@ MeanModel (n : Nat) := MeanShape n & JacShape n & JacIsJacobian n
 -- probability.lut:283-286)
 ScaledModel (n : Nat) : { model : MeanModel n, logSigma : VecOf n -> Float64, dLogSigma : VecOf n -> Vec Float64 }
 ScaledShapes (n : Nat) (m : ScaledModel n) (t : VecOf n) : Bool := (m.dLogSigma t).n == n and (m.model.mean t).n == m.model.k
-DLogSigmaIsGradient (n : Nat) (m : ScaledModel n) (r : Resolution) (t v : VecOf n) : Bool := IsGradient n r m.logSigma m.dLogSigma t v
+DLogSigmaIsGradient (n : Nat) (m : ScaledModel n) (r : StepResolution) (t v : VecOf n) : Bool := IsGradient n r m.logSigma m.dLogSigma t v
 ScaledModel (n : Nat) := ScaledShapes n & DLogSigmaIsGradient n
 
 -- ---------------------------------------------------------------- §3 What a likelihood is
@@ -130,7 +130,7 @@ Likelihood (n : Nat) : {
 TangentShapes (n : Nat) (l : Likelihood n) (y : VecOf l.k) (t : VecOf n) : Bool :=
   y.n == l.k and (l.score y t).n == n and (l.info y t).m == n and (l.info y t).n == n
 -- the score is the gradient of the log-likelihood (v0.1 probability.lut:146-147)
-ScoreIsGradient (n : Nat) (l : Likelihood n) (r : Resolution) (y : VecOf l.k) (t v : VecOf n) : Bool :=
+ScoreIsGradient (n : Nat) (l : Likelihood n) (r : StepResolution) (y : VecOf l.k) (t v : VecOf n) : Bool :=
   IsGradient n r (l.loglik y) (l.score y) t v
 -- the information reported is a Fisher information: symmetric within the tolerance, and its
 -- quadratic form on a drawn direction is not negative beyond rounding (v0.1 probability.lut:155-156
@@ -252,7 +252,6 @@ valueSums (vs : List (Vec Float64)) : Float64 * Float64 * Int :=
 -- maximum (execution.md section 5.2: `pooled`, `entriesOnto`, `sortedValues`, `insertSortedValue`,
 -- `lengthOf`, `reverseOnto` gone). A vector's entries are `Vec`'s `fold` into a list: the core's
 -- `toList Vec` does not find `VecIsFoldable` (it takes the vector for the model; report-bite-12b.md).
-larger (a b : Float64) : Float64 := if a > b then a else b
 vecEntries (v : Vec Float64) : List Float64 := fold Float64 (List Float64) (fn a b { a <> b }) nil (fn x { singleton Float64 x }) v
 kolmogorovDistanceDef (vs : List (Vec Float64)) : Float64 :=
   { us := sortBy Float64 (fn a b { a <= b }) (concat Float64 (map vecEntries vs))
@@ -300,7 +299,7 @@ kolmogorovTail (x : Float64) : Float64 :=
 
 -- the tail probability of the distance of n values, with Stephens's correction: the p-value of
 -- the values against the uniform on [0, 1]; one on no values
-uniformPValue (d : Kolmogorov) (vs : List (Vec Float64)) : Float64 :=
+kolmogorovPValue (d : Kolmogorov) (vs : List (Vec Float64)) : Float64 :=
   match valueSums vs { (s1, s2, count) ->
     if count < 1 then 1.0
     else { q := elementary.sqrt (toFloat64 count)
@@ -316,7 +315,7 @@ uniformPValue (d : Kolmogorov) (vs : List (Vec Float64)) : Float64 :=
 -- quantified over seeds (the review of layer 3, summary-BCD.md item 3: the Bool form at a level
 -- refuted a correct source on 100 seeds with probability 0.994). The control with no host is
 -- probability_model.lut's `lump` (L9.14).
-uniformValues (d : Kolmogorov) : StatisticalLaw UnitList := byPValue UnitList (fn vs { uniformPValue d vs })
+uniformValues (d : Kolmogorov) : StatisticalLaw UnitList := byPValue UnitList (fn vs { kolmogorovPValue d vs })
 SourceIsUniform (d : Kolmogorov) (source : Gen UnitList) (c : Sequential) : Law :=
   Statistical UnitList Seed (uniformValues d) source c
 

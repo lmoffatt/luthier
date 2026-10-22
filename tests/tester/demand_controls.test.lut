@@ -13,19 +13,19 @@ import "generators.lth" Binding
 import "laws.lth" Listed Cited
 import "certification.lth" Certifying Entry Hash Outcome Passed Failed
 import "certification_model.lut" certifying
-import "demand.lth" Demand LawDemand Record Stored Store recorded OneIdentityOneResult NoPriceRefusesAssumed LoweringLosesNothing
+import "demand.lth" Demand LawDemand RunRecord Stored RunStore recorded OneIdentityOneResult NoPriceRefusesAssumed LoweringLosesNothing
   Ran RanIsASpecimenOfTheAsked Strategy ForwardOnDemand CallByNeed
 import "demand_model.lut" theDemand
 
-eqRecord (a b : Record) : Bool := a == b
-keyTypes : List U := [Record]
-keyEqs : List (Record -> Record -> Bool) := [eqRecord]
-first : Record := recorded (theDemand (entry <- "main")) "sha256:aaaa"
-other : Record := recorded (theDemand (entry <- "other")) "sha256:bbbb"
-run (k : Record) (r : String) : Stored Record := { key := k, result := r }
+eqRecord (a b : RunRecord) : Bool := a == b
+keyTypes : List U := [RunRecord]
+keyEqs : List (RunRecord -> RunRecord -> Bool) := [eqRecord]
+first : RunRecord := recorded (theDemand (entry <- "main")) "sha256:aaaa"
+other : RunRecord := recorded (theDemand (entry <- "other")) "sha256:bbbb"
+run (k : RunRecord) (r : String) : Stored RunRecord := { key := k, result := r }
 -- one identity, two results
-twoResults : Store Record eqRecord := { runs := [run first "1", run other "3", run first "2"] }
-brokenStores : List (Store Record eqRecord) := [twoResults]
+twoResults : RunStore RunRecord eqRecord := { runs := [run first "1", run other "3", run first "2"] }
+brokenStores : List (RunStore RunRecord eqRecord) := [twoResults]
 
 sampledDemand : Demand := theDemand (entry <- "main")
 assumedDemand : Demand := theDemand (entry <- "main") (accepts <- AssumedGrade)

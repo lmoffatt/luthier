@@ -32,7 +32,7 @@ import "numbers.lth" Tolerance Doubles Elementary within abs
 import "numbers_model.lut" doubles : Doubles elementary : Elementary
 import "arrays.lth" Vec Mat VecOf vec mat approxVec approxMat frobDef
 import "arrays_model.lut" numpy : Arrays sub dot norm
-import "probability.lth" MeanModel ScaledModel Likelihood Resolution gaussian profiled
+import "probability.lth" MeanModel ScaledModel Likelihood StepResolution gaussian profiled
 import "positions.lut" PositionsOf PairsAmong Design
 import "positions_model.lut" positionsModel
 
@@ -110,7 +110,7 @@ TestedFull = ScaledPositionsWithin freeDim positionBox (elementary.log sigmaLow)
 -- whose truncation, of order (step / sigma)^2, is below 1e-6 for the sigmas of the tape (sigmaLow
 -- and up). The step is the cube root of doubles.epsilon, written as its value: the elementary
 -- functions of numbers.lth have no cube root.
-pitResolution : Resolution := { step := 6.055454452393343e-06, tol := 1e-6 }
+pitResolution : StepResolution := { step := 6.055454452393343e-06, tol := 1e-6 }
 
 posModel : MeanModel freeDim := { k := nPairs, mean := fn t { meanDist t }, jac := fn t { jacDist t } }
 fullModel : ScaledModel (freeDim + 1) := {
