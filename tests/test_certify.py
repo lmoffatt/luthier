@@ -1189,7 +1189,7 @@ def _pooled_law(tmp_path, text=POOLED):
 def test_two_stretches_of_100_cases_with_different_seeds_give_a_grade_over_200(tmp_path):
     path, (one, two), entries = _pooled_law(tmp_path)
     assert [e["cases"] for e in entries] == [100, 100] and {e["seed"] for e in entries} == {1, 2}
-    binding = entries[0]["binding"]
+    binding = certify.union_key(entries[0])  # the binding with its sampling budgets (bite 13c)
     assert certify.pooled(entries, "IntPlusCommutes", one.cone, binding) == 200
     assert certify.certificate_grade(entries, "IntPlusCommutes", one.cone) == "Sampled"
     assert dict(certify.standings(path))["IntPlusCommutes"] == "sampled; pooled over seeds 1, 2: 200 cases in all"
@@ -1200,7 +1200,7 @@ def test_two_stretches_of_100_cases_with_different_seeds_give_a_grade_over_200(t
 
 def test_a_replayed_seed_does_not_double_n(tmp_path):
     path, (one, _), entries = _pooled_law(tmp_path)
-    law, binding = "IntPlusCommutes", entries[0]["binding"]
+    law, binding = "IntPlusCommutes", certify.union_key(entries[0])
     stored = certify.store_path(path).read_text()
     # an agreeing replay is absorbed by the store (Recording), and counted once if it were kept
     tester.run_tests(path, store=True, deep=True)
@@ -1257,7 +1257,7 @@ def test_the_budget_bounds_the_test_across_stretches_and_a_larger_one_continues_
     # the union is one test whatever the budgets: its key leaves the cutoffs out
     entries = certify.read_store(path)
     key = certify.union_key(third.entry)
-    assert key == certify.union_key(first.entry) and [d["parameter"] for d in key] == ["p"]
+    assert key == certify.union_key(first.entry) and [d["parameter"] for d in key if "parameter" in d] == ["p"]
     assert certify.pooled(entries, "Constant", third.cone, key) == 7
     assert certify.standing(entries, "Constant", third.cone).endswith("; pooled over seeds 5, 6, 7: 7 samples in all")
     # a replay starts where its seed's stretch started: the same outcomes, nothing written
