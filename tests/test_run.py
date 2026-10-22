@@ -739,12 +739,17 @@ SEEN_FROM = {}
 
 @pytest.fixture(scope="module")
 def numbers_laws():
+    return Loaded(ROOT / "tests" / "tester" / "numbers_laws.test.lut")
+
+
+@pytest.fixture(scope="module")
+def certification_laws():
     return Loaded(ROOT / "tests" / "tester" / "certification_laws.test.lut")
 
 
 @pytest.mark.parametrize("name", CLASHES)
-def test_a_name_several_libraries_define_does_not_collide(numbers_laws, name):
-    loaded, files = numbers_laws, CLASHES[name]
+def test_a_name_several_libraries_define_does_not_collide(certification_laws, name):
+    loaded, files = certification_laws, CLASHES[name]
     own = {f: loaded.internal((LIB / f).resolve(), name) for f in files}
     assert len(set(own.values())) == len(files), own
     every = set(own.values())
@@ -1240,15 +1245,15 @@ import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed
 import "world.lth" Host Observed HostAgreesPrint
-import "world_model.lut" State
+import "world_model.lut" WorldState
 import "first_action_models.lut" honest
 bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
-Key = State
+Key = WorldState
 states : List Concrete := [Key]
-hosts : List (Host State) := [honest]
+hosts : List (Host WorldState) := [honest]
 once : List String := ["once"]
-blank : State := { stdout := "", files := nil }
-cases : List (Observed State Unit) := [{ before := blank, result := unit, after := { stdout := "once\\n", files := nil } }]
+blank : WorldState := { stdout := "", files := nil }
+cases : List (Observed WorldState Unit) := [{ before := blank, result := unit, after := { stdout := "once\\n", files := nil } }]
 test "HostAgreesPrint" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
   bind "s" "once", bind "c" "cases"])
 """
@@ -1416,7 +1421,7 @@ def test_the_example_plans_linearize_and_agree():
     # linearization by hand give every live name one value
     model = LIB / "plan_model.lut"
     assert _evaluate(model, "bothLinearize") == "true"
-    assert _evaluate(model, "agree") == "true"
+    assert _evaluate(model, "schedulesAgree") == "true"
     a_b_c_d = 'cons "a" (cons "b" (cons "c" (cons "d" nil)))'
     assert _evaluate(model, "needPlan", "schedule") == _evaluate(model, "forwardPlan", "schedule") == a_b_c_d
 

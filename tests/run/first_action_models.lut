@@ -6,22 +6,22 @@
 -- `printLine`, which world.lth's `printDescription` holds it to, says once. test_run.py copies this
 -- file beside the programs into a scratch directory, where its store is written.
 import "world.lth" Host
-import "world_model.lut" State console
+import "world_model.lut" WorldState console
 
-honest : Host State := {
+honest : Host WorldState := {
   console := console,
   observe := extern "python:luthier.host.observe",
   print := extern "python:luthier.host.print_line",
   readFile := extern "python:luthier.host.read_file",
 }
-liar : Host State := {
+liar : Host WorldState := {
   console := console,
   observe := extern "python:luthier.host.observe",
   print := extern "python:run.lying_host.print_twice",
   readFile := extern "python:luthier.host.read_file",
 }
 -- `noisy`'s readFile also prints a line: refused by the frame law, at the standard output's place
-noisy : Host State := {
+noisy : Host WorldState := {
   console := console,
   observe := extern "python:luthier.host.observe",
   print := extern "python:luthier.host.print_line",

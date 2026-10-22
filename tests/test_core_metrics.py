@@ -67,10 +67,10 @@ def test_unclaimed(tmp_path):
 def test_loose_real_and_the_rest(tmp_path):
     m = fixture(tmp_path)
     assert sorted(x.split(": ")[1] for x in m["loose_real"]) == ["allEven", "double"]
-    assert sorted(x.split(": ")[1] for x in m["loose_rest"]) == ["lawA", "size"]
+    assert sorted(x.split(": ")[1] for x in m["loose_rest"]) == ["size"]  # lawA is named by its file's theory, which check no longer reports (core bite 13b)
 
 
 def test_command_prints_the_counts(tmp_path):
     fixture(tmp_path)
     out = subprocess.run([sys.executable, str(SCRIPT), str(tmp_path / "a.lth")], capture_output=True, text=True, check=True).stdout
-    assert [l.split(" (")[0] for l in out.splitlines()] == ["homonyms 0", "executive names shadowing 0", "list helpers 0", "unclaimed 1", "loose 2"]
+    assert [l.split(" (")[0] for l in out.splitlines()] == ["homonyms 0", "executive names shadowing 0", "list helpers 0", "unclaimed 1", "loose 1"]
