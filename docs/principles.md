@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 c68594456fcb, commit 131d861) by `scripts/project_principles.py` (project_principles v2) on 2026-10-22; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 5f99ebce75e3, commit b395a05) by `scripts/project_principles.py` (project_principles v2) on 2026-10-23; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -873,6 +873,9 @@ blocks; the done and implemented items are in the record's drafts table.
   defect where rounding enters, the grade as a lattice, the worst cost seen; `11` §5, §6); worked
   examples the sum of n floats, a matrix inverse with κ(A), a sampled probability integrating to
   one. Two candidate models (D-2026-10-12-p): min and max, or 1/n log-sum-exp with 1/n sum.
+  The 1/n mean composes only as an aggregate carrying its count, (sum, n), the mean being its
+  projection, since the binary mean is not associative (mean(mean(0,2),4) = 2.5, mean(0,mean(2,4))
+  = 1.5; audit of the algebras, 5b1a05e, 4.6; L10.11's aggregates are summed across rows).
   `Cost` is a library (D-2026-10-12-al): its algebra is settled when it is implemented, and the
   certification written in Luthier says what it asks of it; the two candidates can be two of its
   models. The
