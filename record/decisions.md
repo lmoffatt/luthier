@@ -3383,3 +3383,36 @@ Source:     record/IA/gpt-2026-10-22/dialogo.md (c312464), lines 296, 546 and 75
             (eb59936)
 Kind:       principles (L5, L10, L11, O13); his marks pending on the five clauses
 Status:     current
+
+D-2026-10-22-c  His answers on the derivation of a value (the note derivation-2026-10-22-decisions.md).
+                (1) His reading: a derivation is a point of an exponential. The coordinator's
+                elaboration, which he accepted: the exponential B^A is the space of procedures from A
+                to B, the specimens of a function; a value's derivation is a point of it with its
+                input, (f, a) with ev(f, a) = v, an element of the fibre of ev : B^A × A → B over v;
+                internal composition C^B × B^A → C^A composes derivations; a cone's derivation is a
+                diagram ending in v (an object of the slice over B, or of the category of elements).
+                Since a cartesian closed category's B^A is extensional and Luthier must tell apart
+                algorithms with the same function (error, cost, evidence), the exponential is
+                intensional: programs as arrows, the planner's certified identities as 2-cells, the
+                derivation carried a class modulo the demand's equality of consequence (L5.22). O13's
+                question is then how to represent a derivation as a point of an intensional
+                exponential, quotiented by the demand. (2) Question 1 of the note answered by that
+                reading: the derivation is the realization, f applied to a, read as a value, not a
+                fourth object; L5.10's three objects stand. (3) Question 3: the word is "derivation";
+                the coordinator's note that in proof theory a derivation is identified up to
+                normalization, the quotient he means; "derivative" (L5.4's decoration, the
+                differential) is a different word, the record keeps it whole and abbreviates neither
+                to "deriv". (4) Question 2: the sentence of L5.23 stays, that a requirement on a
+                derivation is a law over it giving a certified subtype a demand may ask for (L8.5),
+                as recommended.
+Author:     Luciano for the reading, the word and question 2; the coordinator for the elaboration,
+            accepted
+Quote:      "la derivación yo la veo como un objeto categórico exponencial, ¿tiene sentido?"
+            "Sí, dale"
+            "History suena más pasivo, derivation suena a que podemos simplificar la historia a lo
+            invariante"
+            "ok" (question 2)
+Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-22; the line unknown until the
+            export), relayed to the principles agent
+Kind:       principles (O13, L5.22, L5.23, L5.10 confirmed; the note's three questions)
+Status:     current
