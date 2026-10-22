@@ -1715,6 +1715,9 @@ blocks; the done and implemented items are in the record's drafts table.
   defect where rounding enters, the grade as a lattice, the worst cost seen; `11` §5, §6); worked
   examples the sum of n floats, a matrix inverse with κ(A), a sampled probability integrating to
   one. Two candidate models (D-2026-10-12-p): min and max, or 1/n log-sum-exp with 1/n sum.
+  The 1/n mean composes only as an aggregate carrying its count, (sum, n), the mean being its
+  projection, since the binary mean is not associative (mean(mean(0,2),4) = 2.5, mean(0,mean(2,4))
+  = 1.5; audit of the algebras, 5b1a05e, 4.6; L10.11's aggregates are summed across rows).
   `Cost` is a library (D-2026-10-12-al): its algebra is settled when it is implemented, and the
   certification written in Luthier says what it asks of it; the two candidates can be two of its
   models. The
