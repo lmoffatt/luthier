@@ -2,7 +2,7 @@
 -- record/IA/evidence-2026-10-14/prompt.md, item 3: `QuadraticConverges` (belief.lth) on two
 -- models of `Maximizer`, the host's Levenberg-Marquardt (`lm`, belief_model.lut) and the native
 -- one (`lmMaximizer` with v0.1's damping, optimization_model.lut); the laws of `LMStep`
--- (optimization.lth) on its two models, the host's (`host`) and the native definitions
+-- (optimization.lth) on its two models, the host's (`hostStep`) and the native definitions
 -- (`native`). The quadratic family is drawn: its maximum `b`, its curvature `c` and the start.
 -- `DirectionDescends`, `DirectionAgrees` and `StepRule` take an objective, a record of functions
 -- (7.R4); the three `...OnQuadratic` below [proposed] are each law applied to the family's
@@ -27,13 +27,13 @@ import "belief.lth" Maximizer Settings MaxResult quadratic QuadraticConverges Ma
 import "belief_model.lut" lm
 import "optimization.lth" LMStep Damping LMState quadraticObjective QuadraticStepAccepts DirectionDescends
   DirectionAgrees StepRule DirectionDescendsOnQuadratic DirectionAgreesOnQuadratic StepRuleOnQuadratic
-import "optimization_model.lut" native host
+import "optimization_model.lut" native hostStep
 import "../../examples/sonolocalizacion/session_a.lut" settingsA dampingA nativeLM
 import "fit_cutoffs.lut" tolerance budget cutoffs
 
 onLm : List Binding := [ { parameter := just "mx", type := nothing, generator := "lm", coverage := Listed } ]
 onNativeLM : List Binding := [ { parameter := just "mx", type := nothing, generator := "nativeLM", coverage := Listed } ]
-onHost : List Binding := [ { parameter := just "m", type := nothing, generator := "host", coverage := Listed } ]
+onHost : List Binding := [ { parameter := just "m", type := nothing, generator := "hostStep", coverage := Listed } ]
 onNative : List Binding := [ { parameter := just "m", type := nothing, generator := "native", coverage := Listed } ]
 both : List Binding := [
   { parameter := just "mx", type := nothing, generator := "lm", coverage := Listed },

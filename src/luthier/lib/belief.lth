@@ -183,3 +183,6 @@ laplaceAt (n : Nat) (l : Likelihood n) (b : GaussianBelief n) (y : Vec Float64) 
   { mean := m, precision := madd b.precision (l.info y m) }
 laplaceUpdate (n : Nat) (mx : Maximizer) (s : Settings) (l : Likelihood n) (b : GaussianBelief n) (y : Vec Float64) : GaussianBelief n :=
   laplaceAt n l b y (laplaceMode n mx s l b y).x
+-- [core bite 12] gathered so that this file claims it (4.S14), as arrays.lth gathers
+-- `ArrayContainers`: not a law of `Maximizer`, a comparison of two
+MaximizerComparisons := MaximizersAgree

@@ -33,8 +33,8 @@
 -- `lmMaximizer`).
 --
 -- Index (all sections written in this draft):
---   §1 `Objective`, its laws, `negate`, `posteriorOf` (v0.1 optimization.lut:16-24, 108-110). done
---   §2 `Damping`, `LMState`, `start`, `dampedStep`, `lmStep`, `Reason`, `finished`, `Run`,
+--   §1 `Objective`, its laws, `asObjective`, `posteriorOf` (v0.1 optimization.lut:16-24, 108-110). done
+--   §2 `Damping`, `LMState`, `start`, `dampedStep`, `lmStep`, `StopReason`, `finished`, `Run`,
 --      `minimize` (v0.1 optimization.lut:27-73).                                              done
 --   §3 `LMStep`, the laws of a step: descent, the damping, the decrease; the quadratic family
 --      (v0.1 optimization.lut:76-92).                                                         done
@@ -65,8 +65,8 @@ Objective (n : Nat) := GradIsGradient n & StepMatrixSymmetric n & StepMatrixNonN
 
 -- a log posterior (belief.lth) as the objective that minimizes its negative, the information
 -- its step matrix (v0.1 optimization.lut:108-110); and the three functions a maximizer takes,
--- as one posterior
-negate (n : Nat) (p : Posterior n) : Objective n :=
+-- as one posterior. [core bite 12] `asObjective` was `negate`, a name of the core's `Ring`.
+asObjective (n : Nat) (p : Posterior n) : Objective n :=
   { value := fn x { 0.0 - p.logp x }, grad := fn x { scale (0.0 - 1.0) (p.score x) }, stepMatrix := p.info }
 posteriorOf (n : Nat) (f : VecOf n -> Float64) (g : VecOf n -> Vec Float64) (m : VecOf n -> Mat Float64) : Posterior n :=
   { logp := f, score := g, info := m }
@@ -107,18 +107,19 @@ lmStep (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState n)
     then { x := xt, phi := pt, mu := lowered d st.mu, iter := st.iter + 1, accepted := true }
     else { x := st.x, phi := st.phi, mu := st.mu * d.factor, iter := st.iter + 1, accepted := false } }
 
--- why a run stops: converged when the decrement is below the settings' tolerance, exhausted by
+-- why a run stops (`StopReason`; core bite 12: `Reason` is also checks.lth's): converged when the
+-- decrement is below the settings' tolerance, exhausted by
 -- the budget, stalled by the damping beyond its most; running otherwise (v0.1
 -- optimization.lut:63-69)
-Reason = { running : Unit || converged : Unit || exhausted : Unit || stalled : Unit }
-isConverged (r : Reason) : Bool := match r { converged u -> true ; _ -> false }
-finished (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState n) : Reason :=
+StopReason = { running : Unit || converged : Unit || exhausted : Unit || stalled : Unit }
+isConverged (r : StopReason) : Bool := match r { converged u -> true ; _ -> false }
+finished (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState n) : StopReason :=
   if decrement n s o.grad o.stepMatrix st.x < s.tol then converged unit
   else if st.iter >= s.maxIter then exhausted unit
   else if st.mu > d.most then stalled unit
   else running unit
 
-Run (n : Nat) = { state : LMState n, reason : Reason }
+Run (n : Nat) = { state : LMState n, reason : StopReason }
 
 -- the native driver: the step iterated until the run is finished (v0.1 optimization.lut:72-73)
 minimize (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState n) : Run n :=
@@ -162,7 +163,7 @@ StepRule (m : LMStep) (s : Settings) (d : Damping) (n : Dim) (o : Objective n) (
          then approxVec exact s2.x xt and s2.phi == pt and s2.mu == lowered d st.mu
          else approxVec exact s2.x st.x and s2.phi == st.phi and s2.mu == st.mu * d.factor) }
 -- the quadratic family of belief.lth, minimized: its minimum at b, curvature c
-quadraticObjective (n : Nat) (b : VecOf n) (c : Positive) : Objective n := negate n (quadratic n b c)
+quadraticObjective (n : Nat) (b : VecOf n) (c : Positive) : Objective n := asObjective n (quadratic n b c)
 QuadraticStepAccepts (m : LMStep) (s : Settings) (d : Damping) (n : Dim) (b : VecOf n) (c : Positive) (x0 : VecOf n) : Bool :=
   { o := quadraticObjective n b c
     norm (sub x0 b) == 0.0 or (m.step n s d o (start n o d x0)).accepted }
@@ -178,3 +179,6 @@ DirectionAgreesOnQuadratic (m : LMStep) (tol : Tolerance) (s : Settings) (n : Di
   DirectionAgrees m tol s n (quadraticObjective n b c) x mu
 StepRuleOnQuadratic (m : LMStep) (s : Settings) (d : Damping) (n : Dim) (b : VecOf n) (c : Positive) (st : LMState n) : Bool :=
   StepRule m s d n (quadraticObjective n b c) st
+-- [core bite 12] the three laws on the quadratic family, gathered so that this file claims them
+-- (4.S14), as arrays.lth gathers `ArrayContainers`
+LMStepOnQuadratic := DirectionDescendsOnQuadratic & DirectionAgreesOnQuadratic & StepRuleOnQuadratic

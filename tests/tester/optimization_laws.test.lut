@@ -3,7 +3,7 @@
 -- generator (7.R4), on listed cases: the quadratic family at dimension 3 (`quadraticObjective`)
 -- and the fit's objective, session A's posterior negated (tests/tester/session_a.lut).
 -- `LMStep` on its two models (optimization_model.lut): the native definitions (`native`) and the
--- host's (`host`, lm.py), on session A's objective; on the quadratic family they run in
+-- host's (`hostStep`, lm.py), on session A's objective; on the quadratic family they run in
 -- tests/tester/fit_laws.test.lut. Each cutoff a census of one, the demand's (D-2026-10-14-c): session
 -- A's settings and v0.1's damping schedule (`settingsA`, `dampingA`), the tolerance 1e-12
 -- [proposed], the resolution distances.lut's `pitResolution`. Seed 20261014. The points, the
@@ -16,9 +16,9 @@ import "generators.lth" Binding
 import "laws.lth" Listed
 import "numbers.lth" Tolerance
 import "arrays.lth" Vec vec
-import "optimization.lth" Objective negate quadraticObjective GradIsGradient StepMatrixSymmetric StepMatrixNonNegative
+import "optimization.lth" Objective asObjective quadraticObjective GradIsGradient StepMatrixSymmetric StepMatrixNonNegative
   DirectionDescends DirectionAgrees StepRule
-import "optimization_model.lut" native host
+import "optimization_model.lut" native hostStep
 import "../../examples/sonolocalizacion/distances.lut" pitResolution
 import "../../examples/sonolocalizacion/session_a.lut" dimA posteriorA settingsA dampingA
 
@@ -38,7 +38,7 @@ onQuadratics : List Binding := [
   { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
   { parameter := just "o", type := nothing, generator := "quadratics3", coverage := Listed } ]
 -- the fit's objective: session A's posterior, negated
-objectiveA : Objective dimA := negate dimA posteriorA
+objectiveA : Objective dimA := asObjective dimA posteriorA
 dimSessionA : List Int := [dimA]
 onSessionA : List Binding := [
   { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
@@ -48,7 +48,7 @@ nativeOnA : List Binding := [
   { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
   { parameter := just "o", type := nothing, generator := "objectiveA", coverage := Listed } ]
 hostOnA : List Binding := [
-  { parameter := just "m", type := nothing, generator := "host", coverage := Listed },
+  { parameter := just "m", type := nothing, generator := "hostStep", coverage := Listed },
   { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
   { parameter := just "o", type := nothing, generator := "objectiveA", coverage := Listed } ]
 

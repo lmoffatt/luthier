@@ -14,14 +14,14 @@
 -- the step from the direction, so agreement of the steps is a corollary, 4.R10).
 
 import "belief.lth" Maximizer Settings MaxResult
-import "optimization.lth" LMStep Objective Damping LMState Run dampedStep lmStep minimize start negate posteriorOf isConverged
+import "optimization.lth" LMStep Objective Damping LMState Run dampedStep lmStep minimize start asObjective posteriorOf isConverged
 import "arrays.lth" Vec Mat VecOf
 
 -- the native definitions, as one model
 native : LMStep := { direction := dampedStep, step := lmStep }
 
 -- the host's, routes to lm.py
-host : LMStep := {
+hostStep : LMStep := {
   direction := extern "python:luthier.lm.damped_step",
   step := extern "python:luthier.lm.step",
 }
@@ -31,7 +31,7 @@ host : LMStep := {
 -- (v0.1 optimization.lut:112-115)
 lmMaximizer (d : Damping) : Maximizer := {
   maximize := fn s n f g m x0 {
-    o := negate n (posteriorOf n f g m)
+    o := asObjective n (posteriorOf n f g m)
     r := minimize n s d o (start n o d x0)
     res := { x := r.state.x, converged := isConverged r.reason }
     res },
