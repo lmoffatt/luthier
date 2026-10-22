@@ -32,6 +32,7 @@ import "certification.lth" samplingOf Pruning disputes Certifying ConeHashing Er
   Standing Link ParameterReach Reach Value Hash Support Interval Members Number Printed Passed Failed State Current Stale
   Uncertified Provisional Disagrees DrawnParameter stronger reachOf coversAll latestOf latestAt failureAt
   disputeAt Recording recordEntry Pooling pooledCases Regioning regionedGrade orWeakest Deriving lawRegions
+  Routing Routed Theory Veto Members
 import "test.lth" Grade gradeRank weakest
 import "term_model.lut" alpha canonical substitute stepper
 
@@ -144,6 +145,95 @@ pooling : Pooling certifying := { pooled := pooledCases }
 -- from its cutoffs and premises, the theory's own `regionedGrade` and `lawRegions`
 regioning : Regioning certifying := { combine := orWeakest, graded := fn c rs ev { regionedGrade certifying orWeakest c rs ev } }
 deriving : Deriving := { ofLaw := lawRegions }
+
+-- [Before the tag, 2026-10-22, by Claude Sonnet 5.5, on record/plan/core-2026-10-17/prompt-refuse-theory.md]
+-- The route of a demand, the reference model of `Routing` (certification.lth §6). It follows certify.py's
+-- `witness`, `_each`, `_obligations`, `_conjunct_witness` and `veto`, `_about`, `_passes_theory`, in the
+-- order the code reads them, and is written apart from the theory's specification (`obligations`,
+-- `inSubject`, `refutedAsConsequence`), which the laws read it against. Left out, as the theory says:
+-- fingerprints (`passesTheory` here compares the one the binding recorded whole, where certify.py
+-- intersects the comma-separated sets of a census), the grade over regions, a control's entries, the
+-- demand a refusal names and the words of the exception.
+textHead : String -> String := extern "python:luthier.certify._text_head"
+
+-- the conjuncts listed by entries, each once, in the order the store has them (`dict.fromkeys`)
+keepFirst (xs : List String) : List String :=
+  match xs { nil -> nil ; cons x rest -> cons x (keepFirst (filter List String (fn (y : String) { not (y == x) }) rest)) }
+listing (es : List Entry) : List String := keepFirst (concat String (map Entry (List String) (fn (e : Entry) { e.conjuncts }) es))
+atHash (l : String) (h : Hash) (es : List Entry) : List Entry := filter List Entry (fn (e : Entry) { e.law == l and e.cone == h }) es
+
+-- `_each`: one entry serving each conjunct (the conjunct's entries, the demand's cutoff), or nothing
+each (dm : ConeDemand) (es : List Entry) (cs : List String) : Maybe (List Entry) :=
+  match cs { nil -> just nil ; cons c rest ->
+    (match nth Entry (filter List Entry (fn (e : Entry) { e.conjunct == just c and serves dm e }) es) 0 { nothing -> nothing ; just e ->
+      (match each dm es rest { nothing -> nothing ; just more -> just (cons e more) }) }) }
+-- `_obligations` and `_conjunct_witness`: the theory's conjuncts the law stands for, each served
+headed (t : Theory) (es : List Entry) : List String :=
+  filter List String (fn (c : String) { any List String (fn (h : String) { h == textHead c }) t.heads }) (listing (atHash t.demand.law t.demand.cone es))
+viaTheory (d : Routed) (es : List Entry) : Maybe (List Entry) :=
+  match d.theory { nothing -> nothing ; just t ->
+    (match headed t es { nil -> nothing ; cons c cs -> each t.demand es (cons c cs) }) }
+-- `witness`
+witness (d : Routed) (es : List Entry) : Maybe (List Entry) :=
+  if d.byModel then viaTheory d es
+  else (match listing (atHash d.demand.law d.demand.cone es) { cons c cs -> each d.demand es (cons c cs) ; nil ->
+    (match nth Entry (filter List Entry (serves d.demand) es) 0 { just e -> just [e] ; nothing -> viaTheory d es }) })
+
+-- `_about`: the reach of an entry does not exclude the model the run gives, for each model parameter
+about (d : Routed) (e : Entry) : Bool :=
+  all List String (fn (p : String) { match reachOf p e.reach { nothing -> true ; just r ->
+    (match givenOf p d.demand.given { nothing -> true ; just v -> reachContains r v }) } }) d.models
+givenOf (p : String) (given : List (String * Value)) : Maybe Value :=
+  match given { nil -> nothing ; cons pv rest -> (match pv { (q, v) -> if q == p then just v else givenOf p rest }) }
+-- the routes `veto` reads, each a law and the entries of it that count
+Route = { law : String, here : Entry -> Bool }
+ownRoute (d : Routed) : List Route :=
+  if d.byModel then nil
+  else [{ law := d.demand.law, here := fn (e : Entry) { e.cone == d.demand.cone and about d e } }]
+theoryRoute (d : Routed) (es : List Entry) : List Route :=
+  match d.theory { nothing -> nil ; just t ->
+    [{ law := t.demand.law, here := fn (e : Entry) { e.cone == t.demand.cone and coversAll reachContains e.reach t.demand.given
+         and (match e.conjunct { just c -> any List String (fn (x : String) { x == c }) (headed t es) ; nothing -> false }) } }] }
+routesOf (d : Routed) (es : List Entry) : List Route := ownRoute d <> theoryRoute d es
+inRoute (r : Route) (es : List Entry) : List Entry := filter List Entry (fn (e : Entry) { e.law == r.law and r.here e }) es
+firstDispute (rs : List Route) (es : List Entry) : Maybe (Entry * Entry) :=
+  match rs { nil -> nothing ; cons r rest ->
+    (match nth (Entry * Entry) (disputes entryIdentity nil (inRoute r es)) 0 { just p -> just p ; nothing -> firstDispute rest es }) }
+firstFailure (rs : List Route) (es : List Entry) : Maybe Entry :=
+  match rs { nil -> nothing ; cons r rest ->
+    (match nth Entry (filter List Entry entryFailed (inRoute r es)) 0 { just f -> just f ; nothing -> firstFailure rest es }) }
+-- `_models_of`, `_passes_theory`
+fingerprintOf (p : String) (b : List DrawnParameter) : String :=
+  match b { nil -> "" ; cons x rest -> if x.parameter == p then x.fingerprint else fingerprintOf p rest }
+theoryModel (t : Theory) (q : String) (model : Value) (prints : String) (es : List Entry) : Bool :=
+  fromEntries (probeFor t q model) (theoryAbout t q model prints es)
+probeFor (t : Theory) (q : String) (model : Value) : ConeDemand :=
+  { law := t.demand.law, cone := t.demand.cone, given := [(q, model)], accepts := t.demand.accepts }
+fromEntries (probe : ConeDemand) (mine : List Entry) : Bool :=
+  not (isEmpty String (listing mine)) and not (any List Entry entryFailed mine)
+    and isEmpty (Entry * Entry) (disputes entryIdentity nil mine)
+    and (match each probe mine (listing mine) { nothing -> false ; just w -> true })
+theoryAbout (t : Theory) (q : String) (model : Value) (prints : String) (es : List Entry) : List Entry :=
+  filter List Entry (fn (e : Entry) { e.law == t.demand.law and e.cone == t.demand.cone and coversAll reachContains e.reach [(q, model)]
+    and fingerprintOf q e.binding == prints }) es
+censusOf (p : String) (e : Entry) : List (Value * String) :=
+  match reachOf p e.reach { nothing -> nil ; just r ->
+    (match r { Members vs -> map Value (Value * String) (fn (v : Value) { (v, fingerprintOf p e.binding) }) vs ; Support -> nil ; Interval lo hi -> nil }) }
+-- the exception: the first failure of the law at its hash on a model that passes the theory
+consequence (d : Routed) (es : List Entry) : Maybe Entry :=
+  if d.byModel then nothing
+  else (match d.theory { nothing -> nothing ; just t ->
+    (match t.demand.given { nil -> nothing ; cons qv rest -> (match qv { (q, w) ->
+      nth Entry (filter List Entry (fn (f : Entry) { f.law == d.demand.law and f.cone == d.demand.cone and entryFailed f
+        and any List String (fn (p : String) { any List (Value * String) (fn (mp : Value * String) {
+          match mp { (model, fp) -> theoryModel t q model fp es } }) (censusOf p f) }) d.models }) es) 0 }) }) })
+-- `veto`: a disagreement, else a failure, over every route, else the exception
+veto (d : Routed) (es : List Entry) : Maybe Veto :=
+  match firstDispute (routesOf d es) es { just p -> (match p { (a, b) -> just { state := Disagrees a b, exception := false } }) ; nothing ->
+    (match firstFailure (routesOf d es) es { just f -> just { state := Current f.outcome, exception := false } ; nothing ->
+      (match consequence d es { just f -> just { state := Current f.outcome, exception := true } ; nothing -> nothing }) }) }
+
+routing : Routing certifying := { headOf := textHead, witness := witness, veto := veto }
 
 -- 6.S8: the hash of a cone, the host's
 hashing : ConeHashing alpha canonical := {
