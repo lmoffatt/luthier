@@ -3342,3 +3342,18 @@ Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-21; the line un
 Kind:       core (structures/algebraic.lth, core.lut, lists.lut), the grammar's operators, the
             library's string uses, spec 2 and 3
 Status:     current
+
+D-2026-10-22-a  What an entry about one model serves. A law's pass on a model is evidence about that
+                model only: a run on model N is never served by entries about another model M of the
+                same theory (done at 012b3ce, report-bite-12a.md's follow-up, 7.S22). What such an
+                entry says about the theory still holds: M passing T's laws shows T has a model, and
+                a law's controls (the law refutes a wrong model) show the law discriminates, which
+                is a property of the law and transfers to every model of T. So controls stay
+                law-level: a run on N needs N's passes, not N's own controls. Whether 012b3ce keeps
+                controls law-level is checked in bite 13.
+Author:     Luciano, on the coordinator's answer to bite 12a's question
+Quote:      "sirve para la teoria pero no para el modelo no?"
+Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-22; the line unknown until the
+            export)
+Kind:       certify.py (`served`, `refuse`), run.py (`byModel`), spec 7.S22, the stores' meaning
+Status:     current

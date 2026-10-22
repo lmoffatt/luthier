@@ -886,6 +886,9 @@ unrestricted (item 2's leftover), to close like the claims; and the kernel's sub
 cost of exhaustive cases (about 30,000 steps a case, 475 of 711 s in `kernel.substitute`; bite 9's
 folds doubled it), so test_certify's regions test is LUTHIER_SLOW: a faster substitution is a task
 of its own, after the core, and the marker comes off with it.
+D-2026-10-22-a: check that 012b3ce (a law without a model parameter served only by entries about
+the run's model) keeps controls law-level: a model certified by its passes is not refused for
+lacking controls run at that model, since a law's control transfers to every model of its theory.
 Bite 9's question answered: `Regioning`'s commutativity graded by the core's `Commutative` at
 `Maybe Grade` is accepted (D-2026-10-18-b, D-2026-10-18-f).
 
