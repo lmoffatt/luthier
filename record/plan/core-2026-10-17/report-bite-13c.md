@@ -112,3 +112,53 @@ A direct demand (a law with a model parameter) is still refused by a failure of 
 model N, while a `byModel` demand is now refused only by failures on its own model. D-2026-10-22-a
 says a pass on N is evidence about N only. Should a failure on N likewise refuse only runs on N
 (yes: scope the direct veto by reach too), or does it refute the law for every model (no: keep it)?
+
+## Follow-up: the direct veto scoped by reach
+
+The coordinator answered the question above with yes (D-2026-10-22-d, ddf1160): a failure on model N
+is evidence about N, as a pass is, so it refuses runs on N and not runs on another model M. There is
+one exception: a failure on N of a law stated for every model of a theory, where N passes that
+theory's defining laws, refutes the law as a consequence of the theory and refuses every model's run.
+
+Done in 59da028, `certify.veto`:
+
+- The law's own entries count only when they may be about the run's model (`_about`): for each model
+  parameter of the demand, the entry's reach does not exclude the model given. An entry with no
+  reach recorded for that parameter still counts, since nothing excludes it. This applies to
+  disagreements as well as failures.
+- The exception (`_passes_theory`): a failure of the law at its hash, on a model N its census reach
+  names, refuses the demand whatever the run's model when the store has entries of the theory's law
+  on N, at the theory law's hash and at a fingerprint the failure's binding recorded for N (the same
+  version of N), that list conjuncts, serve every one at the demand's cutoff, and include no failure
+  and no disagreement. The refusal line says why: "failed at ... on N, which passes the defining
+  laws of T: L does not follow from T, so no model's run is served (D-2026-10-22-d)".
+- The tester already records what tells the two cases apart (the theory's conjunct entries with
+  their reach and fingerprints), so nothing was left as a stopgap refusal. The limit is the
+  evidence: when the store holds no entries of the theory on N, nothing shows N is a model of it,
+  and the failure stays N's. A failure whose binding recorded no fingerprint for N (or a census of
+  several models under one comma-joined fingerprint that matches none of the theory's) also falls
+  back to scoping.
+- Spec 6.S15 carries the rule.
+
+Tests: `test_a_failure_on_another_model_does_not_refuse_a_direct_demand` (a failure on N leaves the
+run on M served; a failure on M refuses it; the run on N is refused) and
+`test_a_failure_on_a_model_of_the_theory_refuses_every_model` (N passes `T` and fails `L`: the run on
+M is refused with the why; when N fails `T`, or `T`'s pass is of another version of N, the run on M is
+not refused). Both fail with 705138d's `certify.py` and pass with 59da028's.
+
+Checks: `pytest -q tests/test_certify.py tests/test_run.py` run at the same moment on two copies, the
+working tree (51 failed, 165 passed, 5 skipped, 2 xfailed) and the package with `certify.py` and
+`run.py` of 705138d put first on `PYTHONPATH` (56 failed, 160 passed). No test fails only on the new
+code. Five fail only on the old one: the two new tests, and three that are artefacts of the copy
+living outside the repository (`test_interpreter_revision_is_the_last_tag`, which needs git, and two
+core-collision tests in test_run.py). The 51 common failures are the ones of the first report:
+stale stores (`console`'s four laws, 14 times; `numpy: TraceAgrees`) and 13b's work in progress.
+`scripts/check_spec.py`: only its known finding.
+
+Decisions taken on my own here:
+
+1. An entry with no reach recorded for the model parameter counts against every model.
+2. "The same version of N" is a shared fingerprint between the failure's binding and the theory's
+   entry. N's current hash isn't known to a run on M, so its being current isn't checked.
+3. The exception needs N to pass every conjunct its theory entries list, at the demand's cutoff.
+4. Disagreements are scoped by reach like failures, and have no exception.
