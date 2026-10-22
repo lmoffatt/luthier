@@ -13,6 +13,14 @@ design leaves to Luciano are in `decisions.md` beside this file; every choice ma
 the agent's, one commit undoes it. The first version of this plan (54f6228) had the core imported by
 name; D-2026-10-18-b decided otherwise and this version replaces it (git keeps the first).
 
+Status, 2026-10-22 morning (coordinator): bites 9 to 11, the refusal holes and the eval fix
+landed with their reports; CORE_COLLISIONS is empty. The combined verification
+(report-verify-6-11.md, dafe90f) re-certified every store (40 programs at 0 lines ran on the second
+pass) and ran the suite file by file: all 42 files pass but test_certify's regions test (about 1 s
+an exhaustive case, too slow to finish) and validate_graph/experiment_zero are refused on the
+`doubles` conjuncts' demand. Bite 12 is split into 12a (machinery, those two included) and 12b
+(library and examples), running side by side; 12b re-certifies after 12a.
+
 Status, 2026-10-21 evening (coordinator): bites 6, 7 and 8 landed (report-bite-6.md to -8.md;
 bite 7 committed by the coordinator from Codex's list, 06495fc to 0acef17; bite 8 at 465cb98).
 Bites 9 and 10 are in progress, committing file by file. Bite 8 left the full suite and the full
