@@ -1,983 +1,7 @@
 [
  {
   "law": "HostChangesOnlyDeclared",
-  "cone": "sha256:ec650c4a7a4512bd220630937f50b97264d552f5bfbcc896f4ef8f6cb9ad6250",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
-   },
-   {
-    "parameter": "A",
-    "generator": "unitTypes (Listed)",
-    "fingerprint": "sha256:f1ec8f162b87786760e70b0e1baab65dbd0b681bc1c0c652d5a7f1d1d921de4d"
-   },
-   {
-    "parameter": "h",
-    "generator": "helloHeld (Listed)",
-    "fingerprint": "sha256:276131a9849c922335d48384985de884469b3a4d842cec0e2dec3239fe4e9402"
-   },
-   {
-    "parameter": "extra",
-    "generator": "extras (Listed)",
-    "fingerprint": "sha256:bc6401f9ed9d947aeecfed8adec03b0663bfb3b64b8074ae88769bb1c672f343"
-   },
-   {
-    "parameter": "c",
-    "generator": "clobbersCases (Listed)",
-    "fingerprint": "sha256:bc64acedabb076c61ae77d1fc73bdd0bf806bd73c5625ae36a3db15b76e822ce"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "A",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "Unit"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "h",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((held { stdout : String, files : (List (_ : String) * String) }) Unit) theWorld) fn (w : W) { (((listedHost).print w) \"hello, world\") }) (((printDescription { stdout : String, files : (List (_ : String) * String) }) console) \"hello, world\"))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "extra",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "((cons \"stdout\") ((cons \"input.txt\") ((cons \"other.txt\") nil)))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) withFiles) unit) clobbered)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, A = Unit, h = (((((held { stdout : String, files : (List (_ : String) * String) }) Unit) theWorld) fn (w : W) { (((listedHost).print w) \"hello, world\") }) (((printDescription { stdout : String, files : (List (_ : String) * String) }) console) \"hello, world\")), extra = ((cons \"stdout\") ((cons \"input.txt\") ((cons \"other.txt\") nil))), c = (((((case { stdout : String, files : (List (_ : String) * String) }) Unit) withFiles) unit) clobbered)"
-  },
-  "date": "2026-10-22T04:24:02+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "HostObserveChangesNothing",
-  "cone": "sha256:78887cd3e32143beb8d43e0282da5e8ab1de54beb85114597338873c36109bc0",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
-   },
-   {
-    "parameter": "ps",
-    "generator": "observed (Listed)",
-    "fingerprint": "sha256:b9a1db4e5fe79fe71002b50660738e07d26b64d09256dcbfee3deaa0aac87d3f"
-   },
-   {
-    "parameter": "c",
-    "generator": "clearsCases (Listed)",
-    "fingerprint": "sha256:c177a4d0dde42a02e10a29de9a856764b8c1674a7100c731b9aeac5dda5a2e3d"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "ps",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "((cons \"stdout\") ((cons \"input.txt\") nil))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) printed) printed) blank)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, ps = ((cons \"stdout\") ((cons \"input.txt\") nil)), c = (((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) printed) printed) blank)"
-  },
-  "date": "2026-10-22T04:24:02+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "HostAgreesReadFile",
-  "cone": "sha256:22a70745ded06c0ca871a3df1a334115576e3710f4f8f25ffd8cbf5111efa218",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
-   },
-   {
-    "parameter": "p",
-    "generator": "input (Listed)",
-    "fingerprint": "sha256:59298cec30e70e5ddb3963abc3e02d399ffde0814793a8948935c3560c59fcb1"
-   },
-   {
-    "parameter": "c",
-    "generator": "readsNothingCases (Listed)",
-    "fingerprint": "sha256:6f5422203eee92581c35291763fb4b2d0efe11162b8c5e1587b1eee5d9506ca0"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"input.txt\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) nothing) withFiles)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, p = \"input.txt\", c = (((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) nothing) withFiles)"
-  },
-  "date": "2026-10-22T04:24:02+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "HostAgreesPrint",
-  "cone": "sha256:25cf4e1a410f03cc490e9d94ab1944a357c1b9a84de220b5295e8b96965bfac4",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
-   },
-   {
-    "parameter": "s",
-    "generator": "hello (Listed)",
-    "fingerprint": "sha256:ace8102a595283e9f314d04e120bd31da09b378da007bd77d32379005b9f66e1"
-   },
-   {
-    "parameter": "c",
-    "generator": "noNewlineCases (Listed)",
-    "fingerprint": "sha256:50a79784fd620d49e348e428f1e4c64e4d121222d55a2bfe6283c50ce3e72be8"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "s",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"hello, world\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"hello, world\"))"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, s = \"hello, world\", c = (((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"hello, world\"))"
-  },
-  "date": "2026-10-22T04:24:02+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "ReadChangesNothing",
-  "cone": "sha256:2100c0179385caa68e9100134f6688a823360202aae0b373480867b03937e3ff",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "c",
-    "generator": "readClearsList (Listed)",
-    "fingerprint": "sha256:f187743e46a0507ef6107ce869caeddb64c083de13f3658d690928e964c7ce81"
-   },
-   {
-    "parameter": "st",
-    "generator": "worlds (Listed)",
-    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
-   },
-   {
-    "parameter": "p",
-    "generator": "places (Listed)",
-    "fingerprint": "sha256:adfdf2d93bf73ced797a6f6178f7a18a4686862092962591bd5ef05881a8987b"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "readClears"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "st",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "blank"
-      },
-      {
-       "Printed": "printed"
-      },
-      {
-       "Printed": "withFiles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"stdout\""
-      },
-      {
-       "Printed": "\"input.txt\""
-      },
-      {
-       "Printed": "\"empty.txt\""
-      },
-      {
-       "Printed": "\"other.txt\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 12,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = readClears, st = printed, p = \"stdout\""
-  },
-  "date": "2026-10-22T04:24:02+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "ReadGivesThePlace",
-  "cone": "sha256:b2ea8b2b85e4b2499e80ed75576aefec9113d2cf7f9dfd01d8c352b38115e4c2",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "c",
-    "generator": "readsNothingList (Listed)",
-    "fingerprint": "sha256:621c944f76049f4e967380fac5c7d2614e83a4098e76ce5a63b879907b30ec4a"
-   },
-   {
-    "parameter": "st",
-    "generator": "worlds (Listed)",
-    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
-   },
-   {
-    "parameter": "p",
-    "generator": "places (Listed)",
-    "fingerprint": "sha256:adfdf2d93bf73ced797a6f6178f7a18a4686862092962591bd5ef05881a8987b"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "readsNothing"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "st",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "blank"
-      },
-      {
-       "Printed": "printed"
-      },
-      {
-       "Printed": "withFiles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"stdout\""
-      },
-      {
-       "Printed": "\"input.txt\""
-      },
-      {
-       "Printed": "\"empty.txt\""
-      },
-      {
-       "Printed": "\"other.txt\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 12,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = readsNothing, st = withFiles, p = \"input.txt\""
-  },
-  "date": "2026-10-22T04:24:02+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "PrintChangesOnlyStdout",
-  "cone": "sha256:331bbe103676fb5a2d8b9c24ddb60a6f2a78493c6595970c4d66e37bd6a26391",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "c",
-    "generator": "dropsFilesList (Listed)",
-    "fingerprint": "sha256:f8384e7f6affd2f8e9d26585dd2fb4d9f11537a2ba970cb7ef622353039ba09f"
-   },
-   {
-    "parameter": "st",
-    "generator": "worlds (Listed)",
-    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
-   },
-   {
-    "parameter": "s",
-    "generator": "lines (Listed)",
-    "fingerprint": "sha256:5cb1d5d4343b2b0d2936ac50d927897493be918fd3fffd27c8fa8b4e0454aab4"
-   },
-   {
-    "parameter": "p",
-    "generator": "places (Listed)",
-    "fingerprint": "sha256:adfdf2d93bf73ced797a6f6178f7a18a4686862092962591bd5ef05881a8987b"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "dropsFiles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "st",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "blank"
-      },
-      {
-       "Printed": "printed"
-      },
-      {
-       "Printed": "withFiles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "s",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"\""
-      },
-      {
-       "Printed": "\"hello, world\""
-      },
-      {
-       "Printed": "\"two\\nlines\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"stdout\""
-      },
-      {
-       "Printed": "\"input.txt\""
-      },
-      {
-       "Printed": "\"empty.txt\""
-      },
-      {
-       "Printed": "\"other.txt\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 36,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = dropsFiles, st = withFiles, s = \"\", p = \"input.txt\""
-  },
-  "date": "2026-10-22T04:24:02+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "PrintAppendsALine",
-  "cone": "sha256:7f33907cd612af1a6b3ee320f22ab2be3119636d4a4d37d03061ddec748702d9",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "c",
-    "generator": "noNewlines (Listed)",
-    "fingerprint": "sha256:4de7618943a0defbc737f032d2a37140ea104164b26c8bd71e7b4794be531917"
-   },
-   {
-    "parameter": "st",
-    "generator": "worlds (Listed)",
-    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
-   },
-   {
-    "parameter": "s",
-    "generator": "lines (Listed)",
-    "fingerprint": "sha256:5cb1d5d4343b2b0d2936ac50d927897493be918fd3fffd27c8fa8b4e0454aab4"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "noNewline"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "st",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "blank"
-      },
-      {
-       "Printed": "printed"
-      },
-      {
-       "Printed": "withFiles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "s",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"\""
-      },
-      {
-       "Printed": "\"hello, world\""
-      },
-      {
-       "Printed": "\"two\\nlines\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 9,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = noNewline, st = blank, s = \"\""
-  },
-  "date": "2026-10-22T04:24:02+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "HostChangesOnlyDeclared",
-  "cone": "sha256:ec650c4a7a4512bd220630937f50b97264d552f5bfbcc896f4ef8f6cb9ad6250",
+  "cone": "sha256:569e20af08bd0f2208038a7526de312f4cc078497ff1d5220647cd11f6c7f74a",
   "binding": [
    {
     "parameter": "S",
@@ -987,7 +11,7 @@
    {
     "parameter": "o",
     "generator": "hosts (Listed)",
-    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+    "fingerprint": "sha256:6b193e202212fe089c5ee5e4a73c7652f5f889e514056bc7f80a72827fb94f88"
    },
    {
     "parameter": "A",
@@ -997,7 +21,7 @@
    {
     "parameter": "h",
     "generator": "inputHeld (Listed)",
-    "fingerprint": "sha256:faa93b88aca29c810f6341ff2c842d273cc58971f3df0bd6d53441f0362cb785"
+    "fingerprint": "sha256:0690934f75f09bbe1f99a536a6d94d1603d2f51b02d5f633de52a32b769af29a"
    },
    {
     "parameter": "extra",
@@ -1105,7 +129,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-22T04:23:57+00:00",
+  "date": "2026-10-22T09:49:06+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1125,7 +149,7 @@
  },
  {
   "law": "HostChangesOnlyDeclared",
-  "cone": "sha256:ec650c4a7a4512bd220630937f50b97264d552f5bfbcc896f4ef8f6cb9ad6250",
+  "cone": "sha256:569e20af08bd0f2208038a7526de312f4cc078497ff1d5220647cd11f6c7f74a",
   "binding": [
    {
     "parameter": "S",
@@ -1135,7 +159,7 @@
    {
     "parameter": "o",
     "generator": "hosts (Listed)",
-    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+    "fingerprint": "sha256:6b193e202212fe089c5ee5e4a73c7652f5f889e514056bc7f80a72827fb94f88"
    },
    {
     "parameter": "A",
@@ -1145,7 +169,7 @@
    {
     "parameter": "h",
     "generator": "helloHeld (Listed)",
-    "fingerprint": "sha256:276131a9849c922335d48384985de884469b3a4d842cec0e2dec3239fe4e9402"
+    "fingerprint": "sha256:c98dfc5d0cd165119d17bf9b610aa95c3798686703c7772d29e88f7480d3734e"
    },
    {
     "parameter": "extra",
@@ -1256,7 +280,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-22T04:23:57+00:00",
+  "date": "2026-10-22T09:49:06+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1276,7 +300,7 @@
  },
  {
   "law": "HostObserveChangesNothing",
-  "cone": "sha256:78887cd3e32143beb8d43e0282da5e8ab1de54beb85114597338873c36109bc0",
+  "cone": "sha256:04a2fbea5bced531b25febe908b6d267fdde54cd2542cbdf2296344bfb500c88",
   "binding": [
    {
     "parameter": "S",
@@ -1286,7 +310,7 @@
    {
     "parameter": "o",
     "generator": "hosts (Listed)",
-    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+    "fingerprint": "sha256:6b193e202212fe089c5ee5e4a73c7652f5f889e514056bc7f80a72827fb94f88"
    },
    {
     "parameter": "ps",
@@ -1374,7 +398,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-22T04:23:57+00:00",
+  "date": "2026-10-22T09:49:06+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1394,7 +418,7 @@
  },
  {
   "law": "HostAgreesReadFile",
-  "cone": "sha256:22a70745ded06c0ca871a3df1a334115576e3710f4f8f25ffd8cbf5111efa218",
+  "cone": "sha256:8063d9906de09242957f2820111f59ba3b39a54ea9eda4336af57337b91390b3",
   "binding": [
    {
     "parameter": "S",
@@ -1404,7 +428,7 @@
    {
     "parameter": "o",
     "generator": "hosts (Listed)",
-    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+    "fingerprint": "sha256:6b193e202212fe089c5ee5e4a73c7652f5f889e514056bc7f80a72827fb94f88"
    },
    {
     "parameter": "p",
@@ -1489,7 +513,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-22T04:23:57+00:00",
+  "date": "2026-10-22T09:49:06+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1509,7 +533,7 @@
  },
  {
   "law": "HostAgreesReadFile",
-  "cone": "sha256:22a70745ded06c0ca871a3df1a334115576e3710f4f8f25ffd8cbf5111efa218",
+  "cone": "sha256:8063d9906de09242957f2820111f59ba3b39a54ea9eda4336af57337b91390b3",
   "binding": [
    {
     "parameter": "S",
@@ -1519,7 +543,7 @@
    {
     "parameter": "o",
     "generator": "hosts (Listed)",
-    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+    "fingerprint": "sha256:6b193e202212fe089c5ee5e4a73c7652f5f889e514056bc7f80a72827fb94f88"
    },
    {
     "parameter": "p",
@@ -1604,7 +628,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-22T04:23:57+00:00",
+  "date": "2026-10-22T09:49:06+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1624,7 +648,7 @@
  },
  {
   "law": "HostAgreesPrint",
-  "cone": "sha256:25cf4e1a410f03cc490e9d94ab1944a357c1b9a84de220b5295e8b96965bfac4",
+  "cone": "sha256:a317179c14425a2e5a5bc210bab144882038f08aeb79465f7467418dabe6de25",
   "binding": [
    {
     "parameter": "S",
@@ -1634,7 +658,7 @@
    {
     "parameter": "o",
     "generator": "hosts (Listed)",
-    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+    "fingerprint": "sha256:6b193e202212fe089c5ee5e4a73c7652f5f889e514056bc7f80a72827fb94f88"
    },
    {
     "parameter": "s",
@@ -1719,7 +743,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-22T04:23:57+00:00",
+  "date": "2026-10-22T09:49:06+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1739,7 +763,7 @@
  },
  {
   "law": "HostAgreesPrint",
-  "cone": "sha256:25cf4e1a410f03cc490e9d94ab1944a357c1b9a84de220b5295e8b96965bfac4",
+  "cone": "sha256:a317179c14425a2e5a5bc210bab144882038f08aeb79465f7467418dabe6de25",
   "binding": [
    {
     "parameter": "S",
@@ -1749,7 +773,7 @@
    {
     "parameter": "o",
     "generator": "hosts (Listed)",
-    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+    "fingerprint": "sha256:6b193e202212fe089c5ee5e4a73c7652f5f889e514056bc7f80a72827fb94f88"
    },
    {
     "parameter": "s",
@@ -1837,7 +861,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-22T04:23:57+00:00",
+  "date": "2026-10-22T09:49:06+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1856,8 +880,989 @@
   "regions": []
  },
  {
-  "law": "WriteThenRead",
-  "cone": "sha256:ea6a26cbb67539a91c1fe42fc452774229718f94c87db2ec71fbe5d98304b01b",
+  "law": "RecordCrossesByField",
+  "cone": "sha256:4998e55ca953df2428af6c6b492893192f72f291ab40eace2a805e1f8059e65c",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "ints (Listed)",
+    "fingerprint": "sha256:3182404114bae599688600842111299bde7941e46acb3b8a5b894689f6e1103a"
+   },
+   {
+    "parameter": "B",
+    "generator": "ints (Listed)",
+    "fingerprint": "sha256:3182404114bae599688600842111299bde7941e46acb3b8a5b894689f6e1103a"
+   },
+   {
+    "parameter": "b",
+    "generator": "bridges (Listed)",
+    "fingerprint": "sha256:039a9139892d56e5cd310b149d035c36877aab7bd3cf4a599b616cd931d012b1"
+   },
+   {
+    "parameter": "before",
+    "generator": "befores (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:bc10b995d4668ca593d5c15a36c1aae33334f895e6e9281cb33aaa2c2f83e6c0"
+   },
+   {
+    "parameter": "after",
+    "generator": "afters (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:7284baa694774e8234ac7b7af29080ab3fd52592478536eed2427fae558dc52a"
+   },
+   {
+    "parameter": "l",
+    "generator": "labels (Listed)",
+    "fingerprint": "sha256:3bf71b2ff8a86a912a4c9eb89b61bb8996b1d67c2f35e539ccc6482bdaec9f66"
+   },
+   {
+    "parameter": "f",
+    "generator": "intFunctions (Listed)",
+    "fingerprint": "sha256:7cdca87c52f4de3fb9c727ac81affde92370b78af2d0bd97c1b57c314027ebf4,sha256:34ee4fce2c101a5363ae999767e7b8ddf590a6393aa6e45f37c91a52e2634b39,sha256:92b1b163eea7507c780e419400143cdd51cf653efbf1d2e41cfcc55894e1332b"
+   },
+   {
+    "parameter": "xs",
+    "generator": "arguments (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:dd839d61e7455dccc526f6ee487e6958dce5518ce5adac307e9704398ba1134e"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Int"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Int"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "bridge"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "before",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons (\"g\", succ)) nil)"
+      },
+      {
+       "Printed": "((cons (\"f\", double)) nil)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "after",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons (\"f\", opposite)) nil)"
+      },
+      {
+       "Printed": "((cons (\"h\", succ)) nil)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "l",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"f\""
+      },
+      {
+       "Printed": "\"g\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "double"
+      },
+      {
+       "Printed": "succ"
+      },
+      {
+       "Printed": "opposite"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "xs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons 1) nil)"
+      },
+      {
+       "Printed": "((cons 1) ((cons 2) ((cons 3) nil)))"
+      },
+      {
+       "Printed": "((cons ((- 0) 4)) ((cons 0) ((cons 7) nil)))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 216,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T09:49:04+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "CallsAreCounted",
+  "cone": "sha256:5350f6db5f030dafd1bf9299ac333c9223df3f5c0818d75cc91e05aaa144e8ac",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "ints (Listed)",
+    "fingerprint": "sha256:3182404114bae599688600842111299bde7941e46acb3b8a5b894689f6e1103a"
+   },
+   {
+    "parameter": "B",
+    "generator": "ints (Listed)",
+    "fingerprint": "sha256:3182404114bae599688600842111299bde7941e46acb3b8a5b894689f6e1103a"
+   },
+   {
+    "parameter": "b",
+    "generator": "bridges (Listed)",
+    "fingerprint": "sha256:039a9139892d56e5cd310b149d035c36877aab7bd3cf4a599b616cd931d012b1"
+   },
+   {
+    "parameter": "f",
+    "generator": "intFunctions (Listed)",
+    "fingerprint": "sha256:7cdca87c52f4de3fb9c727ac81affde92370b78af2d0bd97c1b57c314027ebf4,sha256:34ee4fce2c101a5363ae999767e7b8ddf590a6393aa6e45f37c91a52e2634b39,sha256:92b1b163eea7507c780e419400143cdd51cf653efbf1d2e41cfcc55894e1332b"
+   },
+   {
+    "parameter": "xs",
+    "generator": "arguments (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:dd839d61e7455dccc526f6ee487e6958dce5518ce5adac307e9704398ba1134e"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Int"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Int"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "bridge"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "double"
+      },
+      {
+       "Printed": "succ"
+      },
+      {
+       "Printed": "opposite"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "xs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons 1) nil)"
+      },
+      {
+       "Printed": "((cons 1) ((cons 2) ((cons 3) nil)))"
+      },
+      {
+       "Printed": "((cons ((- 0) 4)) ((cons 0) ((cons 7) nil)))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 12,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T09:49:04+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "CallbackGivesTheFunction",
+  "cone": "sha256:0376df3632661f6ab7afcc03ec50e228f8b90a6bbbde8156c60f942aff5cdc0c",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "ints (Listed)",
+    "fingerprint": "sha256:3182404114bae599688600842111299bde7941e46acb3b8a5b894689f6e1103a"
+   },
+   {
+    "parameter": "B",
+    "generator": "ints (Listed)",
+    "fingerprint": "sha256:3182404114bae599688600842111299bde7941e46acb3b8a5b894689f6e1103a"
+   },
+   {
+    "parameter": "b",
+    "generator": "bridges (Listed)",
+    "fingerprint": "sha256:039a9139892d56e5cd310b149d035c36877aab7bd3cf4a599b616cd931d012b1"
+   },
+   {
+    "parameter": "f",
+    "generator": "intFunctions (Listed)",
+    "fingerprint": "sha256:7cdca87c52f4de3fb9c727ac81affde92370b78af2d0bd97c1b57c314027ebf4,sha256:34ee4fce2c101a5363ae999767e7b8ddf590a6393aa6e45f37c91a52e2634b39,sha256:92b1b163eea7507c780e419400143cdd51cf653efbf1d2e41cfcc55894e1332b"
+   },
+   {
+    "parameter": "xs",
+    "generator": "arguments (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:dd839d61e7455dccc526f6ee487e6958dce5518ce5adac307e9704398ba1134e"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Int"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Int"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "bridge"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "double"
+      },
+      {
+       "Printed": "succ"
+      },
+      {
+       "Printed": "opposite"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "xs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons 1) nil)"
+      },
+      {
+       "Printed": "((cons 1) ((cons 2) ((cons 3) nil)))"
+      },
+      {
+       "Printed": "((cons ((- 0) 4)) ((cons 0) ((cons 7) nil)))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 12,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T09:49:04+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "IdentityCarriesHash",
+  "cone": "sha256:45dd8a74e840949ac95bd800d563f4499833fd3220b3b3b1d41cd96d858fb1ec",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "validators (Listed)",
+    "fingerprint": "sha256:66a50605c9477e1e89cf3b7efaf97eecadb8624027be1478955f5f352183c7e2"
+   },
+   {
+    "parameter": "r",
+    "generator": "routes (Listed)",
+    "fingerprint": "sha256:8fc5364a0f651c2cafa7195beba5acd4cdbf25a1da55888cce1673ca8491d4fd"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:280e29a76fb8ae0b0c5f0bd4c335b616efd19891c62df8970190382a7a306336"
+   },
+   {
+    "parameter": "k",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:280e29a76fb8ae0b0c5f0bd4c335b616efd19891c62df8970190382a7a306336"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "validator"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((routeOf \"fit\") lawful) \"python:m.fit\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"raw\") lawless) \"python:m.raw\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"guess\") lawful) \"python:m.guess\") (just \"exploring\"))"
+      },
+      {
+       "Printed": "((((routeOf \"rawGuess\") lawless) \"python:m.rawGuess\") (just \"exploring\"))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 64,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T09:49:03+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "ProvisionalIsAssumed",
+  "cone": "sha256:80c61cf13bcd0beecf01d825914e1a60aa36ca2d13566c4f9444683103da7f55",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "validators (Listed)",
+    "fingerprint": "sha256:66a50605c9477e1e89cf3b7efaf97eecadb8624027be1478955f5f352183c7e2"
+   },
+   {
+    "parameter": "n",
+    "generator": "externNames (Listed)",
+    "fingerprint": "sha256:fb2b5d3eb3b15730cb8f38525c45f5e92c63fc244dc2490f1f5ae08cef536aa5"
+   },
+   {
+    "parameter": "t",
+    "generator": "terms (Listed)",
+    "fingerprint": "sha256:1737aa7abdd820a17456e78e911374ef4a03c74b76544e320bf17da2575289b2,sha256:a57bd0226f642e7a499cb6a2c46fcc943243b656987e9bc914753b957d79c5dc"
+   },
+   {
+    "parameter": "route",
+    "generator": "routeStrings (Listed)",
+    "fingerprint": "sha256:fdbcfd3bfe9edfcef5f7edac553a2f351f6188645deec445efcffba20b93b267"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:280e29a76fb8ae0b0c5f0bd4c335b616efd19891c62df8970190382a7a306336"
+   },
+   {
+    "parameter": "why",
+    "generator": "reasons (Listed)",
+    "fingerprint": "sha256:4f89dbba7d10e35038c8cea2368c678911515afd048804b653cc5f093561acb2"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "validator"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"fit\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "lawful"
+      },
+      {
+       "Printed": "lawless"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "route",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"python:m.fit\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "why",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"\""
+      },
+      {
+       "Printed": "\"a fit to try before its laws are written\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T09:49:03+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "NoLawNoGrade",
+  "cone": "sha256:be570c15fb53685e0556eb7401c0ff71bf34546a415071c6c99235d9da4c3179",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "validators (Listed)",
+    "fingerprint": "sha256:66a50605c9477e1e89cf3b7efaf97eecadb8624027be1478955f5f352183c7e2"
+   },
+   {
+    "parameter": "n",
+    "generator": "externNames (Listed)",
+    "fingerprint": "sha256:fb2b5d3eb3b15730cb8f38525c45f5e92c63fc244dc2490f1f5ae08cef536aa5"
+   },
+   {
+    "parameter": "t",
+    "generator": "terms (Listed)",
+    "fingerprint": "sha256:1737aa7abdd820a17456e78e911374ef4a03c74b76544e320bf17da2575289b2,sha256:a57bd0226f642e7a499cb6a2c46fcc943243b656987e9bc914753b957d79c5dc"
+   },
+   {
+    "parameter": "route",
+    "generator": "routeStrings (Listed)",
+    "fingerprint": "sha256:fdbcfd3bfe9edfcef5f7edac553a2f351f6188645deec445efcffba20b93b267"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:280e29a76fb8ae0b0c5f0bd4c335b616efd19891c62df8970190382a7a306336"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "validator"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"fit\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "lawful"
+      },
+      {
+       "Printed": "lawless"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "route",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"python:m.fit\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T09:49:03+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "AppliedWhenSettled",
+  "cone": "sha256:0849375dc77554dfda7bccf439cd6da291328efa1ea05c49775f0aa5d500dceb",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "validators (Listed)",
+    "fingerprint": "sha256:66a50605c9477e1e89cf3b7efaf97eecadb8624027be1478955f5f352183c7e2"
+   },
+   {
+    "parameter": "accepts",
+    "generator": "cutoff (Listed)",
+    "fingerprint": "sha256:eb173b343aafd45c3e6a8a34db968f0f6402bb7e91d0254560c67af5e2a82431,sha256:3d060440b5b434ed17df8267fade560123a0d41903bf425f7cb824e9723c886b"
+   },
+   {
+    "parameter": "assumes",
+    "generator": "assumedNames (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:09d401f77ccf8980ac8ede2b57211439983e7a9bd1f14a472e8c721ee9313d30"
+   },
+   {
+    "parameter": "r",
+    "generator": "routes (Listed)",
+    "fingerprint": "sha256:8fc5364a0f651c2cafa7195beba5acd4cdbf25a1da55888cce1673ca8491d4fd"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:280e29a76fb8ae0b0c5f0bd4c335b616efd19891c62df8970190382a7a306336"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "validator"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "accepts",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "sampledCutoff"
+      },
+      {
+       "Printed": "assumedCutoff"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "assumes",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons \"guess\") nil)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((routeOf \"fit\") lawful) \"python:m.fit\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"raw\") lawless) \"python:m.raw\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"guess\") lawful) \"python:m.guess\") (just \"exploring\"))"
+      },
+      {
+       "Printed": "((((routeOf \"rawGuess\") lawless) \"python:m.rawGuess\") (just \"exploring\"))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 64,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T09:49:03+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "HostChangesOnlyDeclared",
+  "cone": "sha256:569e20af08bd0f2208038a7526de312f4cc078497ff1d5220647cd11f6c7f74a",
   "binding": [
    {
     "parameter": "S",
@@ -1865,24 +1870,29 @@
     "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
    },
    {
-    "parameter": "s",
-    "generator": "writesEmptyList (Listed)",
-    "fingerprint": "sha256:107a6dcdbd7efddf526e7e45d41c9baab816d01991b29541f0836ec23f4eb019"
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:6b193e202212fe089c5ee5e4a73c7652f5f889e514056bc7f80a72827fb94f88"
    },
    {
-    "parameter": "st",
-    "generator": "worlds (Listed)",
-    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:dc56a88f24d28b83028c3e2feafb12e49912081267755101c454076fd509cb64"
+    "parameter": "A",
+    "generator": "unitTypes (Listed)",
+    "fingerprint": "sha256:f1ec8f162b87786760e70b0e1baab65dbd0b681bc1c0c652d5a7f1d1d921de4d"
    },
    {
-    "parameter": "p",
-    "generator": "paths (Listed)",
-    "fingerprint": "sha256:063661d11a6a8c06a075fa5bfe9ac8f1b84c5b6edf657b778e2c462e852a8ca1"
+    "parameter": "h",
+    "generator": "helloHeld (Listed)",
+    "fingerprint": "sha256:c98dfc5d0cd165119d17bf9b610aa95c3798686703c7772d29e88f7480d3734e"
+   },
+   {
+    "parameter": "extra",
+    "generator": "extras (Listed)",
+    "fingerprint": "sha256:bc6401f9ed9d947aeecfed8adec03b0663bfb3b64b8074ae88769bb1c672f343"
    },
    {
     "parameter": "c",
-    "generator": "contents (Listed)",
-    "fingerprint": "sha256:8dccd2bd4761a99f97aaebbe35b9a21d929c3eb0808fba4c361f1aea9f4e801a"
+    "generator": "clobbersCases (Listed)",
+    "fingerprint": "sha256:bc64acedabb076c61ae77d1fc73bdd0bf806bd73c5625ae36a3db15b76e822ce"
    }
   ],
   "seed": 20261015,
@@ -1914,40 +1924,41 @@
     }
    },
    {
-    "parameter": "s",
+    "parameter": "o",
     "reach": {
      "Members": [
       {
-       "Printed": "writesEmpty"
+       "Printed": "listedHost"
       }
      ]
     }
    },
    {
-    "parameter": "st",
+    "parameter": "A",
     "reach": {
      "Members": [
       {
-       "Printed": "blank"
-      },
-      {
-       "Printed": "withFile"
+       "Printed": "Unit"
       }
      ]
     }
    },
    {
-    "parameter": "p",
+    "parameter": "h",
     "reach": {
      "Members": [
       {
-       "Printed": "\"plot.png\""
-      },
+       "Printed": "(((((held { stdout : String, files : (List (_ : String) * String) }) Unit) theWorld) fn (w : W) { (((listedHost).print w) \"hello, world\") }) (((printDescription { stdout : String, files : (List (_ : String) * String) }) console) \"hello, world\"))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
       {
-       "Printed": "\"plot.svg\""
-      },
-      {
-       "Printed": "\"other.txt\""
+       "Printed": "((cons \"stdout\") ((cons \"input.txt\") ((cons \"other.txt\") nil)))"
       }
      ]
     }
@@ -1957,13 +1968,7 @@
     "reach": {
      "Members": [
       {
-       "Printed": "\"\""
-      },
-      {
-       "Printed": "\"x\""
-      },
-      {
-       "Printed": "\"PNG\""
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) withFiles) unit) clobbered)"
       }
      ]
     }
@@ -1971,7 +1976,7 @@
   ],
   "evidence": {
    "Points": {
-    "evaluated": 18,
+    "evaluated": 1,
     "raised": 0,
     "coverage": "Listed",
     "verdict": "Refuted"
@@ -1979,17 +1984,30 @@
   },
   "grade": null,
   "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, s = writesEmpty, st = blank, p = \"plot.png\", c = \"x\""
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, A = Unit, h = (((((held { stdout : String, files : (List (_ : String) * String) }) Unit) theWorld) fn (w : W) { (((listedHost).print w) \"hello, world\") }) (((printDescription { stdout : String, files : (List (_ : String) * String) }) console) \"hello, world\")), extra = ((cons \"stdout\") ((cons \"input.txt\") ((cons \"other.txt\") nil))), c = (((((case { stdout : String, files : (List (_ : String) * String) }) Unit) withFiles) unit) clobbered)"
   },
-  "date": "2026-10-22T04:18:37+00:00",
+  "date": "2026-10-22T09:48:56+00:00",
   "interpreter": "v0.2",
-  "hosts": [],
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
   "kind": "Control",
   "regions": []
  },
  {
-  "law": "WriteChangesOnlyItsPlace",
-  "cone": "sha256:f279ab6a7057c2b3c930484e37d343ec9aab2393c2d69c198d1a671f0187682f",
+  "law": "HostObserveChangesNothing",
+  "cone": "sha256:04a2fbea5bced531b25febe908b6d267fdde54cd2542cbdf2296344bfb500c88",
   "binding": [
    {
     "parameter": "S",
@@ -1997,29 +2015,19 @@
     "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
    },
    {
-    "parameter": "s",
-    "generator": "keepsOnlyItList (Listed)",
-    "fingerprint": "sha256:d4cc0e594a042737ab187c6c0e7ac93f2a3698c3fb8f069f8483940c96c33795"
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:6b193e202212fe089c5ee5e4a73c7652f5f889e514056bc7f80a72827fb94f88"
    },
    {
-    "parameter": "st",
-    "generator": "worlds (Listed)",
-    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:dc56a88f24d28b83028c3e2feafb12e49912081267755101c454076fd509cb64"
-   },
-   {
-    "parameter": "p",
-    "generator": "paths (Listed)",
-    "fingerprint": "sha256:063661d11a6a8c06a075fa5bfe9ac8f1b84c5b6edf657b778e2c462e852a8ca1"
+    "parameter": "ps",
+    "generator": "observed (Listed)",
+    "fingerprint": "sha256:b9a1db4e5fe79fe71002b50660738e07d26b64d09256dcbfee3deaa0aac87d3f"
    },
    {
     "parameter": "c",
-    "generator": "contents (Listed)",
-    "fingerprint": "sha256:8dccd2bd4761a99f97aaebbe35b9a21d929c3eb0808fba4c361f1aea9f4e801a"
-   },
-   {
-    "parameter": "q",
-    "generator": "paths (Listed)",
-    "fingerprint": "sha256:063661d11a6a8c06a075fa5bfe9ac8f1b84c5b6edf657b778e2c462e852a8ca1"
+    "generator": "clearsCases (Listed)",
+    "fingerprint": "sha256:c177a4d0dde42a02e10a29de9a856764b8c1674a7100c731b9aeac5dda5a2e3d"
    }
   ],
   "seed": 20261015,
@@ -2051,40 +2059,21 @@
     }
    },
    {
-    "parameter": "s",
+    "parameter": "o",
     "reach": {
      "Members": [
       {
-       "Printed": "keepsOnlyIt"
+       "Printed": "listedHost"
       }
      ]
     }
    },
    {
-    "parameter": "st",
+    "parameter": "ps",
     "reach": {
      "Members": [
       {
-       "Printed": "blank"
-      },
-      {
-       "Printed": "withFile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"plot.png\""
-      },
-      {
-       "Printed": "\"plot.svg\""
-      },
-      {
-       "Printed": "\"other.txt\""
+       "Printed": "((cons \"stdout\") ((cons \"input.txt\") nil))"
       }
      ]
     }
@@ -2094,29 +2083,7 @@
     "reach": {
      "Members": [
       {
-       "Printed": "\"\""
-      },
-      {
-       "Printed": "\"x\""
-      },
-      {
-       "Printed": "\"PNG\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "q",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"plot.png\""
-      },
-      {
-       "Printed": "\"plot.svg\""
-      },
-      {
-       "Printed": "\"other.txt\""
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) printed) printed) blank)"
       }
      ]
     }
@@ -2124,7 +2091,7 @@
   ],
   "evidence": {
    "Points": {
-    "evaluated": 54,
+    "evaluated": 1,
     "raised": 0,
     "coverage": "Listed",
     "verdict": "Refuted"
@@ -2132,11 +2099,254 @@
   },
   "grade": null,
   "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, s = keepsOnlyIt, st = withFile, p = \"plot.png\", c = \"\", q = \"other.txt\""
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, ps = ((cons \"stdout\") ((cons \"input.txt\") nil)), c = (((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) printed) printed) blank)"
   },
-  "date": "2026-10-21T14:44:19+00:00",
+  "date": "2026-10-22T09:48:56+00:00",
   "interpreter": "v0.2",
-  "hosts": [],
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "HostAgreesReadFile",
+  "cone": "sha256:8063d9906de09242957f2820111f59ba3b39a54ea9eda4336af57337b91390b3",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:6b193e202212fe089c5ee5e4a73c7652f5f889e514056bc7f80a72827fb94f88"
+   },
+   {
+    "parameter": "p",
+    "generator": "input (Listed)",
+    "fingerprint": "sha256:59298cec30e70e5ddb3963abc3e02d399ffde0814793a8948935c3560c59fcb1"
+   },
+   {
+    "parameter": "c",
+    "generator": "readsNothingCases (Listed)",
+    "fingerprint": "sha256:6f5422203eee92581c35291763fb4b2d0efe11162b8c5e1587b1eee5d9506ca0"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"input.txt\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) nothing) withFiles)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, p = \"input.txt\", c = (((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) nothing) withFiles)"
+  },
+  "date": "2026-10-22T09:48:56+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "HostAgreesPrint",
+  "cone": "sha256:a317179c14425a2e5a5bc210bab144882038f08aeb79465f7467418dabe6de25",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:6b193e202212fe089c5ee5e4a73c7652f5f889e514056bc7f80a72827fb94f88"
+   },
+   {
+    "parameter": "s",
+    "generator": "hello (Listed)",
+    "fingerprint": "sha256:ace8102a595283e9f314d04e120bd31da09b378da007bd77d32379005b9f66e1"
+   },
+   {
+    "parameter": "c",
+    "generator": "noNewlineCases (Listed)",
+    "fingerprint": "sha256:50a79784fd620d49e348e428f1e4c64e4d121222d55a2bfe6283c50ce3e72be8"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"hello, world\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"hello, world\"))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, s = \"hello, world\", c = (((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"hello, world\"))"
+  },
+  "date": "2026-10-22T09:48:56+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
   "kind": "Control",
   "regions": []
  },
@@ -2157,7 +2367,7 @@
    {
     "parameter": "b",
     "generator": "callsFirstFieldList (Listed)",
-    "fingerprint": "sha256:c96e05f5adf65b6d868974a76898032e1dc9b6ad80c99394c5330b48c32f6d33"
+    "fingerprint": "sha256:9a2d5b1752d1578c85b3543e17a1e1089a72e94bbc417a5effc09e9a213239ce"
    },
    {
     "parameter": "before",
@@ -2326,7 +2536,7 @@
   "outcome": {
    "ControlRefuted": "A = Int, B = Int, b = callsFirstField, before = ((cons (\"g\", succ)) nil), after = nil, l = \"f\", f = double, xs = ((cons 1) ((cons 2) ((cons 3) nil)))"
   },
-  "date": "2026-10-21T12:56:13+00:00",
+  "date": "2026-10-22T09:48:54+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
@@ -2349,7 +2559,7 @@
    {
     "parameter": "b",
     "generator": "countsOnceList (Listed)",
-    "fingerprint": "sha256:1203c0f71492a72ef095cb87d7cc834eb623438b42adcd2adc57aaf34b1af576"
+    "fingerprint": "sha256:3bb99db4e53d9cfb674069a0dfa856ea25dea18cfdc775346130496473ea7035"
    },
    {
     "parameter": "f",
@@ -2458,7 +2668,7 @@
   "outcome": {
    "ControlRefuted": "A = Int, B = Int, b = countsOnce, f = double, xs = nil"
   },
-  "date": "2026-10-21T12:56:12+00:00",
+  "date": "2026-10-22T09:48:54+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
@@ -2481,7 +2691,7 @@
    {
     "parameter": "b",
     "generator": "reversesCallsList (Listed)",
-    "fingerprint": "sha256:c457614339d601ba7ff4854f9b29dc0cdc20b3575ff59ab3ceb3a18aad40a148"
+    "fingerprint": "sha256:8c2f029e444da16bd381ac45dcca5b54eb03a9f6d15c4515cca3beabfb676975"
    },
    {
     "parameter": "f",
@@ -2590,7 +2800,7 @@
   "outcome": {
    "ControlRefuted": "A = Int, B = Int, b = reversesCalls, f = double, xs = ((cons 1) ((cons 2) ((cons 3) nil)))"
   },
-  "date": "2026-10-21T12:56:12+00:00",
+  "date": "2026-10-22T09:48:54+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
@@ -2603,7 +2813,7 @@
    {
     "parameter": "e",
     "generator": "identityByRouteList (Listed)",
-    "fingerprint": "sha256:fea168eab9c743a9ec3948cb76ec49158f3dd100331068980cbb18c4b49f5386"
+    "fingerprint": "sha256:9160ff29a7a1ed990e6528e6d09d6e30549c26cdbe361781c27297c72c1af9e0"
    },
    {
     "parameter": "r",
@@ -2719,7 +2929,7 @@
   "outcome": {
    "ControlRefuted": "e = identityByRoute, r = ((((routeOf \"fit\") lawful) \"python:m.fit\") nothing), h = \"sha256:h1\", k = \"sha256:h2\""
   },
-  "date": "2026-10-21T12:56:12+00:00",
+  "date": "2026-10-22T09:48:54+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
@@ -2732,7 +2942,7 @@
    {
     "parameter": "e",
     "generator": "validatesProvisionalList (Listed)",
-    "fingerprint": "sha256:5fb027ce8b285230ae17680da4abf87d54916190b8862bf1df7b78c50c9e9087"
+    "fingerprint": "sha256:a86ebc94a59de9af1356ff3850d3e4e33821686fce0dd70dc03929d1d05fff04"
    },
    {
     "parameter": "n",
@@ -2863,7 +3073,7 @@
   "outcome": {
    "ControlRefuted": "e = validatesProvisional, n = \"fit\", t = lawful, route = \"python:m.fit\", h = \"sha256:h1\", why = \"exploring\""
   },
-  "date": "2026-10-21T12:56:12+00:00",
+  "date": "2026-10-22T09:48:54+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
@@ -2876,7 +3086,7 @@
    {
     "parameter": "e",
     "generator": "gradesWithoutLawsList (Listed)",
-    "fingerprint": "sha256:4983c44c062d1dd183c25975ada60fdb23c9ed4afbec34b3c3c12c14d040892c"
+    "fingerprint": "sha256:fe5af8abe818bf2e32b6573243e25e3576f2451e9aef954811c7122df28d6ae7"
    },
    {
     "parameter": "n",
@@ -2992,7 +3202,7 @@
   "outcome": {
    "ControlRefuted": "e = gradesWithoutLaws, n = \"fit\", t = lawless, route = \"python:m.fit\", h = \"sha256:h1\""
   },
-  "date": "2026-10-21T12:56:12+00:00",
+  "date": "2026-10-22T09:48:53+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
@@ -3005,7 +3215,7 @@
    {
     "parameter": "e",
     "generator": "blanketAssumedList (Listed)",
-    "fingerprint": "sha256:f48d36528247e66c8db868b3a0768b2d2b95f088b87aa88648b64510b17d011b"
+    "fingerprint": "sha256:644966f0db6c5d13b68b431c20c4451261438e520009bed07c975d67ee9d836f"
    },
    {
     "parameter": "accepts",
@@ -3127,7 +3337,7 @@
   "outcome": {
    "ControlRefuted": "e = blanketAssumed, accepts = AssumedGrade, assumes = nil, r = ((((routeOf \"guess\") lawful) \"python:m.guess\") (just \"exploring\")), h = \"sha256:h1\""
   },
-  "date": "2026-10-21T12:56:12+00:00",
+  "date": "2026-10-22T09:48:53+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
@@ -3140,7 +3350,7 @@
    {
     "parameter": "e",
     "generator": "appliesEveryList (Listed)",
-    "fingerprint": "sha256:e71485abfd51e51b7a8adb2bcb0ba02744ca9e10c84fe94e584667234b662531"
+    "fingerprint": "sha256:1f3d91695d0e12a9c91573273c54647cc6bf462a576a44983fbbb82b08b9ac83"
    },
    {
     "parameter": "accepts",
@@ -3262,55 +3472,45 @@
   "outcome": {
    "ControlRefuted": "e = appliesEvery, accepts = Sampled, assumes = nil, r = ((((routeOf \"fit\") lawful) \"python:m.fit\") nothing), h = \"sha256:h4\""
   },
-  "date": "2026-10-21T12:56:12+00:00",
+  "date": "2026-10-22T09:48:53+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
   "regions": []
  },
  {
-  "law": "RecordCrossesByField",
-  "cone": "sha256:4998e55ca953df2428af6c6b492893192f72f291ab40eace2a805e1f8059e65c",
+  "law": "ChangesOnlyDeclared",
+  "cone": "sha256:b647eed00fd93d12a7d7b0012731f925e915126ab2dc5679773744a259611d4f",
   "binding": [
    {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
     "parameter": "A",
-    "generator": "ints (Listed)",
-    "fingerprint": "sha256:3182404114bae599688600842111299bde7941e46acb3b8a5b894689f6e1103a"
+    "generator": "unitTypes (Listed)",
+    "fingerprint": "sha256:f1ec8f162b87786760e70b0e1baab65dbd0b681bc1c0c652d5a7f1d1d921de4d"
    },
    {
-    "parameter": "B",
-    "generator": "ints (Listed)",
-    "fingerprint": "sha256:3182404114bae599688600842111299bde7941e46acb3b8a5b894689f6e1103a"
+    "parameter": "m",
+    "generator": "worldModels (Listed)",
+    "fingerprint": "sha256:38fed8f00463f77838334497be5cb3fe24233effd9ff0f175152d4eb7ce78ad1"
    },
    {
-    "parameter": "b",
-    "generator": "bridges (Listed)",
-    "fingerprint": "sha256:20840c83f02b3de7197330b758fd267459056d0d45396b555d39995f05a314d3"
+    "parameter": "d",
+    "generator": "printLogsList (Listed)",
+    "fingerprint": "sha256:377f962e3b6b25afedf4d3e965abeb5a46e055c3ed83fe3111ee3aafdbe0c52e"
    },
    {
-    "parameter": "before",
-    "generator": "befores (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:bc10b995d4668ca593d5c15a36c1aae33334f895e6e9281cb33aaa2c2f83e6c0"
+    "parameter": "s",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
    },
    {
-    "parameter": "after",
-    "generator": "afters (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:7284baa694774e8234ac7b7af29080ab3fd52592478536eed2427fae558dc52a"
-   },
-   {
-    "parameter": "l",
-    "generator": "labels (Listed)",
-    "fingerprint": "sha256:3bf71b2ff8a86a912a4c9eb89b61bb8996b1d67c2f35e539ccc6482bdaec9f66"
-   },
-   {
-    "parameter": "f",
-    "generator": "intFunctions (Listed)",
-    "fingerprint": "sha256:7cdca87c52f4de3fb9c727ac81affde92370b78af2d0bd97c1b57c314027ebf4,sha256:34ee4fce2c101a5363ae999767e7b8ddf590a6393aa6e45f37c91a52e2634b39,sha256:92b1b163eea7507c780e419400143cdd51cf653efbf1d2e41cfcc55894e1332b"
-   },
-   {
-    "parameter": "xs",
-    "generator": "arguments (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:dd839d61e7455dccc526f6ee487e6958dce5518ce5adac307e9704398ba1134e"
+    "parameter": "p",
+    "generator": "logPlaces (Listed)",
+    "fingerprint": "sha256:42716c19ca3513225370440b26803e784787c81ba6cdc423ef505d26384de43f"
    }
   ],
   "seed": 20261015,
@@ -3332,111 +3532,70 @@
   },
   "reach": [
    {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
     "parameter": "A",
     "reach": {
      "Members": [
       {
-       "Printed": "Int"
+       "Printed": "Unit"
       }
      ]
     }
    },
    {
-    "parameter": "B",
+    "parameter": "m",
     "reach": {
      "Members": [
       {
-       "Printed": "Int"
+       "Printed": "theWorld"
       }
      ]
     }
    },
    {
-    "parameter": "b",
+    "parameter": "d",
     "reach": {
      "Members": [
       {
-       "Printed": "bridge"
+       "Printed": "printLogs"
       }
      ]
     }
    },
    {
-    "parameter": "before",
+    "parameter": "s",
     "reach": {
      "Members": [
       {
-       "Printed": "nil"
+       "Printed": "blank"
       },
       {
-       "Printed": "((cons (\"g\", succ)) nil)"
+       "Printed": "printed"
       },
       {
-       "Printed": "((cons (\"f\", double)) nil)"
+       "Printed": "withFiles"
       }
      ]
     }
    },
    {
-    "parameter": "after",
+    "parameter": "p",
     "reach": {
      "Members": [
       {
-       "Printed": "nil"
+       "Printed": "\"stdout\""
       },
       {
-       "Printed": "((cons (\"f\", opposite)) nil)"
-      },
-      {
-       "Printed": "((cons (\"h\", succ)) nil)"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"f\""
-      },
-      {
-       "Printed": "\"g\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "f",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "double"
-      },
-      {
-       "Printed": "succ"
-      },
-      {
-       "Printed": "opposite"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "xs",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons 1) nil)"
-      },
-      {
-       "Printed": "((cons 1) ((cons 2) ((cons 3) nil)))"
-      },
-      {
-       "Printed": "((cons ((- 0) 4)) ((cons 0) ((cons 7) nil)))"
+       "Printed": "\"log.txt\""
       }
      ]
     }
@@ -3444,47 +3603,50 @@
   ],
   "evidence": {
    "Points": {
-    "evaluated": 216,
+    "evaluated": 6,
     "raised": 0,
     "coverage": "Listed",
-    "verdict": "Supported"
+    "verdict": "Refuted"
    }
   },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:03+00:00",
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, A = Unit, m = theWorld, d = printLogs, s = blank, p = \"log.txt\""
+  },
+  "date": "2026-10-22T09:48:53+00:00",
   "interpreter": "v0.2",
   "hosts": [],
+  "kind": "Control",
   "regions": []
  },
  {
-  "law": "CallsAreCounted",
-  "cone": "sha256:5350f6db5f030dafd1bf9299ac333c9223df3f5c0818d75cc91e05aaa144e8ac",
+  "law": "OwnIsIdempotent",
+  "cone": "sha256:92d1ef4d1cc35bfb24b918a718f4f724b6bbaac4576d7e53dff9cb06abf2230c",
   "binding": [
    {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
     "parameter": "A",
-    "generator": "ints (Listed)",
-    "fingerprint": "sha256:3182404114bae599688600842111299bde7941e46acb3b8a5b894689f6e1103a"
+    "generator": "unitTypes (Listed)",
+    "fingerprint": "sha256:f1ec8f162b87786760e70b0e1baab65dbd0b681bc1c0c652d5a7f1d1d921de4d"
    },
    {
-    "parameter": "B",
-    "generator": "ints (Listed)",
-    "fingerprint": "sha256:3182404114bae599688600842111299bde7941e46acb3b8a5b894689f6e1103a"
+    "parameter": "m",
+    "generator": "worldModels (Listed)",
+    "fingerprint": "sha256:38fed8f00463f77838334497be5cb3fe24233effd9ff0f175152d4eb7ce78ad1"
    },
    {
-    "parameter": "b",
-    "generator": "bridges (Listed)",
-    "fingerprint": "sha256:20840c83f02b3de7197330b758fd267459056d0d45396b555d39995f05a314d3"
+    "parameter": "d",
+    "generator": "appendsLockList (Listed)",
+    "fingerprint": "sha256:d905f61a651c0ed94717a4ad29d1ea40a7b48d0d7ebc3775d57b3e2af9812120"
    },
    {
-    "parameter": "f",
-    "generator": "intFunctions (Listed)",
-    "fingerprint": "sha256:7cdca87c52f4de3fb9c727ac81affde92370b78af2d0bd97c1b57c314027ebf4,sha256:34ee4fce2c101a5363ae999767e7b8ddf590a6393aa6e45f37c91a52e2634b39,sha256:92b1b163eea7507c780e419400143cdd51cf653efbf1d2e41cfcc55894e1332b"
-   },
-   {
-    "parameter": "xs",
-    "generator": "arguments (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:dd839d61e7455dccc526f6ee487e6958dce5518ce5adac307e9704398ba1134e"
+    "parameter": "s",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
    }
   ],
   "seed": 20261015,
@@ -3506,66 +3668,57 @@
   },
   "reach": [
    {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
     "parameter": "A",
     "reach": {
      "Members": [
       {
-       "Printed": "Int"
+       "Printed": "Unit"
       }
      ]
     }
    },
    {
-    "parameter": "B",
+    "parameter": "m",
     "reach": {
      "Members": [
       {
-       "Printed": "Int"
+       "Printed": "theWorld"
       }
      ]
     }
    },
    {
-    "parameter": "b",
+    "parameter": "d",
     "reach": {
      "Members": [
       {
-       "Printed": "bridge"
+       "Printed": "appendsLock"
       }
      ]
     }
    },
    {
-    "parameter": "f",
+    "parameter": "s",
     "reach": {
      "Members": [
       {
-       "Printed": "double"
+       "Printed": "blank"
       },
       {
-       "Printed": "succ"
+       "Printed": "printed"
       },
       {
-       "Printed": "opposite"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "xs",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons 1) nil)"
-      },
-      {
-       "Printed": "((cons 1) ((cons 2) ((cons 3) nil)))"
-      },
-      {
-       "Printed": "((cons ((- 0) 4)) ((cons 0) ((cons 7) nil)))"
+       "Printed": "withFiles"
       }
      ]
     }
@@ -3573,47 +3726,45 @@
   ],
   "evidence": {
    "Points": {
-    "evaluated": 12,
+    "evaluated": 3,
     "raised": 0,
     "coverage": "Listed",
-    "verdict": "Supported"
+    "verdict": "Refuted"
    }
   },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:03+00:00",
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, A = Unit, m = theWorld, d = appendsLock, s = blank"
+  },
+  "date": "2026-10-22T09:48:53+00:00",
   "interpreter": "v0.2",
   "hosts": [],
+  "kind": "Control",
   "regions": []
  },
  {
-  "law": "CallbackGivesTheFunction",
-  "cone": "sha256:0376df3632661f6ab7afcc03ec50e228f8b90a6bbbde8156c60f942aff5cdc0c",
+  "law": "ReadChangesNothing",
+  "cone": "sha256:8ac1f2e662be2d5fe78ffb883ae96a0ecfd29a92d3dd109e9c090ae3e1e154ac",
   "binding": [
    {
-    "parameter": "A",
-    "generator": "ints (Listed)",
-    "fingerprint": "sha256:3182404114bae599688600842111299bde7941e46acb3b8a5b894689f6e1103a"
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
    },
    {
-    "parameter": "B",
-    "generator": "ints (Listed)",
-    "fingerprint": "sha256:3182404114bae599688600842111299bde7941e46acb3b8a5b894689f6e1103a"
+    "parameter": "c",
+    "generator": "readClearsList (Listed)",
+    "fingerprint": "sha256:d81cce7e00f9a59a27ba07423518bffb41d0aba5f02243ceb884a92109d233cf"
    },
    {
-    "parameter": "b",
-    "generator": "bridges (Listed)",
-    "fingerprint": "sha256:20840c83f02b3de7197330b758fd267459056d0d45396b555d39995f05a314d3"
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
    },
    {
-    "parameter": "f",
-    "generator": "intFunctions (Listed)",
-    "fingerprint": "sha256:7cdca87c52f4de3fb9c727ac81affde92370b78af2d0bd97c1b57c314027ebf4,sha256:34ee4fce2c101a5363ae999767e7b8ddf590a6393aa6e45f37c91a52e2634b39,sha256:92b1b163eea7507c780e419400143cdd51cf653efbf1d2e41cfcc55894e1332b"
-   },
-   {
-    "parameter": "xs",
-    "generator": "arguments (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:dd839d61e7455dccc526f6ee487e6958dce5518ce5adac307e9704398ba1134e"
+    "parameter": "p",
+    "generator": "places (Listed)",
+    "fingerprint": "sha256:adfdf2d93bf73ced797a6f6178f7a18a4686862092962591bd5ef05881a8987b"
    }
   ],
   "seed": 20261015,
@@ -3635,66 +3786,56 @@
   },
   "reach": [
    {
-    "parameter": "A",
+    "parameter": "S",
     "reach": {
      "Members": [
       {
-       "Printed": "Int"
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
       }
      ]
     }
    },
    {
-    "parameter": "B",
+    "parameter": "c",
     "reach": {
      "Members": [
       {
-       "Printed": "Int"
+       "Printed": "readClears"
       }
      ]
     }
    },
    {
-    "parameter": "b",
+    "parameter": "st",
     "reach": {
      "Members": [
       {
-       "Printed": "bridge"
+       "Printed": "blank"
+      },
+      {
+       "Printed": "printed"
+      },
+      {
+       "Printed": "withFiles"
       }
      ]
     }
    },
    {
-    "parameter": "f",
+    "parameter": "p",
     "reach": {
      "Members": [
       {
-       "Printed": "double"
+       "Printed": "\"stdout\""
       },
       {
-       "Printed": "succ"
+       "Printed": "\"input.txt\""
       },
       {
-       "Printed": "opposite"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "xs",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
+       "Printed": "\"empty.txt\""
       },
       {
-       "Printed": "((cons 1) nil)"
-      },
-      {
-       "Printed": "((cons 1) ((cons 2) ((cons 3) nil)))"
-      },
-      {
-       "Printed": "((cons ((- 0) 4)) ((cons 0) ((cons 7) nil)))"
+       "Printed": "\"other.txt\""
       }
      ]
     }
@@ -3705,39 +3846,42 @@
     "evaluated": 12,
     "raised": 0,
     "coverage": "Listed",
-    "verdict": "Supported"
+    "verdict": "Refuted"
    }
   },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:03+00:00",
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = readClears, st = printed, p = \"stdout\""
+  },
+  "date": "2026-10-22T09:48:53+00:00",
   "interpreter": "v0.2",
   "hosts": [],
+  "kind": "Control",
   "regions": []
  },
  {
-  "law": "IdentityCarriesHash",
-  "cone": "sha256:45dd8a74e840949ac95bd800d563f4499833fd3220b3b3b1d41cd96d858fb1ec",
+  "law": "ReadGivesThePlace",
+  "cone": "sha256:d3818f6ad31ff231d022d1b866f898bd1690f669759a3a4d7af903a7644bc0ac",
   "binding": [
    {
-    "parameter": "e",
-    "generator": "validators (Listed)",
-    "fingerprint": "sha256:2aa27ed67835b336a5cc13ddc9a5bc2b4c4d0d6fa8e34877dbf55345b6dd24e6"
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
    },
    {
-    "parameter": "r",
-    "generator": "routes (Listed)",
-    "fingerprint": "sha256:8fc5364a0f651c2cafa7195beba5acd4cdbf25a1da55888cce1673ca8491d4fd"
+    "parameter": "c",
+    "generator": "readsNothingList (Listed)",
+    "fingerprint": "sha256:9f34d57381c8dffcee3fd65d93c096dca33d5f7e1897376b1bdd9656803a5ff4"
    },
    {
-    "parameter": "h",
-    "generator": "hashes (Listed)",
-    "fingerprint": "sha256:280e29a76fb8ae0b0c5f0bd4c335b616efd19891c62df8970190382a7a306336"
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
    },
    {
-    "parameter": "k",
-    "generator": "hashes (Listed)",
-    "fingerprint": "sha256:280e29a76fb8ae0b0c5f0bd4c335b616efd19891c62df8970190382a7a306336"
+    "parameter": "p",
+    "generator": "places (Listed)",
+    "fingerprint": "sha256:adfdf2d93bf73ced797a6f6178f7a18a4686862092962591bd5ef05881a8987b"
    }
   ],
   "seed": 20261015,
@@ -3759,68 +3903,56 @@
   },
   "reach": [
    {
-    "parameter": "e",
+    "parameter": "S",
     "reach": {
      "Members": [
       {
-       "Printed": "validator"
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
       }
      ]
     }
    },
    {
-    "parameter": "r",
+    "parameter": "c",
     "reach": {
      "Members": [
       {
-       "Printed": "((((routeOf \"fit\") lawful) \"python:m.fit\") nothing)"
-      },
-      {
-       "Printed": "((((routeOf \"raw\") lawless) \"python:m.raw\") nothing)"
-      },
-      {
-       "Printed": "((((routeOf \"guess\") lawful) \"python:m.guess\") (just \"exploring\"))"
-      },
-      {
-       "Printed": "((((routeOf \"rawGuess\") lawless) \"python:m.rawGuess\") (just \"exploring\"))"
+       "Printed": "readsNothing"
       }
      ]
     }
    },
    {
-    "parameter": "h",
+    "parameter": "st",
     "reach": {
      "Members": [
       {
-       "Printed": "\"sha256:h1\""
+       "Printed": "blank"
       },
       {
-       "Printed": "\"sha256:h2\""
+       "Printed": "printed"
       },
       {
-       "Printed": "\"sha256:h3\""
-      },
-      {
-       "Printed": "\"sha256:h4\""
+       "Printed": "withFiles"
       }
      ]
     }
    },
    {
-    "parameter": "k",
+    "parameter": "p",
     "reach": {
      "Members": [
       {
-       "Printed": "\"sha256:h1\""
+       "Printed": "\"stdout\""
       },
       {
-       "Printed": "\"sha256:h2\""
+       "Printed": "\"input.txt\""
       },
       {
-       "Printed": "\"sha256:h3\""
+       "Printed": "\"empty.txt\""
       },
       {
-       "Printed": "\"sha256:h4\""
+       "Printed": "\"other.txt\""
       }
      ]
     }
@@ -3828,52 +3960,50 @@
   ],
   "evidence": {
    "Points": {
-    "evaluated": 64,
+    "evaluated": 12,
     "raised": 0,
     "coverage": "Listed",
-    "verdict": "Supported"
+    "verdict": "Refuted"
    }
   },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:03+00:00",
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = readsNothing, st = withFiles, p = \"input.txt\""
+  },
+  "date": "2026-10-22T09:48:53+00:00",
   "interpreter": "v0.2",
   "hosts": [],
+  "kind": "Control",
   "regions": []
  },
  {
-  "law": "ProvisionalIsAssumed",
-  "cone": "sha256:80c61cf13bcd0beecf01d825914e1a60aa36ca2d13566c4f9444683103da7f55",
+  "law": "PrintChangesOnlyStdout",
+  "cone": "sha256:6359d8062917d1f51db828564a1a0e93b44f4dee7447fe295ed53166812e8174",
   "binding": [
    {
-    "parameter": "e",
-    "generator": "validators (Listed)",
-    "fingerprint": "sha256:2aa27ed67835b336a5cc13ddc9a5bc2b4c4d0d6fa8e34877dbf55345b6dd24e6"
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
    },
    {
-    "parameter": "n",
-    "generator": "externNames (Listed)",
-    "fingerprint": "sha256:fb2b5d3eb3b15730cb8f38525c45f5e92c63fc244dc2490f1f5ae08cef536aa5"
+    "parameter": "c",
+    "generator": "dropsFilesList (Listed)",
+    "fingerprint": "sha256:9c1630bfcce769ff9be729fda16ec7a8b9f8636ada4f8d80145bccd96e5acc76"
    },
    {
-    "parameter": "t",
-    "generator": "terms (Listed)",
-    "fingerprint": "sha256:1737aa7abdd820a17456e78e911374ef4a03c74b76544e320bf17da2575289b2,sha256:a57bd0226f642e7a499cb6a2c46fcc943243b656987e9bc914753b957d79c5dc"
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
    },
    {
-    "parameter": "route",
-    "generator": "routeStrings (Listed)",
-    "fingerprint": "sha256:fdbcfd3bfe9edfcef5f7edac553a2f351f6188645deec445efcffba20b93b267"
+    "parameter": "s",
+    "generator": "lines (Listed)",
+    "fingerprint": "sha256:5cb1d5d4343b2b0d2936ac50d927897493be918fd3fffd27c8fa8b4e0454aab4"
    },
    {
-    "parameter": "h",
-    "generator": "hashes (Listed)",
-    "fingerprint": "sha256:280e29a76fb8ae0b0c5f0bd4c335b616efd19891c62df8970190382a7a306336"
-   },
-   {
-    "parameter": "why",
-    "generator": "reasons (Listed)",
-    "fingerprint": "sha256:4f89dbba7d10e35038c8cea2368c678911515afd048804b653cc5f093561acb2"
+    "parameter": "p",
+    "generator": "places (Listed)",
+    "fingerprint": "sha256:adfdf2d93bf73ced797a6f6178f7a18a4686862092962591bd5ef05881a8987b"
    }
   ],
   "seed": 20261015,
@@ -3895,76 +4025,72 @@
   },
   "reach": [
    {
-    "parameter": "e",
+    "parameter": "S",
     "reach": {
      "Members": [
       {
-       "Printed": "validator"
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
       }
      ]
     }
    },
    {
-    "parameter": "n",
+    "parameter": "c",
     "reach": {
      "Members": [
       {
-       "Printed": "\"fit\""
+       "Printed": "dropsFiles"
       }
      ]
     }
    },
    {
-    "parameter": "t",
+    "parameter": "st",
     "reach": {
      "Members": [
       {
-       "Printed": "lawful"
+       "Printed": "blank"
       },
       {
-       "Printed": "lawless"
+       "Printed": "printed"
+      },
+      {
+       "Printed": "withFiles"
       }
      ]
     }
    },
    {
-    "parameter": "route",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"python:m.fit\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "h",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"sha256:h1\""
-      },
-      {
-       "Printed": "\"sha256:h2\""
-      },
-      {
-       "Printed": "\"sha256:h3\""
-      },
-      {
-       "Printed": "\"sha256:h4\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "why",
+    "parameter": "s",
     "reach": {
      "Members": [
       {
        "Printed": "\"\""
       },
       {
-       "Printed": "\"a fit to try before its laws are written\""
+       "Printed": "\"hello, world\""
+      },
+      {
+       "Printed": "\"two\\nlines\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"stdout\""
+      },
+      {
+       "Printed": "\"input.txt\""
+      },
+      {
+       "Printed": "\"empty.txt\""
+      },
+      {
+       "Printed": "\"other.txt\""
       }
      ]
     }
@@ -3972,47 +4098,45 @@
   ],
   "evidence": {
    "Points": {
-    "evaluated": 16,
+    "evaluated": 36,
     "raised": 0,
     "coverage": "Listed",
-    "verdict": "Supported"
+    "verdict": "Refuted"
    }
   },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:03+00:00",
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = dropsFiles, st = withFiles, s = \"\", p = \"input.txt\""
+  },
+  "date": "2026-10-22T09:48:53+00:00",
   "interpreter": "v0.2",
   "hosts": [],
+  "kind": "Control",
   "regions": []
  },
  {
-  "law": "NoLawNoGrade",
-  "cone": "sha256:be570c15fb53685e0556eb7401c0ff71bf34546a415071c6c99235d9da4c3179",
+  "law": "PrintAppendsALine",
+  "cone": "sha256:3484449f90aece477cab11d5b6ac43d45463ffca6601fc9287601c0a5fa8d4f9",
   "binding": [
    {
-    "parameter": "e",
-    "generator": "validators (Listed)",
-    "fingerprint": "sha256:2aa27ed67835b336a5cc13ddc9a5bc2b4c4d0d6fa8e34877dbf55345b6dd24e6"
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
    },
    {
-    "parameter": "n",
-    "generator": "externNames (Listed)",
-    "fingerprint": "sha256:fb2b5d3eb3b15730cb8f38525c45f5e92c63fc244dc2490f1f5ae08cef536aa5"
+    "parameter": "c",
+    "generator": "noNewlines (Listed)",
+    "fingerprint": "sha256:4d24f41ad54b545e06f1b5f04e52d864213a323d091e55fe849343ee138dca83"
    },
    {
-    "parameter": "t",
-    "generator": "terms (Listed)",
-    "fingerprint": "sha256:1737aa7abdd820a17456e78e911374ef4a03c74b76544e320bf17da2575289b2,sha256:a57bd0226f642e7a499cb6a2c46fcc943243b656987e9bc914753b957d79c5dc"
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
    },
    {
-    "parameter": "route",
-    "generator": "routeStrings (Listed)",
-    "fingerprint": "sha256:fdbcfd3bfe9edfcef5f7edac553a2f351f6188645deec445efcffba20b93b267"
-   },
-   {
-    "parameter": "h",
-    "generator": "hashes (Listed)",
-    "fingerprint": "sha256:280e29a76fb8ae0b0c5f0bd4c335b616efd19891c62df8970190382a7a306336"
+    "parameter": "s",
+    "generator": "lines (Listed)",
+    "fingerprint": "sha256:5cb1d5d4343b2b0d2936ac50d927897493be918fd3fffd27c8fa8b4e0454aab4"
    }
   ],
   "seed": 20261015,
@@ -4034,63 +4158,53 @@
   },
   "reach": [
    {
-    "parameter": "e",
+    "parameter": "S",
     "reach": {
      "Members": [
       {
-       "Printed": "validator"
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
       }
      ]
     }
    },
    {
-    "parameter": "n",
+    "parameter": "c",
     "reach": {
      "Members": [
       {
-       "Printed": "\"fit\""
+       "Printed": "noNewline"
       }
      ]
     }
    },
    {
-    "parameter": "t",
+    "parameter": "st",
     "reach": {
      "Members": [
       {
-       "Printed": "lawful"
+       "Printed": "blank"
       },
       {
-       "Printed": "lawless"
+       "Printed": "printed"
+      },
+      {
+       "Printed": "withFiles"
       }
      ]
     }
    },
    {
-    "parameter": "route",
+    "parameter": "s",
     "reach": {
      "Members": [
       {
-       "Printed": "\"python:m.fit\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "h",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"sha256:h1\""
+       "Printed": "\"\""
       },
       {
-       "Printed": "\"sha256:h2\""
+       "Printed": "\"hello, world\""
       },
       {
-       "Printed": "\"sha256:h3\""
-      },
-      {
-       "Printed": "\"sha256:h4\""
+       "Printed": "\"two\\nlines\""
       }
      ]
     }
@@ -4098,47 +4212,55 @@
   ],
   "evidence": {
    "Points": {
-    "evaluated": 8,
+    "evaluated": 9,
     "raised": 0,
     "coverage": "Listed",
-    "verdict": "Supported"
+    "verdict": "Refuted"
    }
   },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:03+00:00",
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = noNewline, st = blank, s = \"\""
+  },
+  "date": "2026-10-22T09:48:53+00:00",
   "interpreter": "v0.2",
   "hosts": [],
+  "kind": "Control",
   "regions": []
  },
  {
-  "law": "AppliedWhenSettled",
-  "cone": "sha256:0849375dc77554dfda7bccf439cd6da291328efa1ea05c49775f0aa5d500dceb",
+  "law": "WriteChangesOnlyItsPlace",
+  "cone": "sha256:05a2d94d934fb9b834e1cb3e0aa361df1b079878fbd6a0f2bdcbebe0b842144b",
   "binding": [
    {
-    "parameter": "e",
-    "generator": "validators (Listed)",
-    "fingerprint": "sha256:2aa27ed67835b336a5cc13ddc9a5bc2b4c4d0d6fa8e34877dbf55345b6dd24e6"
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
    },
    {
-    "parameter": "accepts",
-    "generator": "cutoff (Listed)",
-    "fingerprint": "sha256:eb173b343aafd45c3e6a8a34db968f0f6402bb7e91d0254560c67af5e2a82431,sha256:3d060440b5b434ed17df8267fade560123a0d41903bf425f7cb824e9723c886b"
+    "parameter": "s",
+    "generator": "keepsOnlyItList (Listed)",
+    "fingerprint": "sha256:2ba5d3dbf71a0d90f6290ac97151a0fde4fa6315e7b9d788d5dcd22f909bb08d"
    },
    {
-    "parameter": "assumes",
-    "generator": "assumedNames (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:09d401f77ccf8980ac8ede2b57211439983e7a9bd1f14a472e8c721ee9313d30"
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:dc56a88f24d28b83028c3e2feafb12e49912081267755101c454076fd509cb64"
    },
    {
-    "parameter": "r",
-    "generator": "routes (Listed)",
-    "fingerprint": "sha256:8fc5364a0f651c2cafa7195beba5acd4cdbf25a1da55888cce1673ca8491d4fd"
+    "parameter": "p",
+    "generator": "paths (Listed)",
+    "fingerprint": "sha256:063661d11a6a8c06a075fa5bfe9ac8f1b84c5b6edf657b778e2c462e852a8ca1"
    },
    {
-    "parameter": "h",
-    "generator": "hashes (Listed)",
-    "fingerprint": "sha256:280e29a76fb8ae0b0c5f0bd4c335b616efd19891c62df8970190382a7a306336"
+    "parameter": "c",
+    "generator": "contents (Listed)",
+    "fingerprint": "sha256:8dccd2bd4761a99f97aaebbe35b9a21d929c3eb0808fba4c361f1aea9f4e801a"
+   },
+   {
+    "parameter": "q",
+    "generator": "paths (Listed)",
+    "fingerprint": "sha256:063661d11a6a8c06a075fa5bfe9ac8f1b84c5b6edf657b778e2c462e852a8ca1"
    }
   ],
   "seed": 20261015,
@@ -4160,75 +4282,82 @@
   },
   "reach": [
    {
-    "parameter": "e",
+    "parameter": "S",
     "reach": {
      "Members": [
       {
-       "Printed": "validator"
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
       }
      ]
     }
    },
    {
-    "parameter": "accepts",
+    "parameter": "s",
     "reach": {
      "Members": [
       {
-       "Printed": "sampledCutoff"
-      },
-      {
-       "Printed": "assumedCutoff"
+       "Printed": "keepsOnlyIt"
       }
      ]
     }
    },
    {
-    "parameter": "assumes",
+    "parameter": "st",
     "reach": {
      "Members": [
       {
-       "Printed": "nil"
+       "Printed": "blank"
       },
       {
-       "Printed": "((cons \"guess\") nil)"
+       "Printed": "withFile"
       }
      ]
     }
    },
    {
-    "parameter": "r",
+    "parameter": "p",
     "reach": {
      "Members": [
       {
-       "Printed": "((((routeOf \"fit\") lawful) \"python:m.fit\") nothing)"
+       "Printed": "\"plot.png\""
       },
       {
-       "Printed": "((((routeOf \"raw\") lawless) \"python:m.raw\") nothing)"
+       "Printed": "\"plot.svg\""
       },
       {
-       "Printed": "((((routeOf \"guess\") lawful) \"python:m.guess\") (just \"exploring\"))"
-      },
-      {
-       "Printed": "((((routeOf \"rawGuess\") lawless) \"python:m.rawGuess\") (just \"exploring\"))"
+       "Printed": "\"other.txt\""
       }
      ]
     }
    },
    {
-    "parameter": "h",
+    "parameter": "c",
     "reach": {
      "Members": [
       {
-       "Printed": "\"sha256:h1\""
+       "Printed": "\"\""
       },
       {
-       "Printed": "\"sha256:h2\""
+       "Printed": "\"x\""
       },
       {
-       "Printed": "\"sha256:h3\""
+       "Printed": "\"PNG\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "q",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"plot.png\""
       },
       {
-       "Printed": "\"sha256:h4\""
+       "Printed": "\"plot.svg\""
+      },
+      {
+       "Printed": "\"other.txt\""
       }
      ]
     }
@@ -4236,17 +4365,152 @@
   ],
   "evidence": {
    "Points": {
-    "evaluated": 64,
+    "evaluated": 54,
     "raised": 0,
     "coverage": "Listed",
-    "verdict": "Supported"
+    "verdict": "Refuted"
    }
   },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:02+00:00",
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, s = keepsOnlyIt, st = withFile, p = \"plot.png\", c = \"\", q = \"other.txt\""
+  },
+  "date": "2026-10-22T09:08:49+00:00",
   "interpreter": "v0.2",
   "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "WriteThenRead",
+  "cone": "sha256:f8d3c10274486216322b47d7898afa3d4b08e156c316e5c3ff72d538af898da0",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "s",
+    "generator": "writesEmptyList (Listed)",
+    "fingerprint": "sha256:3a11e4811147065542b016e8d44c93539ae3954b5c497d506dfcf799b7fead86"
+   },
+   {
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:dc56a88f24d28b83028c3e2feafb12e49912081267755101c454076fd509cb64"
+   },
+   {
+    "parameter": "p",
+    "generator": "paths (Listed)",
+    "fingerprint": "sha256:063661d11a6a8c06a075fa5bfe9ac8f1b84c5b6edf657b778e2c462e852a8ca1"
+   },
+   {
+    "parameter": "c",
+    "generator": "contents (Listed)",
+    "fingerprint": "sha256:8dccd2bd4761a99f97aaebbe35b9a21d929c3eb0808fba4c361f1aea9f4e801a"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "writesEmpty"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blank"
+      },
+      {
+       "Printed": "withFile"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"plot.png\""
+      },
+      {
+       "Printed": "\"plot.svg\""
+      },
+      {
+       "Printed": "\"other.txt\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"\""
+      },
+      {
+       "Printed": "\"x\""
+      },
+      {
+       "Printed": "\"PNG\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 18,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, s = writesEmpty, st = blank, p = \"plot.png\", c = \"x\""
+  },
+  "date": "2026-10-22T09:08:48+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
   "regions": []
  },
  {

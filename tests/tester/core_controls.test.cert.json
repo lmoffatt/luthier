@@ -1,5 +1,512 @@
 [
  {
+  "law": "MetricCandidate",
+  "cone": "sha256:64d0bbfaf13079f7708a2ddfe526cc5f50161685dc3d215373deb336acf43e59",
+  "binding": [
+   {
+    "parameter": "candidate",
+    "generator": "klMetric (Listed)",
+    "fingerprint": "sha256:803b4abd1342f919b07298887b15e8221998d969696b804fb85eb70b9cde1c44"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related MetricProbability) ((structural MetricProbability)).eq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "candidate",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "klMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.125,
+      0.875
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      0.125,
+      0.875
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.125,
+      0.875
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 20261020)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Commutative MetricProbability Float64 (structural Float64) (candidate).d: candidate = klMetric, x = 0.6838633584892584, y = 0.2844699014800177"
+  },
+  "date": "2026-10-22T08:43:01+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 5
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 5
+   }
+  ]
+ },
+ {
+  "law": "MetricCandidate",
+  "cone": "sha256:64d0bbfaf13079f7708a2ddfe526cc5f50161685dc3d215373deb336acf43e59",
+  "binding": [
+   {
+    "parameter": "candidate",
+    "generator": "negativeMetric (Listed)",
+    "fingerprint": "sha256:d061fe9d70005c2ea243a4913b14848e5d4da0fe353584d12302376856847256"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related MetricProbability) ((structural MetricProbability)).eq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "candidate",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "negativeMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.125,
+      0.875
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      0.125,
+      0.875
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.125,
+      0.875
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 300,
+    "raised": 0,
+    "coverage": "(Drawn 20261020)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Triangular MetricProbability (candidate).d: candidate = negativeMetric, x = 0.6838633584892584, y = 0.2844699014800177, z = 0.7694892666997916"
+  },
+  "date": "2026-10-22T08:42:59+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 7
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 5
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "z boundary"
+    },
+    "n": 6
+   }
+  ]
+ },
+ {
+  "law": "MetricCandidate",
+  "cone": "sha256:64d0bbfaf13079f7708a2ddfe526cc5f50161685dc3d215373deb336acf43e59",
+  "binding": [
+   {
+    "parameter": "candidate",
+    "generator": "relativeMetric (Listed)",
+    "fingerprint": "sha256:64f76ebe12f90c8e7b3d5d5cfff5fb1c534418e62fa4562be5776613e1905fd5"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related MetricProbability) ((structural MetricProbability)).eq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "candidate",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "relativeMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.125,
+      0.875
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      0.125,
+      0.875
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.125,
+      0.875
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 20261020)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Commutative MetricProbability Float64 (structural Float64) (candidate).d: candidate = relativeMetric, x = 0.6838633584892584, y = 0.2844699014800177"
+  },
+  "date": "2026-10-22T08:42:57+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 5
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 5
+   }
+  ]
+ },
+ {
+  "law": "MetricCandidate",
+  "cone": "sha256:64d0bbfaf13079f7708a2ddfe526cc5f50161685dc3d215373deb336acf43e59",
+  "binding": [
+   {
+    "parameter": "candidate",
+    "generator": "squaredMetric (Listed)",
+    "fingerprint": "sha256:119e6cc3a00676e86ede29ef572d1c9637665961605593c354073a60edb26b3f"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related MetricProbability) ((structural MetricProbability)).eq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "candidate",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "squaredMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.125,
+      0.875
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      0.125,
+      0.875
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.125,
+      0.875
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 300,
+    "raised": 0,
+    "coverage": "(Drawn 20261020)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Triangular MetricProbability (candidate).d: candidate = squaredMetric, x = 0.6137608895864568, y = 0.4846150801894034, z = 0.46977808045022595"
+  },
+  "date": "2026-10-22T08:42:54+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 7
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 5
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "z boundary"
+    },
+    "n": 6
+   }
+  ]
+ },
+ {
   "law": "RefuteListCons",
   "cone": "sha256:8d14a7e0600f7c7956aedd637992fc8b10792e3be2fa9d594180e7d683ed2124",
   "binding": [],
@@ -198,513 +705,6 @@
   "hosts": [],
   "kind": "Control",
   "regions": []
- },
- {
-  "law": "MetricCandidate",
-  "cone": "sha256:64d0bbfaf13079f7708a2ddfe526cc5f50161685dc3d215373deb336acf43e59",
-  "binding": [
-   {
-    "parameter": "candidate",
-    "generator": "klMetric (Listed)",
-    "fingerprint": "sha256:803b4abd1342f919b07298887b15e8221998d969696b804fb85eb70b9cde1c44"
-   },
-   {
-    "parameter": "p",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related MetricProbability) ((structural MetricProbability)).eq)",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   },
-   {
-    "parameter": "z",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   }
-  ],
-  "seed": 20261020,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "candidate",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "klMetric"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.125,
-      0.875
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      0.125,
-      0.875
-     ]
-    }
-   },
-   {
-    "parameter": "z",
-    "reach": {
-     "Interval": [
-      0.125,
-      0.875
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 200,
-    "raised": 0,
-    "coverage": "(Drawn 20261020)",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "Commutative MetricProbability Float64 (structural Float64) (candidate).d: candidate = klMetric, x = 0.6838633584892584, y = 0.2844699014800177"
-  },
-  "date": "2026-10-21T08:11:25+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.12.9"
-   ],
-   [
-    "python:math.exp",
-    "python 3.12.9"
-   ],
-   [
-    "python:math.log",
-    "python 3.12.9"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.12.9"
-   ]
-  ],
-  "kind": "Control",
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "x boundary"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "y boundary"
-    },
-    "n": 5
-   }
-  ]
- },
- {
-  "law": "MetricCandidate",
-  "cone": "sha256:64d0bbfaf13079f7708a2ddfe526cc5f50161685dc3d215373deb336acf43e59",
-  "binding": [
-   {
-    "parameter": "candidate",
-    "generator": "negativeMetric (Listed)",
-    "fingerprint": "sha256:d061fe9d70005c2ea243a4913b14848e5d4da0fe353584d12302376856847256"
-   },
-   {
-    "parameter": "p",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related MetricProbability) ((structural MetricProbability)).eq)",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   },
-   {
-    "parameter": "z",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   }
-  ],
-  "seed": 20261020,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "candidate",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "negativeMetric"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.125,
-      0.875
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      0.125,
-      0.875
-     ]
-    }
-   },
-   {
-    "parameter": "z",
-    "reach": {
-     "Interval": [
-      0.125,
-      0.875
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 300,
-    "raised": 0,
-    "coverage": "(Drawn 20261020)",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "Triangular MetricProbability (candidate).d: candidate = negativeMetric, x = 0.6838633584892584, y = 0.2844699014800177, z = 0.7694892666997916"
-  },
-  "date": "2026-10-21T06:06:07+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "x boundary"
-    },
-    "n": 7
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "y boundary"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "z boundary"
-    },
-    "n": 6
-   }
-  ]
- },
- {
-  "law": "MetricCandidate",
-  "cone": "sha256:64d0bbfaf13079f7708a2ddfe526cc5f50161685dc3d215373deb336acf43e59",
-  "binding": [
-   {
-    "parameter": "candidate",
-    "generator": "relativeMetric (Listed)",
-    "fingerprint": "sha256:64f76ebe12f90c8e7b3d5d5cfff5fb1c534418e62fa4562be5776613e1905fd5"
-   },
-   {
-    "parameter": "p",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related MetricProbability) ((structural MetricProbability)).eq)",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   },
-   {
-    "parameter": "z",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   }
-  ],
-  "seed": 20261020,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "candidate",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "relativeMetric"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.125,
-      0.875
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      0.125,
-      0.875
-     ]
-    }
-   },
-   {
-    "parameter": "z",
-    "reach": {
-     "Interval": [
-      0.125,
-      0.875
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 200,
-    "raised": 0,
-    "coverage": "(Drawn 20261020)",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "Commutative MetricProbability Float64 (structural Float64) (candidate).d: candidate = relativeMetric, x = 0.6838633584892584, y = 0.2844699014800177"
-  },
-  "date": "2026-10-21T06:06:03+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "x boundary"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "y boundary"
-    },
-    "n": 5
-   }
-  ]
- },
- {
-  "law": "MetricCandidate",
-  "cone": "sha256:64d0bbfaf13079f7708a2ddfe526cc5f50161685dc3d215373deb336acf43e59",
-  "binding": [
-   {
-    "parameter": "candidate",
-    "generator": "squaredMetric (Listed)",
-    "fingerprint": "sha256:119e6cc3a00676e86ede29ef572d1c9637665961605593c354073a60edb26b3f"
-   },
-   {
-    "parameter": "p",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related MetricProbability) ((structural MetricProbability)).eq)",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   },
-   {
-    "parameter": "z",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricProbability",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   }
-  ],
-  "seed": 20261020,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "candidate",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "squaredMetric"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.125,
-      0.875
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      0.125,
-      0.875
-     ]
-    }
-   },
-   {
-    "parameter": "z",
-    "reach": {
-     "Interval": [
-      0.125,
-      0.875
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 300,
-    "raised": 0,
-    "coverage": "(Drawn 20261020)",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "Triangular MetricProbability (candidate).d: candidate = squaredMetric, x = 0.6137608895864568, y = 0.4846150801894034, z = 0.46977808045022595"
-  },
-  "date": "2026-10-21T06:05:59+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "x boundary"
-    },
-    "n": 7
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "y boundary"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "z boundary"
-    },
-    "n": 6
-   }
-  ]
  },
  {
   "law": "RefuteFreeCombine",

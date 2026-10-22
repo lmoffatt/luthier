@@ -1,5 +1,320 @@
 [
  {
+  "law": "ListDistinctness",
+  "cone": "sha256:3030c3ee7ec5cf5232274f5302d762354c1156bd139862913427b0eba9b8259c",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "testedType (Listed)",
+    "fingerprint": "sha256:42d59f6a57a814c8975856c641c318f20a985ec9eb4c1481a1f2b19e0f054907"
+   },
+   {
+    "parameter": "candidate",
+    "generator": "distinctPredicate (Listed)",
+    "fingerprint": "sha256:f12a30878f30e98618333702dc2666279fe0091b6bdc0f1260297e485db33781"
+   },
+   {
+    "parameter": "xs",
+    "generator": "values (Listed)",
+    "fingerprint": "sha256:574c2a0c9e4e522fb1704d0df30a68931fdd0b2599578f98127f01c9f8dd39fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "testedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "candidate",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "distinctPredicate"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "xs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons 0) nil)"
+      },
+      {
+       "Printed": "((cons 1) nil)"
+      },
+      {
+       "Printed": "((cons 1) ((cons 2) nil))"
+      },
+      {
+       "Printed": "((cons 2) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 1) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 3) ((cons 1) ((cons 2) ((cons 1) nil))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 7,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = testedType, candidate = distinctPredicate, xs = ((cons 1) ((cons 1) nil))"
+  },
+  "date": "2026-10-22T08:50:08+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "ListEmptiness",
+  "cone": "sha256:b10d89ced501df150aa249b239b892595b095d4c3e0a3557df95921c31475987",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "testedType (Listed)",
+    "fingerprint": "sha256:42d59f6a57a814c8975856c641c318f20a985ec9eb4c1481a1f2b19e0f054907"
+   },
+   {
+    "parameter": "candidate",
+    "generator": "emptyPredicate (Listed)",
+    "fingerprint": "sha256:8a5f50c451905680f47cdd2b08827548237cc667e465e19ad5989aef8b85ec02"
+   },
+   {
+    "parameter": "xs",
+    "generator": "values (Listed)",
+    "fingerprint": "sha256:574c2a0c9e4e522fb1704d0df30a68931fdd0b2599578f98127f01c9f8dd39fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "testedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "candidate",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "emptyPredicate"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "xs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons 0) nil)"
+      },
+      {
+       "Printed": "((cons 1) nil)"
+      },
+      {
+       "Printed": "((cons 1) ((cons 2) nil))"
+      },
+      {
+       "Printed": "((cons 2) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 1) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 3) ((cons 1) ((cons 2) ((cons 1) nil))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 7,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = testedType, candidate = emptyPredicate, xs = ((cons 0) nil)"
+  },
+  "date": "2026-10-22T08:50:08+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "ReverseReindexes",
+  "cone": "sha256:dcb68236e88f2ab9ab2e8b64045722986fba925864443dd5915a00a738c26f64",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "testedType (Listed)",
+    "fingerprint": "sha256:42d59f6a57a814c8975856c641c318f20a985ec9eb4c1481a1f2b19e0f054907"
+   },
+   {
+    "parameter": "candidate",
+    "generator": "fixedHead (Listed)",
+    "fingerprint": "sha256:fe1f273c2ea4f6d236f27f31644d66962620a8cba097857bd7dea222b11a927b"
+   },
+   {
+    "parameter": "xs",
+    "generator": "values (Listed)",
+    "fingerprint": "sha256:574c2a0c9e4e522fb1704d0df30a68931fdd0b2599578f98127f01c9f8dd39fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "testedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "candidate",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fixedHead"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "xs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons 0) nil)"
+      },
+      {
+       "Printed": "((cons 1) nil)"
+      },
+      {
+       "Printed": "((cons 1) ((cons 2) nil))"
+      },
+      {
+       "Printed": "((cons 2) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 1) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 3) ((cons 1) ((cons 2) ((cons 1) nil))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 7,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = testedType, candidate = fixedHead, xs = ((cons 1) ((cons 2) nil))"
+  },
+  "date": "2026-10-22T08:50:07+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
   "law": "MapKeepsLength",
   "cone": "sha256:e0fe8ef87a32d96db50da783feb7a52a25d8281a57eeeba7fc7526474e958ef9",
   "binding": [
@@ -456,246 +771,6 @@
      "name": "one element"
     },
     "n": 218
-   }
-  ]
- },
- {
-  "law": "ListDistinctness",
-  "cone": "sha256:3030c3ee7ec5cf5232274f5302d762354c1156bd139862913427b0eba9b8259c",
-  "binding": [
-   {
-    "parameter": "A",
-    "generator": "testedType (Listed)",
-    "fingerprint": "sha256:42d59f6a57a814c8975856c641c318f20a985ec9eb4c1481a1f2b19e0f054907"
-   },
-   {
-    "parameter": "candidate",
-    "generator": "distinctPredicate (Listed)",
-    "fingerprint": "sha256:3682dd98ed96e98e172bf60e74b7b2f3cebaf1326e4054cf6959a7e3cbbe5cf1"
-   },
-   {
-    "parameter": "xs",
-    "generator": "values (Listed)",
-    "fingerprint": "sha256:574c2a0c9e4e522fb1704d0df30a68931fdd0b2599578f98127f01c9f8dd39fa"
-   }
-  ],
-  "seed": 20261021,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "A",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "testedType"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "candidate",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "distinctPredicate"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "xs",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons 0) nil)"
-      },
-      {
-       "Printed": "((cons 1) nil)"
-      },
-      {
-       "Printed": "((cons 1) ((cons 2) nil))"
-      },
-      {
-       "Printed": "((cons 2) ((cons 1) nil))"
-      },
-      {
-       "Printed": "((cons 1) ((cons 1) nil))"
-      },
-      {
-       "Printed": "((cons 3) ((cons 1) ((cons 2) ((cons 1) nil))))"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 7,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "A = testedType, candidate = distinctPredicate, xs = ((cons 1) ((cons 1) nil))"
-  },
-  "date": "2026-10-21T08:53:43+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": [
-   {
-    "region": {
-     "source": "FromType",
-     "name": "empty"
-    },
-    "n": 1
-   },
-   {
-    "region": {
-     "source": "FromType",
-     "name": "one element"
-    },
-    "n": 2
-   }
-  ]
- },
- {
-  "law": "ListEmptiness",
-  "cone": "sha256:b10d89ced501df150aa249b239b892595b095d4c3e0a3557df95921c31475987",
-  "binding": [
-   {
-    "parameter": "A",
-    "generator": "testedType (Listed)",
-    "fingerprint": "sha256:42d59f6a57a814c8975856c641c318f20a985ec9eb4c1481a1f2b19e0f054907"
-   },
-   {
-    "parameter": "candidate",
-    "generator": "emptyPredicate (Listed)",
-    "fingerprint": "sha256:73509c09c5f7703905d041970d7d310ff996665e67709af64f823059ba6dff45"
-   },
-   {
-    "parameter": "xs",
-    "generator": "values (Listed)",
-    "fingerprint": "sha256:574c2a0c9e4e522fb1704d0df30a68931fdd0b2599578f98127f01c9f8dd39fa"
-   }
-  ],
-  "seed": 20261021,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "A",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "testedType"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "candidate",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "emptyPredicate"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "xs",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons 0) nil)"
-      },
-      {
-       "Printed": "((cons 1) nil)"
-      },
-      {
-       "Printed": "((cons 1) ((cons 2) nil))"
-      },
-      {
-       "Printed": "((cons 2) ((cons 1) nil))"
-      },
-      {
-       "Printed": "((cons 1) ((cons 1) nil))"
-      },
-      {
-       "Printed": "((cons 3) ((cons 1) ((cons 2) ((cons 1) nil))))"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 7,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "A = testedType, candidate = emptyPredicate, xs = ((cons 0) nil)"
-  },
-  "date": "2026-10-21T08:53:43+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": [
-   {
-    "region": {
-     "source": "FromType",
-     "name": "empty"
-    },
-    "n": 1
-   },
-   {
-    "region": {
-     "source": "FromType",
-     "name": "one element"
-    },
-    "n": 2
    }
   ]
  },
@@ -2990,126 +3065,6 @@
   "date": "2026-10-21T08:45:13+00:00",
   "interpreter": "v0.2",
   "hosts": [],
-  "regions": [
-   {
-    "region": {
-     "source": "FromType",
-     "name": "empty"
-    },
-    "n": 1
-   },
-   {
-    "region": {
-     "source": "FromType",
-     "name": "one element"
-    },
-    "n": 2
-   }
-  ]
- },
- {
-  "law": "ReverseReindexes",
-  "cone": "sha256:dcb68236e88f2ab9ab2e8b64045722986fba925864443dd5915a00a738c26f64",
-  "binding": [
-   {
-    "parameter": "A",
-    "generator": "testedType (Listed)",
-    "fingerprint": "sha256:42d59f6a57a814c8975856c641c318f20a985ec9eb4c1481a1f2b19e0f054907"
-   },
-   {
-    "parameter": "candidate",
-    "generator": "fixedHead (Listed)",
-    "fingerprint": "sha256:c72b896a4596594759afe652c57e12e75e2b178448ee461b52ef26d6732352f3"
-   },
-   {
-    "parameter": "xs",
-    "generator": "values (Listed)",
-    "fingerprint": "sha256:574c2a0c9e4e522fb1704d0df30a68931fdd0b2599578f98127f01c9f8dd39fa"
-   }
-  ],
-  "seed": 20261021,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "A",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "testedType"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "candidate",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "fixedHead"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "xs",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons 0) nil)"
-      },
-      {
-       "Printed": "((cons 1) nil)"
-      },
-      {
-       "Printed": "((cons 1) ((cons 2) nil))"
-      },
-      {
-       "Printed": "((cons 2) ((cons 1) nil))"
-      },
-      {
-       "Printed": "((cons 1) ((cons 1) nil))"
-      },
-      {
-       "Printed": "((cons 3) ((cons 1) ((cons 2) ((cons 1) nil))))"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 7,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "A = testedType, candidate = fixedHead, xs = ((cons 1) ((cons 2) nil))"
-  },
-  "date": "2026-10-21T08:45:13+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
   "regions": [
    {
     "region": {

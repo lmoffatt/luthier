@@ -1,7 +1,7 @@
 [
  {
   "law": "ImageSeesTheTitle",
-  "cone": "sha256:129b3cdc9cc371d9b5073c8f677f589e522b50fe3a615b3c0aab619fac8f9292",
+  "cone": "sha256:4fb5d78f1b8c17298a0908b81c2bd986870bfcbe986892e678daed453924d75d",
   "binding": [
    {
     "parameter": "S",
@@ -11,7 +11,7 @@
    {
     "parameter": "d",
     "generator": "noTitleList (Listed)",
-    "fingerprint": "sha256:6df5817ba0a9bbe4ca5bc5d426f07ab6c0d0bec756e3c4f17d6e3689e1627762"
+    "fingerprint": "sha256:3da40df0511ec0348bd71c0eaa30c4c5ad7dd3b28e6772e99b745de059be772b"
    },
    {
     "parameter": "p",
@@ -125,7 +125,7 @@
   "outcome": {
    "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = noTitle, p = (pointsAndLine (parsed obsText)), s = \"\", ext = \"png\""
   },
-  "date": "2026-10-22T04:18:04+00:00",
+  "date": "2026-10-22T09:08:14+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -150,7 +150,7 @@
  },
  {
   "law": "LayerOrderInvariant",
-  "cone": "sha256:7769762be40e4a2b3c3ed3a1e66710493c32fe2bfe7b7f2830bf1a1c1e33fcf1",
+  "cone": "sha256:81fe8c6eafc3a8d634bf6445232e3271edb9cd2644812fb5f9cacc706758d7b6",
   "binding": [
    {
     "parameter": "S",
@@ -160,7 +160,7 @@
    {
     "parameter": "d",
     "generator": "layerOrderedList (Listed)",
-    "fingerprint": "sha256:2babb8d77e5811ee13765390b4d5dad108fb82acdaea42d779244cfb72bddcd6"
+    "fingerprint": "sha256:bee7f85313828d2f9364e013026c1b7a4da58061d789c40967e96468a4d4a1ea"
    },
    {
     "parameter": "margin",
@@ -289,7 +289,7 @@
   "outcome": {
    "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = layerOrdered, margin = 0.05, p = ((apartLayers (parsed obsText)) (parsed farText)), i = 0, ext = \"png\""
   },
-  "date": "2026-10-22T04:17:34+00:00",
+  "date": "2026-10-22T09:07:39+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -322,7 +322,7 @@
  },
  {
   "law": "RowOrderInvariant",
-  "cone": "sha256:cc43aab0323d1481f3970bc26378f8bc6cb6c11476c3039bbf13d928574657d8",
+  "cone": "sha256:86f6489644d34904662b6517e4bd6b36d3804f39e3e29bb9685c482c7d05f32e",
   "binding": [
    {
     "parameter": "S",
@@ -332,7 +332,7 @@
    {
     "parameter": "d",
     "generator": "firstRowApartList (Listed)",
-    "fingerprint": "sha256:346bd177022f985b91db7b5c418677d2b721e7de72db64c0ed8b4a731dfc2392"
+    "fingerprint": "sha256:b5a6238864f9ba7b607093606cc037e5f1147500b50a66f574ae09329c74eedb"
    },
    {
     "parameter": "p",
@@ -352,7 +352,7 @@
    {
     "parameter": "f",
     "generator": "perms (Listed)",
-    "fingerprint": "sha256:9d6d71031adf0265c00be0ce44768d26ec069e2a2a9e8ff7da4f8d4d4424d07d"
+    "fingerprint": "sha256:53e8beeaa4f1f78ae7615801f324e6c1c9977b7e8b52baeb7fd39abc28476ea2,sha256:6b01cbc478fbab1ce0387481a93cae945b97b36d1b67c29c91efd20bef41b494,sha256:412ec80441153d65ec59bcc5831dbb6f3380f3864d2815de76378eb9708e3f82,sha256:fd15b504560802d52ad7b2db3f7ff80b40624819c37478eb0955b6c2c96249ce,sha256:fff8bd76031a879acced835faa1344a228eac6a8924260206bfe3ae7ae61b3e5,sha256:051ac7764f93d36dd520419e7f5e03a3d20ff91d6ba790e156db9e702fd3bd10"
    },
    {
     "parameter": "ext",
@@ -442,22 +442,22 @@
     "reach": {
      "Members": [
       {
-       "Printed": "fn (r : (Fin 3)) { r }"
+       "Printed": "permIdentity"
       },
       {
-       "Printed": "fn (r : (Fin 3)) { match ((== r) 0) { true -> 1; false -> match ((== r) 1) { true -> 0; false -> 2 } } }"
+       "Printed": "permSwapFirst"
       },
       {
-       "Printed": "fn (r : (Fin 3)) { match ((== r) 0) { true -> 0; false -> match ((== r) 1) { true -> 2; false -> 1 } } }"
+       "Printed": "permSwapLast"
       },
       {
-       "Printed": "fn (r : (Fin 3)) { match ((== r) 0) { true -> 2; false -> match ((== r) 1) { true -> 1; false -> 0 } } }"
+       "Printed": "permReverse"
       },
       {
-       "Printed": "fn (r : (Fin 3)) { match ((== r) 0) { true -> 1; false -> match ((== r) 1) { true -> 2; false -> 0 } } }"
+       "Printed": "permRotateUp"
       },
       {
-       "Printed": "fn (r : (Fin 3)) { match ((== r) 0) { true -> 2; false -> match ((== r) 1) { true -> 0; false -> 1 } } }"
+       "Printed": "permRotateDown"
       }
      ]
     }
@@ -486,9 +486,9 @@
   },
   "grade": null,
   "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = firstRowApart, p = (pointsAndLine (parsed obsText)), name = \"obs\", t = (parsed obsText), f = fn (r : (Fin 3)) { match ((== r) 0) { true -> 1; false -> match ((== r) 1) { true -> 0; false -> 2 } } }, ext = \"png\""
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = firstRowApart, p = (pointsAndLine (parsed obsText)), name = \"obs\", t = (parsed obsText), f = permSwapFirst, ext = \"png\""
   },
-  "date": "2026-10-22T04:15:56+00:00",
+  "date": "2026-10-22T09:05:53+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -513,7 +513,7 @@
  },
  {
   "law": "ImageOfTheValue",
-  "cone": "sha256:53c0082067f562e103d7353f70fed0e286c54bb7294dc44cbf9c040cc91dff33",
+  "cone": "sha256:1a889317c8af89d80592268cbf386c6fd7edabf7eed169f33f96196f15134658",
   "binding": [
    {
     "parameter": "S",
@@ -523,7 +523,7 @@
    {
     "parameter": "d",
     "generator": "readsOffSchemaList (Listed)",
-    "fingerprint": "sha256:26bf64ecbbf8eb058357e3908e66bf46c477589c740b2006b524913f299cb550"
+    "fingerprint": "sha256:04d85409d0b3d0250b01a712d5cb06f6da6d89d13c9513867d42d542a81d6f6a"
    },
    {
     "parameter": "p",
@@ -625,7 +625,7 @@
   "outcome": {
    "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = readsOffSchema, p = (pointsAndLine (parsed obsText)), q = (pointsAndLine (leaky (parsed obsText))), ext = \"png\""
   },
-  "date": "2026-10-22T04:15:51+00:00",
+  "date": "2026-10-22T09:05:48+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -650,7 +650,7 @@
  },
  {
   "law": "FormatByExtension",
-  "cone": "sha256:96d47db9a3cb34c95a6b96d01c718c0697adc11e4acaf5988867e007a045be4e",
+  "cone": "sha256:cee80a180c0f55870c4adeb4d626367795f14c5feceaed3727cfa772d46ae23f",
   "binding": [
    {
     "parameter": "S",
@@ -660,7 +660,7 @@
    {
     "parameter": "d",
     "generator": "pngAlwaysList (Listed)",
-    "fingerprint": "sha256:be2468dfcb6eb9bb2185ad295ac81d4f20b43112cf9391ccd84380d2dd19b54f"
+    "fingerprint": "sha256:865af3664ddc5abb0afb650b7a3bad1513d797f385d47eaf6babb23651128964"
    },
    {
     "parameter": "p",
@@ -756,7 +756,7 @@
   "outcome": {
    "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = pngAlways, p = (pointsAndLine (parsed obsText)), ext = \"svg\""
   },
-  "date": "2026-10-22T04:15:37+00:00",
+  "date": "2026-10-22T09:05:33+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -781,7 +781,7 @@
  },
  {
   "law": "FileExistsAfter",
-  "cone": "sha256:38e86cd190321bea44ba98616093672806cdbf53f30d6599150d724b0f1eedfb",
+  "cone": "sha256:1830f0c9785b9cb759b025b62a8f166675888837045abf1e7577adadd4f52da7",
   "binding": [
    {
     "parameter": "S",
@@ -791,7 +791,7 @@
    {
     "parameter": "d",
     "generator": "noFileList (Listed)",
-    "fingerprint": "sha256:01a07a5f0d7ae48a9a81a44b14d0e1ba372ae444070aaad3b0b6bb5403371023"
+    "fingerprint": "sha256:0287bb3fffcee99553b5d5d0d2146c67ae876efcdf9bb665965ce924739be653"
    },
    {
     "parameter": "p",
@@ -920,7 +920,7 @@
   "outcome": {
    "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = noFile, p = (pointsAndLine (parsed obsText)), stem = \"plot\", ext = \"png\", st = blank"
   },
-  "date": "2026-10-22T04:15:05+00:00",
+  "date": "2026-10-22T09:05:00+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
