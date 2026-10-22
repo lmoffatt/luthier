@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 1ac3a2711a26, commit 0a8c70d) by `scripts/project_principles.py` (project_principles v2) on 2026-10-20; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 f7e258cf763a, commit 0a8c70d (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-22; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -322,11 +322,33 @@ object is consumed or stable: kept; with G1 for what is derived (the former L6).
   parameters of each level it touches coming from the demand (clause 17). Infinity is potential, as
   Haskell implements it: no limit for whoever walks the road, and each computation comes with its
   limits (D-2026-10-18-c). [proposed]
+- L5.22 (His idea of 2026-10-22; "derivation" is GPT's word for his "historia del cómputo") A value
+  has a derivation: the account of how it was obtained, kept to what is semantically relevant, the
+  facts that change what a law or a demand can say of the value: the inputs it descends from, the
+  models and specimens that produced it, the bridges it crossed, the certificates its route relied on
+  and the roots of trust it rests on (L11.9). (The model's reading) It is the trace of the run (`09`
+  §7: the operations with their results and costs) taken up to his equality of consequence, under
+  which two traces are equal when no observation the theories name tells them apart, so `(a + b) *
+  1.0` and `a + b` have one derivation where no law separates them (GPT's example); it is not the
+  trace itself, and it is not a certificate (L10.13). What clause 6 identifies a result by is the
+  identity of its derivation, and the derivation is that key read as a value: the record already keeps
+  it, and this clause names what it keeps. [proposed]
+- L5.23 (GPT's rule, on his idea) A value carries no more of its derivation than the demand asks:
+  the demand selects the projection of the derivation that is materialized and carried, as it selects
+  the cone (clause 13) and the decoration (clause 4), so a `Float64` stays a `Float64` until a demand
+  asks for the value with its derivation, one more decoration beside the error, the derivative and the
+  certificate (Terms). (The model's) A requirement on the derivation (no `assumed` dependence, descent
+  from a calibrated input, only bridges certified within a bound, GPT's cases) is a law over it, and
+  gives the certified subtype of L8.5, demandable like any type. What is not carried is not erased
+  (clause 14). The identity of clause 6 is what exists today (spec 8.S8); the decoration waits with
+  the others for O5, and the quotient of clause 22 for O13. [proposed]
 Example: doubling positives is positive only when positivity is demanded and derivable, sin of
 positives is only Real because no law composes (clause 15).
-References: spec 3; D-2026-10-11-c, D-2026-10-11-i, D-2026-10-12-h, D-2026-10-12-n.
-Rests on: O1 (the error decoration), O3 (the world as a value), O5, O8, O12.
-Status: settled; clause 4 proposed on his note on Terms; clauses 17 and 18 proposed.
+References: spec 3; D-2026-10-11-c, D-2026-10-11-i, D-2026-10-12-h, D-2026-10-12-n, D-2026-10-22-b.
+Rests on: O1 (the error decoration), O3 (the world as a value), O5, O8, O12, O13 (the derivation's
+representation and quotient).
+Status: settled; clause 4 proposed on his note on Terms; clauses 17 and 18 proposed; clauses 22 and
+23 proposed, his idea of 2026-10-22 (D-2026-10-22-b).
 
 **L6. One function, many specimens, chosen by maximizing the performance the demander chooses, along
 certified identities.**
@@ -672,13 +694,25 @@ cost) and G0, the demand (what the demand requires of the evidence is its own).
   model for a law of its theory, the file that states an identity for the identity; a file that only
   gathers evidence (a test program) keeps no store. So each repository keeps its own (P7), and no
   entry is written in two partitions (D-2026-10-16-a). [proposed]
+- L10.13 (GPT's cut, on his idea of 2026-10-22) A certificate is evidence about a law; a derivation
+  (L5.22) is the account of one value; the two refer to each other and neither absorbs the other. A
+  derivation names the certificates its route relied on, by hash (clause 4); a certificate names no
+  result, since it is keyed by the cone and the binding and not by the runs it served, so no cycle
+  runs between them (the model's). What a run observes of one result (the residual on these inputs,
+  the error a crossing added) is evidence about that realization: it belongs to its derivation and to
+  the run's record (spec 12.S18), and it changes no certificate of the model, by the cut of
+  D-2026-10-22-a read one level down, evidence serving what it is about: a pass its model, a control
+  the law, a run's observation its result. So the certificate of a model, the evidence of one
+  computation and the derivation of its value are three records, and no object carries the three.
+  [proposed]
 Example: with B's laws only `assumed`, A inherits the cost of an assumption and nothing more; a
 lookup table equal to the native on a grid is certified on the grid and nowhere else (clause 7).
-References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-q, D-2026-10-12-r, D-2026-10-12-t; P3, P11.
-Rests on: O1 (the conversion and the algebra), O3 (the opt-out's syntax).
+References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-q, D-2026-10-12-r, D-2026-10-12-t,
+D-2026-10-22-a, D-2026-10-22-b; P3, P11.
+Rests on: O1 (the conversion and the algebra), O3 (the opt-out's syntax), O13 (the derivation).
 Status: proposed in draft 11; clauses 3 and 9 settled on his marks (D-2026-10-12-w); clauses 4 to 6
 settled, moved from L5 and L11; clause 2 reworded on D-2026-10-12-t; clause 7 carries his correction
-of draft 7 in grades; clause 10 settled (D-2026-10-13-c, -e).
+of draft 7 in grades; clause 10 settled (D-2026-10-13-c, -e); clause 13 proposed (D-2026-10-22-b).
 
 **L11. Luthier orchestrates other languages: an extern is a specimen certified by its laws, and what
 does not follow Luthier's way lives in a world.**
@@ -726,10 +760,34 @@ world it runs in) with L4; delegation (now L9.7) from G1 and G2; transport (now 
   is, a file by re-reading it, a pipe by its own copy, a terminal by the bytes it accepted. Which kind
   of feedback each place has, and the grade an action there earns by it, is open (D-2026-10-16-n).
   [proposed]
-References: D-2026-10-11-m; W5, W10.
-Rests on: O3 (the opt-out's syntax; the world as a value).
+- L11.10 (His idea of 2026-10-22) A value crosses a bridge without losing what Luthier knows of it:
+  a crossing changes the representation, the host or the place of execution, and the value's theory,
+  its evidence and its derivation (L5.22) stay on Luthier's side (clause 1) and go through with it, so
+  the consumer need not read the producer's language, only the type and the evidence that come with
+  the value (GPT's reading). A bridge declares what it preserves, what it adds (the error and the
+  resources of the conversion, clause 5), what it assumes (a root of trust, clause 9) and what it can
+  no longer certify; what it adds enters the derivation, which across hosts names each specimen, each
+  bridge and each host's version and platform where they enter the identity (clause 4, L5.6). What is
+  lost is lost by a declared bridge, never by the crossing itself (GPT's invariant). [proposed]
+- L11.11 (His image, "director de orquesta"; the mechanics GPT's) What "orchestrates" means: the
+  hosts compute, and may compute most of a program; Luthier states the theories, knows which host
+  implementations are their specimens (clause 2), keeps the evidence for the claim (L10), places the
+  bridges (clause 5), composes the derivation across them (clause 10) and answers a demand with a
+  realization that meets the theory, the evidence and the tolerance asked (L5, L6). Of a value that
+  crossed languages, what it means, how it was obtained, what it assumed and which laws justify using
+  it can be answered, to the extent demanded and certified. The composition of derivations across
+  hosts and the planner's reading of them come with the planner, after evidence (D-2026-10-13-ad).
+  [proposed]
+Example: raw measurements calibrated in Python, fitted in Julia, solved in LAPACK and returned
+(GPT's chain): the estimate's derivation names the three specimens with their versions, the two
+bridges with the error each added, the certificates each step relied on and the roots of trust; a
+demand carries of it what it asks for, and a second specimen of one step changes the derivation and
+not the meaning (clauses 10 and 11).
+References: D-2026-10-11-m, D-2026-10-22-b; W5, W10.
+Rests on: O3 (the opt-out's syntax; the world as a value), O13 (the derivation and what a bridge
+declares).
 Status: settled by his correction of draft 7; clause 6 candidate, reworded; clause 7 settled
-(D-2026-10-13-g).
+(D-2026-10-13-g); clauses 10 and 11 proposed, his idea of 2026-10-22 (D-2026-10-22-b).
 
 ### Under G2, cost
 
@@ -860,6 +918,14 @@ blocks; the done and implemented items are in the record's drafts table.
   R8), functions over `Fin n` not enumerated by `exhaustive` (to fix). Blocks L7.
 - **O12** (spec) The identity of a result in the memo (L5.6) and `plan.lut` as its carrier.
   Blocks L5.6.
+- **O13** (language) The derivation of a value (L5.22): its representation, a decoration the demand
+  asks for (L5.4, O5), a type indexed by a summary of it, or a value paired with a reference, by
+  hash, to an immutable graph with the facts a demand needs reflected into the type; how the
+  quotient by equality of consequence (`09` §7) is computed, which facts two derivations must share
+  to be one for a demand, and whether a certified summary may stand for an ancestry discarded; and
+  the form of a bridge's declaration of what it preserves and loses (L11.10). Raised by GPT on his
+  idea of 2026-10-22 (`record/IA/gpt-2026-10-22/`); the specification does not force the answer.
+  Blocks L5.22, L5.23, L10.13, L11.10, L11.11.
 
 ## His marks pending
 
@@ -874,11 +940,14 @@ blocks; the done and implemented items are in the record's drafts table.
 - L10.1, L10.2, L10.7, L10.8, the certificate entry; L8.3, what `a : A` asserts; L4.11, actions on Luthier's own state;
   L5.17 and L5.18, the cutoff and the policy constants; L6.5, 6, 7; L12.3, 5; L9.1.
 - The two faces defined in Terms, and the shape of this draft (D-2026-10-12-g, -s).
+- L5.22, L5.23, L10.13, L11.10 and L11.11, the derivation of a value and its crossing of languages
+  (his idea of 2026-10-22, GPT's proposal, the clauses the model's wording; D-2026-10-22-b); with
+  them, whether "derivation" enters Terms.
 
 ## Keys
 
 - G0, G1, G2: the organizers above; L1 to L7: the principles; L5.4: clause 4 of L5.
-- O1 to O12: the open questions above.
+- O1 to O13: the open questions above.
 - D-2026-10-11-n and the like: decisions, in `record/decisions.md`.
 - P1 to P15: the principles of the method, `record/principles.md`.
 - W1 to W15: the way of working, `docs/way-of-working.md`.
