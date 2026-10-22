@@ -1,5 +1,855 @@
 [
  {
+  "law": "HostChangesOnlyDeclared",
+  "cone": "sha256:ec650c4a7a4512bd220630937f50b97264d552f5bfbcc896f4ef8f6cb9ad6250",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:36f20eb71eb514098bd66a7ef44849445fdb811c29ce1127b3a9db21cd5641af"
+   },
+   {
+    "parameter": "h",
+    "generator": "host.print at s = \"== /home/lmoffatt/.cache/luthier-12b/runs/fitnoA2/positions.csv\" (the action held)",
+    "fingerprint": "sha256:527ece657f5ce7be5c5df5d4c7838bb8d059d19a80ce57812ea36dc85c29b9ae"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\", \"examples/sonolocalizacion/A/graph_noA2/nodes.csv\", \"examples/sonolocalizacion/A/graph_noA2/measurements.csv\"] (the certifier's places)",
+    "fingerprint": "sha256:710a58ae1a6e74e143d4fda56900841f6120648d7fd708a0ea37f0c5cfa27c93"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "kind": "FirstAction",
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host.print at s = \"== /home/lmoffatt/.cache/luthier-12b/runs/fitnoA2/positions.csv\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\", \"examples/sonolocalizacion/A/graph_noA2/nodes.csv\", \"examples/sonolocalizacion/A/graph_noA2/measurements.csv\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.print_line"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T05:37:06+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostAgreesPrint",
+  "cone": "sha256:25cf4e1a410f03cc490e9d94ab1944a357c1b9a84de220b5295e8b96965bfac4",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:36f20eb71eb514098bd66a7ef44849445fdb811c29ce1127b3a9db21cd5641af"
+   },
+   {
+    "parameter": "s",
+    "generator": "\"== /home/lmoffatt/.cache/luthier-12b/runs/fitnoA2/positions.csv\" (the run's argument)",
+    "fingerprint": "sha256:cc736fe143d6803811eae226fb28fa57a187cf239715c02f26557cf756f505dd"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\", \"examples/sonolocalizacion/A/graph_noA2/nodes.csv\", \"examples/sonolocalizacion/A/graph_noA2/measurements.csv\"] (the certifier's places)",
+    "fingerprint": "sha256:710a58ae1a6e74e143d4fda56900841f6120648d7fd708a0ea37f0c5cfa27c93"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "kind": "FirstAction",
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"== /home/lmoffatt/.cache/luthier-12b/runs/fitnoA2/positions.csv\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\", \"examples/sonolocalizacion/A/graph_noA2/nodes.csv\", \"examples/sonolocalizacion/A/graph_noA2/measurements.csv\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.print_line"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T05:37:06+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostChangesOnlyDeclared",
+  "cone": "sha256:ec650c4a7a4512bd220630937f50b97264d552f5bfbcc896f4ef8f6cb9ad6250",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:36f20eb71eb514098bd66a7ef44849445fdb811c29ce1127b3a9db21cd5641af"
+   },
+   {
+    "parameter": "h",
+    "generator": "host.readFile at p = \"examples/sonolocalizacion/A/graph_noA2/nodes.csv\" (the action held)",
+    "fingerprint": "sha256:ad1b51e3b1836f82e5a253971ca54b7e114b2732a5f119e25462b66de3319e22"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\"] (the certifier's places)",
+    "fingerprint": "sha256:9211fb1270952270c24088c7734d555fc31f59c561a77ca8c736ee706504497e"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "kind": "FirstAction",
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host.readFile at p = \"examples/sonolocalizacion/A/graph_noA2/nodes.csv\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.read_file"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T05:34:28+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostAgreesReadFile",
+  "cone": "sha256:22a70745ded06c0ca871a3df1a334115576e3710f4f8f25ffd8cbf5111efa218",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:36f20eb71eb514098bd66a7ef44849445fdb811c29ce1127b3a9db21cd5641af"
+   },
+   {
+    "parameter": "p",
+    "generator": "\"examples/sonolocalizacion/A/graph_noA2/nodes.csv\" (the run's argument)",
+    "fingerprint": "sha256:e0849c075142b9c20d696e7276d6ea7ef6334be8208f9e5353566d45f4efab54"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\"] (the certifier's places)",
+    "fingerprint": "sha256:9211fb1270952270c24088c7734d555fc31f59c561a77ca8c736ee706504497e"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "kind": "FirstAction",
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"examples/sonolocalizacion/A/graph_noA2/nodes.csv\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.read_file"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T05:34:28+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostChangesOnlyDeclared",
+  "cone": "sha256:ec650c4a7a4512bd220630937f50b97264d552f5bfbcc896f4ef8f6cb9ad6250",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:36f20eb71eb514098bd66a7ef44849445fdb811c29ce1127b3a9db21cd5641af"
+   },
+   {
+    "parameter": "h",
+    "generator": "host.print at s = \"== /home/lmoffatt/.cache/luthier-12b/runs/fitA/positions.csv\" (the action held)",
+    "fingerprint": "sha256:b5ccf31078dcc95d147174cbe543ff15f04b6e58c9895b14301cec6dc73c1795"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\", \"examples/sonolocalizacion/A/graph/nodes.csv\", \"examples/sonolocalizacion/A/graph/measurements.csv\"] (the certifier's places)",
+    "fingerprint": "sha256:7f3c7dfdd7291f868b2bbacc06b57f634edc51987eb4a88a0fa5f0d14fcb4bef"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "kind": "FirstAction",
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host.print at s = \"== /home/lmoffatt/.cache/luthier-12b/runs/fitA/positions.csv\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\", \"examples/sonolocalizacion/A/graph/nodes.csv\", \"examples/sonolocalizacion/A/graph/measurements.csv\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.print_line"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T05:34:03+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostAgreesPrint",
+  "cone": "sha256:25cf4e1a410f03cc490e9d94ab1944a357c1b9a84de220b5295e8b96965bfac4",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:36f20eb71eb514098bd66a7ef44849445fdb811c29ce1127b3a9db21cd5641af"
+   },
+   {
+    "parameter": "s",
+    "generator": "\"== /home/lmoffatt/.cache/luthier-12b/runs/fitA/positions.csv\" (the run's argument)",
+    "fingerprint": "sha256:9f71d4672f58e2a47f15e1f09a69df0cd555afb984e88c2ca3fe28903a85dbb6"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\", \"examples/sonolocalizacion/A/graph/nodes.csv\", \"examples/sonolocalizacion/A/graph/measurements.csv\"] (the certifier's places)",
+    "fingerprint": "sha256:7f3c7dfdd7291f868b2bbacc06b57f634edc51987eb4a88a0fa5f0d14fcb4bef"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "kind": "FirstAction",
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"== /home/lmoffatt/.cache/luthier-12b/runs/fitA/positions.csv\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\", \"examples/sonolocalizacion/A/graph/nodes.csv\", \"examples/sonolocalizacion/A/graph/measurements.csv\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.print_line"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T05:34:03+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostChangesOnlyDeclared",
+  "cone": "sha256:ec650c4a7a4512bd220630937f50b97264d552f5bfbcc896f4ef8f6cb9ad6250",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:36f20eb71eb514098bd66a7ef44849445fdb811c29ce1127b3a9db21cd5641af"
+   },
+   {
+    "parameter": "h",
+    "generator": "host.print at s = \"valid: 10 nodes, 22 measurements, 21 distinct pairs; directions the distances do not see: 14 (of which 10 are the heights and 3 the rigid motions of the plane)\" (the action held)",
+    "fingerprint": "sha256:79e3f657051d660ffd5a334c462c97544da261bde373df696e3204c6220a9405"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\", \"examples/sonolocalizacion/A/graph/nodes.csv\", \"examples/sonolocalizacion/A/graph/measurements.csv\"] (the certifier's places)",
+    "fingerprint": "sha256:7f3c7dfdd7291f868b2bbacc06b57f634edc51987eb4a88a0fa5f0d14fcb4bef"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "kind": "FirstAction",
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host.print at s = \"valid: 10 nodes, 22 measurements, 21 distinct pairs; directions the distances do not see: 14 (of which 10 are the heights and 3 the rigid motions of the plane)\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\", \"examples/sonolocalizacion/A/graph/nodes.csv\", \"examples/sonolocalizacion/A/graph/measurements.csv\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.print_line"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T05:28:13+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostAgreesPrint",
+  "cone": "sha256:25cf4e1a410f03cc490e9d94ab1944a357c1b9a84de220b5295e8b96965bfac4",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:36f20eb71eb514098bd66a7ef44849445fdb811c29ce1127b3a9db21cd5641af"
+   },
+   {
+    "parameter": "s",
+    "generator": "\"valid: 10 nodes, 22 measurements, 21 distinct pairs; directions the distances do not see: 14 (of which 10 are the heights and 3 the rigid motions of the plane)\" (the run's argument)",
+    "fingerprint": "sha256:5b2b16e6b20a6efdc1e99ecdecfa5e5978b4bdd951bff83834766bec33544478"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\", \"examples/sonolocalizacion/A/graph/nodes.csv\", \"examples/sonolocalizacion/A/graph/measurements.csv\"] (the certifier's places)",
+    "fingerprint": "sha256:7f3c7dfdd7291f868b2bbacc06b57f634edc51987eb4a88a0fa5f0d14fcb4bef"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "kind": "FirstAction",
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"valid: 10 nodes, 22 measurements, 21 distinct pairs; directions the distances do not see: 14 (of which 10 are the heights and 3 the rigid motions of the plane)\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\", \"examples/sonolocalizacion/A/graph/nodes.csv\", \"examples/sonolocalizacion/A/graph/measurements.csv\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.print_line"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T05:28:13+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostChangesOnlyDeclared",
+  "cone": "sha256:ec650c4a7a4512bd220630937f50b97264d552f5bfbcc896f4ef8f6cb9ad6250",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:36f20eb71eb514098bd66a7ef44849445fdb811c29ce1127b3a9db21cd5641af"
+   },
+   {
+    "parameter": "h",
+    "generator": "host.readFile at p = \"examples/sonolocalizacion/A/graph/nodes.csv\" (the action held)",
+    "fingerprint": "sha256:bf38d750e3135e3128eb3a0eb4950ed027e7781997c5c777cf6ea1708aa77af4"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\"] (the certifier's places)",
+    "fingerprint": "sha256:9211fb1270952270c24088c7734d555fc31f59c561a77ca8c736ee706504497e"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "kind": "FirstAction",
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host.readFile at p = \"examples/sonolocalizacion/A/graph/nodes.csv\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.read_file"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T05:28:08+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostAgreesReadFile",
+  "cone": "sha256:22a70745ded06c0ca871a3df1a334115576e3710f4f8f25ffd8cbf5111efa218",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:36f20eb71eb514098bd66a7ef44849445fdb811c29ce1127b3a9db21cd5641af"
+   },
+   {
+    "parameter": "p",
+    "generator": "\"examples/sonolocalizacion/A/graph/nodes.csv\" (the run's argument)",
+    "fingerprint": "sha256:9063ba9509e890a735bb078cc666b999e7ef405b55a9c7495722c8f76d4d012e"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\"] (the certifier's places)",
+    "fingerprint": "sha256:9211fb1270952270c24088c7734d555fc31f59c561a77ca8c736ee706504497e"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "kind": "FirstAction",
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"examples/sonolocalizacion/A/graph/nodes.csv\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.read_file"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T05:28:08+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
   "law": "ChangesOnlyDeclared",
   "cone": "sha256:f46a13526b54d21140737cd946a3b79c283374a6bc195a41318e429245c85729",
   "binding": [
@@ -1910,176 +2760,6 @@
   "grade": "Cases",
   "outcome": "Passed",
   "date": "2026-10-21T05:10:54+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ]
- },
- {
-  "law": "HostChangesOnlyDeclared",
-  "cone": "sha256:e6bc45e74c77710bd7c072a8db7faa0b249a23e232cc133a625d51bcc3572b59",
-  "binding": [
-   {
-    "parameter": "o",
-    "generator": "host (the run's model)",
-    "fingerprint": "sha256:79218ab5030b0193e129056d7f277d5e62008a6df503263362774b8fef6df195"
-   },
-   {
-    "parameter": "h",
-    "generator": "host.readFile at p = \"examples/sonolocalizacion/A/graph_noA2/nodes.csv\" (the action held)",
-    "fingerprint": "sha256:ad1b51e3b1836f82e5a253971ca54b7e114b2732a5f119e25462b66de3319e22"
-   },
-   {
-    "parameter": "extra",
-    "generator": "[\"stdout\"] (the certifier's places)",
-    "fingerprint": "sha256:9211fb1270952270c24088c7734d555fc31f59c561a77ca8c736ee706504497e"
-   }
-  ],
-  "seed": null,
-  "cases": 1,
-  "kind": "FirstAction",
-  "budgets": {},
-  "reach": [
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "host"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "h",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "host.readFile at p = \"examples/sonolocalizacion/A/graph_noA2/nodes.csv\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "extra",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "[\"stdout\"]"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   },
-   "protocol": "first action (10.S10)",
-   "route": "python:luthier.host.read_file"
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-17T18:18:24+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ]
- },
- {
-  "law": "HostAgreesReadFile",
-  "cone": "sha256:892eb4ea2f682788efc159d34fe1a753e7982625cba100a83633932832d01110",
-  "binding": [
-   {
-    "parameter": "o",
-    "generator": "host (the run's model)",
-    "fingerprint": "sha256:79218ab5030b0193e129056d7f277d5e62008a6df503263362774b8fef6df195"
-   },
-   {
-    "parameter": "p",
-    "generator": "\"examples/sonolocalizacion/A/graph_noA2/nodes.csv\" (the run's argument)",
-    "fingerprint": "sha256:e0849c075142b9c20d696e7276d6ea7ef6334be8208f9e5353566d45f4efab54"
-   },
-   {
-    "parameter": "extra",
-    "generator": "[\"stdout\"] (the certifier's places)",
-    "fingerprint": "sha256:9211fb1270952270c24088c7734d555fc31f59c561a77ca8c736ee706504497e"
-   }
-  ],
-  "seed": null,
-  "cases": 1,
-  "kind": "FirstAction",
-  "budgets": {},
-  "reach": [
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "host"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"examples/sonolocalizacion/A/graph_noA2/nodes.csv\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "extra",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "[\"stdout\"]"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   },
-   "protocol": "first action (10.S10)",
-   "route": "python:luthier.host.read_file"
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-17T18:18:24+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
