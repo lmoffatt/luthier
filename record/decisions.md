@@ -3416,3 +3416,14 @@ Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-22; the line un
             export), relayed to the principles agent
 Kind:       principles (O13, L5.22, L5.23, L5.10 confirmed; the note's three questions)
 Status:     current
+
+D-2026-10-22-d  A failure, like a pass, is evidence about its model (the coordinator's extension of
+                D-2026-10-22-a, on report-bite-13c.md's question): a law's failure on model N
+                refuses runs on N, not runs on another model M. One exception: a failure on N of a
+                law stated for every model of a theory, where N passes that theory's defining laws,
+                shows the law does not follow from the theory, and refuses every model's run on
+                that law. Done in bite 13c's follow-up.
+Author:     the coordinator (one commit undoes it; Luciano told in chat the same day)
+Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-22)
+Kind:       certify.py (`veto`), run.py; spec 6.S15, 7.S22
+Status:     current
