@@ -55,9 +55,8 @@ sameAct (a : Alpha) (x y : Act) : Bool := match x {
   Define n t b -> (match y { Define m u c -> n == m and a.alphaEq t u and a.alphaEq b c ; _ -> false }) ;
   Datum t -> (match y { Datum u -> a.alphaEq t u ; _ -> false }) ;
 }
-sameProgram (a : Alpha) (xs ys : Program) : Bool := match xs {
-  nil -> (match ys { nil -> true ; cons y rest -> false }) ;
-  cons x rest -> match ys { nil -> false ; cons y more -> sameAct a x y and sameProgram a rest more } }
+sameProgram (a : Alpha) (xs ys : Program) : Bool :=
+  size xs == size ys and all List (Act * Act) (fn (q : Act * Act) { match q { (x, y) -> sameAct a x y } }) (zip Act Act xs ys)
 aType (s : String) : SurfaceAct := declare s [] universe
 of (x t : String) : SurfaceAct := declare x [] (nm t)
 

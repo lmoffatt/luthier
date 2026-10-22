@@ -342,21 +342,22 @@ textsOf (cs : List TokenView) : List String := map (fn (c : TokenView) { c.text 
 
 derivesIn (d : Derives) (n : String) (cs : List TokenView) : Bool := d.derivesRhs luthierLexicon (ref n) cs
 -- the longest non-empty prefix that `n` derives, with the rest; `splits` lists prefixes shortest first
+-- kept as a recursion (bite 13b): a search from the longest end of the list with a result, not a fold
 longestPrefix (d : Derives) (n : String) (ps : List (List TokenView * List TokenView)) : Maybe (List TokenView * List TokenView) :=
   match ps { nil -> nothing ; cons (xs, ys) more -> match longestPrefix d n more {
     just p -> just p ;
     nothing -> if not (isEmpty TokenView xs) and derivesIn d n xs then just (xs, ys) else nothing } }
-memberChars (cs : List String) (ws : List String) : Bool := any List String (fn (w : String) { characters w == cs }) ws
 -- the kind the lexer gives a lexeme, or nothing when it drops it (a blank, a line break, a comment)
 tokenKindOf (d : Derives) (xs : List TokenView) : Maybe String :=
   if derivesIn d "string" xs then just "string"
   else if derivesIn d "number" xs then just "number"
-  else if derivesIn d "name" xs then just (if memberChars (textsOf xs) (litsOf luthierSyntax) then "literal" else "name")
+  else if derivesIn d "name" xs then just (if any List String (fn (w : String) { characters w == textsOf xs }) (litsOf luthierSyntax) then "literal" else "name")
   else if derivesIn d "literal" xs then just "literal"
   else nothing
 -- the tokens of a text by maximal munch: at each point the longest lexeme, dropped or kept with its
 -- kind; nothing where no lexeme starts (an unknown character, a string left open or with an unknown
 -- escape). Every round consumes, so the length of the text is fuel enough.
+-- kept as a recursion (bite 13b): maximal munch: each round consumes a variable-length prefix of the rest, with fuel
 tokenizeWithin (d : Derives) (fuel : Nat) (cs : List TokenView) : Maybe (List Lexeme) :=
   match cs { nil -> just nil ; cons c rest ->
     if fuel == 0 then nothing
@@ -402,7 +403,8 @@ nm (s : String) : Surface := name s
 pvar (s : String) : SurfacePattern := pApp s []
 
 lastIsNewline (ts : List TokenView) : Bool :=
-  match ts { nil -> false ; cons t rest -> match rest { nil -> t.kind == "newline" ; cons u more -> lastIsNewline rest } }
+  if isEmpty TokenView ts then false
+  else match nth TokenView ts (size ts - 1) { just t -> t.kind == "newline" ; nothing -> false }
 
 -- ---------------------------------------------------------------- the trees a text can give
 

@@ -31,6 +31,7 @@ remainders (e : Ebnf) (r : Rhs) (ts : List TokenView) : List (List TokenView) :=
 remaindersAny (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : List (List TokenView) :=
   concat (List TokenView) (map (fn (r : Rhs) { remainders e r ts }) rs)
 
+-- kept as a recursion (bite 13b): each element's remainders are the starts of the next (sequential composition, state threaded)
 remaindersSeq (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : List (List TokenView) :=
   match rs { nil -> [ts] ; cons r rest -> remaindersFrom e rest (remainders e r ts) }
 

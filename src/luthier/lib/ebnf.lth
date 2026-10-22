@@ -80,14 +80,12 @@ nullableWithin (e : Ebnf) (k : Nat) (r : Rhs) : Bool := match r {
   eps -> true ;
   lit s -> false ;
   cat c -> false ;
-  ref n -> if k == 0 then false else anyNullable e (k - 1) (rulesOf e n) ;
-  seq rs -> allNullable e k rs ;
-  alt rs -> anyNullable e k rs ;
+  ref n -> if k == 0 then false else any List Rhs (nullableWithin e (k - 1)) (rulesOf e n) ;
+  seq rs -> all List Rhs (nullableWithin e k) rs ;
+  alt rs -> any List Rhs (nullableWithin e k) rs ;
   opt a -> true ;
   rep a -> true ;
 }
-anyNullable (e : Ebnf) (k : Nat) (rs : List Rhs) : Bool := any List Rhs (nullableWithin e k) rs
-allNullable (e : Ebnf) (k : Nat) (rs : List Rhs) : Bool := all List Rhs (nullableWithin e k) rs
 
 -- The nonterminals a right-hand side can call before it consumes a token.
 leftCalls (e : Ebnf) (r : Rhs) : List String := match r {
@@ -100,6 +98,7 @@ leftCalls (e : Ebnf) (r : Rhs) : List String := match r {
   opt a -> leftCalls e a ;
   rep a -> leftCalls e a ;
 }
+-- kept as a recursion (bite 13b): a prefix up to the first element that is not nullable (early stop); the core has no takeWhile
 leftCallsSeq (e : Ebnf) (rs : List Rhs) : List String :=
   match rs { nil -> nil ; cons r rest ->
     if nullable e r then leftCalls e r <> leftCallsSeq e rest else leftCalls e r }
@@ -109,9 +108,7 @@ leftCallsOf (e : Ebnf) (n : String) : List String := leftCallsAll e (rulesOf e n
 -- Whether `m` can reach `n` through left calls, within `k` steps; a path need not be longer than
 -- the number of productions.
 reachesLeft (e : Ebnf) (k : Nat) (from to : String) : Bool :=
-  if k == 0 then false else anyReaches e (k - 1) (leftCallsOf e from) to
-anyReaches (e : Ebnf) (k : Nat) (ns : List String) (to : String) : Bool :=
-  any List String (fn (n : String) { n == to or reachesLeft e k n to }) ns
+  if k == 0 then false else any List String (fn (n : String) { n == to or reachesLeft e (k - 1) n to }) (leftCallsOf e from)
 
 noneLeftRecursive (e : Ebnf) (ns : List String) : Bool :=
   all List String (fn (n : String) { not (reachesLeft e (ruleCount e) n n) }) ns
@@ -122,9 +119,8 @@ refsOf (r : Rhs) : List String := match r {
   seq rs -> refsAll rs ; alt rs -> refsAll rs ; opt a -> refsOf a ; rep a -> refsOf a ;
 }
 refsAll (rs : List Rhs) : List String := concat String (map refsOf rs)
-allDefined (names defined : List String) : Bool := all List String (fn (n : String) { member List String n defined }) names
 refsDefined (e : Ebnf) : Bool :=
-  member List String e.start (lhsNames e.rules) and allDefined (refsAll (rhsOf e.rules)) (lhsNames e.rules)
+  member List String e.start (lhsNames e.rules) and all List String (fn (n : String) { member List String n (lhsNames e.rules) }) (refsAll (rhsOf e.rules))
 rhsOf (ps : List Production) : List Rhs := map rhsOfProduction ps
 
 -- The domain of the laws and of a model's certificate (L10.1). `noneLeftRecursive` is what the
@@ -144,16 +140,15 @@ Derives : { derivesRhs : Ebnf -> Rhs -> List TokenView -> Bool }
 -- what a grammar derives: the token list is produced from its start symbol
 derives (d : Derives) (e : Ebnf) (ts : List TokenView) : Bool := d.derivesRhs e (ref e.start) ts
 
-anyRhs (d : Derives) (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : Bool :=
+derivesAny (d : Derives) (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : Bool :=
   any List Rhs (fn (r : Rhs) { d.derivesRhs e r ts }) rs
 
 -- some split of `ts` gives its first part to `a` and its second to `b`; with `nonEmptyFirst`,
 -- the first part must not be empty
-anySplit (d : Derives) (e : Ebnf) (nonEmptyFirst : Bool) (a b : Rhs)
+derivesBySplit (d : Derives) (e : Ebnf) (nonEmptyFirst : Bool) (a b : Rhs)
          (ps : List (List TokenView * List TokenView)) : Bool :=
-  match ps { nil -> false ; cons (xs, ys) more ->
-    (not (nonEmptyFirst and isEmpty TokenView xs) and d.derivesRhs e a xs and d.derivesRhs e b ys)
-    or anySplit d e nonEmptyFirst a b more }
+  any List (List TokenView * List TokenView) (fn (q : List TokenView * List TokenView) { match q { (xs, ys) ->
+    not (nonEmptyFirst and isEmpty TokenView xs) and d.derivesRhs e a xs and d.derivesRhs e b ys } }) ps
 
 -- the empty string derives exactly the empty list: the unit of sequence
 EpsEmpty (d : Derives) (e : WellFormedEbnf) (ts : List TokenView) : Bool :=
@@ -169,17 +164,17 @@ CatOne (d : Derives) (e : WellFormedEbnf) (k : String) (ts : List TokenView) : B
 
 -- a nonterminal derives what any of its right-hand sides derives
 RefUnion (d : Derives) (e : WellFormedEbnf) (n : String) (ts : List TokenView) : Bool :=
-  d.derivesRhs e (ref n) ts == anyRhs d e (rulesOf e n) ts
+  d.derivesRhs e (ref n) ts == derivesAny d e (rulesOf e n) ts
 
 -- an empty sequence is the empty string; a longer one splits the list between head and tail
 SeqEmpty (d : Derives) (e : WellFormedEbnf) (ts : List TokenView) : Bool :=
   d.derivesRhs e (seq nil) ts == isEmpty TokenView ts
 SeqSplits (d : Derives) (e : WellFormedEbnf) (a : Rhs) (rs : List Rhs) (ts : List TokenView) : Bool :=
-  d.derivesRhs e (seq (cons a rs)) ts == anySplit d e false a (seq rs) (splits TokenView ts)
+  d.derivesRhs e (seq (cons a rs)) ts == derivesBySplit d e false a (seq rs) (splits TokenView ts)
 
 -- alternation is union
 AltUnion (d : Derives) (e : WellFormedEbnf) (rs : List Rhs) (ts : List TokenView) : Bool :=
-  d.derivesRhs e (alt rs) ts == anyRhs d e rs ts
+  d.derivesRhs e (alt rs) ts == derivesAny d e rs ts
 
 -- optional is the empty list or the thing
 OptEmptyOrOne (d : Derives) (e : WellFormedEbnf) (a : Rhs) (ts : List TokenView) : Bool :=
@@ -188,7 +183,7 @@ OptEmptyOrOne (d : Derives) (e : WellFormedEbnf) (a : Rhs) (ts : List TokenView)
 -- repetition is the empty list, or a round that consumes something followed by the repetition
 -- again. Asking the round to consume is what makes the law determine `rep`: the rest is shorter.
 RepRounds (d : Derives) (e : WellFormedEbnf) (a : Rhs) (ts : List TokenView) : Bool :=
-  d.derivesRhs e (rep a) ts == (isEmpty TokenView ts or anySplit d e true a (rep a) (splits TokenView ts))
+  d.derivesRhs e (rep a) ts == (isEmpty TokenView ts or derivesBySplit d e true a (rep a) (splits TokenView ts))
 
 -- On a well-formed grammar the laws have one solution, by induction on the length of the list,
 -- in three steps (Kimi and Claude, round 2). First the empty list: there `derivesRhs e r nil` is

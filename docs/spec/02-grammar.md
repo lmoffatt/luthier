@@ -154,7 +154,7 @@ Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut.
 <!-- luthierSyntax: begin -->
 
 Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
-(v1; sha256: 022727537b8ec3e8fb99859652ba5e6d7227593585ee0ab28666e8711d79c19a).
+(v1; sha256: a68594335d048f4830b56d7be8667128b9327237a64e9a9244455d078de361b7).
 
     program ::= { act newline }
 
