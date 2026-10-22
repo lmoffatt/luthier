@@ -26,12 +26,14 @@ textJoin : List String -> String
 natDecimal : Nat -> String
 textAppend (x y : String) : String := textJoin (textParts x <> textParts y)
 unqualified (s : String) : String := textJoin (lastComponent (textParts s) nil)
+-- kept as a recursion (bite 13b): a left scan with an accumulator reset at each dot; the core has only the right fold
 lastComponent (xs acc : List String) : List String := match xs {
   nil -> acc ; cons x rest -> lastComponent rest (if x == "." then nil else acc <> [x]) }
 freshName (x : String) (avoid : List String) : String :=
   if member List String x avoid then freshName (textAppend x "'") avoid else x
 
 -- All variable and binder names, including shadowed ones: nominal swapping needs more than FV.
+-- kept as a recursion (bite 13b): a collector over the nodes of a term tree; the name is the family's
 allNames (t : Term) : List String := match t {
   Var x -> [x] ;
   Lam x a b -> cons x ((allNames a <> allNames b)) ;
@@ -104,6 +106,7 @@ swapLocalPairs (y z : String) (cs : List (String * Term)) : List (String * Term)
 substPairs (x : String) (s : Term) (cs : List (String * Term)) : List (String * Term) :=
   map (fn (kb : String * Term) { match kb { (k, b) -> (k, substTerm x s b) } }) cs
 -- a label of the name substituted shadows it in the later fields (term.lth, `telescopeFree`)
+-- kept as a recursion (bite 13b): a telescope: each entry's names bind in what follows it, so the tail is rewritten by the head; no fold of a monoid says that (a label equal to x stops the substitution)
 substTelescope (x : String) (s : Term) (cs : List (String * Term)) : List (String * Term) := match cs {
   nil -> nil ; cons (k, b) rest -> cons (k, substTerm x s b) (if k == x then rest else substTelescope x s rest) }
 substArms (x : String) (s : Term) (arms : List (Pattern * Term)) : List (Pattern * Term) :=
@@ -111,6 +114,7 @@ substArms (x : String) (s : Term) (arms : List (Pattern * Term)) : List (Pattern
 substArm (x : String) (s : Term) (p : Pattern) (b : Term) : Pattern * Term :=
   if member List String x (patternVars p) or not (member List String x (freeVars b)) then (p, b)
   else match freshArm x s (patternVars p) p b { (q, c) -> (q, substTerm x s c) }
+-- kept as a recursion (bite 13b): renames pattern variables one by one, each rename changing the pattern and the body the next sees (state threaded)
 freshArm (x : String) (s : Term) (vs : List String) (p : Pattern) (b : Term) : Pattern * Term := match vs {
   nil -> (p, b) ; cons y rest ->
     if member List String y (freeVars s) then renameArm x s y rest p b
@@ -125,10 +129,9 @@ substitute : Substitution alpha := { subst := substTerm }
 canonName (n : Nat) : String := textAppend "x" (natDecimal n)
 nextBinder (avoid : List String) (n : Nat) : String * Nat :=
   if member List String (canonName n) avoid then nextBinder avoid (n + 1) else (canonName n, n + 1)
-freeCanonical (xs : List String) : List String := match xs {
-  nil -> nil ; cons x rest -> cons (unqualified x) (freeCanonical rest) }
-resolveName (env : List (String * String)) (x : String) : String := match env {
-  nil -> unqualified x ; cons (a, b) rest -> if x == a then b else resolveName rest x }
+freeCanonical (xs : List String) : List String := map unqualified xs
+resolveName (env : List (String * String)) (x : String) : String :=
+  match lookup List String String x env { just b -> b ; nothing -> unqualified x }
 canonTerm (avoid : List String) (env : List (String * String)) (n : Nat) (t : Term) : Term * Nat := match t {
   Var x -> (Var (resolveName env x), n) ;
   Lam x a b -> match nextBinder avoid n { (y, n1) ->
@@ -161,13 +164,16 @@ canonTerm (avoid : List String) (env : List (String * String)) (n : Nat) (t : Te
   Match a arms -> match canonTerm avoid env n a { (b, n1) ->
     match canonArms avoid env n1 arms { (bs, n2) -> (Match b bs, n2) } } ;
   _ -> (t, n) ; }
+-- kept as a recursion (bite 13b): threads the binder counter n through the entries (state), as canonTerm does
 canonPairs (avoid : List String) (env : List (String * String)) (n : Nat) (xs : List (String * Term)) : List (String * Term) * Nat := match xs {
   nil -> (nil, n) ; cons (k, a) rest -> match canonTerm avoid env n a { (b, n1) ->
     match canonPairs avoid env n1 rest { (bs, n2) -> (cons (k, b) bs, n2) } } }
 -- a label stays literal and shadows an outer binder of its name in the later fields
+-- kept as a recursion (bite 13b): threads the binder counter n and the environment through the entries (state)
 canonTelescope (avoid : List String) (env : List (String * String)) (n : Nat) (xs : List (String * Term)) : List (String * Term) * Nat := match xs {
   nil -> (nil, n) ; cons (k, a) rest -> match canonTerm avoid env n a { (b, n1) ->
     match canonTelescope avoid (cons (k, k) env) n1 rest { (bs, n2) -> (cons (k, b) bs, n2) } } }
+-- kept as a recursion (bite 13b): threads the binder counter n and removes each name from the rest (state)
 canonBindings (avoid : List String) (n : Nat) (xs : List String) : List (String * String) * Nat := match xs {
   nil -> (nil, n) ; cons x rest -> match nextBinder avoid n { (y, n1) ->
     match canonBindings avoid n1 (remove String x rest) { (bs, n2) -> (cons (x, y) bs, n2) } } }
@@ -175,8 +181,8 @@ canonPattern (env : List (String * String)) (p : Pattern) : Pattern := match p {
   PVar x -> PVar (resolveName env x) ; PCon c ps -> PCon c (canonPatterns env ps) ;
   PPair a b -> PPair (canonPattern env a) (canonPattern env b) ;
   PInj l q -> PInj l (canonPattern env q) ; _ -> p ; }
-canonPatterns (env : List (String * String)) (ps : List Pattern) : List Pattern := match ps {
-  nil -> nil ; cons p rest -> cons (canonPattern env p) (canonPatterns env rest) }
+canonPatterns (env : List (String * String)) (ps : List Pattern) : List Pattern := map (canonPattern env) ps
+-- kept as a recursion (bite 13b): threads the binder counter n through the arms (state)
 canonArms (avoid : List String) (env : List (String * String)) (n : Nat) (xs : List (Pattern * Term)) : List (Pattern * Term) * Nat := match xs {
   nil -> (nil, n) ; cons (p, a) rest -> match canonBindings avoid n (patternVars p) { (bs, n1) ->
     match canonTerm avoid (bs <> env) n1 a { (b, n2) ->
@@ -189,10 +195,8 @@ canonical : CanonicalForm alpha := { canon := canonicalTerm, unqualify := unqual
 -- alternatives, so they are aliases of sums and not `data` (4.R3, L2.7, D-2026-10-13-aa); an
 -- alternative of type `Unit` is injected by its label alone (3.S4).
 HeadStep = { Done : Term || Next : Term }
-lookupBody (p : Program) (x : String) : Maybe Term := match p {
-  nil -> nothing ; cons act rest -> match act {
-    Define y ty b -> if x == y then just b else lookupBody rest x ;
-    _ -> lookupBody rest x } }
+bodyNamed (p : Program) (x : String) : Maybe Term :=
+  lookup List String Term x (concat (String * Term) (map (fn (act : Act) { match act { Define y ty b -> [(y, b)] ; _ -> nil } }) p))
 Bindings = List (String * Term)
 bindingNames (xs : Bindings) : List String := map (fn (xv : String * Term) { match xv { (x, v) -> x } }) xs
 bindingTermNames (xs : Bindings) : List String :=
@@ -200,15 +204,18 @@ bindingTermNames (xs : Bindings) : List String :=
 linearBindings (xs : Bindings) : Bool := distinct String (bindingNames xs)
 -- Rename every bound occurrence to a distinct temporary absent from the body and
 -- every replacement, then substitute replacements. No replacement is revisited.
+-- kept as a recursion (bite 13b): destructures the shape of the list (empty, one binding, several), no iteration
 applyBindings (xs : Bindings) (b : Term) : Term := match xs {
   nil -> b ; cons (x, v) nil -> substTerm x v b ;
   _ -> stageBindings xs b ((allNames b <> (bindingNames xs <> bindingTermNames xs))) nil }
+-- kept as a recursion (bite 13b): threads the growing avoid list and the substituted body through the bindings (state)
 stageBindings (xs : Bindings) (b : Term) (avoid : List String) (ready : Bindings) : Term := match xs {
   nil -> finishBindings ready b ; cons (x, v) rest ->
     stageBinding x v rest b avoid ready (freshName x avoid) }
 stageBinding (x : String) (v : Term) (rest : Bindings) (b : Term)
              (avoid : List String) (ready : Bindings) (z : String) : Term :=
   stageBindings rest (substTerm x (Var z) b) (cons z avoid) (cons (z, v) ready)
+-- kept as a recursion (bite 13b): a left fold substituting into the body one binding after another; the core has only the right fold
 finishBindings (xs : Bindings) (b : Term) : Term := match xs {
   nil -> b ; cons (x, v) rest -> finishBindings rest (substTerm x v b) }
 truthTerm (b : Bool) : Term := Var (if b then "true" else "false")
@@ -245,11 +252,8 @@ stepUnary (p : Program) (r : String) (a : Term) : HeadStep :=
   else Done (App (Primitive r) a)
 -- Equality has its own closed-value domain; the permissive Iota classifier is not enough.
 -- Check both entire values before comparing, even when an outer label already differs.
-constructorType (env : Program) (x : String) : Maybe Term := match env {
-  nil -> nothing ; cons act rest -> match act {
-    Define t ty (Data self cs) -> match lookup List String Term x cs {
-      just a -> just a ; nothing -> constructorType rest x } ;
-    _ -> constructorType rest x } }
+constructorType (env : Program) (x : String) : Maybe Term :=
+  lookup List String Term x (concat (String * Term) (map (fn (act : Act) { match act { Define t ty (Data self cs) -> cs ; _ -> nil } }) env))
 saturatedParts (ty : Term) (args : List Term) : Bool := match (ty, args) {
   (Pi x a b, cons v rest) -> saturatedParts b rest ;
   (Pi x a b, nil) -> false ; (_, nil) -> true ; _ -> false }
@@ -261,10 +265,9 @@ concreteValue (p : Program) (t : Term) : Bool := match t {
   Lit c -> true ; Pair a b -> concreteValue p a and concreteValue p b ;
   Inj l a -> concreteValue p a ; RecordValue fs -> concreteFields p fs ;
   _ -> match equalityConstructor p t { nothing -> false ; just (c, vs) -> concreteTerms p vs } }
-concreteFields (p : Program) (fs : List (String * Term)) : Bool := match fs {
-  nil -> true ; cons (k, v) rest -> concreteValue p v and concreteFields p rest }
-concreteTerms (p : Program) (vs : List Term) : Bool := match vs {
-  nil -> true ; cons v rest -> concreteValue p v and concreteTerms p rest }
+concreteFields (p : Program) (fs : List (String * Term)) : Bool :=
+  all List (String * Term) (fn (kv : String * Term) { match kv { (k, v) -> concreteValue p v } }) fs
+concreteTerms (p : Program) (vs : List Term) : Bool := all List Term (concreteValue p) vs
 -- These comparisons are called only after the complete concrete-value check.
 equalValues (p : Program) (s t : Term) : Bool := match (s, t) {
   (Lit (IntConst a), Lit (IntConst b)) -> a == b ;
@@ -278,9 +281,9 @@ equalValues (p : Program) (s t : Term) : Bool := match (s, t) {
 equalTerms (p : Program) (vs ws : List Term) : Bool := match (vs, ws) {
   (nil, nil) -> true ; (cons v rest, cons w more) -> equalValues p v w and equalTerms p rest more ;
   _ -> false }
-equalFields (p : Program) (fs gs : List (String * Term)) : Bool := match fs {
-  nil -> true ; cons (k, v) rest -> match lookup List String Term k gs {
-    nothing -> false ; just w -> equalValues p v w and equalFields p rest gs } }
+equalFields (p : Program) (fs gs : List (String * Term)) : Bool :=
+  all List (String * Term) (fn (kv : String * Term) { match kv { (k, v) -> match lookup List String Term k gs {
+    nothing -> false ; just w -> equalValues p v w } } }) fs
 -- EqualityDemandsParts: a part that is not yet a value is reduced in place, leftmost first,
 -- after the operand's head has stepped; a part that cannot become a value leaves == stuck.
 stepValue (p : Program) (t : Term) : Maybe Term := match stepHead p t {
@@ -295,10 +298,12 @@ demandParts (p : Program) (t : Term) : Maybe Term := match t {
     if dataConstructor p c
     then (match demandTerms p vs { just ws -> just (rebuildConstructor c ws) ; nothing -> nothing })
     else nothing } }
+-- kept as a recursion (bite 13b): finds the leftmost part that is not yet a value and rebuilds the list around it (search with a result)
 demandFields (p : Program) (fs : List (String * Term)) : Maybe (List (String * Term)) := match fs {
   nil -> nothing ; cons (k, v) rest -> if concreteValue p v
     then (match demandFields p rest { just gs -> just (cons (k, v) gs) ; nothing -> nothing })
     else (match stepValue p v { just w -> just (cons (k, w) rest) ; nothing -> nothing }) }
+-- kept as a recursion (bite 13b): finds the leftmost part that is not yet a value and rebuilds the list around it (search with a result)
 demandTerms (p : Program) (vs : List Term) : Maybe (List Term) := match vs {
   nil -> nothing ; cons v rest -> if concreteValue p v
     then (match demandTerms p rest { just ws -> just (cons v ws) ; nothing -> nothing })
@@ -312,7 +317,7 @@ stepEquality (p : Program) (i j : Term) : HeadStep :=
         nothing -> Done (App (App (Primitive "==") i) j) }
       else Done (App (App (Primitive "==") i) j) }
 stepHead (p : Program) (t : Term) : HeadStep := match t {
-  Var x -> match lookupBody p x { nothing -> Done t ; just b -> Next b } ;
+  Var x -> match bodyNamed p x { nothing -> Done t ; just b -> Next b } ;
   Let x ty v b -> Next (substTerm x v b) ;
   App f a -> stepApplication p f a ; Match s arms -> stepMatch p s arms ;
   Proj r x -> stepProjection p r x ; _ -> Done t }
@@ -346,12 +351,10 @@ stepPattern (env : Program) (p : Pattern) (v : Term) : PatternStep := match p {
   PCon c ps -> stepConstructorPattern env c ps v }
 -- Data constructor keys are values, bare or applied; explicit acts keep priority.
 -- Free applied names remain admissible for Iota; other bare names remain holes.
-dataConstructor (env : Program) (x : String) : Bool := match env {
-  nil -> false ; cons act rest -> match act {
-    Define t ty (Data self cs) -> constructorKey cs x or dataConstructor rest x ;
-    _ -> dataConstructor rest x } }
-constructorKey (cs : List (String * Term)) (x : String) : Bool := match cs {
-  nil -> false ; cons (c, ty) rest -> c == x or constructorKey rest x }
+dataConstructor (env : Program) (x : String) : Bool :=
+  any List Act (fn (act : Act) { match act { Define t ty (Data self cs) -> constructorKey cs x ; _ -> false } }) env
+constructorKey (cs : List (String * Term)) (x : String) : Bool :=
+  any List (String * Term) (fn (kv : String * Term) { match kv { (c, ty) -> c == x } }) cs
 constructorTerms (env : Program) (v : Term) (args : List Term) : Maybe (String * List Term) := match v {
   Var x -> if not (free env x) then nothing
     else if dataConstructor env x then just (x, args)
@@ -380,9 +383,11 @@ stepPatternList (env : Program) (ps : List Pattern) (vs : List Term) : PatternLi
       ListMiss -> ListMiss ; ListBlocked -> ListBlocked ; ListDemand ws -> ListDemand (cons v ws) ;
       ListHit ys -> ListHit (xs <> ys) } } ; _ -> ListMiss }
 rebuildConstructor (c : String) (args : List Term) : Term := applyArguments (Var c) args
+-- kept as a recursion (bite 13b): a left fold, App (App f a) b; the core has only the right fold
 applyArguments (f : Term) (args : List Term) : Term := match args {
   nil -> f ; cons a rest -> applyArguments (App f a) rest }
 ArmStep = { ArmSelected : Term || ScrutineeNext : Term || NoArm : Unit }
+-- kept as a recursion (bite 13b): the first arm that hits decides, and a demand or a block stops the scan (search with a result)
 chooseArm (p : Program) (s : Term) (arms : List (Pattern * Term)) : ArmStep := match arms {
   nil -> NoArm ; cons (pat, b) rest -> match stepPattern p pat s {
     Demand v -> ScrutineeNext v ; Miss -> chooseArm p s rest ; Blocked -> NoArm ;

@@ -153,6 +153,7 @@ pairsFree (kvs : List (String * Term)) : List String :=
 -- a record type is a telescope (7.S7's dependent records, 12.S1, arrays.lth's `Mat`): a label binds
 -- in the types of the later fields, never in its own or in an earlier one; a `RecordValue`'s labels
 -- bind nothing (kernel.py bite 11, aa198f2, by a Sonnet agent; stated here by luthier-03)
+-- kept as a recursion (bite 13b): a telescope: each entry's names bind in what follows it, so the tail is rewritten by the head; no fold of a monoid says that
 telescopeFree (kvs : List (String * Term)) : List String :=
   match kvs { nil -> nil ; cons (k, v) rest -> (freeVars v <> remove String k (telescopeFree rest)) }
 
@@ -248,9 +249,9 @@ underBinderPairs (a : Alpha) (x y : String) (cs ds : List (String * Term)) : Boo
   (x == y and pairsAgree a cs ds) or (not (member List String x (pairsFree ds)) and pairsAgree a cs (renamePairs y x ds))
 renamePairs (y x : String) (kvs : List (String * Term)) : List (String * Term) :=
   map (fn (kv : String * Term) { match kv { (k, v) -> (k, renamedTo y x v) } }) kvs
-pairsAgree (a : Alpha) (xs ys : List (String * Term)) : Bool := match xs {
-  nil -> (match ys { nil -> true ; cons y rest -> false }) ;
-  cons (k, u) rest -> match ys { nil -> false ; cons (j, v) more -> k == j and a.alphaEq u v and pairsAgree a rest more } }
+pairsAgree (a : Alpha) (xs ys : List (String * Term)) : Bool :=
+  size xs == size ys and all List ((String * Term) * (String * Term)) (fn (q : (String * Term) * (String * Term)) {
+    match q { ((k, u), (j, v)) -> k == j and a.alphaEq u v } }) (zip (String * Term) (String * Term) xs ys)
 -- a pattern's shape with its variables in order: two arms agree when their patterns have one shape
 -- and their bodies agree after renaming the variables positionally (patterns are linear, 3.S10)
 patternShape (q : Pattern) : Pattern := match q {
@@ -262,15 +263,14 @@ shapes (qs : List Pattern) : List Pattern := map patternShape qs
 -- names still to rename, so a later pair sees the names the earlier swaps left (a permutation as a
 -- product of transpositions; Codex, writing kernel.py: one swap after another without this turned
 -- `(x, y)` into `(y, x)` back again)
+-- kept as a recursion (bite 13b): walks two lists at once and carries the names still to rename, each swap changing the rest (state threaded)
 renameAll (xs ys : List String) (t : Term) : Term := match xs { nil -> t ;
   cons x rest -> match ys { nil -> t ;
     cons y more -> renameAll rest (swapNames y x more) (renamedTo y x t) } }
 swapNames (y x : String) (ns : List String) : List String := map (swapName y x) ns
-armsAgree (a : Alpha) (xs ys : List (Pattern * Term)) : Bool := match xs {
-  nil -> (match ys { nil -> true ; cons y rest -> false }) ;
-  cons (p, b) rest -> match ys { nil -> false ;
-    cons (q, c) more -> patternShape p == patternShape q
-                        and a.alphaEq b (renameAll (patternVars p) (patternVars q) c) and armsAgree a rest more } }
+armsAgree (a : Alpha) (xs ys : List (Pattern * Term)) : Bool :=
+  size xs == size ys and all List ((Pattern * Term) * (Pattern * Term)) (fn (q : (Pattern * Term) * (Pattern * Term)) {
+    match q { ((p, b), (q2, c)) -> patternShape p == patternShape q2 and a.alphaEq b (renameAll (patternVars p) (patternVars q2) c) } }) (zip (Pattern * Term) (Pattern * Term) xs ys)
 partsAgree (a : Alpha) (s t : Term) : Bool := match s {
   Var x -> t == Var x ; Lit c -> t == Lit c ; Universe -> t == Universe ; World -> t == World ;
   Axiom r -> t == Axiom r ; Hole x -> t == Hole x ; Extern r -> t == Extern r ; Primitive r -> t == Primitive r ;
@@ -408,8 +408,8 @@ reduce (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n :
 stepsTo (a : Alpha) (r : Maybe Term) (u : Term) : Bool := match r { nothing -> false ; just v -> a.alphaEq v u }
 isNormal (r : Maybe Term) : Bool := match r { nothing -> true ; just u -> false }
 -- the definition of a name in a program, wherever it stands: a program is a set of acts (3.S1)
-definition (p : Program) (x : String) : Maybe Term := match p { nil -> nothing ;
-  cons act rest -> match act { Define y t b -> if y == x then just b else definition rest x ; _ -> definition rest x } }
+definition (p : Program) (x : String) : Maybe Term :=
+  lookup List String Term x (concat (String * Term) (map (fn (act : Act) { match act { Define y t b -> [(y, b)] ; _ -> nil } }) p))
 -- a program that gives a name neither a definition nor a declaration: where a law uses that name
 -- as a constructor or a label, the program does not redefine it
 free (p : Program) (x : String) : Bool :=
