@@ -1521,3 +1521,24 @@ def test_pruning_keeps_a_confirmed_control():
         entries = certify.record(entries, control(k, {"ControlRefuted": f"x = {k}"}))
     assert 0 in [e["seed"] for e in entries]
     assert certify.control_status(entries, "L", "sha256:a").startswith(certify.CONTROL_FAILED)
+
+
+def test_the_budgets_that_change_the_distribution_are_in_the_identity():
+    """Audit 1.4 B, spec 7.S8: `specialMass` and `atomAtZero` change what is drawn, so two runs of one
+    seed under different masses are two identities and never pool; the fuel and the tries only cut a
+    run and stay out of the identity."""
+    budgets = {"tries": 2000, "fuel": 3000000, "specialMass": 0.05, "atomAtZero": 0.01, "coveringAbove": 20000}
+    base = dict(entry(seed=3), budgets=budgets)
+    for field, value in [("specialMass", 0.45), ("atomAtZero", 0.2), ("coveringAbove", 10)]:
+        other = dict(base, budgets=dict(budgets, **{field: value}))
+        assert certify.identity(other) != certify.identity(base), field
+        assert certify.union_key(other) != certify.union_key(base), field
+    for field, value in [("fuel", 10), ("tries", 3)]:
+        assert certify.identity(dict(base, budgets=dict(budgets, **{field: value}))) == certify.identity(base), field
+    assert set(certify.SAMPLING).isdisjoint(certify.LIMITS)
+    # a replay under another mass is recorded beside the first, not absorbed as known
+    moved = dict(base, budgets=dict(budgets, specialMass=0.45), date="2026-10-15T00:00:00+00:00")
+    store = certify.record(certify.record([], base), moved)
+    assert len(store) == 2 and certify.known(store, certify.identity(base)) is base
+    # and the two are two distributions: no union of their stretches
+    assert len(certify.stretches(store, "L", "sha256:1", certify.union_key(base))) == 1

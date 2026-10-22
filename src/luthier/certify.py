@@ -442,15 +442,40 @@ def _laws_own(entries):
     return [e for e in entries if not is_control(e)]
 
 
+# [bite 13c, the coordinator's reading of D-2026-10-16-g; spec 7.S8] The budgets of 7.S8 by what they
+# change. A field that changes what is drawn, which cases are checked or what the regions read is
+# part of the sampling (`sampling`), so of the identity and of the union a stretch pools into: the
+# masses of the special values and of the atom at 0, the product above which a covering array
+# chooses the cases, the counts of runs, seeds and draws that size a level, a control's power or a
+# generator's distribution, and the classifier's two bounds. A field that only cuts a run stays out
+# (D-2026-10-15-g): the fuel, the tries of a filter (a value found within fewer tries is the same
+# value), the redraws, the probes and the draws per case.
+SAMPLING = ("specialMass", "atomAtZero", "coveringAbove", "levelRuns", "seedsPerControl", "distributionDraws",
+            "regionNumbers", "regionEntries")
+LIMITS = ("fuel", "tries", "redraws", "probes", "drawsPerCase")
+
+
+def sampling(entry):
+    """The budgets of the entry that change what it samples (`SAMPLING`); None when it records no
+    budgets (a first action's entry)."""
+    budgets = entry.get("budgets")
+    if not isinstance(budgets, dict):
+        return None
+    return {k: budgets[k] for k in SAMPLING if k in budgets}
+
+
 def identity(entry):
     """certification.lth's `identity`: the law, the cone's hash, the binding expanded, the seed and
     `n` (7.S9, 7.S13), as one comparable key; a control's kind is part of it [proposed], and the
     conjunct of a conjunction's entry (tester.py's `_run_conjunction`, D-2026-10-18-f). A field an
     entry lacks reads as null (`store_errors` reports it in a store; a demand's reading may hold
-    entries built in part)."""
+    entries built in part). [bite 13c] And the budgets that change what is sampled (`sampling`):
+    two runs of one seed under another mass of special values are two samples, not a replay."""
     key = [entry.get(k) for k in IDENTITY] + ([entry["kind"]] if "kind" in entry else [])
     if "conjunct" in entry:
         key.append({"conjunct": entry["conjunct"]})
+    if sampling(entry) is not None:
+        key.append({"sampling": sampling(entry)})
     return json.dumps(key, sort_keys=True, ensure_ascii=False)
 
 
@@ -966,10 +991,17 @@ def stretch_size(entry):
 def union_key(entry):
     """The binding a stretch is pooled under: its binding, without the drawing of a statistical
     stretch's cutoffs (the parameter its evidence names), whose budget is the demand's for the whole
-    test and not part of the distribution (D-2026-10-16-g, D-2026-10-15-b)."""
+    test and not part of the distribution (D-2026-10-16-g, D-2026-10-15-b). [bite 13c] With the budgets
+    that change the distribution (`sampling`), the last element: one union is one distribution."""
     evidence = entry.get("evidence")
     cutoffs = evidence.get("cutoffs") if isinstance(evidence, dict) else None
-    return [d for d in entry["binding"] if not (isinstance(d, dict) and d.get("parameter") == cutoffs)]
+    return _without(entry, cutoffs)
+
+
+def _without(entry, parameter):
+    """The entry's binding without the drawing of `parameter`, with its `sampling` last."""
+    key = [d for d in entry["binding"] if not (isinstance(d, dict) and d.get("parameter") == parameter)]
+    return key + ([{"sampling": sampling(entry)}] if sampling(entry) is not None else [])
 
 
 def stretches(entries, law, current, key):
@@ -1017,7 +1049,7 @@ def continuation(entries, entry, cutoffs, parameter):
     the same stream further), its `"from"`, None when it started the test; else from the latest
     stretch, with the samples and seeds of the test so far; None when there is none. The budget
     bounds the whole test (`cutoffs["budget"]` against the samples so far), so a new seed buys none."""
-    key = [d for d in entry["binding"] if d.get("parameter") != parameter]
+    key = _without(entry, parameter)
     same = []
     for e in entries:
         evidence = e.get("evidence")
