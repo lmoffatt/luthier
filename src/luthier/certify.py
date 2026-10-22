@@ -806,7 +806,7 @@ def _or_strongest(m, n):
 
 
 # The combinations of the grades over regions and bindings a demand may choose (5.S8,
-# D-2026-10-16-i), by the name `Demand.combine` gives; the weakest by default (certification_model's
+# D-2026-10-16-i), by the name `ConeDemand.combine` gives; the weakest by default (certification_model's
 # `regioning`). [proposed] The two the theory states, `orWeakest` and `orStrongest`.
 COMBINATIONS = {"weakest": _or_weakest, "strongest": _or_strongest}
 COMBINATION = "weakest"

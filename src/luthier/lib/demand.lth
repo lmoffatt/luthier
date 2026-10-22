@@ -34,7 +34,7 @@
 -- first everything Boolean, so the cutoff is the weakest grade accepted, and where a cost would
 -- enter (the bound, the evidence cost, the price of an assumption, 6.S15, 6.S10) there is a hole
 -- `C`, with the comment "D-2026-10-13-m, after the slice's failures". certification.lth §3 keeps
--- its `Demand`, the demand on one law; here it is `LawDemand`, the same record by structure, and
+-- its `ConeDemand`, the demand on one law; here it is `LawDemand`, the same record by structure, and
 -- the law of 8.S1 is that it is passed down from the run's demand and not recomputed (L12.3).
 -- The demand of a run is built from the arguments `run` takes (demand_model.lut, `theDemand`),
 -- with its defaults declared there and recorded (L5.19); what it passes down and what it records
@@ -113,7 +113,7 @@ given (d : Demand) (name : String) : Maybe Value := lookup List String Value nam
 
 -- ---------------------------------------------------------------- §2 Passing down
 
--- The demand on one law (certification.lth §3, its `Demand`, 6.S15, 7.S15): the law, the current
+-- The demand on one law (certification.lth §3, its `ConeDemand`, 6.S15, 7.S15): the law, the current
 -- hash of its cone, what the run gives its parameters, and the weakest grade accepted. The same
 -- record by structure, so a `LawDemand` is what `Certifying.serves` and `refuse` take.
 LawDemand = { law : String, cone : Hash, given : List (String * Value), accepts : Grade }

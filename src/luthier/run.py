@@ -2009,7 +2009,7 @@ class Demand:
         return self.accepts
 
     def record(self, cone):
-        """demand.lth's `Record` (`recorded`, 12.S18, L5.18): the demand as the run's entry keeps
+        """demand.lth's `RunRecord` (`recorded`, 12.S18, L5.18): the demand as the run's entry keeps
         it, on the cone it ran. [proposed] the grade by its `--accept` word, as `certification`'s
         `accept`; the parameters as an object, as the entry's `parameters`."""
         from . import certify
@@ -2364,7 +2364,7 @@ def certification(loaded, program, entry, demand, refuse=True):
     cone, the run's cutoff passed down (`Demand.law`, L12.3), and what the run gives the law:
     [proposed] the name itself to the law's parameter typed by the theory (printed, as a census of
     one prints it), and each hole the run filled with `--set` to the law's parameter of the same
-    name (certification.lth's `Demand`); the model's own cone is compared with the fingerprint the
+    name (certification.lth's `ConeDemand`); the model's own cone is compared with the fingerprint the
     entry's binding recorded (certify.at). A name built on a provisional extern is refused whole,
     unless the demand names it (`Demand.assumes`, D-2026-10-16-c): then no law of it is demanded and
     it is listed under `assumed` with its reasons and the names of the cone downstream of it, each
@@ -3185,7 +3185,7 @@ def chosen_plan(plan):
 
 def result_key(record, seed, plan, certificates):
     """plan.lth's `keyOf` (8.S8, D-2026-10-15-h): the key of a run from its record (`demand`,
-    demand.lth's `Record`, and `key`, plan.lth's `demandKey` of it on the plan's live cone, which
+    demand.lth's `RunRecord`, and `key`, plan.lth's `demandKey` of it on the plan's live cone, which
     holds the decoration from the record), its seed, its plan, as chosen, and the hashes of the
     certificates that served its cone. The fuel, the time and the lock are in the record and not
     here (D-2026-10-15-g). `record` is an entry of `x.run.json` or anything with those two fields."""
@@ -3316,7 +3316,7 @@ def record(path, main, values, output, state=None, cut=None):
     pins and whether the run `matches` it, `differs`, or found it `absent` and wrote it), whether
     it ran `--checked` (`checked`) and then the refinements tested per route (`refinements`).
 
-    The demand as one object (`demand`, demand.lth's `Record`: entry, cone, parameters, accept,
+    The demand as one object (`demand`, demand.lth's `RunRecord`: entry, cone, parameters, accept,
     assumes, delta, fuel, timeLimit, checked, lock, decoration, strategy, fresh), the plan (`plan`,
     with the strategy that ran) and the demand's key (`key`). [proposed] The
     fields that were there before are kept beside it, with the same values: `entry`, `parameters`,
@@ -3396,7 +3396,7 @@ def _say_store(path, store, item):
 
 def read_runs(path):
     """The runs `x.run.json` holds beside `x.lut` (or at `path` itself), and the breaches of
-    demand.lth's `determined` among them (its `Store`'s `OneIdentityOneResult`, 8.S3): each pair
+    demand.lth's `determined` among them (its `RunStore`'s `OneIdentityOneResult`, 8.S3): each pair
     (i, j), i < j, of runs with one demand record (`demand`) and two outputs. Nothing is served from them yet (8.S10). [proposed] A
     run recorded before the demand was (no `demand`) is in the list and in no pair."""
     path = Path(path)

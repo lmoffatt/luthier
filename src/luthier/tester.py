@@ -2093,8 +2093,8 @@ def model_homes(loaded, spec, runner=None):
 
     A model is a value whose type is the theory head of the parameter the binding binds (`numpy :
     Arrays` for `a : Arrays`, `listedHost : Host State` for `o : Host S`): the census the binding
-    names, or each member of a census that is a list literal of names. A type alias (`State`,
-    demand.lth's `Record`), a type (`UnitList`), a constructor (`Sampled`) or a census whose
+    names, or each member of a census that is a list literal of names. A type alias (`WorldState`,
+    demand.lth's `RunRecord`), a type (`UnitList`), a constructor (`Sampled`) or a census whose
     parameter's type is no theory head (`S : U`, `g : Grade`) is no model, and its file no home
     (report-e.md, finding 1)."""
     if loaded is None or runner is None:

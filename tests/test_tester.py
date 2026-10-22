@@ -404,7 +404,7 @@ def test_a_type_a_census_lists_is_no_model_home():
 
 def test_an_alias_or_a_constructor_is_no_model_home(tmp_path):
     # report-e.md, finding 1: demand_laws.test.lut and world_laws.test.lut as first written, with demand.lth's
-    # alias `Record` and world_model.lut's alias `State` listed for a parameter `K : U` or `S :
+    # alias `RunRecord` and world_model.lut's alias `WorldState` listed for a parameter `K : U` or `S :
     # Concrete`, and test.lth's constructor `Sampled` for `accepts : Grade`; none is a model, so
     # none of their files is a home. A model is a value whose type is the parameter's theory head:
     # certification_model.lut's `certifying : Certifying`, world_model.lut's `host : HostConsole`
