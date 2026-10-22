@@ -86,7 +86,7 @@ record's field, a parameter and a pattern variable stay free, since D-2026-10-18
 names (the coordinator, 2026-10-21, on review-bite-5.md finding 2d). [proposed, core bite 12a] An
 `operator` act travels with its file: a file that imports from it, directly or through another
 import, writes the operator at the type the act binds without listing the act or its function, since
-the operators of a type are those of the model the type names (4.R13); arrays_model.lut's `operator *
+an operator belongs to the model that its type names (4.R13); arrays_model.lut's `operator *
 := matMul` gives `a * a` in an importer. This clause was silent before; the alternative, an operator
 reaching only the file that binds it, would leave a type's arithmetic unusable outside its model file.
 
