@@ -124,3 +124,25 @@ about the model the run gives (its theory's conjunction entries), refusing what 
 models serve today? It closes a hole in what a run's certificate means; it costs refusals wherever
 a model's theory has not been certified as a conjunction yet, until 12b's re-certification covers
 them.
+
+## Follow-up: serving by the run's model
+
+The coordinator's answer to the question (2026-10-22): yes. 012b3ce, with 7.S22's [proposed]
+sentence corrected in the commit after it. A demand whose law takes no model parameter is marked
+`byModel` in run.py; certify.py's `served` serves it only by its theory's conjunction entries
+about the model the run gives, and `refuse` reads its state from those entries, so another model's
+entries of the law (core's own `Commutative` lines) neither serve it nor refuse it. The run's
+record names, for such a demand, the conjunction entry that served it. Test:
+`test_a_law_without_a_model_parameter_is_served_only_by_the_run_s_model` (test_certify.py): with
+`ops` certified and `other`, another model of the same theory, never certified, `luthier run` of a
+program on `ops` runs, and the one on `other` is refused naming `other: Commutative`, `Neutral` and
+`Unital` (before, `Commutative` was served by entries about other models). `doubles` stays
+certified (`luthier eval` of `doubles.plus 1.0 2.0`: 1 certified, 15 vacuous).
+
+Checks, with the change: tests/test_certify.py 55 passed, 3 failed, 2 skipped; tests/test_run.py
+100 passed, 46 failed, 3 skipped, 2 xfailed. The failing tests are the same ones as before the change
+(compared by name), each refused on world.cert.json's four stale console laws, for 12b's
+re-certification. `scripts/check_spec.py`: only its known finding.
+
+Item 2's leftover, for bite 13: operator bindings (`operator_binding` in elaborate.py) still go
+through a subtype's bases unrestricted, so an operator bound at one subtype can serve a sibling.
