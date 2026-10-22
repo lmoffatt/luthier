@@ -54,13 +54,13 @@ worlds : List WorldState := [blank, withFile]
 tableNames : List String := ["obs"]
 obsTables : List Table := [parsed obsText]
 -- the six permutations of three rows
-perms : List (Fin 3 -> Fin 3) := [
-  fn r { r },
-  fn r { if r == 0 then 1 else if r == 1 then 0 else 2 },
-  fn r { if r == 0 then 0 else if r == 1 then 2 else 1 },
-  fn r { if r == 0 then 2 else if r == 1 then 1 else 0 },
-  fn r { if r == 0 then 1 else if r == 1 then 2 else 0 },
-  fn r { if r == 0 then 2 else if r == 1 then 0 else 1 } ]
+permIdentity (r : Fin 3) : Fin 3 := r
+permSwapFirst (r : Fin 3) : Fin 3 := if r == 0 then 1 else if r == 1 then 0 else 2
+permSwapLast (r : Fin 3) : Fin 3 := if r == 0 then 0 else if r == 1 then 2 else 1
+permReverse (r : Fin 3) : Fin 3 := if r == 0 then 2 else if r == 1 then 1 else 0
+permRotateUp (r : Fin 3) : Fin 3 := if r == 0 then 1 else if r == 1 then 2 else 0
+permRotateDown (r : Fin 3) : Fin 3 := if r == 0 then 2 else if r == 1 then 0 else 1
+perms : List (Fin 3 -> Fin 3) := [permIdentity, permSwapFirst, permSwapLast, permReverse, permRotateUp, permRotateDown]
 margins : List Margin := [0.05]
 positions : List Int := [0, 1]
 titles : List String := ["", "another title"]

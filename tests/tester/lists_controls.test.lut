@@ -155,8 +155,8 @@ onHammingListIsAMetric : List Binding := [
   { parameter := just "z", type := nothing, generator := "boolVectors", coverage := Listed } ]
 test "HammingListIsAMetric" ExhaustiveMode (seed <- 20261021) (profile <- onHammingListIsAMetric) (control <- true)
 
-emptyPredicate : List Int -> Bool := fn xs { true }
-distinctPredicate : List Int -> Bool := fn xs { true }
+emptyPredicate : List Int -> Bool := fn xs { match xs { nil -> true ; cons x rest -> true } }
+distinctPredicate : List Int -> Bool := fn xs { match xs { nil -> true ; cons x rest -> true } }
 
 onListEmptiness : List Binding := [
   { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },

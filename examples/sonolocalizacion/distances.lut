@@ -42,7 +42,7 @@ import "positions_model.lut" positionsModel
 nodes : Int := 7
 nPairs : Int := nodes * (nodes - 1) / 2
 pairOffset (a : Int) : Int := a * nodes - a * (a + 1) / 2
-firstFrom (k a : Int) : Int := if a + 2 < nodes and pairOffset (a + 1) <= k then firstFrom k (a + 1) else a
+firstFrom (k a : Int) : Fin nodes := if a + 2 < nodes and pairOffset (a + 1) <= k then firstFrom k (a + 1) else a
 pairI : Vec (Fin nodes) := vec (Fin nodes) nPairs (fn k { firstFrom k 0 })
 pairJ : PairsAmong nodes pairI := vec (Fin nodes) nPairs (fn k {
   a := firstFrom k 0
