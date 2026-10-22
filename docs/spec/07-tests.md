@@ -164,7 +164,11 @@ each conjunct its entry, in the store of the law's claim, under the law's name a
 cone, with the conjunct named in its identity (spec 7.S9) and the conjuncts listed. The law's grade
 is the demand's combination of its conjuncts' grades, the weakest by default (spec 5.S8), and it has
 none while one conjunct has none or is refuted; a run's demand of the law is served only when each
-conjunct is. A control of the law passes when it refutes one conjunct: the conjuncts run in order
+conjunct is. [proposed, core bite 12a] A run demands a theory's laws one by one, each by its own name
+(`doubles: Neutral`); where the theory is defined by such a conjunction and no entry of that law
+serves, the demand is served by the entries of the theory's law for the model the run gives, at its
+hash, whose conjunct applies that law or, for a law that is itself a conjunction (`TotalOrder`), one
+of the laws it splits into, each such conjunct served. A control of the law passes when it refutes one conjunct: the conjuncts run in order
 until one is refuted, and the line writes one control entry, the law's, with the conjunct it refuted.
 A binding by name binds every conjunct's variable of that name, so two conjuncts whose variables
 share a name and differ in type are bound apart by type. [implemented] In `tester.py`

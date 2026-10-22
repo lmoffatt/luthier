@@ -2080,6 +2080,22 @@ def _provisional(x):
     return False
 
 
+def _conjunction_demand(demand, theories, law_cones, theory, law, name, cones, axiom):
+    """The demand of the theory's own law for the model `name`, with the conjunct heads `law`
+    stands for (`_Theories.leaves`): what `certify.served` reads when no entry of `law` itself
+    serves (core bite 12a, D-2026-10-18-f). The tester certifies a theory whose definition is a
+    conjunction as one law, its entries under the theory's name with the text of their conjunct;
+    the run demands each law of the theory by its own name (`Neutral`, `TotalOrder`). None when
+    the theory's law takes no model parameter."""
+    m = theories.model_parameter(theory, theory)
+    if m is None:
+        return None
+    d = demand.law(theory.partition("@")[0], law_cones.hash(theory), [(m, {"Printed": name.partition("@")[0]})],
+                   {m: cones.hash(name)}, axiom)
+    d["heads"] = theories.leaves(law)
+    return d
+
+
 class _Theories:
     """The theory heads of the loaded files (a name declared at a record and defined by its laws,
     `Arrays : { ... }` and `Arrays := AddPointwise & ...`), and the laws a type states (6.S1)."""
@@ -2124,6 +2140,27 @@ class _Theories:
                 continue
             if self.is_theory(name) and name != theory:
                 pending[:0] = [self.bodies[name]]
+            elif name not in out:
+                out.append(name)
+        return out
+
+    def leaves(self, law):
+        """The laws a law stands for: itself, or the conjuncts of its definition when that is a `&`
+        of laws, read through (`TotalOrder` is `Reflexive`, `Transitive`, `Antisymmetric`, `Total`),
+        as the tester splits a conjunction (D-2026-10-18-f)."""
+        out, pending, seen = [], [law], set()
+        while pending:
+            x = pending.pop(0)
+            name = x if isinstance(x, str) else _head_name(x)
+            if isinstance(x, s.Binop) and x.operator == "&":
+                pending[:0] = [x.left, x.right]
+                continue
+            if name is None or name in seen:
+                continue
+            seen.add(name)
+            body = self.bodies.get(name)
+            if body is not None and isinstance(body, s.Binop) and body.operator == "&":
+                pending[:0] = [body]
             elif name not in out:
                 out.append(name)
         return out
@@ -2365,7 +2402,11 @@ def certification(loaded, program, entry, demand, refuse=True):
             stating[n] = theory
     laws = sorted({law for theory in set(stating.values()) for law in theories.laws(theory)
                    if not theories.case_law(law, theory)})
-    law_cones = certify.Cones(_elaborated(runtime_slice(loaded.acts, laws[0], core_data(loaded) + tuple(laws), theory_laws=True))) \
+    # a theory whose definition is a conjunction is certified as one law, an entry per conjunct
+    # (tester.py's `_run_conjunction`, D-2026-10-18-f): its cone serves its laws' demands too
+    conjunctions = sorted(set(stating.values()))
+    law_cones = certify.Cones(_elaborated(runtime_slice(loaded.acts, laws[0], core_data(loaded) + tuple(laws) + tuple(conjunctions),
+                                                        theory_laws=True))) \
         if laws else None
     cone, firsts, axioms = [], [], {}
     for n in names:
@@ -2394,6 +2435,9 @@ def certification(loaded, program, entry, demand, refuse=True):
                 given += [(p, _given(values[p])) for p in params if p in values and p != m]
                 axiom = theories.axiom_of(law)
                 d = demand.law(law.partition("@")[0], law_cones.hash(law), given, fingerprints, axiom is not None)
+                conjunction = _conjunction_demand(demand, theories, law_cones, theory, law, n, cones, axiom is not None)
+                if conjunction is not None:
+                    d["conjunction"] = conjunction
                 if axiom is not None:
                     axioms[id(d)] = axiom
                 demands.append(d)

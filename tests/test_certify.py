@@ -1322,3 +1322,51 @@ Claim (x : Bool) : Bool := Law model x
     assert cones.hash('Claim') != certify.Cones(tuple(
         t.Define(a.name, a.type, t.Var('false')) if isinstance(a, t.Define) and a.name == 'aux' else a
         for a in program)).hash('Claim')
+
+
+# ---------------------------------------------------------------------- core bite 12a, item 3
+# A theory whose definition is a conjunction is certified as one law, an entry per conjunct
+# (D-2026-10-18-f); a run demands each of its laws by its own name (`doubles: Neutral`), and those
+# demands are served by the conjuncts' entries (report-verify-6-11.md, failure 2: validate_graph and
+# experiment_zero refused on `doubles: Neutral / Absorbing / Involutive / TotalOrder`). `Unital` is a
+# law defined as a conjunction, read through to its conjuncts as `TotalOrder` is.
+
+CONJ_THEORY = '''Ops : { plus : Int -> Int -> Int }
+Ops (o : Ops) := Commutative Int Int (structural Int) o.plus & Neutral Int (structural Int) o.plus 0 & Unital Int (structural Int) o.plus 0
+Unital (A : U) (s : Object A) (op : A -> A -> A) (e : A) := LeftNeutral A s op e & RightNeutral A s op e
+'''
+CONJ_MODELS = '''import "ops.lth" Ops
+ops : Ops := { plus := fn a b { a + b } }
+other : Ops := { plus := fn a b { b + a } }
+'''
+CONJ_TEST = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "ops.lut" ops
+import "ops.lth" Ops
+smallInts : List Int := [0, 1, 2]
+onOps : List Binding := [ { parameter := just "o", type := nothing, generator := "ops", coverage := Listed },
+  { parameter := nothing, type := just "Int", generator := "smallInts", coverage := Listed } ]
+test "Ops" ExhaustiveMode (profile <- onOps)
+'''
+CONJ_USE = '''import "ops.lut" ops other
+three : Int := ops.plus 1 2
+four : Int := other.plus 2 2
+'''
+
+
+def test_a_theory_s_laws_are_served_by_its_conjunction_s_entries(tmp_path, capsys):
+    for name, text in [("ops.lth", CONJ_THEORY), ("ops.lut", CONJ_MODELS), ("ops.test.lut", CONJ_TEST),
+                       ("use.lut", CONJ_USE)]:
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    main(["certify", str(tmp_path / "ops.test.lut")])
+    entries = json.loads((tmp_path / "ops.cert.json").read_text(encoding="utf-8"))
+    assert {e["law"] for e in entries} == {"Ops"} and all("conjunct" in e for e in entries)
+    capsys.readouterr()
+    main(["eval", str(tmp_path / "use.lut"), "three"])
+    out = capsys.readouterr().out
+    assert "3 : Int" in out and "uncertified" not in out and "1 certified" in out
+    # another model of the theory is not served by `ops`'s entries
+    main(["eval", str(tmp_path / "use.lut"), "four"])
+    out = capsys.readouterr().out
+    assert "other: Neutral: uncertified" in out and "other: Unital: uncertified" in out

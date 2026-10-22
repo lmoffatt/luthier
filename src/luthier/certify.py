@@ -1157,9 +1157,28 @@ def served(demand, entries):
     at_hash = [e for e in _laws_own(entries) if e["law"] == demand["law"] and at(demand, e)]
     conjuncts = list(dict.fromkeys(c for e in at_hash for c in e.get("conjuncts") or ()))
     if not conjuncts:
-        return any(serves_over(demand, e, entries) for e in entries)
+        return (any(serves_over(demand, e, entries) for e in entries)
+                or "conjunction" in demand and _served_by_conjuncts(demand["conjunction"], entries))
     return all(any(serves_over(demand, e, [f for f in entries if f.get("conjunct") == c])
                    for e in entries if e.get("conjunct") == c) for c in conjuncts)
+
+
+def _served_by_conjuncts(conjunction, entries):
+    """[proposed, core bite 12a] A law demanded by its own name as one of a theory's laws
+    (`doubles: Neutral`), served by the entries the tester records under the theory's law for the
+    conjuncts the law stands for (`conjunction["heads"]`, the conjunct's text headed by one of
+    them; D-2026-10-18-f): each such conjunct served at the theory law's hash, for the model the run
+    gives. Not served when no conjunct of the theory is headed so."""
+    at_hash = [e for e in _laws_own(entries) if e["law"] == conjunction["law"] and at(conjunction, e)]
+    texts = dict.fromkeys(c for e in at_hash for c in e.get("conjuncts") or ())
+    mine = [c for c in texts if _text_head(c) in conjunction["heads"]]
+    return bool(mine) and all(any(serves_over(conjunction, e, [f for f in entries if f.get("conjunct") == c])
+                                  for e in entries if e.get("conjunct") == c) for c in mine)
+
+
+def _text_head(text):
+    """The law a conjunct's printed text applies (`Neutral Float64 ...` is `Neutral`)."""
+    return text.lstrip("(").split(" ", 1)[0].rstrip(")")
 
 
 def served_grade(demand, entry, entries=None):
