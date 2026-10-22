@@ -782,6 +782,28 @@ def parameters(runner, law):
     return params
 
 
+def fixed_carrier(runner, law, params):
+    """The parameters a structure's laws fix (4.R6, the coordinator's (a) of 2026-10-22): the law (or
+    a conjunct of it) is a structure `S (F : U) (d : S Float64) := ...` whose model is typed by `S` at
+    arguments that are not its parameters, so `F` is `Float64`: {name: value}; {} otherwise."""
+    base = law.split(_CONJUNCT)[0]
+    declared = next((a for a in runner.program if isinstance(a, t.Declare) and a.name == base), None)
+    if declared is None:
+        return {}
+    k, ty = 0, declared.type
+    while isinstance(ty, t.Pi):
+        k, ty = k + 1, ty.codomain
+    if not (k and isinstance(ty, t.Record) and len(params) > k):
+        return {}
+    head, args = params[k][1], []
+    while isinstance(head, t.App):
+        args.append(head.argument); head = head.function
+    names = {n for n, _ in params[:k]}
+    if head != t.Var(base) or len(args) != k or any(names & set(kernel.free_names(a)) for a in args):
+        return {}
+    return {n: a for (n, _), a in zip(params[:k], reversed(args))}
+
+
 def _list_depth(runner, ty):
     """How many `List`s a type is nested in: a census of lists, for a parameter that is a list,
     lists its elements (`List (List A)` for a `List A`; a refined list, `UnitList`, read as one)."""
@@ -1019,8 +1041,12 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
     con = _constructor(loaded)
     drawn = t.App(con("Drawn"), t.Lit(t.IntConst(spec.seed)))
     plan, coverage = [], (drawn if spec.sampled else con("Exhaustive"))
+    fixed = fixed_carrier(runner, law, params)
     try:
         for k, (name, ty) in enumerate(params):
+            if name in fixed:
+                plan.append([fixed[name]])
+                continue
             b = resolve_binding(spec, name, _head_name(ty))
             if b is None:
                 plan.append(None)
@@ -2270,7 +2296,12 @@ def new_entry(runner, loaded, spec, cones, fuel, conjunct=None):
     values = Values(runner, random.Random(0), spec.size, spec.budgets, fuel)
     of = law if conjunct is None else _as_called(loaded, conjunct[0])
     binding, reach, hosts = [], [], dict(cones.hosts(of))
+    fixed = fixed_carrier(runner, law, params)
     for k, (name, ty) in enumerate(params):
+        if name in fixed:
+            binding.append({"parameter": name, "generator": f"{_show(fixed[name])} (fixed by the structure's laws)",
+                            "fingerprint": ""})
+            continue
         b = resolve_binding(spec, name, _head_name(ty))
         if b is not None:
             called = _as_called(loaded, b.generator)

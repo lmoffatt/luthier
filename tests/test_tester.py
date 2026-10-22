@@ -430,3 +430,30 @@ def test_an_alias_or_a_constructor_is_no_model_home(tmp_path):
     assert homes == {"OneIdentityOneResult": [], "NoPriceRefusesAssumed": ["certification_model.lut"],
                      "AppliedWhenSettled": [], "HostAgreesPrint": ["world_model.lut"],
                      "PrintAppendsALine": ["world_model.lut"]}
+
+
+FIXED_CARRIER = '''import "test.lth" test SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+
+Machine (F : U) : { plus : F -> F -> F }
+PlusOfZero (m : Machine Float64) (x : Float64) : Bool := m.plus x 0.0 == x
+ZeroPlus (m : Machine Float64) (x : Float64) : Bool := m.plus 0.0 x == x
+Machine (F : U) (m : Machine Float64) := PlusOfZero m & ZeroPlus m
+machine : Machine Float64 := { plus := fn a b { a + b } }
+models : List Binding := [
+  { parameter := nothing, type := just "Machine", generator := "machine", coverage := Listed } ]
+
+test "Machine" (SampledMode linear) (profile <- models)
+'''
+
+
+def test_a_structure_whose_laws_fix_its_carrier_runs_at_that_carrier(tmp_path):
+    # the coordinator's (a) of 2026-10-22: `Doubles (F : U) (d : Doubles Float64) := ...` fixes `F`;
+    # before, the line was not run, "F : U: a parameter of type U has no generator (7.R2)"
+    top = tmp_path / "machine.test.lut"
+    top.write_text(FIXED_CARRIER, encoding="utf-8")
+    [o] = tester.run_tests(top)
+    line = tester.line(o)
+    assert "not run" not in line and "conjunction of 2" in line, line
