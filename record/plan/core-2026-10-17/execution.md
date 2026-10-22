@@ -13,6 +13,13 @@ design leaves to Luciano are in `decisions.md` beside this file; every choice ma
 the agent's, one commit undoes it. The first version of this plan (54f6228) had the core imported by
 name; D-2026-10-18-b decided otherwise and this version replaces it (git keeps the first).
 
+Status, 2026-10-22 afternoon (coordinator): bites 12a and 12b landed with their reports
+(report-bite-12a.md, report-bite-12b.md): the stores re-certified, validate_graph and experiment_zero
+reproduce their records, the suite passes in all 42 files (the regions test LUTHIER_SLOW). Left:
+44 homonyms, 185 list helpers, 21 unclaimed. Bite 12b's question taken by the coordinator as (a):
+check accepts a structure whose laws fix its carrier (`Doubles` at `Float64`), done in 13a. Bite 13
+is split into 13a (machinery) and 13b (the library's leftovers and the closing), side by side.
+
 Status, 2026-10-22 morning (coordinator): bites 9 to 11, the refusal holes and the eval fix
 landed with their reports; CORE_COLLISIONS is empty. The combined verification
 (report-verify-6-11.md, dafe90f) re-certified every store (40 programs at 0 lines ran on the second
