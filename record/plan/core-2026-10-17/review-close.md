@@ -144,3 +144,25 @@ homonym (item 1). `prepend` as a fold. A law for `withinOf`.
 
 Seed and sample method (item 4); looking at the hidden side as well as the reported one (item 4);
 nothing else. No decision for `record/decisions.md`.
+
+## Before the tag: cleanup
+
+Commits (brief prompt-pre-tag-cleanup.md): bb5e40e deletes `allUnit` (generators_model.lut,
+tests/test_tester.py and `UnitList` use `all List (Vec Float64) unitVec`); 2846405 `overRegions` as
+a `fold` over `filter List Region grades rs` and `prepend` as a fold into `Certificate -> Certificate`
+(`compose`, `id`); d347991 the stale names in the 13 listed comments and docstrings; 7f7ad86 the eight
+stores that moved (arrays, arrays_model, certification, certification_model, generators_model, laws,
+probability, probability_model).
+
+Certification: `luthier certify` over the 44 files of tests/tester, one at a time, twice. First pass
+76 lines ran; second pass 0 lines ran, 44 files. Exit 1 on belief_laws, cases and laws: their
+output is the same on both passes (known refutations and uncontrolled notices, no store changed
+for them); I did not look further. Outputs in ~/.cache/luthier-cleanup/pass{1,2}-*.out.
+
+Suite: every tests/test_*.py file by itself under `timeout 1800`; all pass (test_certify 70 passed,
+test_run 146, test_elaborate 69, test_tester 24, and so on). test_check_private collects no tests
+(rc 5), as before. Outputs in ~/.cache/luthier-cleanup/suite-*.out.
+
+`scripts/core_metrics.py`: homonyms 0, executive shadows 113, list helpers 45 (was 48), unclaimed 7,
+loose 1407 (real 1330, rest 77; was 1411, 1343, 68). The total and the real count are down; "rest"
+is up by 9, which I did not trace.
