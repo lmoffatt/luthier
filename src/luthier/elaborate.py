@@ -1027,7 +1027,8 @@ def claim_matches(S, pattern_of, dty, extra_vars, c):
         pattern = pattern_of(claim)
         for candidate in bases(dty, c):
             sigma = {}
-            if solve(pattern, candidate, frozenset(claim.binders) | frozenset(extra_vars), sigma, c):
+            if (solve(pattern, candidate, frozenset(claim.binders) | frozenset(extra_vars), sigma, c)
+                    and not sibling_subtype(pattern, sigma, dty, c)):
                 found.append((claim, sigma)); break
     # A subtype's own model takes precedence over a model inherited from its base.
     # Keep every exact match, so two models declared at the same carrier remain an error.
@@ -1043,6 +1044,20 @@ def claim_matches(S, pattern_of, dty, extra_vars, c):
     # definition. It precedes the carrier's default; two local models still conflict.
     explicit = [entry for entry in selected if entry[0] in local]
     return explicit or selected
+
+
+def sibling_subtype(pattern, sigma, dty, c):
+    """Whether a claim at a subtype would serve a type outside it (core bite 12a, 4.R13): a claim
+    at a subtype applies to a value of that subtype or of a subtype declared inside it, so its
+    carrier must be one of the type's bases. `solve` compares two subtypes by their bases alone,
+    so without this a claim at `MetricInteger` served `Mark`, a sibling subtype of `Int`."""
+    if isinstance(dty, t.Hole) or is_meta(dty):
+        return False
+    for name, value in sigma.items():
+        pattern = substitute(name, value, pattern)
+    if not any(isinstance(x, t.Subtype) for x in bases(pattern, c)):
+        return False
+    return not any(alpha_equal(pattern, x) for x in bases(dty, c))
 
 
 def model_of(claim, sigma, c, where):

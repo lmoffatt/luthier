@@ -582,3 +582,29 @@ def test_an_alias_parameter_is_not_captured_by_a_record_field():
     # a binder of a function type or of a dependent product is bound the same way
     p = elaborate_program(program('G (n : Int) = (n : Nat) -> Fin n\nx : G 3'))
     assert alpha_equal(p[-1].type, t.Pi('n', V('Nat'), t.App(V('Fin'), V('n'))))
+
+
+# Core bite 12a, item 2: through a subtype to its base, never to a sibling subtype's claim (4.R13;
+# docs/concepts.md 4.3, `d microphone speaker` landing on core.lut's IntIsAMetric).
+SIBLINGS = ('Wide : U := { k : Int | k <= 100 }\nNarrow : U := { k : Int | k <= 10 }\n'
+            'Inner : U := { k : Wide | 0 <= k }\n'
+            'WideIsAMetric (model : Metric Wide (structural Wide) <- { d := fn x y { 0.0 } }) : Bool := '
+            'Metric Wide (structural Wide) model\n'
+            'a : Narrow\nb : Inner\nw : Wide\n')
+
+
+def test_a_claim_at_a_subtype_serves_it_and_the_subtypes_declared_inside_it():
+    for x in ('w', 'b'):
+        r = term(f'd {x} {x}', SIBLINGS)
+        assert isinstance(r.function.function, t.Proj) and r.function.function.label == 'd'
+
+
+def test_a_claim_at_a_subtype_does_not_serve_a_sibling_subtype():
+    # `Narrow`'s only candidate is core.lut's IntIsAMetric, claimed at MetricInteger, another
+    # subtype of Int: refused, the candidate named
+    with pytest.raises(TypingError) as e:
+        term('d a a', 'Narrow : U := { k : Int | 0 <= k and k <= 10 }\na : Narrow')
+    assert 'no model' in str(e.value) and 'at Narrow' in str(e.value) and 'IntIsAMetric' in str(e.value)
+    with pytest.raises(TypingError) as e:
+        term('d a a', SIBLINGS)
+    assert 'no model' in str(e.value)

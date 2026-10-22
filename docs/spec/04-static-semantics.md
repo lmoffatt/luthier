@@ -292,7 +292,10 @@ carries two), the model is named in the call. The subtype is the wrong relation 
 A name of a structure is resolved as an operator is (D-2026-10-18-b). A structure is
 a name declared at a record with parameters; a claim `X : Bool := S T m` binds the model `m` of `S`
 at `T`. A field written unqualified is resolved by the type of its first argument whose type is
-headed by a parameter of the structure, under instantiation and through a subtype to its base;
+headed by a parameter of the structure, under instantiation and through a subtype to its base.
+A claim at a subtype serves a value of that subtype or of a subtype declared inside it, never a
+sibling: with `Mark` and `MetricInteger` both subtypes of `Int`, `d` at `Mark` does not reach a
+claim at `MetricInteger` (the coordinator, 2026-10-21, on docs/concepts.md 4.3; core bite 12a).
 `S.f` names the structure, `S.f m` the model. A parameter typed by a structure applied to types,
 omitted at a call, is the model its types name; another is passed by name (D-2026-10-18-g). No
 model, models of two structures at the type, or two models of one structure at it, are errors that
