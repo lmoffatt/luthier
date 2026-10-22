@@ -14,8 +14,6 @@ import "laws.lth" Listed Cited
 import "certification.lth" Certifying Recording Entry Certificate ConeDemand ConeName Refusal Outcome Passed Failed NotRunFor
   fuelSpent outOfFuel known recordEntry failureAt Current agree disputedAt
   ANewIdentityGoesInFront AnAgreeingReplayAddsNothing AnAgreeingPairSettles ADisagreeingReplayIsKept AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused
-import "certification.lth" Routing Routed Theory Veto Members Printed Disagrees
-import "certification_model.lut" routing entryIdentity entryFailed
 import "certification_model.lut" certifying hasFailure passes weakestOfBests serves stateOf entryFailed
 import "term.lth" Term Act Program Alpha Substitution Reduction Var Lit Lam App Pi Pair Match Let Define
   IntConst PVar PPair
@@ -187,80 +185,3 @@ greedyErasures : List (Erasure alpha substitute stepper) := [{ erase := eraseBin
 test "ErasureKeepsTheStep" ExhaustiveMode (seed <- 20261018) (whereBindings <- [bind "a" "alphas",
   bind "sb" "substitutions", bind "m" "steppers", bind "e" "greedyErasures", bind "p" "erasurePrograms",
   bind "t" "erasureTerms"]) (control <- true)
-
-rEntry (l : String) (h : Hash) (m fp : String) (c : Maybe String) (cs : List String) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
-  { law := l, cone := h, binding := [{ parameter := "m", generator := "x", fingerprint := fp }], seed := s, cases := 1, conjunct := c,
-    conjuncts := cs, budgets := defaultBudgets, reach := [{ parameter := "m", reach := Members [Printed m] }],
-    evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-22", interpreter := "listed", hosts := nil }
-tpM : Entry := rEntry "T" "hT" "M" "fM" (just "P M") ["P M", "Q M"] 1 (just Cases) Passed
-tqM : Entry := rEntry "T" "hT" "M" "fM" (just "Q M") ["P M", "Q M"] 1 (just Cases) Passed
-tpN : Entry := rEntry "T" "hT" "N" "fN" (just "P N") ["P N", "Q N"] 1 (just Cases) Passed
-tqN : Entry := rEntry "T" "hT" "N" "fN" (just "Q N") ["P N", "Q N"] 1 (just Cases) Passed
-tpN2 : Entry := rEntry "T" "hT" "N" "fN2" (just "P N") ["P N", "Q N"] 1 (just Cases) Passed
-tpMFails : Entry := rEntry "T" "hT" "M" "fM" (just "P M") ["P M", "Q M"] 2 nothing (Failed "x = 1")
-tpMDisagrees : Entry := rEntry "T" "hT" "M" "fM" (just "P M") ["P M", "Q M"] 1 nothing (Failed "x = 2")
-tpNFails : Entry := rEntry "T" "hT" "N" "fN" (just "P N") ["P N", "Q N"] 2 nothing (Failed "x = 3")
-pM : Entry := rEntry "P" "hP" "M" "fM" nothing nil 1 (just Cases) Passed
-lM : Entry := rEntry "L" "hL" "M" "fM" nothing nil 1 (just Cases) Passed
-lNFails : Entry := rEntry "L" "hL" "N" "fN" nothing nil 2 nothing (Failed "m = N")
-lMFails : Entry := rEntry "L" "hL" "M" "fM" nothing nil 2 nothing (Failed "m = M")
-lMDisagrees : Entry := rEntry "L" "hL" "M" "fM" nothing nil 1 nothing (Failed "m = M")
-routeEntries : List Entry := [tpM, tqM, tpMFails, pM, lM, lNFails, lMFails, tpNFails]
-routeStores : List (List Entry) := [nil, [tpM, tqM], [tpM], [pM], [lM], [lNFails, lM], [lNFails, tpN, tqN, lM],
-  [lNFails, tpNFails, tpN, tqN, lM], [lNFails, tpN2, lM], [lMFails, lM], [lMDisagrees, lM], [tpMFails, tpM, tqM],
-  [tpMDisagrees, tpM, tqM], [tpN, tqN, tpM, tqM], [pM, tpMFails, tpM, tqM], [lNFails, tpN, tqN, tpM, tqM, lM]]
-mDemand (l : String) (h : Hash) (m : String) : ConeDemand := { law := l, cone := h, given := [("m", Printed m)], accepts := Sampled }
-theoryOn (m : String) (heads : List String) : Theory := { demand := mDemand "T" "hT" m, heads := heads }
-routeds : List Routed := [
-  { demand := { law := "P", cone := "hP", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := just (theoryOn "M" ["P"]) },
-  { demand := { law := "Q", cone := "hQ", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := just (theoryOn "M" ["Q"]) },
-  { demand := mDemand "T" "hT" "M", byModel := false, models := ["m"], theory := nothing },
-  { demand := mDemand "P" "hP" "M", byModel := false, models := ["m"], theory := just (theoryOn "M" ["P"]) },
-  { demand := mDemand "L" "hL" "M", byModel := false, models := ["m"], theory := just (theoryOn "M" ["L"]) },
-  { demand := mDemand "L" "hL" "M", byModel := false, models := ["m"], theory := nothing },
-  { demand := mDemand "L" "hL" "N", byModel := false, models := ["m"], theory := just (theoryOn "N" ["L"]) } ]
-
--- The controls of the route's laws (before the tag, 2026-10-22). A witness that keeps the first entry
--- of the real one only (it drops an obligation) and one that adds an entry the demand does not need;
--- a witness that never serves; a byModel demand served by the law's own entries; a veto that invents a
--- failure; one that reads only the law's own entries (skips the theory's subject); one that reads
--- failures before disagreements; one not scoped by reach (it reads the law's entries of every model);
--- and one scoped by reach that never treats a consequence as refuting all (it passes the defining
--- laws of N and still refutes only N's runs). The demands, entries and stores are the laws' file's.
-firstOnly (d : Routed) (es : List Entry) : Maybe (List Entry) :=
-  match routing.witness d es { nothing -> nothing ; just w -> just (take Entry 1 w) }
-padded (d : Routed) (es : List Entry) : Maybe (List Entry) :=
-  match routing.witness d es { nothing -> nothing ; just w -> just (w <> take Entry 1 es) }
-never (d : Routed) (es : List Entry) : Maybe (List Entry) := nothing
-ownForByModel (d : Routed) (es : List Entry) : Maybe (List Entry) :=
-  routing.witness { demand := d.demand, byModel := false, models := d.models, theory := d.theory } es
-invents (d : Routed) (es : List Entry) : Maybe Veto := just { state := Current (Failed "invented"), exception := false }
-ownOnly (d : Routed) (es : List Entry) : Maybe Veto :=
-  routing.veto { demand := d.demand, byModel := d.byModel, models := d.models, theory := nothing } es
-failureFirst (d : Routed) (es : List Entry) : Maybe Veto :=
-  match routing.veto d es { nothing -> nothing ; just v -> (match v.state {
-    Disagrees a b -> if entryFailed a then just { state := Current a.outcome, exception := false }
-                     else if entryFailed b then just { state := Current b.outcome, exception := false } else just v ;
-    _ -> just v }) }
-unscoped (d : Routed) (es : List Entry) : Maybe Veto :=
-  routing.veto { demand := d.demand, byModel := d.byModel, models := nil, theory := d.theory } es
-noException (d : Routed) (es : List Entry) : Maybe Veto :=
-  match routing.veto d es { nothing -> nothing ; just v -> if v.exception then nothing else just v }
-droppingRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := firstOnly, veto := routing.veto }]
-paddingRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := padded, veto := routing.veto }]
-neverRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := never, veto := routing.veto }]
-ownRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := ownForByModel, veto := routing.veto }]
-inventingRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := routing.witness, veto := invents }]
-ownOnlyRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := routing.witness, veto := ownOnly }]
-failureFirstRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := routing.witness, veto := failureFirst }]
-unscopedRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := routing.witness, veto := unscoped }]
-noExceptionRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := routing.witness, veto := noException }]
-test "AWitnessCoversEveryObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models", bind "r" "droppingRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
-test "AWitnessIsOneEntryPerObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models", bind "r" "paddingRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
-test "AnEntryForEveryObligationWitnesses" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models", bind "r" "neverRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
-test "AWitnessCoversEveryObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models", bind "r" "ownRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
-test "AVetoNamesItsCause" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models", bind "r" "inventingRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
-test "AFailureInASubjectVetoes" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models", bind "r" "ownOnlyRoutings", bind "d" "routeds", bind "es" "routeStores", bind "e" "routeEntries"]) (control <- true)
-test "ADisagreementInASubjectVetoesFirst" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models", bind "r" "failureFirstRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
-test "AnEntryAboutAnotherModelVetoesNothing" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models", bind "r" "unscopedRoutings", bind "d" "routeds", bind "es" "routeStores", bind "e" "routeEntries"]) (control <- true)
-test "AConsequenceRefutesEveryModel" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models", bind "r" "noExceptionRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)

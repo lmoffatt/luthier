@@ -1,0 +1,72 @@
+-- tests/tester/certification_route.test.lut: the laws of `Routing` (certification.lth §6) on
+-- certification_model.lut's `routing`: the witness and the veto of a routed demand (core bite 13c's
+-- items 3 and 4, D-2026-10-22-a and -d). Written 2026-10-22 by Claude Sonnet 5.5 on record/plan/
+-- core-2026-10-17/prompt-refuse-theory.md, in a file of its own so that test_certify's list of the
+-- lines of certification_laws.test.lut keeps its meaning. Seed 20261022. Its controls are in
+-- certification_route_controls.test.lut.
+
+import "test.lth" test ExhaustiveMode Grade Proved Cases Sampled defaultBudgets Budgets
+import "generators.lth" Binding
+import "laws.lth" Listed Cited
+import "certification.lth" Routing Routed Theory Members Printed Hash Entry Outcome Passed Failed Certifying
+  AWitnessCoversEveryObligation AWitnessIsOneEntryPerObligation AnEntryForEveryObligationWitnesses AVetoNamesItsCause
+  AFailureInASubjectVetoes ADisagreementInASubjectVetoesFirst AnEntryAboutAnotherModelVetoesNothing AConsequenceRefutesEveryModel
+  ConeDemand
+import "certification_model.lut" certifying routing
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+certifyingModels : List Certifying := [certifying]
+
+-- The route of a demand (before the tag, 2026-10-22, by Claude Sonnet 5.5, on record/plan/core-2026-10-17/
+-- prompt-refuse-theory.md): the eight laws of `Routing` (certification.lth §6) on certification_model.lut's
+-- `routing`, over listed demands and stores. The theory's law is `T` at `hT`, with the conjuncts `P M`
+-- and `Q M` (a model `M`) and `P N`, `Q N` (a model `N`, a version `fN`); the laws `P` (a conjunct's law,
+-- at `hP`), `Q` and `L` (a law stated for every model of `T`, at `hL`). The demands: `P` and `Q` with no
+-- model parameter (`byModel`, served only through the theory's conjuncts), `T` itself (a conjunction
+-- demanded whole), `P` as a direct demand (its own entry or the theory's), `L` on `M` and on `N` with and
+-- without its theory. The stores: a theory's two conjuncts, one, a law's own pass, a failure on another
+-- model, the same with `N` passing the theory (the exception), failing it, or passing another version of
+-- it, a failure and a disagreement on `M`, a conjunct that fails and one that is in disagreement, a
+-- theory's entries about another model, a law served over a failed conjunct. The controls are in
+-- certification_controls.test.lut.
+rEntry (l : String) (h : Hash) (m fp : String) (c : Maybe String) (cs : List String) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
+  { law := l, cone := h, binding := [{ parameter := "m", generator := "x", fingerprint := fp }], seed := s, cases := 1, conjunct := c,
+    conjuncts := cs, budgets := defaultBudgets, reach := [{ parameter := "m", reach := Members [Printed m] }],
+    evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-22", interpreter := "listed", hosts := nil }
+tpM : Entry := rEntry "T" "hT" "M" "fM" (just "P M") ["P M", "Q M"] 1 (just Cases) Passed
+tqM : Entry := rEntry "T" "hT" "M" "fM" (just "Q M") ["P M", "Q M"] 1 (just Cases) Passed
+tpN : Entry := rEntry "T" "hT" "N" "fN" (just "P N") ["P N", "Q N"] 1 (just Cases) Passed
+tqN : Entry := rEntry "T" "hT" "N" "fN" (just "Q N") ["P N", "Q N"] 1 (just Cases) Passed
+tpN2 : Entry := rEntry "T" "hT" "N" "fN2" (just "P N") ["P N", "Q N"] 1 (just Cases) Passed
+tpMFails : Entry := rEntry "T" "hT" "M" "fM" (just "P M") ["P M", "Q M"] 2 nothing (Failed "x = 1")
+tpMDisagrees : Entry := rEntry "T" "hT" "M" "fM" (just "P M") ["P M", "Q M"] 1 nothing (Failed "x = 2")
+tpNFails : Entry := rEntry "T" "hT" "N" "fN" (just "P N") ["P N", "Q N"] 2 nothing (Failed "x = 3")
+pM : Entry := rEntry "P" "hP" "M" "fM" nothing nil 1 (just Cases) Passed
+lM : Entry := rEntry "L" "hL" "M" "fM" nothing nil 1 (just Cases) Passed
+lNFails : Entry := rEntry "L" "hL" "N" "fN" nothing nil 2 nothing (Failed "m = N")
+lMFails : Entry := rEntry "L" "hL" "M" "fM" nothing nil 2 nothing (Failed "m = M")
+lMDisagrees : Entry := rEntry "L" "hL" "M" "fM" nothing nil 1 nothing (Failed "m = M")
+routeEntries : List Entry := [tpM, tqM, tpMFails, pM, lM, lNFails, lMFails, tpNFails]
+routeStores : List (List Entry) := [nil, [tpM, tqM], [tpM], [pM], [lM], [lNFails, lM], [lNFails, tpN, tqN, lM],
+  [lNFails, tpNFails, tpN, tqN, lM], [lNFails, tpN2, lM], [lMFails, lM], [lMDisagrees, lM], [tpMFails, tpM, tqM],
+  [tpMDisagrees, tpM, tqM], [tpN, tqN, tpM, tqM], [pM, tpMFails, tpM, tqM], [lNFails, tpN, tqN, tpM, tqM, lM]]
+mDemand (l : String) (h : Hash) (m : String) : ConeDemand := { law := l, cone := h, given := [("m", Printed m)], accepts := Sampled }
+theoryOn (m : String) (heads : List String) : Theory := { demand := mDemand "T" "hT" m, heads := heads }
+routeds : List Routed := [
+  { demand := { law := "P", cone := "hP", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := just (theoryOn "M" ["P"]) },
+  { demand := { law := "Q", cone := "hQ", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := just (theoryOn "M" ["Q"]) },
+  { demand := mDemand "T" "hT" "M", byModel := false, models := ["m"], theory := nothing },
+  { demand := mDemand "P" "hP" "M", byModel := false, models := ["m"], theory := just (theoryOn "M" ["P"]) },
+  { demand := mDemand "L" "hL" "M", byModel := false, models := ["m"], theory := just (theoryOn "M" ["L"]) },
+  { demand := mDemand "L" "hL" "M", byModel := false, models := ["m"], theory := nothing },
+  { demand := mDemand "L" "hL" "N", byModel := false, models := ["m"], theory := just (theoryOn "N" ["L"]) } ]
+routings : List (Routing certifying) := [routing]
+routeBindings : List Binding := [bind "k" "certifyingModels", bind "r" "routings", bind "d" "routeds", bind "es" "routeStores"]
+test "AWitnessCoversEveryObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- routeBindings)
+test "AWitnessIsOneEntryPerObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- routeBindings)
+test "AnEntryForEveryObligationWitnesses" ExhaustiveMode (seed <- 20261022) (whereBindings <- routeBindings)
+test "AVetoNamesItsCause" ExhaustiveMode (seed <- 20261022) (whereBindings <- routeBindings)
+test "ADisagreementInASubjectVetoesFirst" ExhaustiveMode (seed <- 20261022) (whereBindings <- routeBindings)
+test "AConsequenceRefutesEveryModel" ExhaustiveMode (seed <- 20261022) (whereBindings <- routeBindings)
+test "AFailureInASubjectVetoes" ExhaustiveMode (seed <- 20261022) (whereBindings <- cons (bind "e" "routeEntries") routeBindings)
+test "AnEntryAboutAnotherModelVetoesNothing" ExhaustiveMode (seed <- 20261022) (whereBindings <- cons (bind "e" "routeEntries") routeBindings)
