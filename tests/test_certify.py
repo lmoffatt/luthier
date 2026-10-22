@@ -1604,3 +1604,54 @@ def test_a_run_records_the_entry_of_every_conjunct_that_served_it(tmp_path, caps
     recorded = set(record["certificates"])
     from luthier.run import _entry_hash
     assert {e["conjunct"] for e in entries if _entry_hash(e) in recorded} == conjuncts and len(conjuncts) > 1
+
+
+# ---------------------------------------------------------------------- bite 13c's follow-up, D-2026-10-22-d
+
+def _law_entry(model, outcome="Passed", seed=1, law="L", cone="hL", conjunct=None):
+    e = {"law": law, "cone": cone, "binding": [{"parameter": "m", "generator": "x", "fingerprint": "f" + model}],
+         "seed": seed, "cases": 1, "reach": [{"parameter": "m", "reach": {"Members": [{"Printed": model}]}}],
+         "outcome": outcome, "grade": "Cases" if outcome == "Passed" else None}
+    if conjunct is not None:
+        e.update(conjunct=conjunct, conjuncts=["P " + model])
+    return e
+
+
+def _direct(model="M"):
+    given = [("m", {"Printed": model})]
+    return {"law": "L", "cone": "hL", "given": given, "accepts": "Sampled", "fingerprints": {"m": "f" + model},
+            "conjunction": {"law": "T", "cone": "hT", "given": given, "accepts": "Sampled",
+                            "fingerprints": {"m": "f" + model}, "heads": ["L"]}}
+
+
+def test_a_failure_on_another_model_does_not_refuse_a_direct_demand():
+    """D-2026-10-22-d: a failure of `L` on N is evidence about N; the run on M, served by its pass, is
+    not refused. A failure on M still is."""
+    cone = [{"name": "n", "provisional": False, "laws": [_direct()]}]
+    on_n = _law_entry("N", {"Failed": "m = N"}, seed=2)
+    assert certify.refuse([on_n, _law_entry("M")], cone) == []
+    on_m = _law_entry("M", {"Failed": "m = M"}, seed=2)
+    assert [r["state"] for r in certify.refuse([on_m, _law_entry("M")], cone)] == [("Current", {"Failed": "m = M"})]
+    # the run on N is refused by it
+    cone_n = [{"name": "n", "provisional": False, "laws": [_direct("N")]}]
+    assert certify.refuse([on_n, _law_entry("N")], cone_n)[0]["state"] == ("Current", {"Failed": "m = N"})
+
+
+def test_a_failure_on_a_model_of_the_theory_refuses_every_model():
+    """D-2026-10-22-d's exception: N passes the theory's defining laws (`T`'s conjunct entries on N, at
+    the fingerprint the failure recorded) and fails `L`: `L` does not follow from `T`, and the run on M
+    is refused, its line saying why. Without that evidence, or when N fails `T`, the failure stays N's."""
+    cone = [{"name": "n", "provisional": False, "laws": [_direct()]}]
+    on_n = _law_entry("N", {"Failed": "m = N"}, seed=2)
+    n_is_t = _law_entry("N", law="T", cone="hT", conjunct="P N")
+    entries = [on_n, n_is_t, _law_entry("M")]
+    refusals = certify.refuse(entries, cone)
+    assert [(r["law"], r["state"]) for r in refusals] == [("L", ("Current", {"Failed": "m = N"}))]
+    line = certify.show_refusal(refusals[0], entries)
+    assert line.startswith("n: L: failed at m = N on N, which passes the defining laws of T") and "D-2026-10-22-d" in line
+    # N fails the theory: not a model of it, the failure is N's alone
+    n_fails_t = _law_entry("N", {"Failed": "x"}, seed=3, law="T", cone="hT", conjunct="P N")
+    assert certify.refuse([on_n, n_fails_t, n_is_t, _law_entry("M")], cone) == []
+    # the theory's pass was of another version of N (another fingerprint): nothing shows N is a model
+    other = dict(n_is_t, binding=[{"parameter": "m", "generator": "x", "fingerprint": "fN2"}])
+    assert certify.refuse([on_n, other, _law_entry("M")], cone) == []

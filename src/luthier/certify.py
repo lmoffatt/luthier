@@ -1311,6 +1311,47 @@ def _conjunct_witness(conjunction, entries):
     return _each(conjunction, entries, mine) if mine else None
 
 
+def _about(entry, demand):
+    """[D-2026-10-22-d] Whether the entry may be about the model the demand gives: for each model
+    parameter of the demand (`fingerprints`), its reach does not exclude the model given. An entry
+    whose reach records no reach for that parameter is read as about it (nothing excludes it)."""
+    given = dict(demand.get("given") or ())
+    reaches = {}
+    for r in entry.get("reach") or ():
+        reaches.setdefault(r["parameter"], r["reach"])
+    return all(p not in reaches or p not in given or contains(reaches[p], given[p])
+               for p in demand.get("fingerprints") or {})
+
+
+def _models_of(entry, parameter):
+    """The models a census reach names for `parameter`, with the fingerprint its binding recorded."""
+    reach = next((r["reach"] for r in entry.get("reach") or () if r["parameter"] == parameter), None)
+    prints = {d["parameter"]: d.get("fingerprint", "") for d in entry["binding"] if isinstance(d, dict)}
+    if not (isinstance(reach, dict) and "Members" in reach):
+        return []
+    return [(v, prints.get(parameter, "")) for v in reach["Members"]]
+
+
+def _passes_theory(conjunction, model, fingerprint, entries):
+    """[D-2026-10-22-d] Whether `model` passes the theory's defining laws: its theory law's entries at
+    their hash about that model, at the fingerprint the failure recorded, list conjuncts, each served
+    at the demand's cutoff (`_each`), none failed and none in disagreement. False when the tester
+    recorded no such entry: then nothing shows the model is one of the theory."""
+    (p, _), = conjunction["given"]
+    prints = set(fingerprint.split(",")) if fingerprint else set()
+    # the version of the model is matched by `own` (a fingerprint the failure's binding recorded)
+    probe = dict(conjunction, given=[(p, model)], fingerprints={})
+    def own(e):
+        drawn = {d["parameter"]: d.get("fingerprint", "") for d in e["binding"] if isinstance(d, dict)}
+        return (e["law"] == conjunction["law"] and e["cone"] == conjunction["cone"]
+                and covers_all(e.get("reach") or [], [(p, model)]) and set(drawn.get(p, "").split(",")) & prints)
+    mine = [e for e in _laws_own(entries) if own(e)]
+    conjuncts = list(dict.fromkeys(c for e in mine for c in e.get("conjuncts") or ()))
+    if not conjuncts or any(_failed(e) for e in mine) or disputes(mine):
+        return False
+    return _each(probe, mine, conjuncts) is not None
+
+
 def veto(demand, entries):
     """[bite 13c, audit 1.5 A] What refuses a law's demand whatever serves it: a disagreement, else a
     failure, among the entries of each subject the demand resolves to, at that subject's hash
@@ -1318,11 +1359,15 @@ def veto(demand, entries):
     entries (not for a `byModel` demand, whose own entries are about other models), and, when the
     demand carries its theory's conjunction, the theory's entries about the run's model (their reach
     holds it) for the conjuncts the law stands for: serving a demand by another route keeps its
-    refusals. A (state, demand) pair, the demand the one whose subject refused; None when nothing
-    vetoes."""
+    refusals. [D-2026-10-22-d, bite 13c's follow-up] The law's own entries count only when they may
+    be about the run's model (`_about`): a failure on N refuses runs on N, not on M. Except a failure
+    on N where N passes the theory's defining laws (`_passes_theory`): the law does not follow from
+    the theory, and every model's run on it is refused, the refusal saying why. A (state, demand,
+    why) triple, the demand the one whose subject refused and `why` None or the words of the
+    exception; None when nothing vetoes."""
     routes = []
     if not demand.get("byModel"):
-        routes.append((demand, lambda e, d=demand: at(d, e)))
+        routes.append((demand, lambda e, d=demand: at(d, e) and _about(e, d)))
     m = demand.get("conjunction")
     if m is not None:
         mine = set(_obligations(m, entries))
@@ -1331,11 +1376,22 @@ def veto(demand, entries):
     for d, here in routes:
         dispute = dispute_of(entries, d["law"], here)
         if dispute is not None:
-            return ("Disagrees", dispute), d
+            return ("Disagrees", dispute), d, None
     for d, here in routes:
         failure = next((e for e in _laws_own(entries) if e["law"] == d["law"] and here(e) and _failed(e)), None)
         if failure is not None:
-            return ("Current", failure["outcome"]), d
+            return ("Current", failure["outcome"]), d, None
+    if not demand.get("byModel") and m is not None:
+        for e in _laws_own(entries):
+            if e["law"] != demand["law"] or not at(demand, e) or not _failed(e):
+                continue
+            for p in demand.get("fingerprints") or {}:
+                for model, fingerprint in _models_of(e, p):
+                    if _passes_theory(m, model, fingerprint, entries):
+                        name = model.get("Printed", model) if isinstance(model, dict) else model
+                        why = (f"on {name}, which passes the defining laws of {m['law']}: {demand['law']} does "
+                               f"not follow from {m['law']}, so no model's run is served (D-2026-10-22-d)")
+                        return ("Current", e["outcome"]), demand, why
     return None
 
 
@@ -1389,8 +1445,9 @@ def refuse(entries, cone):
         for d in c["laws"]:
             vetoed = veto(d, entries)
             if vetoed is not None:
-                state, by = vetoed
-                refusals.append({"name": c["name"], "law": d["law"], "state": state, "demand": by})
+                state, by, why = vetoed
+                refusals.append({"name": c["name"], "law": d["law"], "state": state, "demand": by,
+                                 **({"why": why} if why else {})})
             elif d.get("byModel"):
                 # read against the theory's entries about the run's model (`served`); the law's own
                 # entries are about other models, so neither their failures nor their states count
@@ -1423,7 +1480,7 @@ def show_refusal(refusal, entries):
             return f"{head}: stale (the model's code changed since its entries)"
         return f"{head}: stale (its entries are at {what[7:19]}, the cone is now at {d['cone'][7:19]})"
     if what != "Passed":
-        return f"{head}: {show_outcome(what)}"
+        return f"{head}: {show_outcome(what)}" + (f" {refusal['why']}" if refusal.get("why") else "")
     current = [e for e in entries if e["law"] == d["law"] and at(d, e) and passed(e)]
     served = [served_grade(d, e, entries) for e in current]
     if all(GRADE_RANK[g] < GRADE_RANK[d["accepts"]] for g in served):
