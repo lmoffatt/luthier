@@ -32,7 +32,7 @@ ReadingSteps (t : Tape) (a : Step) : Bool := t.reading a (a + 1) == 1.0
 -- range of validity is the type of its variables (D-2026-10-18-j): marks of the tape, where no
 -- operation leaves the normal range.
 metres (k : Mark) : Float64 := toFloat64 k / 1000.0
-MetresWithin (t : Tape) (d : Doubles) (a b : Mark) : Bool := {
+MetresWithin (t : Tape) (d : Doubles Float64) (a b : Mark) : Bool := {
   computed := absDistance (metres a) (metres b)
   exact := t.reading a b / 1000.0
   absDistance computed exact <= d.epsilon * (metres a + metres b + exact) }

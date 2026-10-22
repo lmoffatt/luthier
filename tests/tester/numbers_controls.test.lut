@@ -26,7 +26,7 @@ tolerance : Tolerance := 1.0e-12
 
 -- the models of the real values, one per type, and the profile of each control: the same list with
 -- the broken value bound to its type
-swapped : Doubles := { plus := fn a b { a - b },
+swapped : Doubles Float64 := { plus := fn a b { a - b },
   minus := doubles.minus,
   times := doubles.times,
   divide := doubles.divide,
@@ -42,7 +42,7 @@ swappedProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-timesSkewed : Doubles := { plus := doubles.plus,
+timesSkewed : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := fn a b { a * b + a - b },
   divide := doubles.divide,
@@ -58,7 +58,7 @@ timesSkewedProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-plusOff : Doubles := { plus := fn a b { a + b + 1.0 },
+plusOff : Doubles Float64 := { plus := fn a b { a + b + 1.0 },
   minus := doubles.minus,
   times := doubles.times,
   divide := doubles.divide,
@@ -74,7 +74,7 @@ plusOffProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-timesOff : Doubles := { plus := doubles.plus,
+timesOff : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := fn a b { a * b + 1.0 },
   divide := doubles.divide,
@@ -90,7 +90,7 @@ timesOffProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-divideOff : Doubles := { plus := doubles.plus,
+divideOff : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := doubles.times,
   divide := fn a b { a / b + 1.0 },
@@ -106,7 +106,7 @@ divideOffProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-divideShifted : Doubles := { plus := doubles.plus,
+divideShifted : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := doubles.times,
   divide := fn a b { a / (b + 1.0) },
@@ -122,7 +122,7 @@ divideShiftedProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-minusOff : Doubles := { plus := doubles.plus,
+minusOff : Doubles Float64 := { plus := doubles.plus,
   minus := fn a b { a - b + 1.0 },
   times := doubles.times,
   divide := doubles.divide,
@@ -138,7 +138,7 @@ minusOffProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-minusFlipped : Doubles := { plus := doubles.plus,
+minusFlipped : Doubles Float64 := { plus := doubles.plus,
   minus := fn a b { b - a },
   times := doubles.times,
   divide := doubles.divide,
@@ -154,7 +154,7 @@ minusFlippedProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-minusDoubled : Doubles := { plus := doubles.plus,
+minusDoubled : Doubles Float64 := { plus := doubles.plus,
   minus := fn a b { a - b * 2.0 },
   times := doubles.times,
   divide := doubles.divide,
@@ -170,7 +170,7 @@ minusDoubledProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-leqStrict : Doubles := { plus := doubles.plus,
+leqStrict : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := doubles.times,
   divide := doubles.divide,
@@ -186,7 +186,7 @@ leqStrictProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-leqIsEqual : Doubles := { plus := doubles.plus,
+leqIsEqual : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := doubles.times,
   divide := doubles.divide,
@@ -202,7 +202,7 @@ leqIsEqualProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-leqAlways : Doubles := { plus := doubles.plus,
+leqAlways : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := doubles.times,
   divide := doubles.divide,
@@ -218,7 +218,7 @@ leqAlwaysProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-leqSlack : Doubles := { plus := doubles.plus,
+leqSlack : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := doubles.times,
   divide := doubles.divide,
@@ -239,7 +239,7 @@ leqSlackProfile : List Binding := [
 slackChain : Chain Float64 leqSlack.leq := { x := 1.5, y := 0.75, z := 0.0 }
 slackChainBinding : List Binding := [
   { parameter := just "c", type := nothing, generator := "slackChain", coverage := Listed } ]
-lessLoose : Doubles := { plus := doubles.plus,
+lessLoose : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := doubles.times,
   divide := doubles.divide,
@@ -255,7 +255,7 @@ lessLooseProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-greaterWrong : Doubles := { plus := doubles.plus,
+greaterWrong : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := doubles.times,
   divide := doubles.divide,
@@ -271,7 +271,7 @@ greaterWrongProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-geqWrong : Doubles := { plus := doubles.plus,
+geqWrong : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := doubles.times,
   divide := doubles.divide,
@@ -287,7 +287,7 @@ geqWrongProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-unequalWrong : Doubles := { plus := doubles.plus,
+unequalWrong : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := doubles.times,
   divide := doubles.divide,
@@ -303,7 +303,7 @@ unequalWrongProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-plusFlipped : Doubles := { plus := fn a b { b - a },
+plusFlipped : Doubles Float64 := { plus := fn a b { b - a },
   minus := doubles.minus,
   times := doubles.times,
   divide := doubles.divide,
@@ -319,7 +319,7 @@ plusFlippedProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-timesNegated : Doubles := { plus := doubles.plus,
+timesNegated : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := fn a b { 0.0 - a * b },
   divide := doubles.divide,
@@ -335,7 +335,7 @@ timesNegatedProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-epsilonSmall : Doubles := { plus := doubles.plus,
+epsilonSmall : Doubles Float64 := { plus := doubles.plus,
   minus := doubles.minus,
   times := doubles.times,
   divide := doubles.divide,
@@ -358,15 +358,15 @@ epsilonSmallProfile : List Binding := [
 coarse (v : Float64) : Float64 :=
   { t := 134217729.0 * v
     t - (t - v) }
-plusCoarse : Doubles := { plus := fn a b { coarse (a + b) }, minus := doubles.minus, times := doubles.times,
+plusCoarse : Doubles Float64 := { plus := fn a b { coarse (a + b) }, minus := doubles.minus, times := doubles.times,
   divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
   unequal := doubles.unequal, epsilon := doubles.epsilon }
 plusCoarseProfile : List Binding := [ { parameter := nothing, type := just "Doubles", generator := "plusCoarse", coverage := Listed } ]
-timesCoarse : Doubles := { plus := doubles.plus, minus := doubles.minus, times := fn a b { coarse (a * b) },
+timesCoarse : Doubles Float64 := { plus := doubles.plus, minus := doubles.minus, times := fn a b { coarse (a * b) },
   divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
   unequal := doubles.unequal, epsilon := doubles.epsilon }
 timesCoarseProfile : List Binding := [ { parameter := nothing, type := just "Doubles", generator := "timesCoarse", coverage := Listed } ]
-divideCoarse : Doubles := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
+divideCoarse : Doubles Float64 := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
   divide := fn a b { coarse (a / b) }, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
   unequal := doubles.unequal, epsilon := doubles.epsilon }
 divideCoarseProfile : List Binding := [ { parameter := nothing, type := just "Doubles", generator := "divideCoarse", coverage := Listed } ]
@@ -374,10 +374,10 @@ divideCoarseProfile : List Binding := [ { parameter := nothing, type := just "Do
 -- just below `gamma2`, the bound D-2026-10-17-f first wrote; refuted at a listed case, found by a
 -- search of uniform draws in [-10, 10] (seed 20261021) and checked in Python with the law's own
 -- order of operations; at a quarter, the reciprocal's bound `2u` becomes `u / 2`
-epsilonThird : Doubles := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
+epsilonThird : Doubles Float64 := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
   divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
   unequal := doubles.unequal, epsilon := doubles.epsilon / 3.0 }
-epsilonQuarter : Doubles := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
+epsilonQuarter : Doubles Float64 := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
   divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
   unequal := doubles.unequal, epsilon := doubles.epsilon / 4.0 }
 epsilonThirdProfile : List Binding := [ { parameter := nothing, type := just "Doubles", generator := "epsilonThird", coverage := Listed } ]
@@ -407,7 +407,7 @@ reciprocalWitnessX : List NonZero := [1.637]
 reciprocalWitness : List Binding := [
   { parameter := just "x", type := nothing, generator := "reciprocalWitnessX", coverage := Listed } ]
 -- times scales the product by 1.5: commutative, zero absorbs, but one is not neutral
-timesScaled : Doubles := { plus := doubles.plus, minus := doubles.minus, times := fn a b { a * b * 1.5 },
+timesScaled : Doubles Float64 := { plus := doubles.plus, minus := doubles.minus, times := fn a b { a * b * 1.5 },
   divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
   unequal := doubles.unequal, epsilon := doubles.epsilon }
 timesScaledProfile : List Binding := [ { parameter := nothing, type := just "Doubles", generator := "timesScaled", coverage := Listed } ]

@@ -534,7 +534,7 @@ test "Small" ExhaustiveMode
 # ---------------------------------------------------------------------- the model's own store
 
 MODEL = '''import "numbers.lth" Doubles
-doubles : Doubles := {
+doubles : Doubles Float64 := {
   plus := fn a b { a + b }, minus := fn a b { a - b }, times := fn a b { a * b }, divide := fn a b { a / b },
   less := fn a b { a < b }, leq := fn a b { a <= b }, greater := fn a b { a > b }, geq := fn a b { a >= b },
   unequal := fn a b { a /= b },
@@ -551,7 +551,7 @@ import "m_model.lut" doubles
 models : List Binding := [
   { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed } ]
 
-Wrapper (d : Doubles) (x : Float64) : Bool := DivideOne d x
+Wrapper (d : Doubles Float64) (x : Float64) : Bool := DivideOne d x
 
 test "DivideOne" (SampledMode linear) (profile <- models)
 test "Wrapper" (SampledMode linear) (profile <- models)
@@ -578,7 +578,7 @@ def test_an_entry_goes_into_the_store_of_the_file_that_defines_the_model(tmp_pat
 LAWS_OF_LIST = LAWS_OF_MODEL.replace(
     '''models : List Binding := [
   { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed } ]''',
-    '''census : List Doubles := [doubles]
+    '''census : List (Doubles Float64) := [doubles]
 models : List Binding := [
   { parameter := nothing, type := just "Doubles", generator := "census", coverage := Listed } ]''')
 

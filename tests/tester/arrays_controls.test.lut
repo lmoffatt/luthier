@@ -876,7 +876,7 @@ test "SymmetricIsAnEqualizer" ExhaustiveMode (seed <- 20261021) (profile <- onSy
 -- `MatMulTransposes` has no such control: numpy computes both of its sides in one order (they
 -- were bitwise equal on 3000 drawn pairs), so no bound below it can be refuted; `TraceCyclic`
 -- has none either: no witness of `gamma (r + c)` was found (report-bite-12b.md).
-doublesThird : Doubles := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
+doublesThird : Doubles Float64 := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
   divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater,
   geq := doubles.geq, unequal := doubles.unequal, epsilon := doubles.epsilon / 3.0 }
 witnessX : Vec Float64 := vec Float64 3 (fn k { if k == 0 then -2.6048498622458123 else if k == 1 then 7.066966961177535 else -0.9288140062739014 })

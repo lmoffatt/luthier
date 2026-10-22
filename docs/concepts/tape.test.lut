@@ -45,7 +45,7 @@ test "MarkIsAMetric" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <
 
 -- the doubles with no room for rounding: the bound of MetresWithin becomes zero, and the rounding
 -- of the division by a thousand refutes it
-noRoom : Doubles := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
+noRoom : Doubles Float64 := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
   divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
   unequal := doubles.unequal, epsilon := 0.0 }
 onNoRoom : List Binding := [

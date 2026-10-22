@@ -25,12 +25,17 @@ realField : CompleteOrderedField Real := axiom "the real numbers: the complete o
 -- gives its values (`fromInt`, `ratio`, `toQ`): a `Rational` has no literal to write `0` with
 
 -- `Float64`: the machine's operations and order (11.S4, numbers.lth §2)
-doubles : Doubles := {
+doubles : Doubles Float64 := {
   plus := fn a b { a + b }, minus := fn a b { a - b }, times := fn a b { a * b }, divide := fn a b { a / b },
   less := fn a b { a < b }, leq := fn a b { a <= b }, greater := fn a b { a > b }, geq := fn a b { a >= b },
   unequal := fn a b { a /= b },
   epsilon := 2.220446049250313e-16,
 }
+
+-- the doubles' claim, at `Float64` (execution.md section 4; the coordinator's (a) of 2026-10-22):
+-- `plus` and `times` of a `Float64` resolve to `doubles`' fields, with numbers.lth's laws as their
+-- evidence; the doubles are not a semiring (11.S15)
+DoublesHaveTheOperations (model : Doubles Float64 <- doubles) : Bool := Doubles Float64 model
 
 -- the computed distance `|a - b|` is a metric within a bound (D-2026-10-17-f; execution.md section
 -- 4): the subtraction rounds once, `fl(a - b) = (a - b)(1 + delta)` with `|delta| <= u` (Higham
@@ -43,7 +48,7 @@ AbsDistanceIsAMetricWithin (model : MetricWithin Float64 (structural Float64) <-
     { d := absDistance, bound := fn a b { doubles.epsilon / 2.0 * (abs a + abs b) } }) : Bool :=
   MetricWithin Float64 (structural Float64) model
 -- the claims of this file, gathered as core.lut's `CoreData` gathers the core's
-NumberModels := AbsDistanceIsAMetricWithin
+NumberModels := DoublesHaveTheOperations & AbsDistanceIsAMetricWithin
 
 -- the nearest double to an integer (11.S5)
 conversion : Conversion := { convert := toFloat64 }

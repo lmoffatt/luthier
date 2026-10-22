@@ -203,7 +203,7 @@ approxMatBoth (tol : Tolerance) (sa sb : Mat Float64) (norm : Float64) (a b : Ma
 -- range as its premise: at most 10^6 terms (`n u` below 1.2e-10, and a sum of 10^6 products
 -- below 1e300 does not overflow) and entries zero or of magnitude in [1e-150, 1e150], numbers.lth's
 -- `Moderate`, so that no product underflows below the normal doubles or overflows.
-gammaN (fp : Doubles) (n : Int) : Float64 := (toFloat64 n * fp.epsilon / 2.0) / (1.0 - toFloat64 n * fp.epsilon / 2.0)
+gammaN (fp : Doubles Float64) (n : Int) : Float64 := (toFloat64 n * fp.epsilon / 2.0) / (1.0 - toFloat64 n * fp.epsilon / 2.0)
 -- The range is written as the law's premise in its body (`not (in range) or ...`), not as a
 -- refinement of its variables: the tester's drawing of a refinement of `VecOf n` exhausted the
 -- host's recursion (2026-10-21), and a premise claims nothing outside it just the same.
@@ -259,7 +259,7 @@ MscalePointwise (m : Arrays) (r c : Dim) (s : Float64) (a : MatOf r c) : Bool :=
 -- Higham 2002 eq. 3.5; D-2026-10-18-j)
 DotCommutative (m : Arrays) (n : Dim) (x y : VecOf n) : Bool := Commutative (VecOf n) Float64 (structural Float64) m.dot x y
 DotOnBasis (m : Arrays) (n : Dim) (x : VecOf n) (j : Fin n) : Bool := m.dot x (basis n j) == x.f j
-DotAgrees (m : Arrays) (fp : Doubles) (n : Dim) (x y : VecOf n) : Bool :=
+DotAgrees (m : Arrays) (fp : Doubles Float64) (n : Dim) (x y : VecOf n) : Bool :=
   not (sumRange n and moderateVec x and moderateVec y) or Ball Float64 absDistance (fn p q { 3.0 * gammaN fp n * absSumTo n (fn k { x.f k * y.f k }) }) (m.dot x y) (dotDef x y)
 -- the norm: the root of the inner product, one on the basis, scaling with the magnitude
 NormOfBasis (m : Arrays) (n : Dim) (j : Fin n) : Bool := m.norm (basis n j) == 1.0
@@ -271,7 +271,7 @@ NormScales (m : Arrays) (tol : Tolerance) (n : Dim) (c : Positive) (x : VecOf n)
 -- within `3 gamma c` of the native sum relative to the magnitudes of the row's terms (Higham 2002
 -- section 3.5)
 MatVecOnBasis (m : Arrays) (r c : Dim) (a : MatOf r c) (j : Fin c) : Bool := approxVec exact (m.matVec a (basis c j)) (column a j)
-MatVecAgrees (m : Arrays) (fp : Doubles) (r c : Dim) (a : MatOf r c) (x : VecOf c) : Bool :=
+MatVecAgrees (m : Arrays) (fp : Doubles Float64) (r c : Dim) (a : MatOf r c) (x : VecOf c) : Bool :=
   not (sumRange c and moderateMat a and moderateVec x) or vecBall (fn p q i { 3.0 * gammaN fp c * absSumTo c (fn j { a.f i j * x.f j }) }) (m.matVec a x) (matVecDef a x)
 -- the product: the identity is neutral exactly (the core's `Neutral`, on the square matrices;
 -- on a rectangular one the identities of its two sizes, `MatMulByIdentity`), the transpose
@@ -281,10 +281,10 @@ MatMulNeutral (m : Arrays) (k : Dim) (a : MatOf k k) : Bool := Neutral (Mat Floa
 MatMulByIdentity (m : Arrays) (r c : Dim) (a : MatOf r c) : Bool :=
   (matObject Float64).eq (m.matMul a (identity c)) a and (matObject Float64).eq (m.matMul (identity r) a) a
 -- both sides sum the same k products of each entry, in orders the host chooses
-MatMulTransposes (m : Arrays) (fp : Doubles) (r k c : Dim) (a : MatOf r k) (b : MatOf k c) : Bool :=
+MatMulTransposes (m : Arrays) (fp : Doubles Float64) (r k c : Dim) (a : MatOf r k) (b : MatOf k c) : Bool :=
   not (sumRange k and moderateMat a and moderateMat b) or matBall (fn p q e { 3.0 * gammaN fp k * absSumTo k (fn l { a.f (e mod r) l * b.f l (e / r) }) })
     (m.transpose (m.matMul a b)) (m.matMul (m.transpose b) (m.transpose a))
-MatMulAgrees (m : Arrays) (fp : Doubles) (r k c : Dim) (a : MatOf r k) (b : MatOf k c) : Bool :=
+MatMulAgrees (m : Arrays) (fp : Doubles Float64) (r k c : Dim) (a : MatOf r k) (b : MatOf k c) : Bool :=
   not (sumRange k and moderateMat a and moderateMat b) or matBall (fn p q e { 3.0 * gammaN fp k * absSumTo k (fn l { a.f (e / c) l * b.f l (e mod c) }) }) (m.matMul a b) (matMulDef a b)
 
 -- The retained rank of a symmetric matrix at a floor: the number of its eigenvalues above the
@@ -328,10 +328,10 @@ TraceAdditive (m : Arrays) (tol : Tolerance) (k : Dim) (a b : MatOf k k) : Bool 
 -- bounds, not the demand's tolerance: each side of the cyclic law sums the r c products twice
 -- nested, within `gamma (r + c)` of the exact sum relative to their magnitudes (Higham 2002,
 -- Lemma 3.3: (1 + gamma c)(1 + gamma r) <= 1 + gamma (r + c)); the trace sums k entries
-TraceCyclic (m : Arrays) (fp : Doubles) (r c : Dim) (a : MatOf r c) (b : MatOf c r) : Bool :=
+TraceCyclic (m : Arrays) (fp : Doubles Float64) (r c : Dim) (a : MatOf r c) (b : MatOf c r) : Bool :=
   not (sumRange (r + c) and moderateMat a and moderateMat b) or Ball Float64 absDistance (fn p q { 3.0 * gammaN fp (r + c) * absSumTo r (fn i { absSumTo c (fn j { a.f i j * b.f j i }) }) })
     (m.trace (m.matMul a b)) (m.trace (m.matMul b a))
-TraceAgrees (m : Arrays) (fp : Doubles) (k : Dim) (a : MatOf k k) : Bool :=
+TraceAgrees (m : Arrays) (fp : Doubles Float64) (k : Dim) (a : MatOf k k) : Bool :=
   not (sumRange k and moderateMat a) or Ball Float64 absDistance (fn p q { 3.0 * gammaN fp k * absSumTo k (fn i { a.f i i }) }) (m.trace a) (traceDef a)
 
 -- The pseudo-inverse of a symmetric matrix on its retained subspace, at the same floor as the

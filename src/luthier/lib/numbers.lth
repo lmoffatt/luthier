@@ -80,10 +80,10 @@ Tame : U := { x : Float64 | x == 0.0 or (1.0e-100 <= x and x <= 1.0e100) or (-1.
 -- nearest, and the comparisons are the order of the finite doubles; `epsilon` is the distance
 -- from one to the next double, 2^-52, twice the unit roundoff `u` of spec 1 (1.S9). The infix
 -- forms of core.lut are the model (numbers_model.lut `doubles`).
-Doubles : {
-  plus minus times divide : Float64 -> Float64 -> Float64,
-  less leq greater geq unequal : Float64 -> Float64 -> Bool,
-  epsilon : Float64,
+Doubles (F : U) : {
+  plus minus times divide : F -> F -> F,
+  less leq greater geq unequal : F -> F -> Bool,
+  epsilon : F,
 }
 
 -- What is exact (11.S4), stated by the core's properties in `Doubles`' claim below: rounding is a
@@ -91,31 +91,31 @@ Doubles : {
 -- finite); zero and one are neutral and zero absorbs, over every double; negation is involutive;
 -- `leq` is a total order (core.lut's `FloatIsOrdered` claims it of `<=`). What has no core
 -- property, or needs a range the core's property cannot state, is stated here.
-DivideOne (d : Doubles) (x : Moderate) : Bool := d.divide x 1.0 == x
-MinusSelf (d : Doubles) (x : Moderate) : Bool := d.minus x x == 0.0
-DivideSelf (d : Doubles) (x : Positive) : Bool := d.divide x x == 1.0
-MinusIsPlusNegated (d : Doubles) (x y : Moderate) : Bool := d.minus x y == d.plus x (d.minus 0.0 y)
+DivideOne (d : Doubles Float64) (x : Moderate) : Bool := d.divide x 1.0 == x
+MinusSelf (d : Doubles Float64) (x : Moderate) : Bool := d.minus x x == 0.0
+DivideSelf (d : Doubles Float64) (x : Positive) : Bool := d.divide x x == 1.0
+MinusIsPlusNegated (d : Doubles Float64) (x y : Moderate) : Bool := d.minus x y == d.plus x (d.minus 0.0 y)
 -- [proposed, 2026-10-15, L9.14] the strict order differs from the order only at a tie, which two
 -- independent draws almost never give, so `less := a <= b` passed the law over every drawn pair
 -- (report-mutants.md); the law is stated over a pair that ties when `tie` holds, its second the
 -- first: the same instances as over every pair, drawn with an atom at equality of one half
-LessIsStrict (d : Doubles) (x y : Moderate) (tie : Bool) : Bool :=
+LessIsStrict (d : Doubles Float64) (x y : Moderate) (tie : Bool) : Bool :=
   { z := if tie then x else y
     d.less x z == (d.leq x z and not (x == z)) }
-GreaterIsLessReversed (d : Doubles) (x y : Moderate) : Bool := d.greater x y == d.less y x
-GeqIsLeqReversed (d : Doubles) (x y : Moderate) : Bool := d.geq x y == d.leq y x
-UnequalIsNotEqual (d : Doubles) (x y : Moderate) : Bool := d.unequal x y == not (x == y)
+GreaterIsLessReversed (d : Doubles Float64) (x y : Moderate) : Bool := d.greater x y == d.less y x
+GeqIsLeqReversed (d : Doubles Float64) (x y : Moderate) : Bool := d.geq x y == d.leq y x
+UnequalIsNotEqual (d : Doubles Float64) (x y : Moderate) : Bool := d.unequal x y == not (x == y)
 -- a sum keeps the order of its terms, and so does a product by a non-negative factor (rounding is
 -- monotone, 11.S4, L13.3): `Monotone` of the operation with `z`, since `MonotoneIn` needs the
 -- operation closed on its carrier and a sum of moderate doubles need not be moderate
-PlusMonotone (d : Doubles) (z : Moderate) (p : Related Moderate d.leq) : Bool :=
+PlusMonotone (d : Doubles Float64) (z : Moderate) (p : Related Moderate d.leq) : Bool :=
   Monotone Moderate Float64 d.leq d.leq (fn x { d.plus x z }) p
-TimesMonotone (d : Doubles) (z : NonNegative) (p : Related Moderate d.leq) : Bool :=
+TimesMonotone (d : Doubles Float64) (z : NonNegative) (p : Related Moderate d.leq) : Bool :=
   Monotone Moderate Float64 d.leq d.leq (fn x { d.times x z }) p
 
 -- `epsilon` is the ulp of one: adding it to one is seen and is undone exactly by the subtraction,
 -- adding half of it is not seen (ties to even)
-EpsilonIsTheUlpOfOne (d : Doubles) : Bool :=
+EpsilonIsTheUlpOfOne (d : Doubles Float64) : Bool :=
   d.minus (d.plus 1.0 d.epsilon) 1.0 == d.epsilon and d.greater (d.plus 1.0 d.epsilon) 1.0
   and d.plus 1.0 (d.divide d.epsilon 2.0) == 1.0
 
@@ -134,22 +134,22 @@ EpsilonIsTheUlpOfOne (d : Doubles) : Bool :=
 -- once each, so `x (1 / x)` is within `2u` of one (in fact within `u`, the spacing below one).
 gamma2 (epsilon : Float64) : Float64 := epsilon / (1.0 - epsilon)
 -- range: sums of moderate doubles are finite, and a sum that falls below the normal range is exact
-PlusAssociativeWithin (d : Doubles) (x y z : Moderate) : Bool :=
+PlusAssociativeWithin (d : Doubles Float64) (x y z : Moderate) : Bool :=
   AssociativeWithin Float64 absDistance d.plus (fn a b c { 3.0 * gamma2 d.epsilon * (abs a + abs b + abs c) }) x y z
 -- range: `Tame`, so that neither product of two nor of three leaves the normal range
-TimesAssociativeWithin (d : Doubles) (x y z : Tame) : Bool :=
+TimesAssociativeWithin (d : Doubles Float64) (x y z : Tame) : Bool :=
   AssociativeWithin Float64 absDistance d.times (fn a b c { 3.0 * gamma2 d.epsilon * (abs a * abs b * abs c) }) x y z
 -- range: moderate doubles; a product that underflows errs by at most 2^-1075, below the bound of
 -- any moderate `x`, `y`, `z` that is not zero
-TimesDistributiveWithin (d : Doubles) (x y z : Moderate) : Bool :=
+TimesDistributiveWithin (d : Doubles Float64) (x y z : Moderate) : Bool :=
   DistributiveWithin Float64 absDistance d.times d.plus (fn a b c { 3.0 * gamma2 d.epsilon * (abs a * (abs b + abs c)) }) x y z
 -- range: a moderate double that is not zero, whose reciprocal is a normal double
-DivideInvertibleWithin (d : Doubles) (x : NonZero) : Bool :=
+DivideInvertibleWithin (d : Doubles Float64) (x : NonZero) : Bool :=
   InvertibleWithin Float64 absDistance d.times 1.0 (fn a { d.divide 1.0 a }) (fn a { d.epsilon }) x
 
 -- `Doubles`' claim (execution.md section 4): the exact properties by the core's names, then the
 -- laws above; the doubles are not a semiring (11.S15), so `Semiring` is not claimed
-Doubles (d : Doubles) :=
+Doubles (F : U) (d : Doubles Float64) :=
   Commutative Moderate Float64 (structural Float64) d.plus & Commutative Moderate Float64 (structural Float64) d.times
   & Neutral Float64 (structural Float64) d.plus 0.0 & Absorbing Float64 (structural Float64) d.times 0.0
   & Neutral Float64 (structural Float64) d.times 1.0 & Involutive Float64 (structural Float64) (fn x { d.minus 0.0 x })
