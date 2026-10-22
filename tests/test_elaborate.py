@@ -275,7 +275,7 @@ def test_eval_parse_error(tmp_path):
 def test_eval_loads_imports():
     # 12.S19 in the context of the files as run loads them (12.S22): a name the file imports from
     # plan_model.lut evaluates to its value, not its weak head form
-    r = cli(ROOT / 'tests/eval/plan_agree.lut', 'agree')
+    r = cli(ROOT / 'tests/eval/plan_agree.lut', 'schedulesAgree')
     assert r.returncode == 0, r.stdout + r.stderr
     assert r.stdout.splitlines()[0] == 'true : Bool'
     r = cli(ROOT / 'tests/eval/plan_agree.lut', 'needPlan.schedule')
