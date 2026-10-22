@@ -190,7 +190,11 @@ declared `x : T` and later given a body, the body has type `T`, or `T -> Bool`, 
 `T -> Failures E`, or is a `Law` over `T`. Any other type is an error, reported against the
 declaration. The checker accepts all four (`verdict_type` in `check.py`; spec 5.S9). [decided D-2026-10-13-o] A theory with parameters of its own repeats them in its definition by laws,
 `Recognizer (e : Ebnf) := AcceptsWhatDerives e`, and each law takes the theory's parameters first
-and the model after them.
+and the model after them. [decided, the coordinator, 2026-10-22, on report-bite-12b.md's question] A
+structure whose laws hold at one instance of its parameters states them over that instance: past the
+parameters it repeats, the body is a predicate over the structure applied to as many arguments as it
+has parameters, `Doubles (F : U) (d : Doubles Float64) := ...` (`fixes_carrier` in `check.py`), and
+its claim is made at that instance.
 Files: r6_predicate_body.accept.lut, r6_body_type.reject.lut.
 
 **4.R7. An alias is written with `=` and has no state.** [implemented] `AB = A * B` makes `AB`

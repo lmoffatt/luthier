@@ -820,11 +820,27 @@ def fits(typing, ty, bt):
             or isinstance(bt, t.App) and typing.same(bt, t.App(t.Var('Law'), ty)))
 
 
+def fixes_carrier(q, n, ty, bt):
+    """4.R6, the coordinator's (a) of 2026-10-22: a structure whose laws hold at one instance of its
+    parameters states them over that instance, `Doubles (F : U) (d : Doubles Float64) := ...`: past
+    the common parameters, a predicate over `n` applied to as many arguments as it has parameters."""
+    k = 0
+    while isinstance(ty, t.Pi) and isinstance(bt, t.Pi) and q.same(ty.domain, bt.domain):
+        bt = substitute(bt.name, t.Var(ty.name), bt.codomain) if bt.name != ty.name else bt.codomain
+        ty = ty.codomain; k += 1
+    if not (k and isinstance(ty, t.Record) and isinstance(bt, t.Pi) and verdict_type(bt.codomain)): return False
+    h, args = bt.domain, 0
+    while isinstance(h, t.App): h = h.function; args += 1
+    return h == t.Var(n) and args == k and q.theory_record(bt.domain) is not None
+
+
 def violatesR6(p, n):
-    """4.R6: a separately declared body's type fits T, a predicate over T, or Law T; peel common parameters."""
+    """4.R6: a separately declared body's type fits T, a predicate over T, or Law T; peel common
+    parameters. A structure's laws may fix its parameters (`fixes_carrier`)."""
     if not acts(p, n, s.Declare) or not acts(p, n, s.Define): return False
     q = typing_for(p, n); ty = next(a.type for a in q.program if isinstance(a, t.Declare) and a.name == n)
-    return not fits(q, ty, q.typeOf(q.body(n)))
+    bt = q.typeOf(q.body(n))
+    return not (fits(q, ty, bt) or bt is not None and fixes_carrier(q, n, ty, bt))
 
 
 def contains_arrow(q, u, fuel, seen=frozenset()):

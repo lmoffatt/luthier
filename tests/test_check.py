@@ -687,3 +687,26 @@ def test_an_operator_act_is_exported_with_its_file(tmp_path, capsys):
     capsys.readouterr()
     main(["eval", str(tmp_path / "use.lut"), "two.y"])
     assert capsys.readouterr().out.startswith("4 : Int")
+
+
+FIXED_CARRIER = (
+    'Machine (F : U) : { plus : F -> F -> F }\n'
+    'PlusOfZero (m : Machine Float64) (x : Float64) : Bool := m.plus x 0.0 == x\n'
+    'Machine (F : U) (m : Machine Float64) := PlusOfZero m\n'
+    'machine : Machine Float64 := { plus := fn a b { a + b } }\n'
+    'MachineAtFloat (model : Machine Float64 <- machine) : Bool := Machine Float64 model\n')
+
+
+def test_a_structure_whose_laws_fix_its_carrier_is_accepted_and_resolves_there():
+    # the coordinator's (a) of 2026-10-22 (report-bite-12b.md finding 1): `Doubles (F : U)` with its
+    # conjunction written at `Doubles Float64`; 4.R6 refused it before
+    p = program(FIXED_CARRIER + 'three : Float64 := plus 1.0 2.0\n')
+    assert not c.violatesR6(p, 'Machine')
+    assert not [f for f in c.check(p) if f.name in ('Machine', 'three')]
+    from luthier.elaborate import elaborate_term, show
+    assert 'machine' in show(elaborate_term(p[-1].body.term, p[:-1]))
+    # still refused: a conjunction over another structure, or over the record at too few arguments
+    bad = FIXED_CARRIER.replace('Machine (F : U) (m : Machine Float64) := PlusOfZero m',
+                                'Other (F : U) : { plus : F -> F -> F }\n'
+                                'Machine (F : U) (m : Other Float64) := m.plus 0.0 0.0 == 0.0')
+    assert c.violatesR6(program(bad), 'Machine')
