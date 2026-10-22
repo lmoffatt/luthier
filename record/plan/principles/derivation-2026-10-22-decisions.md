@@ -5,6 +5,9 @@ with GPT (`record/IA/gpt-2026-10-22/`, c312464). Everything below is proposed an
 mark; one commit undoes it. The decision that it enters the principles is yours and is logged as
 D-2026-10-22-b.
 
+Updated the same day on your answers (D-2026-10-22-c): the three questions answered. Your reading, a derivation as a point of an exponential, with the coordinator's
+elaboration you accepted, is in O13 and in L5.22.
+
 ## What changed
 
 Five clauses, all [proposed], and one open question. No new principle and no new organizer: what
@@ -45,14 +48,18 @@ list of what they need is in my report).
    seen from how it was made, the identity of L5.6 read as a value? I wrote the second: L5.10's
    "three objects, never one" stands, and the key the memo already computes is the derivation's
    identity. If you want a fourth object, L5's statement and concepts.md §14 change. Recommended:
-   the second.
+   the second. Answered: the second, by your reading of the derivation as a point of an
+   exponential, (f, a) with ev(f, a) = v; L5.10's three objects stand (D-2026-10-22-c).
 
 2. L5.23 says a requirement on a derivation (no `assumed` dependence, descent from a calibrated
    input) is a law over it, giving a certified subtype a demand may ask for (L8.5). That is the
    sentence that puts the history "en el tipo", as you said, and it costs nothing until O5 and O13
-   exist. Keep it in the clause now, or leave it to O13? Recommended: keep it.
+   exist. Keep it in the clause now, or leave it to O13? Recommended: keep it. Answered: keep it
+   ("ok", D-2026-10-22-c).
 
 3. The word. GPT's "derivation" against your "historia del cómputo". "History" is taken by L5.14
    (how much history a certificate keeps) and by the repository's history (P6), "trace" by `09` §7's
    record of a run, and "derivation" pairs with L5.16's "derivable" and "derived". It enters Terms
-   when the clauses settle. Recommended: derivation.
+   when the clauses settle. Recommended: derivation. Answered: derivation ("History suena más
+   pasivo, derivation suena a que podemos simplificar la historia a lo invariante"); "derivative"
+   stays the word for the differential, and neither is shortened to "deriv" (D-2026-10-22-c).

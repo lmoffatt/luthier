@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 c68594456fcb, commit b267ece (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-22; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 c68594456fcb, commit 131d861) by `scripts/project_principles.py` (project_principles v2) on 2026-10-22; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
