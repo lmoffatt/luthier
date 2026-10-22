@@ -471,13 +471,13 @@ IotaSkips (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (
 -- on a `data` stayed stuck)
 IotaConstructors (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (t c k f g y : String) (v b d : Term) : Bool :=
   not (distinct String [t, c, k, f, g]) or not (all List String (free p) [t, c, k, f, g])
-  or (stepsTo a (m.step (withData t c k f g p) (Match (Var c) [(PCon c [], b)])) b
-      and stepsTo a (m.step (withData t c k f g p) (Match (Var c) [(PCon k [], b), (PCon c [], d)])) d
-      and stepsTo a (m.step (withData t c k f g p) (Match (Var k) [(PCon c [], b), (PWild, d)])) d
-      and stepsTo a (m.step (withData t c k f g p) (Match (App (Var f) v) [(PCon g [PVar y], b), (PCon f [PVar y], d)]))
+  or (stepsTo a (m.step (programWithData t c k f g p) (Match (Var c) [(PCon c [], b)])) b
+      and stepsTo a (m.step (programWithData t c k f g p) (Match (Var c) [(PCon k [], b), (PCon c [], d)])) d
+      and stepsTo a (m.step (programWithData t c k f g p) (Match (Var k) [(PCon c [], b), (PWild, d)])) d
+      and stepsTo a (m.step (programWithData t c k f g p) (Match (App (Var f) v) [(PCon g [PVar y], b), (PCon f [PVar y], d)]))
                     (sb.subst y v d))
 -- the program with a `data` `t` whose constructors are `c`, `k` (nullary) and `f`, `g` (unary)
-withData (t c k f g : String) (p : Program) : Program :=
+programWithData (t c k f g : String) (p : Program) : Program :=
   cons (Define t Universe (Data t [(c, Var t), (k, Var t), (f, Pi "_" (Var t) (Var t)), (g, Pi "_" (Var t) (Var t))])) p
 
 -- a local definition steps to its body with the value for its name (zeta; D-2026-10-13-aa, Q1)
@@ -551,11 +551,11 @@ PrimStructural (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Progr
 -- them: `cons`, `nil` of core); stated on the data of `IotaConstructors`
 PrimConstructors (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (t c k f g : String) (i j : Int) : Bool :=
   not (distinct String [t, c, k, f, g]) or not (all List String (free p) [t, c, k, f, g])
-  or (stepsTo a (m.step (withData t c k f g p) (bin "==" (Var c) (Var c))) (truth true)
-      and stepsTo a (m.step (withData t c k f g p) (bin "==" (Var c) (Var k))) (truth false)
-      and stepsTo a (m.step (withData t c k f g p) (bin "==" (App (Var f) (Lit (IntConst i))) (App (Var f) (Lit (IntConst j)))))
+  or (stepsTo a (m.step (programWithData t c k f g p) (bin "==" (Var c) (Var c))) (truth true)
+      and stepsTo a (m.step (programWithData t c k f g p) (bin "==" (Var c) (Var k))) (truth false)
+      and stepsTo a (m.step (programWithData t c k f g p) (bin "==" (App (Var f) (Lit (IntConst i))) (App (Var f) (Lit (IntConst j)))))
                     (truth (i == j))
-      and stepsTo a (m.step (withData t c k f g p) (bin "==" (App (Var f) (Lit (IntConst i))) (App (Var g) (Lit (IntConst i)))))
+      and stepsTo a (m.step (programWithData t c k f g p) (bin "==" (App (Var f) (Lit (IntConst i))) (App (Var g) (Lit (IntConst i)))))
                     (truth false))
 -- `==` compares values, so it demands its parts as a match demands what its patterns inspect:
 -- when a compared part is not yet a value, the step reduces that part in place, the leftmost

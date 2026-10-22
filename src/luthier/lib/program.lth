@@ -37,9 +37,9 @@
 --      only, the author's judgement.                                                  done
 --   §7 `WellFormed :=` the conjunction.                                               done
 
-import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern LambdaParam Item Field Binder Body
+import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern LambdaParam Item RecordField Binder Body
   Clause ImportName declare define alias importAct operatorAct datum explicit implicit termBody dataBody
-  clausesBody name literal universe world app binop neg tuple pi sigma sigmaNamed record
+  clausesBody name literal universe world app binop neg tuple piSurface sigma sigmaNamed recordSurface
   subtype recordValue block sumSurface list lambda matchOf namedArg ifThen proj quoted pWild pApp pLit pTuple
   plainParam typedParam shapeParam bind rebind
 import "term.lth" Term Program Act Constant Pattern Alpha AlphaPair Substitution Var Lit Universe World Lam App Pi
@@ -127,7 +127,7 @@ isAlias (p : SurfaceProgram) (n : String) : Bool :=
 -- the name itself when it has none (a function of core's `String`, 11, declared here until core
 -- names it; review of layers 0-1, B).
 namePrefix : String -> String
-known (core : List String) (p : SurfaceProgram) (n : String) : Bool :=
+knownName (core : List String) (p : SurfaceProgram) (n : String) : Bool :=
   knownWhole core p n or knownWhole core p (namePrefix n)
 knownWhole (core : List String) (p : SurfaceProgram) (n : String) : Bool :=
   member List String n (actNames p) or member List String n (importedNames p) or member List String n (constructors p) or member List String n core
@@ -144,13 +144,13 @@ constructors (p : SurfaceProgram) : List String := match p { nil -> nil ;
     _ -> constructors rest } }
 -- the labels of a labeled sum anywhere in a term are its injections, used as constructors where
 -- the sum is written in a type: `{ one : A || two : B }` in a field's type (check.py, bite 2)
-sumLabels (t : Surface) : List String := ((match t { sumSurface kvs -> pairNames kvs ; _ -> nil }) <> (sumLabelsIn (children t)))
+sumLabels (t : Surface) : List String := ((match t { sumSurface kvs -> surfacePairNames kvs ; _ -> nil }) <> (sumLabelsIn (children t)))
 sumLabelsIn (ts : List Surface) : List String := match ts { nil -> nil ; cons t rest -> ((sumLabels t) <> (sumLabelsIn rest)) }
 typeLabels (t : Maybe Surface) : List String := match t { nothing -> nil ; just u -> sumLabels u }
 binderLabels (bs : List Binder) : List String := match bs { nil -> nil ;
   cons b rest -> ((match b { explicit xs t d -> sumLabels t ; implicit xs t -> sumLabels t }) <> (binderLabels rest)) }
-bodyConstructors (b : Body) : List String := match b { dataBody cs -> pairNames cs ; termBody t -> sumLabels t ; clausesBody cs -> nil }
-pairNames (kvs : List (String * Surface)) : List String := match kvs { nil -> nil ; cons (k, v) rest -> cons k (pairNames rest) }
+bodyConstructors (b : Body) : List String := match b { dataBody cs -> surfacePairNames cs ; termBody t -> sumLabels t ; clausesBody cs -> nil }
+surfacePairNames (kvs : List (String * Surface)) : List String := match kvs { nil -> nil ; cons (k, v) rest -> cons k (surfacePairNames rest) }
 
 -- the variables a pattern binds, given the constructors `k`
 patternBinds (k : List String) (q : SurfacePattern) : List String := match q {
@@ -169,10 +169,10 @@ namesIn (k : List String) (t : Surface) : List String := match t {
   binop o a b -> ((namesIn k a) <> (namesIn k b)) ;
   neg a -> namesIn k a ; quoted a -> namesIn k a ; namedArg x a -> namesIn k a ; proj a x -> namesIn k a ;
   tuple ts -> namesInAll k ts ; list ts -> namesInAll k ts ;
-  pi xs a b -> ((namesIn k a) <> (removeNames xs (namesIn k b))) ;
+  piSurface xs a b -> ((namesIn k a) <> (removeNames xs (namesIn k b))) ;
   sigma xs a b -> ((namesIn k a) <> (removeNames xs (namesIn k b))) ;
   sigmaNamed x a y b -> ((namesIn k a) <> (removeName x (namesIn k b))) ;
-  record fs law -> ((fieldsNames k fs) <> (match law { nothing -> nil ; just l -> removeNames (fieldLabels fs) (namesIn k l) })) ;
+  recordSurface fs law -> ((fieldsNames k fs) <> (match law { nothing -> nil ; just l -> removeNames (fieldLabels fs) (namesIn k l) })) ;
   subtype q a law -> ((namesIn k a) <> (removeNames (patternBinds k q) (namesIn k law))) ;
   recordValue kvs -> pairsNames k kvs ; sumSurface kvs -> pairsNames k kvs ;
   block items e -> itemsNames k items e ;
@@ -184,9 +184,9 @@ namesInAll (k : List String) (ts : List Surface) : List String :=
   match ts { nil -> nil ; cons t rest -> ((namesIn k t) <> (namesInAll k rest)) }
 pairsNames (k : List String) (kvs : List (String * Surface)) : List String :=
   match kvs { nil -> nil ; cons (x, v) rest -> ((namesIn k v) <> (pairsNames k rest)) }
-fieldLabels (fs : List Field) : List String := match fs { nil -> nil ; cons f rest -> (f.names <> (fieldLabels rest)) }
+fieldLabels (fs : List RecordField) : List String := match fs { nil -> nil ; cons f rest -> (f.names <> (fieldLabels rest)) }
 -- a field's names are in scope in the fields after it (a dependent record, 2.S14)
-fieldsNames (k : List String) (fs : List Field) : List String :=
+fieldsNames (k : List String) (fs : List RecordField) : List String :=
   match fs { nil -> nil ; cons f rest -> ((namesIn k f.type) <> (removeNames f.names (fieldsNames k rest))) }
 -- a block's items bind in what follows them
 itemsNames (k : List String) (items : List Item) (e : Surface) : List String := match items {
@@ -243,13 +243,13 @@ definedNames (p : SurfaceProgram) : List String :=
 
 -- 4.R1: a declaration mentions only names that exist, declared or defined (or imported, or core's)
 violatesR1 (p : SurfaceProgram) (n : String) : Bool :=
-  any List SurfaceAct (fn a { match a { declare x bs t -> any List String (fn (m : String) { not (known coreNames p m) }) (dOf p a) ; _ -> false } }) (actsNamed p n)
+  any List SurfaceAct (fn a { match a { declare x bs t -> any List String (fn (m : String) { not (knownName coreNames p m) }) (dOf p a) ; _ -> false } }) (actsNamed p n)
 
 -- 4.R2, the part that reads names: the names a definition mentions exist. That a name in type
 -- position is defined unless it is in the definition's own theory needs type position (4.S2) and
 -- the theories (4.S3, the strongly connected components): todo, §2.
 violatesR2Exists (p : SurfaceProgram) (n : String) : Bool :=
-  any List SurfaceAct (fn a { match a { define x bs t b -> any List String (fn (m : String) { not (known coreNames p m) }) (((dOf p a) <> (bOf p a))) ; _ -> false } }) (actsNamed p n)
+  any List SurfaceAct (fn a { match a { define x bs t b -> any List String (fn (m : String) { not (knownName coreNames p m) }) (((dOf p a) <> (bOf p a))) ; _ -> false } }) (actsNamed p n)
 
 -- 4.R3: a predicate touches what it is over: every label of a record with a law, the variables of
 -- a subtype's pattern (a pattern that binds nothing constrains nothing: `{ _ : T | true }`), the
@@ -268,7 +268,7 @@ untouched (k : List String) (labels : List String) (law : Surface) : Bool :=
 touchesName (l : String) (ns : List String) : Bool :=
   match ns { nil -> false ; cons m rest -> m == l or namePrefix m == l or touchesName l rest }
 predicateUntouched (k : List String) (isPredicate : Bool) (t : Surface) : Bool := match t {
-  record fs law -> match law { nothing -> false ; just l -> untouched k (fieldLabels fs) l } ;
+  recordSurface fs law -> match law { nothing -> false ; just l -> untouched k (fieldLabels fs) l } ;
   subtype q a law -> (match patternBinds k q { nil -> true ; vs -> untouched k vs law }) ;
   lambda ps items e -> isPredicate and untouched k (paramsBind k ps) (block items e) ;
   _ -> false ;
@@ -284,12 +284,12 @@ predicateUntouched (k : List String) (isPredicate : Bool) (t : Surface) : Bool :
 -- expands aliases first (4.R7), sees it.
 endsInVerdict (t : Surface) : Bool := match t {
   binop o a b -> o == "->" and endsInVerdict b ;
-  pi xs a b -> endsInVerdict b ;
+  piSurface xs a b -> endsInVerdict b ;
   name s -> s == "Bool" or s == "Law" ;
   app f a -> headName t == just "Failures" or headName t == just "Law" ;
   _ -> false ;
 }
-isArrow (t : Surface) : Bool := match t { binop o a b -> o == "->" ; pi xs a b -> true ; _ -> false }
+isArrow (t : Surface) : Bool := match t { binop o a b -> o == "->" ; piSurface xs a b -> true ; _ -> false }
 lambdaIsPredicate (p : SurfaceProgram) (n : String) (t : Maybe Surface) : Bool := match t {
   just u -> endsInVerdict u ;
   nothing -> (match declaredSurface p n { nothing -> true ; just d -> not (isArrow d) or endsInVerdict d }) }
@@ -353,7 +353,7 @@ patternsNamed (k : List String) (qs : List SurfacePattern) : List String :=
 -- core names it), and `namePrefix` of it is the field.
 nameRest : String -> String
 fieldsOfDeclared (p : SurfaceProgram) (n : String) : List String := match p { nil -> nil ; cons act rest -> match act {
-  declare x bs t -> if x == n then (match t { record fs law -> fieldLabels fs ; _ -> nil }) else fieldsOfDeclared rest n ;
+  declare x bs t -> if x == n then (match t { recordSurface fs law -> fieldLabels fs ; _ -> nil }) else fieldsOfDeclared rest n ;
   _ -> fieldsOfDeclared rest n } }
 -- the fields a term reads: the field after the first `.` of every dotted name, and every projection,
 -- bound or not, since a law reads a field through its model parameter, `m.parse` (check.py, bite 2:
@@ -385,7 +385,7 @@ violatesR3 (p : SurfaceProgram) (n : String) : Bool :=
   untouchedFields p n
   or any List SurfaceAct (fn a { match a {
     define x bs t b -> (match b { termBody u -> predicateUntouched (constructors p) (lambdaIsPredicate p x t) u ;
-                                  dataBody cs -> any List String (fn (c : String) { not (member List String c (lawNames p)) }) (pairNames cs) ; _ -> false }) ;
+                                  dataBody cs -> any List String (fn (c : String) { not (member List String c (lawNames p)) }) (surfacePairNames cs) ; _ -> false }) ;
     _ -> false } }) (actsNamed p n)
 
 -- the declared type of a name: the one its definition writes, or its declaration's when the
@@ -404,7 +404,7 @@ atUniverse (p : SurfaceProgram) (n : String) (t : Maybe Surface) : Bool := typeO
 -- `core.lut` (11.R2) is a rule on files, not read here.
 makesAType (b : Body) : Bool := match b {
   dataBody cs -> true ;
-  termBody u -> (match u { subtype q a law -> true ; record fs law -> not (law == nothing) ; _ -> isExtern u or isPrimitive u }) ;
+  termBody u -> (match u { subtype q a law -> true ; recordSurface fs law -> not (law == nothing) ; _ -> isExtern u or isPrimitive u }) ;
   clausesBody cs -> false ;
 }
 violatesR4 (p : SurfaceProgram) (n : String) : Bool :=
@@ -414,12 +414,12 @@ violatesR4 (p : SurfaceProgram) (n : String) : Bool :=
 isExtern (t : Surface) : Bool := match t { app f a -> isExtern f ; name s -> s == "extern" ; _ -> false }
 -- 11.R1: a body `primitive "..."` states what the interpreter provides
 isPrimitive (t : Surface) : Bool := match t { app f a -> isPrimitive f ; name s -> s == "primitive" ; _ -> false }
-isProvisional (t : Surface) : Bool :=
-  match t { app f a -> (match a { namedArg x v -> x == "provisional" ; _ -> false }) or isProvisional f ; _ -> false }
+isProvisionalExtern (t : Surface) : Bool :=
+  match t { app f a -> (match a { namedArg x v -> x == "provisional" ; _ -> false }) or isProvisionalExtern f ; _ -> false }
 -- and its type must be defined (4.R2 applies to an extern as to any body)
 violatesR5 (p : SurfaceProgram) (n : String) : Bool :=
   any List SurfaceAct (fn act { match act { define x bs t b ->
-    (match b { termBody u -> isExtern u and not (isProvisional u) ; _ -> false })
+    (match b { termBody u -> isExtern u and not (isProvisionalExtern u) ; _ -> false })
     and (atUniverse p n t or (match typeOfAct p n t { just ty -> any List String (fn (m : String) { not (isDefined p m or isAlias p m or member List String m coreNames or member List String m (constructors p)) }) (namesIn (constructors p) ty) ;
                                                         nothing -> false })) ;
     _ -> false } }) (actsNamed p n)
@@ -431,13 +431,13 @@ violatesR5 (p : SurfaceProgram) (n : String) : Bool :=
 children (t : Surface) : List Surface := match t {
   app f x -> [f, x] ; binop o l r -> [l, r] ; neg x -> [x] ; quoted x -> [x] ; namedArg y x -> [x] ; proj x y -> [x] ;
   tuple ts -> ts ; list ts -> ts ; recordValue kvs -> pairValues kvs ; sumSurface kvs -> pairValues kvs ;
-  pi xs a b -> [a, b] ; sigma xs a b -> [a, b] ; sigmaNamed x a y b -> [a, b] ; subtype q a l -> [a, l] ;
-  record fs l -> ((fieldTypes fs) <> (match l { nothing -> nil ; just u -> [u] })) ;
+  piSurface xs a b -> [a, b] ; sigma xs a b -> [a, b] ; sigmaNamed x a y b -> [a, b] ; subtype q a l -> [a, l] ;
+  recordSurface fs l -> ((fieldTypes fs) <> (match l { nothing -> nil ; just u -> [u] })) ;
   block items e -> cons e (itemValues items) ; lambda ps items e -> cons e (itemValues items) ;
   matchOf x arms -> cons x (armBodies arms) ;
   ifThen c x m -> cons c (cons x (match m { nothing -> nil ; just y -> [y] })) ;
   _ -> nil }
-fieldTypes (fs : List Field) : List Surface := match fs { nil -> nil ; cons f rest -> cons f.type (fieldTypes rest) }
+fieldTypes (fs : List RecordField) : List Surface := match fs { nil -> nil ; cons f rest -> cons f.type (fieldTypes rest) }
 itemValues (items : List Item) : List Surface := map (fn (it : Item) { match it { bind x v -> v ; rebind q v -> v } }) items
 armBodies (arms : List (SurfacePattern * Surface)) : List Surface := map (fn (arm : SurfacePattern * Surface) { match arm { (q, b) -> b } }) arms
 anyTerm (f : Surface -> Bool) (t : Surface) : Bool := f t or any List Surface (anyTerm f) (children t)
@@ -575,7 +575,7 @@ typed (a : Alpha) (sb : Substitution a) (t : Typing a sb) (r : Maybe Term) (ty :
 -- term rarely meets; and `same` and `refines` held apart from the trivial relations, which made
 -- every law hold before; review of layers 0-1, B.)
 int : Term := Var "Int"
-lit (i : Int) : Term := Lit (IntConst i)
+termInt (i : Int) : Term := Lit (IntConst i)
 
 -- a variable has the type its context gives it, a global name the type its declaration gives it
 -- (a definition's type, `Define` carrying it, likewise); a constant the type of its kind (spec 11)
@@ -583,7 +583,7 @@ TypeOfVar (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx
   typed a sb t (t.typeOf p (cons (x, ty) ctx) (Var x)) ty
   and typed a sb t (t.typeOf [Declare x ty] [] (Var x)) ty
 TypeOfConstant (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (i : Int) (u : Float64) (s : String) : Bool :=
-  typed a sb t (t.typeOf p ctx (lit i)) int and typed a sb t (t.typeOf p ctx (Lit (FloatConst u))) (Var "Float64")
+  typed a sb t (t.typeOf p ctx (termInt i)) int and typed a sb t (t.typeOf p ctx (Lit (FloatConst u))) (Var "Float64")
   and typed a sb t (t.typeOf p ctx (Lit (StringConst s))) (Var "String")
 -- the exponential: a lambda has the dependent function type of its body, applied to an argument
 -- of its domain the type of its body with the argument for the variable (3 §2, 3.S5); an
@@ -591,14 +591,14 @@ TypeOfConstant (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program)
 TypeOfLam (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (ty : Term) : Bool :=
   typed a sb t (t.typeOf p ctx (Lam x ty (Var x))) (Pi x ty ty)
 TypeOfApp (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (i : Int) : Bool :=
-  typed a sb t (t.typeOf p ctx (App (Lam x int (Var x)) (lit i))) int
-  and t.typeOf p ctx (App (lit i) (lit i)) == nothing
+  typed a sb t (t.typeOf p ctx (App (Lam x int (Var x)) (termInt i))) int
+  and t.typeOf p ctx (App (termInt i) (termInt i)) == nothing
 -- the product, the record and its projection, the sum's injection, a match's arm (3 §2)
 TypeOfIntroductions (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (i j : Int) (x y : String) : Bool :=
-  typed a sb t (t.typeOf p ctx (Pair (lit i) (lit j))) (Sigma "_" int int)
-  and (x == y or (typed a sb t (t.typeOf p ctx (RecordValue [(x, lit i), (y, lit j)])) (Record [(x, int), (y, int)])
-                  and typed a sb t (t.typeOf p ctx (Proj (RecordValue [(x, lit i), (y, lit j)]) y)) int))
-  and typed a sb t (t.typeOf p ctx (Match (lit i) [(PWild, lit j)])) int
+  typed a sb t (t.typeOf p ctx (Pair (termInt i) (termInt j))) (Sigma "_" int int)
+  and (x == y or (typed a sb t (t.typeOf p ctx (RecordValue [(x, termInt i), (y, termInt j)])) (Record [(x, int), (y, int)])
+                  and typed a sb t (t.typeOf p ctx (Proj (RecordValue [(x, termInt i), (y, termInt j)]) y)) int))
+  and typed a sb t (t.typeOf p ctx (Match (termInt i) [(PWild, termInt j)])) int
 -- the type formers are types: their role (L2.7) is to form types, of type `U` when their parts are
 TypeOfFormers (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x l : String) : Bool :=
   typed a sb t (t.typeOf p ctx (Pi x int int)) Universe and typed a sb t (t.typeOf p ctx (Sigma x int int)) Universe
@@ -607,7 +607,7 @@ TypeOfFormers (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) 
   and typed a sb t (t.typeOf p ctx (Data x [(l, Var x)])) Universe
 -- a local definition is transparent: inside it the name is the value (D-2026-10-13-aa, Q1)
 TypeOfLet (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (i : Int) : Bool :=
-  typed a sb t (t.typeOf p ctx (Let x int (lit i) (Var x))) int
+  typed a sb t (t.typeOf p ctx (Let x int (termInt i) (Var x))) int
 -- `&` joins two laws over one model (5.S6): two Boolean predicates give a Boolean predicate, and
 -- when either part is valued in `Law` (laws.lth) the Boolean part is lifted and the conjunction is
 -- a `Law` ("a combination of both lifts each Boolean part") [proposed: elaborate.py bite 6,
@@ -645,7 +645,7 @@ SubtypeRefinesBase (a : Alpha) (sb : Substitution a) (t : Typing a sb) (x : Stri
 RefinesFunctions (a : Alpha) (sb : Substitution a) (t : Typing a sb) (x : String) (d c : RefinePair a sb t) : Bool :=
   t.refines (Pi x d.big c.small) (Pi x d.small c.big)
 RefinesSeparates (a : Alpha) (sb : Substitution a) (t : Typing a sb) (x : String) : Bool :=
-  not (t.refines (Var "String") int) and not (t.refines int (Subtype x int (App (App (Var "<") (lit 0)) (Var x))))
+  not (t.refines (Var "String") int) and not (t.refines int (Subtype x int (App (App (Var "<") (termInt 0)) (Var x))))
 
 -- 4.R11: inside the branch of a condition `c` in which a variable `x : T` occurs, `x` has the
 -- subtype `{ x : T | c }`, and inside the other `{ x : T | not c }`; the same holds of a pattern:
@@ -656,7 +656,7 @@ branchesRefine (ctx : Context) (t : Context -> Term -> Bool -> Context) (x : Str
 -- stated on two conditions in which `x` occurs: a predicate applied to it, and `0 < x`
 BranchRefines (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ctx : Context) (x q : String) (ty : Term) : Bool :=
   branchesRefine ctx t.branchContext x (App (Var q) (Var x)) ty
-  and branchesRefine ctx t.branchContext x (App (App (Var "<") (lit 0)) (Var x)) ty
+  and branchesRefine ctx t.branchContext x (App (App (Var "<") (termInt 0)) (Var x)) ty
 
 Typing (a : Alpha) (sb : Substitution a) := TypeOfVar a sb & TypeOfConstant a sb & TypeOfLam a sb & TypeOfApp a sb & TypeOfConjunction a sb
   & TypeOfIntroductions a sb & TypeOfFormers a sb & TypeOfLet a sb & TypeOfUniverse a sb & SameIsAlpha a sb
@@ -773,7 +773,7 @@ violates6R1 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a 
 reportedAs (rs : List Report) (kind n : String) : Bool :=
   match rs { nil -> false ; cons r rest -> (r.kind == kind and r.name == n) or reportedAs rest kind n }
 provisionalExtern (p : SurfaceProgram) (n : String) : Bool :=
-  any List SurfaceAct (fn act { match act { define x bs t b -> (match b { termBody u -> isExtern u and isProvisional u ; _ -> false }) ;
+  any List SurfaceAct (fn act { match act { define x bs t b -> (match b { termBody u -> isExtern u and isProvisionalExtern u ; _ -> false }) ;
                               _ -> false } }) (actsNamed p n)
 looseFunction (p : SurfaceProgram) (n : String) : Bool :=
   any List SurfaceAct (fn act { match act { define x bs t b -> nonEmptyBinders bs or (match t { just (binop o l r) -> o == "->" ; _ -> false }) ;

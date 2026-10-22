@@ -27,8 +27,8 @@
 --      libraries is the model's until core.lut exists.                                    done
 
 import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern Item ImportName declare define importAct name
-  app termBody record recordValue alias dataBody Binder explicit implicit Field literal stringLit floatLit universe
-  binop tuple pi sigma sigmaNamed subtype sum list proj block lambda ifThen matchOf bind rebind
+  app termBody recordSurface recordValue alias dataBody Binder explicit implicit RecordField literal stringLit floatLit universe
+  binop tuple piSurface sigma sigmaNamed subtype sum list proj block lambda ifThen matchOf bind rebind
 import "program.lth" actNames coreNames pairValues itemValues armBodies
 
 -- ---------------------------------------------------------------- §1 Files and their kinds
@@ -114,7 +114,7 @@ importLineNames (ns : List ImportName) : List String :=
 -- a small set of files: a theory with one field `f`, a model of it with fields `f` and `g` and a
 -- helper, a file that imports both under an alias, and an unrelated file
 sample : FileSystem := [
-  ("la.lth", [declare "LinearAlgebra" [] (record [{ names := ["f"], type := name "Int" }] nothing)]),
+  ("la.lth", [declare "LinearAlgebra" [] (recordSurface [{ names := ["f"], type := name "Int" }] nothing)]),
   ("la_numpy.lut", [define "Numpy" [] (just (name "LinearAlgebra")) (termBody (recordValue [("f", name "one"), ("g", name "two")])),
                     define "helper" [] nothing (termBody (name "w"))]),
   ("other.lut", [define "elsewhere" [] nothing (termBody (name "z"))]),
@@ -169,10 +169,10 @@ typeMentions (s : String) (t : Surface) : Bool := match t {
   app f a -> typeMentions s f or typeMentions s a ;
   binop o a b -> typeMentions s a or typeMentions s b ;
   tuple ts -> any List Surface (typeMentions s) ts ;
-  pi xs a b -> typeMentions s a or typeMentions s b ;
+  piSurface xs a b -> typeMentions s a or typeMentions s b ;
   sigma xs a b -> typeMentions s a or typeMentions s b ;
   sigmaNamed x a y b -> typeMentions s a or typeMentions s b ;
-  record fs law -> any List Field (fn (f : Field) { typeMentions s f.type }) fs ;
+  recordSurface fs law -> any List RecordField (fn (f : RecordField) { typeMentions s f.type }) fs ;
   subtype q a law -> typeMentions s a ;
   sum kvs -> any List (String * Surface) (fn (kv : String * Surface) { match kv { (k, v) -> typeMentions s v } }) kvs ;
   list ts -> any List Surface (typeMentions s) ts ;

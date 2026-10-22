@@ -30,11 +30,11 @@
 --      implicit arguments (4.S23), blocks and `<-`, tuple parameters, clauses.        done
 --   §5 `Elaboration :=` the conjunction.                                             done
 
-import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern Literal Field Item Body Clause Binder
+import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern Literal RecordField Item Body Clause Binder
   LambdaParam declare define alias datum operatorAct importAct explicit implicit termBody dataBody clausesBody name
-  literal universe world app binop neg tuple pi sigma record subtype recordValue block sumSurface list lambda
+  literal universe world app binop neg tuple piSurface sigma recordSurface subtype recordValue block sumSurface list lambda
   matchOf namedArg ifThen proj intLit floatLit stringLit pWild pApp pLit pTuple plainParam typedParam
-  shapeParam bind rebind
+  shapeParam bind rebind nm pvar
 import "term.lth" Term Program Act Pattern Constant Alpha Var Lit Universe World Lam App Pi Sigma Pair
   Match Inj Sum Data Subtype Record RecordValue Proj Let Declare Define Datum IntConst FloatConst StringConst PVar
   PWild PCon PPair PLit
@@ -58,8 +58,6 @@ sameAct (a : Alpha) (x y : Act) : Bool := match x {
 sameProgram (a : Alpha) (xs ys : Program) : Bool := match xs {
   nil -> (match ys { nil -> true ; cons y rest -> false }) ;
   cons x rest -> match ys { nil -> false ; cons y more -> sameAct a x y and sameProgram a rest more } }
-nm (s : String) : Surface := name s
-pvar (s : String) : SurfacePattern := pApp s []
 aType (s : String) : SurfaceAct := declare s [] universe
 of (x t : String) : SurfaceAct := declare x [] (nm t)
 
@@ -116,7 +114,7 @@ ListLiterals (a : Alpha) (e : Elaboration a) : Bool :=
 -- a product whose projections are named (D-2026-10-13-x).
 TypeForms (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term scope (sumSurface [("x", nm "A"), ("y", nm "B")])) (Sum [("x", Var "A"), ("y", Var "B")])
-  and gives a (e.term scope (record [{ names := ["x"], type := nm "A" }, { names := ["y"], type := nm "B" }] nothing))
+  and gives a (e.term scope (recordSurface [{ names := ["x"], type := nm "A" }, { names := ["y"], type := nm "B" }] nothing))
           (Record [("x", Var "A"), ("y", Var "B")])
   and sameProgram a (e.elaborate [define "C" [] (just universe)
                                     (dataBody [("r", nm "C"), ("s", binop "->" (app (nm "List") (nm "C")) (nm "C"))])])
@@ -131,7 +129,7 @@ TypeForms (a : Alpha) (e : Elaboration a) : Bool :=
 -- the context of this section: two types, two integers, two Booleans, a failure list
 typesAndValues : SurfaceProgram := [aType "A", aType "B", of "i" "Int", of "j" "Int", of "c" "Bool", of "q" "Bool",
   declare "f" [] (app (nm "Failures") (nm "E"))]
-bin (o : String) (x y : Term) : Term := App (App (Var o) x) y
+binVar (o : String) (x y : Term) : Term := App (App (Var o) x) y
 -- a type declared at a type, with a primitive body as in core.lut, and a value of it
 primitiveTypes : SurfaceProgram := [aType "R",
   define "F" [] (just (nm "R")) (termBody (app (nm "primitive") (literal (stringLit "ieee754-binary64")))), of "r" "F"]
@@ -142,21 +140,21 @@ OperatorsByType (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term typesAndValues (binop "->" (nm "A") (nm "B"))) (Pi "_" (Var "A") (Var "B"))
   and gives a (e.term typesAndValues (binop "*" (nm "A") (nm "B"))) (Sigma "_" (Var "A") (Var "B"))
   and gives a (e.term typesAndValues (binop "+" (nm "A") (nm "B"))) (Sum [("left", Var "A"), ("right", Var "B")])
-  and gives a (e.term typesAndValues (binop "*" (nm "i") (nm "j"))) (bin "*" (Var "i") (Var "j"))
-  and gives a (e.term typesAndValues (binop "+" (nm "i") (nm "j"))) (bin "+" (Var "i") (Var "j"))
-  and gives a (e.term typesAndValues (binop "->" (nm "c") (nm "q"))) (bin "implies" (Var "c") (Var "q"))
-  and gives a (e.term typesAndValues (binop "and" (nm "c") (nm "q"))) (bin "and" (Var "c") (Var "q"))
-  and gives a (e.term typesAndValues (binop "or" (nm "c") (nm "q"))) (bin "or" (Var "c") (Var "q"))
+  and gives a (e.term typesAndValues (binop "*" (nm "i") (nm "j"))) (binVar "*" (Var "i") (Var "j"))
+  and gives a (e.term typesAndValues (binop "+" (nm "i") (nm "j"))) (binVar "+" (Var "i") (Var "j"))
+  and gives a (e.term typesAndValues (binop "->" (nm "c") (nm "q"))) (binVar "implies" (Var "c") (Var "q"))
+  and gives a (e.term typesAndValues (binop "and" (nm "c") (nm "q"))) (binVar "and" (Var "c") (Var "q"))
+  and gives a (e.term typesAndValues (binop "or" (nm "c") (nm "q"))) (binVar "or" (Var "c") (Var "q"))
   -- a name declared at a type and given a `primitive` body is a type (11.R1: `Float64 : Real :=
   -- primitive "ieee754-binary64"`), so `->` between two is the arrow; a name declared at it with no
   -- such body is a value, and `*` on two of those is the operator [proposed: elaborate.py bite 6,
   -- 0984440; stated by luthier-03]
   and gives a (e.term primitiveTypes (binop "->" (nm "F") (nm "F"))) (Pi "_" (Var "F") (Var "F"))
-  and gives a (e.term primitiveTypes (binop "*" (nm "r") (nm "r"))) (bin "*" (Var "r") (Var "r"))
+  and gives a (e.term primitiveTypes (binop "*" (nm "r") (nm "r"))) (binVar "*" (Var "r") (Var "r"))
 -- negation is subtraction from zero, of the operand's type (2.S12)
-Negation (a : Alpha) (e : Elaboration a) : Bool :=
-  gives a (e.term typesAndValues (neg (nm "i"))) (bin "-" (Lit (IntConst 0)) (Var "i"))
-  and gives a (e.term [of "r" "Float64"] (neg (nm "r"))) (bin "-" (Lit (FloatConst 0.0)) (Var "r"))
+NegationElaborates (a : Alpha) (e : Elaboration a) : Bool :=
+  gives a (e.term typesAndValues (neg (nm "i"))) (binVar "-" (Lit (IntConst 0)) (Var "i"))
+  and gives a (e.term [of "r" "Float64"] (neg (nm "r"))) (binVar "-" (Lit (FloatConst 0.0)) (Var "r"))
 
 -- `if` on a `Bool` is a `match` on `true` and `false`; without `else` it gives a `Maybe`
 -- (D-2026-10-11-b); on `Failures E` the condition is first projected by `holds`, and without
@@ -179,13 +177,13 @@ OperatorOfTheModel (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term [aType "Z7", of "z" "Z7", declare "addZ7" [] (binop "->" (nm "Z7") (binop "->" (nm "Z7") (nm "Z7"))),
                    operatorAct "+" (nm "addZ7")]
                   (binop "+" (nm "z") (nm "z")))
-          (bin "addZ7" (Var "z") (Var "z"))
+          (binVar "addZ7" (Var "z") (Var "z"))
 
 -- ---------------------------------------------------------------- §4 Terms by context
 
 -- a record value is the introduction of its record type, and a projection the arrow of that name
 -- (D-2026-10-13-x, which replaces 2.S12's pair and one-branch `match`)
-pairType : Surface := record [{ names := ["x"], type := nm "A" }, { names := ["y"], type := nm "B" }] nothing
+pairType : Surface := recordSurface [{ names := ["x"], type := nm "A" }, { names := ["y"], type := nm "B" }] nothing
 Records (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term [aType "A", aType "B", of "u" "A", of "v" "B"] (recordValue [("x", nm "u"), ("y", nm "v")]))
           (RecordValue [("x", Var "u"), ("y", Var "v")])
@@ -231,7 +229,7 @@ Blocks (a : Alpha) (e : Elaboration a) : Bool :=
           (Match (Var "n") [(PPair (PVar "a") (PVar "b"), Var "a")])
   -- a bare name bound to a value that is not an action rebinds it: a `Let` on a fresh name
   and gives a (e.term [] (block [rebind (pvar "y") (literal (intLit 1)), rebind (pvar "y") (binop "+" (nm "y") (literal (intLit 1)))] (nm "y")))
-          (Let "y0" (Var "Int") (Lit (IntConst 1)) (Let "y1" (Var "Int") (bin "+" (Var "y0") (Lit (IntConst 1))) (Var "y1")))
+          (Let "y0" (Var "Int") (Lit (IntConst 1)) (Let "y1" (Var "Int") (binVar "+" (Var "y0") (Lit (IntConst 1))) (Var "y1")))
 
 -- a tuple parameter is a lambda whose body matches its argument (2.S12); a definition by clauses
 -- is a lambda over its parameters matching their tuple, or the one parameter itself (D-2026-10-13-p)
@@ -261,4 +259,4 @@ Shapes (a : Alpha) (e : Elaboration a) : Bool :=
 -- `Bool`, `Maybe` and `Failures` are definitions of core and checks.lth, not rows of elaboration;
 -- `quote` gives the `Term` of its term, the value term.lth's `Evaluation` states.
 Elaboration (a : Alpha) := ActsCurried a & ActsKept a & Atoms a & Lambdas a & Patterns a & ListLiterals a & TypeForms a
-  & OperatorsByType a & Negation a & Conditions a & OperatorOfTheModel a & Records a & Arguments a & Blocks a & Shapes a
+  & OperatorsByType a & NegationElaborates a & Conditions a & OperatorOfTheModel a & Records a & Arguments a & Blocks a & Shapes a

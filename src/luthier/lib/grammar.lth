@@ -76,7 +76,7 @@ Item : U := data {
   rebind : SurfacePattern -> Surface -> Item ;
 }
 
-Field = { names : List String, type : Surface }
+RecordField = { names : List String, type : Surface }
 
 -- spec 2.S9: the terms. A binary operator is kept as the text written, one of the literals of the
 -- precedence levels (`binaryOperators`). Roles: the tree laws, one per constructor.
@@ -89,10 +89,10 @@ Surface : U := data {
   binop : String -> Surface -> Surface -> Surface ;
   neg : Surface -> Surface ;
   tuple : List Surface -> Surface ;
-  pi : List String -> Surface -> Surface -> Surface ;
+  piSurface : List String -> Surface -> Surface -> Surface ;
   sigma : List String -> Surface -> Surface -> Surface ;
   sigmaNamed : String -> Surface -> String -> Surface -> Surface ;
-  record : List Field -> Maybe Surface -> Surface ;
+  recordSurface : List RecordField -> Maybe Surface -> Surface ;
   subtype : SurfacePattern -> Surface -> Surface -> Surface ;
   recordValue : List (String * Surface) -> Surface ;
   block : List Item -> Surface -> Surface ;
@@ -348,7 +348,7 @@ longestPrefix (d : Derives) (n : String) (ps : List (List TokenView * List Token
     nothing -> if not (isEmpty TokenView xs) and derivesIn d n xs then just (xs, ys) else nothing } }
 memberChars (cs : List String) (ws : List String) : Bool := any List String (fn (w : String) { characters w == cs }) ws
 -- the kind the lexer gives a lexeme, or nothing when it drops it (a blank, a line break, a comment)
-kindOf (d : Derives) (xs : List TokenView) : Maybe String :=
+tokenKindOf (d : Derives) (xs : List TokenView) : Maybe String :=
   if derivesIn d "string" xs then just "string"
   else if derivesIn d "number" xs then just "number"
   else if derivesIn d "name" xs then just (if memberChars (textsOf xs) (litsOf luthierSyntax) then "literal" else "name")
@@ -362,7 +362,7 @@ tokenizeWithin (d : Derives) (fuel : Nat) (cs : List TokenView) : Maybe (List Le
     if fuel == 0 then nothing
     else match longestPrefix d "lexeme" (splits TokenView cs) { nothing -> nothing ; just (xs, ys) ->
       match tokenizeWithin d (fuel - 1) ys { nothing -> nothing ; just ls ->
-        match kindOf d xs { nothing -> just ls ; just k -> just (cons { kind := k, chars := textsOf xs } ls) } } } }
+        match tokenKindOf d xs { nothing -> just ls ; just k -> just (cons { kind := k, chars := textsOf xs } ls) } } } }
 tokenize (d : Derives) (s : String) : Maybe (List Lexeme) :=
   tokenizeWithin d (size (characters s)) (map charView (characters s))
 
@@ -406,12 +406,12 @@ lastIsNewline (ts : List TokenView) : Bool :=
 
 -- ---------------------------------------------------------------- the trees a text can give
 
--- `RoundTrip` and `ParsedIsWritten` quantify over the trees a text can give; `ok` says what a name
+-- `WrittenRoundTrip` and `ParsedIsWritten` quantify over the trees a text can give; `ok` says what a name
 -- is (the lexer's names, `isName`). One rule beyond shapes: a single labeled field carries no law
 -- (that is a subtype). Parentheses are not in the tree, so every tree of an `if` is written by
 -- some text: `if c then (if d then y) else b` gives the tree that 2.S11 denies to the text without
 -- them (GPT, Claude, round 3), and the printer writes them back (`PrintParenthesizes`).
-namesCount (fs : List Field) : Nat := fold Field Nat (fn (a b : Nat) { a + b }) 0 (fn (f : Field) { size f.names }) fs
+namesCount (fs : List RecordField) : Nat := fold RecordField Nat (fn (a b : Nat) { a + b }) 0 (fn (f : RecordField) { size f.names }) fs
 
 wfPattern (ok : String -> Bool) (p : SurfacePattern) : Bool := match p {
   pWild -> true ; pLit l -> true ;
@@ -430,10 +430,10 @@ wf (ok : String -> Bool) (t : Surface) : Bool := match t {
   binop o a b -> member List String o binaryOperators and wf ok a and wf ok b ;
   neg a -> wf ok a ;
   tuple ts -> size ts >= 2 and all List Surface (wf ok) ts ;
-  pi xs a b -> not (isEmpty String xs) and all List String ok xs and wf ok a and wf ok b ;
+  piSurface xs a b -> not (isEmpty String xs) and all List String ok xs and wf ok a and wf ok b ;
   sigma xs a b -> not (isEmpty String xs) and all List String ok xs and wf ok a and wf ok b ;
   sigmaNamed x a y b -> ok x and ok y and wf ok a and wf ok b ;
-  record fs law -> not (isEmpty Field fs) and all List Field (wfField ok) fs and maybeWf ok law
+  recordSurface fs law -> not (isEmpty RecordField fs) and all List RecordField (wfField ok) fs and maybeWf ok law
                    and (namesCount fs >= 2 or law == nothing) ;
   subtype p a law -> subtypePatternOk ok p and wf ok a and wf ok law ;
   recordValue kvs -> not (isEmpty (String * Surface) kvs) and all List (String * Surface) (wfPair ok) kvs ;
@@ -448,7 +448,7 @@ wf (ok : String -> Bool) (t : Surface) : Bool := match t {
   quoted a -> wf ok a ;
 }
 maybeWf (ok : String -> Bool) (m : Maybe Surface) : Bool := match m { nothing -> true ; just t -> wf ok t }
-wfField (ok : String -> Bool) (f : Field) : Bool := not (isEmpty String f.names) and all List String ok f.names and wf ok f.type
+wfField (ok : String -> Bool) (f : RecordField) : Bool := not (isEmpty String f.names) and all List String ok f.names and wf ok f.type
 wfPair (ok : String -> Bool) (kv : String * Surface) : Bool := match kv { (k, v) -> ok k and wf ok v }
 wfItem (ok : String -> Bool) (it : Item) : Bool := match it { bind x t -> ok x and wf ok t ; rebind q t -> wfPattern ok q and wf ok t }
 wfParam (ok : String -> Bool) (p : LambdaParam) : Bool := match p {
@@ -491,11 +491,11 @@ WrittenProgram (d : Derives) (g : Grammar d) : U := { p : SurfaceProgram | wfPro
 -- The printer and the parser are inverse on the trees a text can give (2.S9, 2.S13). The printer
 -- writes a projection as `(a).b`, a negation of a negation as `-(-a)`, a string with its escapes,
 -- and parentheses wherever the table would read the text otherwise (`PrintParenthesizes`).
-RoundTrip (d : Derives) (g : Grammar d) (p : WrittenProgram d g) : Bool :=
+WrittenRoundTrip (d : Derives) (g : Grammar d) (p : WrittenProgram d g) : Bool :=
   g.parse (g.print p) == parsed p
 
 -- Parsing is canonical: printing a parsed text and parsing again changes nothing (2.S4, 2.S13).
-Canonical (d : Derives) (g : Grammar d) (s : String) : Bool :=
+CanonicalPrinting (d : Derives) (g : Grammar d) (s : String) : Bool :=
   match g.parse s { parsed p -> g.parse (g.print p) == parsed p ; parseFailed es -> true }
 
 -- What parses is a tree a text can give, so the two laws above speak of one set.
@@ -624,17 +624,17 @@ Negation (d : Derives) (g : Grammar d) : Bool :=
 -- the open forms take the whole term to their right (level 1 of the table)
 OpenForms (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := (n : Nat) * Vec n" (sigma ["n"] (nm "Nat") (app (nm "Vec") (nm "n")))
-  and parsesX d g "x := (a : A) -> B c" (pi ["a"] (nm "A") (app (nm "B") (nm "c")))
+  and parsesX d g "x := (a : A) -> B c" (piSurface ["a"] (nm "A") (app (nm "B") (nm "c")))
   and parsesX d g "x := (a : A) * (b : B) * C" (sigma ["a"] (nm "A") (sigma ["b"] (nm "B") (nm "C")))
   and parsesX d g "x := if c then a else b + 1" (ifThen (nm "c") (nm "a") (just (binop "+" (nm "b") (numeral 1))))
-  and parsesX d g "x := A -> (b : B) -> C" (binop "->" (nm "A") (pi ["b"] (nm "B") (nm "C")))
-  and parsesX d g "x := P & (y : A) -> Q" (binop "&" (nm "P") (pi ["y"] (nm "A") (nm "Q")))
+  and parsesX d g "x := A -> (b : B) -> C" (binop "->" (nm "A") (piSurface ["b"] (nm "B") (nm "C")))
+  and parsesX d g "x := P & (y : A) -> Q" (binop "&" (nm "P") (piSurface ["y"] (nm "A") (nm "Q")))
   and parsesX d g "x := A -> if c then a" (binop "->" (nm "A") (ifThen (nm "c") (nm "a") nothing))
   and not (isParsed (g.parse "x := a + if c then a else b"))
 -- an open form ends its term: what follows belongs to it (Claude, round 3)
 OpenFormEndsItsTerm (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := U -> (a : A) * b & C" (binop "->" universe (sigma ["a"] (nm "A") (binop "&" (nm "b") (nm "C"))))
-  and parsesX d g "x := A -> (b : B) -> C & D" (binop "->" (nm "A") (pi ["b"] (nm "B") (binop "&" (nm "C") (nm "D"))))
+  and parsesX d g "x := A -> (b : B) -> C & D" (binop "->" (nm "A") (piSurface ["b"] (nm "B") (binop "&" (nm "C") (nm "D"))))
 -- the printer writes the parentheses the table needs: an `if` without `else` in the then-branch of
 -- one with an `else`, and an open form before `&` (GPT, Claude, round 3)
 printsBack (d : Derives) (g : Grammar d) (t : Surface) : Bool := g.parse (g.print (defX t)) == parsed (defX t)
@@ -654,7 +654,7 @@ SumTree (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := { a : A || b : B }" (sumSurface [("a", nm "A"), ("b", nm "B")])
   and parsesX d g "x := f { a : A || b : B }" (app (nm "f") (sumSurface [("a", nm "A"), ("b", nm "B")]))
   and parsesX d g "x := { s : { a : A || b : B }, d : D }"
-    (record [{ names := ["s"], type := sumSurface [("a", nm "A"), ("b", nm "B")] }, { names := ["d"], type := nm "D" }] nothing)
+    (recordSurface [{ names := ["s"], type := sumSurface [("a", nm "A"), ("b", nm "B")] }, { names := ["d"], type := nm "D" }] nothing)
   and not (isParsed (g.parse "x := { a : A || b : B, c : C }"))
   and parsesX d g "x := a < b and c > e" (binop "and" (binop "<" (nm "a") (nm "b")) (binop ">" (nm "c") (nm "e")))
 
@@ -714,18 +714,18 @@ LiteralTree (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := 3" (numeral 3) and parsesX d g "x := 3.5" (literal (floatLit 3.5))
   and parsesX d g "x := \"a\"" (literal (stringLit "a"))
 -- 2.S9: the dependent and named forms, records and subtypes.
-PiTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := (a b : Int) -> Int" (pi ["a", "b"] (nm "Int") (nm "Int"))
+PiTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := (a b : Int) -> Int" (piSurface ["a", "b"] (nm "Int") (nm "Int"))
 SigmaNamedTree (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := (a : A) * (b : B)" (sigmaNamed "a" (nm "A") "b" (nm "B"))
 RecordTree (d : Derives) (g : Grammar d) : Bool :=
-  parsesX d g "x := { a : Int }" (record [{ names := ["a"], type := nm "Int" }] nothing)
+  parsesX d g "x := { a : Int }" (recordSurface [{ names := ["a"], type := nm "Int" }] nothing)
   and parsesX d g "x := { a b : Int, c : Float64 }"
-    (record [{ names := ["a", "b"], type := nm "Int" }, { names := ["c"], type := nm "Float64" }] nothing)
+    (recordSurface [{ names := ["a", "b"], type := nm "Int" }, { names := ["c"], type := nm "Float64" }] nothing)
   and parsesX d g "x := { a : Int, b : Int | a < b }"
-    (record [{ names := ["a"], type := nm "Int" }, { names := ["b"], type := nm "Int" }] (just (binop "<" (nm "a") (nm "b"))))
+    (recordSurface [{ names := ["a"], type := nm "Int" }, { names := ["b"], type := nm "Int" }] (just (binop "<" (nm "a") (nm "b"))))
 SubtypeTree (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := { a : Int | 0 <= a }" (subtype (pvar "a") (nm "Int") (binop "<=" (numeral 0) (nm "a")))
-  and parsesX d g "x := { a b : Int | a < b }" (record [{ names := ["a", "b"], type := nm "Int" }] (just (binop "<" (nm "a") (nm "b"))))
+  and parsesX d g "x := { a b : Int | a < b }" (recordSurface [{ names := ["a", "b"], type := nm "Int" }] (just (binop "<" (nm "a") (nm "b"))))
   and parsesX d g "x := { (p, q) : P | p < q }" (subtype (pTuple [pvar "p", pvar "q"]) (nm "P") (binop "<" (nm "p") (nm "q")))
   and parsesX d g "x := { _ : T | p }" (subtype pWild (nm "T") (nm "p"))
 -- 2.S17: block, record value, items.
@@ -772,7 +772,7 @@ NegationTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := -1" (neg 
 BrokenTextFails (d : Derives) (g : Grammar d) : Bool := not (isParsed (g.parse "x := )"))
 
 -- A grammar is a lexer, a layout pass, a parser and a printer that satisfy all of the above.
-Grammar (d : Derives) := RoundTrip d & Canonical d & ParsedIsWritten d & ParsesWhatDerives d & ErrorsHaveLines d
+Grammar (d : Derives) := WrittenRoundTrip d & CanonicalPrinting d & ParsedIsWritten d & ParsesWhatDerives d & ErrorsHaveLines d
   & LiteralsAreNotNames d & OtherWordsAreNames d & KindsAreTheGrammars d & NameTokens d & NumberTokens d
   & LexesWhatDerives d & LexFailsWhatDerivesNot d & StringTokens d & LexErrorsHaveLines d
   & CommentDropped d & ArrowIsOneToken d
