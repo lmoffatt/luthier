@@ -292,7 +292,7 @@ def test_the_route_the_model_names():
 
 def entry(law="L", cone="sha256:1", seed=0, outcome="Passed", grade="Sampled", binding=()):
     return {"law": law, "cone": cone, "binding": list(binding), "seed": seed, "cases": 100, "budgets": {},
-            "reach": [], "evidence": {"Points": {"evaluated": 100}}, "grade": grade, "outcome": outcome,
+            "reach": [], "evidence": {"Points": {"evaluated": 100, "coverage": "Drawn 0"}}, "grade": grade, "outcome": outcome,
             "date": "2026-10-14T00:00:00+00:00", "interpreter": "abc", "hosts": []}
 
 
@@ -675,7 +675,7 @@ def test_a_store_another_process_writes_during_the_suite_survives():
     from conftest import library_stores_apart
     probe = certify.LIBRARY / "suite_probe_model.lut"  # no such file is needed: the store is beside its name
     where = certify.LIBRARY / "suite_probe_model.cert.json"
-    ours = {"law": "Ours", "cone": "sha256:0", "binding": [], "seed": 1, "cases": 1, "outcome": "Passed", "grade": "Sampled"}
+    ours = {"law": "Ours", "cone": "sha256:0", "binding": [], "seed": 1, "cases": 1, "outcome": "Passed", "grade": "Cases"}
     theirs = dict(ours, law="Theirs")
     try:
         where.write_text("[]\n", encoding="utf-8")
