@@ -608,3 +608,19 @@ def test_a_claim_at_a_subtype_does_not_serve_a_sibling_subtype():
     with pytest.raises(TypingError) as e:
         term('d a a', SIBLINGS)
     assert 'no model' in str(e.value)
+
+
+BOX = ('Box (A : U) = { item : A }\n'
+       'boxFold (A M : U) (combine : M -> M -> M) (neutral : M) (f : A -> M) (b : Box A) : M := combine (f b.item) neutral\n'
+       'BoxIsFoldable (model : Foldable Box <- { fold := boxFold }) : Bool := Foldable Box model\n'
+       'b : Box Int\n')
+
+
+def test_a_container_given_to_a_core_function_is_not_taken_as_its_model():
+    # report-bite-12b.md finding 3: `toList Vec Float64 v` took `v`, a record, as the Foldable model
+    # and left a function of the container; a record without the structure's fields is no model
+    r = term('toList Box Int b', BOX)
+    assert not isinstance(r, t.Lam)
+    from luthier.elaborate import show
+    assert "boxFold" in show(r) and show(r).endswith(") b)"), show(r)
+

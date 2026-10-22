@@ -1249,11 +1249,14 @@ def fill_structure(slot_type, c, where):
 
 def is_model_type(ty, S, c):
     """Whether a value of type `ty` can be a model of the structure `S`: its type is `S` applied, a
-    record, or not known (an argument is read as the model unless its type says otherwise)."""
+    record with the structure's fields, or not known (an argument is read as the model unless its
+    type says otherwise). A record without them is a container (`v : Vec Float64`, `{ n, f }`, in
+    `toList Vec Float64 v`), not a model (report-bite-12b.md finding 3)."""
     if isinstance(ty, t.Hole):
         return True
+    fields_of_S = {n for n, _ in c.structures[S].record.fields}
     for x in bases(ty, c):
-        if structure_of(x, c) == S or isinstance(x, t.Record):
+        if structure_of(x, c) == S or isinstance(x, t.Record) and fields_of_S <= {n for n, _ in x.fields}:
             return True
         h, _ = head_of(x)
         if isinstance(h, t.Hole):

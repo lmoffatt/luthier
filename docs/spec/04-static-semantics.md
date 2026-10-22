@@ -301,7 +301,9 @@ A claim at a subtype serves a value of that subtype or of a subtype declared ins
 sibling: with `Mark` and `MetricInteger` both subtypes of `Int`, `d` at `Mark` does not reach a
 claim at `MetricInteger` (the coordinator, 2026-10-21, on docs/concepts.md 4.3; core bite 12a).
 `S.f` names the structure, `S.f m` the model. A parameter typed by a structure applied to types,
-omitted at a call, is the model its types name; another is passed by name (D-2026-10-18-g). No
+omitted at a call, is the model its types name; another is passed by name (D-2026-10-18-g). An
+argument whose type is a record without the structure's fields is not its model, so it is not taken
+for the omitted one: in `toList Vec Float64 v`, `v` is the container (core bite 13a). No
 model, models of two structures at the type, or two models of one structure at it, are errors that
 name the field, the type and the models claimed. An operator with no binding at its left operand's
 type is an error; core's bindings elaborate to the kernel's operation of the symbol (3.S17).
