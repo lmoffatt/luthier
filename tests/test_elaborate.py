@@ -546,3 +546,39 @@ def test_a_subtypes_own_model_resolves_before_its_base_model():
     # Both Int and Nat claim Object and Order; Nat is also a refinement of Int.
     assert term('eq n n', 'n : Nat')
     assert term('leq n n', 'n : Nat')
+
+
+# Core bite 12a, item 1: the three elaborations bite 4 kept for the hash (report-bite-4.md,
+# findings 1 and 2, and the product's nesting; spec 2.S8, 4.R7, 3.S4).
+SUBTYPE_OF_U = 'Concrete : U := { A : U | true }\nT : Concrete\nA : U\nB : U\nC : U'
+
+
+def test_a_type_typed_by_a_subtype_of_U_makes_a_product():
+    # 2.S8: `T * Float64` with `T : Concrete` is the product, as with `T : U`
+    eq('T * Float64', t.Sigma('_', V('T'), V('Float64')), SUBTYPE_OF_U)
+    eq('T + B', t.Sum((('left', V('T')), ('right', V('B')))), SUBTYPE_OF_U)
+    eq('T -> B', t.Pi('_', V('T'), V('B')), SUBTYPE_OF_U)
+
+
+def test_products_nest_to_the_right():
+    # 3.S4: `A * B * C` is `A * (B * C)`, as `(a, b, c)` is `(a, (b, c))`
+    right = t.Sigma('_', V('A'), t.Sigma('_', V('B'), V('C')))
+    eq('A * B * C', right, SUBTYPE_OF_U)
+    eq('A * (B * C)', right, SUBTYPE_OF_U)
+    eq('T * A * B * C', t.Sigma('_', V('T'), right), SUBTYPE_OF_U)
+    # a component that is itself a product written in parentheses stays one component
+    eq('A * (B * C) * T', t.Sigma('_', V('A'), t.Sigma('_', t.Sigma('_', V('B'), V('C')), V('T'))),
+       SUBTYPE_OF_U)
+    # multiplication of numbers keeps its left association
+    eq('i * j * i', bin('*', bin('*', V('i'), V('j')), V('i')), 'i : Int\nj : Int')
+
+
+def test_an_alias_parameter_is_not_captured_by_a_record_field():
+    # 4.R7: inside `F`, whose parameter is `n`, `V Int`'s field `f : Fin n -> A` reads the field `n`
+    p = elaborate_program(program('V (A : U) = { n : Nat, f : Fin n -> A }\n'
+                                  'F (n : Int) = { p : V Int }\nx : F 3'))
+    inner = dict(dict(p[-1].type.fields)['p'].fields)
+    assert alpha_equal(inner['f'], t.Pi('_', t.App(V('Fin'), V('n')), V('Int')))
+    # a binder of a function type or of a dependent product is bound the same way
+    p = elaborate_program(program('G (n : Int) = (n : Nat) -> Fin n\nx : G 3'))
+    assert alpha_equal(p[-1].type, t.Pi('n', V('Nat'), t.App(V('Fin'), V('n'))))

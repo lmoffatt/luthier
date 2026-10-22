@@ -213,8 +213,8 @@ def unfold(ty, c):
     if not isinstance(h, t.Var):
         return None
     if h.name in ('*', '+') and len(args) == 2 and h.name not in c.types:
-        # a product or a sum the elaborator wrote as the symbol applied (`T * Float64` with `T :
-        # Concrete`, kept for the hash): read as the type it means
+        # a product or a sum written as the symbol applied (a left operand the context did not
+        # type, `walk`'s fallback): read as the type it means
         return t.Sigma('_', args[0], args[1]) if h.name == '*' else t.Sum((('left', args[0]), ('right', args[1])))
     if h.name in c.predicates and not args:
         return c.predicates[h.name]
@@ -1429,6 +1429,29 @@ def operator_binding(op, ty, c):
     return None
 
 
+def right_product(v, c):
+    """A chain `A * B * C` whose first operand is a type, as the product nested to the right,
+    `A * (B * C)` (3.S4; core bite 12a); None when the first operand is not a type. The parser
+    nests the chain to the left and keeps no parentheses, so a component written in parentheses
+    as a product (`A * (B * C) * D`) is one component: the chain is the left spine alone."""
+    parts = []
+    while isinstance(v, s.Binop) and v.operator == '*':
+        parts.append(v.right); v = v.left
+    parts.append(v); parts.reverse()
+    first = walk(parts[0], c)
+    try:
+        ty = infer(first, c)
+    except Untyped:
+        return None
+    if ty is None or not is_type(first, ty, c):
+        return None
+    components = [as_type(first)] + [walk_type(x, c) for x in parts[1:]]
+    out = components[-1]
+    for x in reversed(components[:-1]):
+        out = t.Sigma('_', x, out)
+    return out
+
+
 def walk(v, c, expected=None):
     match v:
         case s.Name(n):
@@ -1462,22 +1485,25 @@ def walk(v, c, expected=None):
                 # D-2026-10-21-a: the semigroup operation is the model's combine field,
                 # at every carrier, including a structure parameter of a generic definition.
                 return resolve_field('combine', None, (a, b), c, expected)
+            if op == '*' and isinstance(a, s.Binop) and a.operator == '*':
+                product = right_product(v, c)
+                if product is not None:
+                    return product
             left = walk(a, c); right = walk(b, c)
             try:
                 ty = infer(left, c)
             except Untyped:
                 ty = None
-            if op in {'->', '*', '+'} and ty is not None and (isinstance(ty, t.Universe) or isinstance(left, t.Var) and left.name in c.refinements):
+            if op in {'->', '*', '+'} and ty is not None and is_type(left, ty, c):
+                # a type, typed by `U` or by a subtype of it (`T * Float64` with `T : Concrete`,
+                # 2.S8; core bite 12a), makes the function type, the product or the sum
                 left, right = as_type(left), as_type(right)
                 return t.Sum((('left', left), ('right', right))) if op == '+' else (t.Pi if op == '->' else t.Sigma)('_', left, right)
             op = 'implies' if op == '->' else op
             if op not in BINDABLE:
                 return apps(t.Var(op), [left, right])
             if ty is None or is_type(left, ty, c):
-                # [bite 4, kept for the hash] a left operand the context does not name (4.R2 refuses
-                # it), or a type typed by a subtype of `U` (`T * Float64` with `T : Concrete`, which
-                # has always elaborated to the symbol applied, not to a product: a finding of the
-                # bite's report, whose correction moves the cones of generators.lth and world.lth)
+                # a left operand the context does not name (4.R2 refuses it)
                 return apps(t.Var(op), [left, right])
             return operator_use(op, a, left, right, ty, c)
         case s.Neg(x):
@@ -1503,20 +1529,21 @@ def walk(v, c, expected=None):
             return pairs(parts)
         case s.Pi(ns, a, b) | s.Sigma(ns, a, b):
             inner = c.child(); domain = walk_type(a, c)
-            for n in ns: inner.types[n] = domain
+            for n in ns: inner.types[n] = domain; inner.names[n] = n
             return curry(t.Pi if isinstance(v, s.Pi) else t.Sigma, [(n, domain) for n in ns], walk_type(b, inner))
         case s.SigmaNamed(n, a, m, b):
-            inner = c.child(); left = walk_type(a, c); inner.types[n] = left
+            inner = c.child(); left = walk_type(a, c); inner.types[n] = left; inner.names[n] = n
             return t.Record(((n, left), (m, walk_type(b, inner))))
         case s.Record(fs, law):
             if law is not None:
                 return walk(refined_record(v), c, expected)
-            # a later field's type may name an earlier one (a dependent record)
+            # a later field's type may name an earlier one (a dependent record); the field's name
+            # is bound there, over an alias parameter of the same name (4.R7; core bite 12a)
             inner = c.child(); result = []
             for f in fs:
                 ty = walk_type(f.type, inner)
                 for n in f.names:
-                    result.append((n, ty)); inner.types[n] = ty
+                    result.append((n, ty)); inner.types[n] = ty; inner.names[n] = n
             return t.Record(tuple(result))
         case s.RecordValue(fs):
             record = record_of(expected, c) if expected is not None else None

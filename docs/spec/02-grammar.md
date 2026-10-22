@@ -105,9 +105,8 @@ left side is a type and implication when it is a `Bool`; `*` is the product type
 multiplication, `+` the sum type or addition, by the type of the left operand; `&` is the
 conjunction of laws (spec 5). An `operator` act gives `+`, `-`, `*`, `/` a meaning on the
 argument types of a function, and a type names its model (D-2026-10-11-j): the model a type names gives its operators (`spec 4.R13`), as the ring of `Z7`.
-Known defect, until the core's bite 12 (report-bite-4.md, finding 1): when the left operand is a
-type whose own type is a subtype of `U` (`T : Concrete`), `T * Float64` elaborates to `*` applied,
-not to the product; the typing reads it as the product, and the term stays for the hash.
+A type whose own type is a subtype of `U` (`T : Concrete`) is a type here: `T * Float64` is the
+product (corrected in the core's bite 12a; report-bite-4.md, finding 1).
 
 [decided D-2026-10-13-p] One table, from the loosest to the tightest:
 
