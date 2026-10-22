@@ -399,6 +399,29 @@ since `extern` and `axiom`, as names of core, take their type from where they ar
 the declared type alone: the checker records the target of an extern and its type, and does not
 resolve it (`spec 3 §8`). `check.py` imports no host module (`test_unused_extern_is_not_resolved`).
 
+**4.S25. The relations that compare, and what each decides.** [proposed] Source: the algebra audit
+(`record/plan/audit-algebras-2026-10-22/report.md`, section 9, 5b1a05e), L3.4, L3.5, D-2026-10-17-d,
+D-2026-10-17-f and the correction to D-2026-10-18-c; the table is the audit's contract made explicit
+(bite A8 of its execution plan). The code compares in seven ways, on three planes (L3.5: the
+objects, the levels of comparison, the computable models). They are different relations, and no
+row below is an authorization to read another: a result of one is not evidence for the next.
+
+| Relation | Where | Plane and clause | Preserves | Does not decide |
+| --- | --- | --- | --- | --- |
+| `alpha_equal` and the canonical hash | `kernel.alpha_equal`, `kernel.py` | 1, the strict level (L3.4) | Syntactic identity up to the names of bound variables: two terms equal here are one term | Semantic equality: two types differing only in the names of their fields are distinct here, equivalent only by a named value (L3.4) |
+| `Typing.same` | `check.py` | 1, the checker's definitional comparison (4.R9) | Equality after bounded reduction, with unknowns allowed to agree | Any semantic claim; an unknown agrees with anything, so `same` is not a proof of equality, and reduction stops at its bound |
+| `fits` and `refines` | `elaborate.py` (`Typing.refines` in `check.py` is the checker's copy) | 1, compatibility for elaboration (4.R9, 11.R1) | Variance (contravariant domain, covariant codomain), subtype to base, `Float64` and `Rational` to `Real`, unknowns passing | Substitution: a pass lets an elaboration go on and never authorizes replacing one value by another; a claim at a subtype serves only that subtype and those inside it, never a sibling (`sibling_subtype`, 4.R13) |
+| `Object.eq` | `Object` in `core/structures/equality.lth` | 1, the type's own equality (L3.3) | An equivalence relation on the carrier, the Boolean base | Anything beyond what the type's laws state; a function type has none of its own (`functions`, pointwise, below) |
+| `Metric`, `ToleranceRelation`, `ProbabilisticMetric` | `core/structures/equality.lth` | 2, the levels over a base (L3.5, D-2026-10-18-c) | A distance with its laws over `Object.eq`, a relation reflexive and symmetric, a distribution of distances with a t-norm | They declare and state laws only; a threshold on a metric is a tolerance relation, not transitive, and an equivalence only for an `Ultrametric` (the correction to D-2026-10-18-c); a divergence is none of them |
+| `MetricWithin` | `core/structures/equality.lth`; a model in `numbers_model.lut` | 3, the realization relation (D-2026-10-17-f) | That a computed distance lies within a stated bound of an exact metric, the bound from error analysis | That the computed distance is a `Metric`: it is a separate claim, and a floating-point realization is not a model of `Metric` |
+| `Pointwise` | `core/properties/functions.lth` | 1, sampled extensionality (D-2026-10-17-d) | Agreement of two functions under the codomain's `eq` at the inputs drawn | Equality of functions: a finite sample is not a decision procedure for extensional equality, and a pass at the inputs tried (a `Sampled` or `Cases` certificate) says nothing at the inputs not tried |
+
+Two consequences. No map between the planes is written yet: how a Boolean comparison embeds into a
+metric, how a refinement preserves an observation, how pointwise evidence becomes evidence about an
+operation over a domain (audit section 9, "missing maps"), so a result of one row serves another
+only where a law says so. And a sampled pointwise pass never stands for extensional equality; it
+stands for what its certificate grade says of its inputs (`spec 6`).
+
 ## Open
 
 - O2, which 4.R8 rests on.
