@@ -1542,3 +1542,65 @@ def test_the_budgets_that_change_the_distribution_are_in_the_identity():
     assert len(store) == 2 and certify.known(store, certify.identity(base)) is base
     # and the two are two distributions: no union of their stretches
     assert len(certify.stretches(store, "L", "sha256:1", certify.union_key(base))) == 1
+
+
+def _theory_entry(conjunct, outcome="Passed", seed=1, model="M"):
+    return {"law": "T", "cone": "hT", "binding": [{"parameter": "m", "generator": "x", "fingerprint": "f"}],
+            "seed": seed, "cases": 1, "reach": [{"parameter": "m", "reach": {"Members": [{"Printed": model}]}}],
+            "outcome": outcome, "grade": "Cases" if outcome == "Passed" else None, "conjunct": conjunct,
+            "conjuncts": ["P M", "Q M"]}
+
+
+def _by_model(law):
+    return {"law": law, "cone": "h" + law, "given": [], "accepts": "Sampled", "fingerprints": {}, "byModel": True,
+            "conjunction": {"law": "T", "cone": "hT", "given": [("m", {"Printed": "M"})], "accepts": "Sampled",
+                            "fingerprints": {"m": "f"}, "heads": [law]}}
+
+
+def test_a_law_served_through_its_theory_s_conjuncts_is_refused_by_their_failure():
+    """Audit 1.5 A: a pass and a failure of the conjunct `P M` on the run's model, two seeds. The
+    demand of `P` served through its theory's conjuncts is refused, as a direct demand would be; a
+    failure on another model refuses nothing."""
+    passes = [_theory_entry("P M"), _theory_entry("Q M")]
+    failed = _theory_entry("P M", {"Failed": "x = 1"}, seed=2)
+    cone = [{"name": "n", "provisional": False, "laws": [_by_model("P")]}]
+    assert certify.refuse(passes, cone) == []
+    refusals = certify.refuse([failed] + passes, cone)
+    assert [(r["law"], r["state"]) for r in refusals] == [("P", ("Current", {"Failed": "x = 1"}))]
+    assert certify.show_refusal(refusals[0], [failed] + passes) == "n: P: failed at x = 1"
+    # the failure of `Q M` does not refuse `P`, nor one on another model
+    assert certify.refuse([_theory_entry("Q M", {"Failed": "x"}, seed=2)] + passes, cone) == []
+    assert certify.refuse([_theory_entry("P M", {"Failed": "x"}, seed=2, model="N")] + passes, cone) == []
+    # a disagreement of the conjunct refuses too
+    again = dict(_theory_entry("P M", {"Failed": "x = 1"}), date="2026-10-22T00:00:01+00:00")
+    assert certify.refuse([again] + passes, cone)[0]["state"][0] == "Disagrees"
+
+
+def test_the_witness_of_a_demand_covers_every_obligation():
+    """Audit 1.5 B, 3.1: what admits a demand is what a run records. `P` is witnessed by `P M`, `Q` by
+    `Q M`; a conjunction's demand by an entry of each conjunct."""
+    p, q = _theory_entry("P M"), _theory_entry("Q M")
+    assert certify.witness(_by_model("P"), [p, q]) == [p]
+    assert certify.witness(_by_model("Q"), [p, q]) == [q]
+    assert certify.witness(_by_model("Q"), [p]) is None
+    whole = dict(_by_model("T")["conjunction"], law="T")
+    del whole["heads"]
+    assert certify.witness(whole, [p, q]) == [p, q]
+    assert certify.witness(whole, [p]) is None
+
+
+def test_a_run_records_the_entry_of_every_conjunct_that_served_it(tmp_path, capsys):
+    """Audit 1.5 B, L5.6, 8.S8: `ops` is admitted on `Commutative`, `Neutral` and `Unital` through the
+    conjuncts of `Ops`; the run's record lists an entry of each conjunct, not the first one thrice."""
+    for name, text in [("ops.lth", CONJ_THEORY), ("ops.lut", CONJ_MODELS), ("ops.test.lut", CONJ_TEST),
+                       ("ops.run.lut", CONJ_RUN_OPS)]:
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    main(["certify", str(tmp_path / "ops.test.lut")])
+    capsys.readouterr()
+    assert main(["run", str(tmp_path / "ops.run.lut")]) == 0, capsys.readouterr()
+    entries = json.loads((tmp_path / "ops.cert.json").read_text(encoding="utf-8"))
+    conjuncts = {e["conjunct"] for e in entries}
+    record = json.loads((tmp_path / "ops.run.json").read_text(encoding="utf-8"))[-1]
+    recorded = set(record["certificates"])
+    from luthier.run import _entry_hash
+    assert {e["conjunct"] for e in entries if _entry_hash(e) in recorded} == conjuncts and len(conjuncts) > 1

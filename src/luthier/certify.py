@@ -1255,34 +1255,88 @@ def serves_over(demand, entry, entries):
 
 
 def served(demand, entries):
-    """Whether the entries serve the demand of a law (`serves_over`): one of them does, or, for a law
-    whose body is a conjunction of laws (D-2026-10-18-f), one entry of each conjunct its entries at
-    the demand's hash list does; a conjunct's entry never serves the conjunction alone."""
+    """Whether the entries serve the demand of a law: a witness covers every obligation it resolves
+    to (`witness`)."""
+    return witness(demand, entries) is not None
+
+
+def witness(demand, entries):
+    """[bite 13c, audit 1.5 B and 3.1] The entries that serve the demand of a law, one for each
+    obligation it resolves to, or None when an obligation has none: what admission reads (`served`)
+    and what a run records as the certificates that served it (run.py, L5.6, 8.S8). The obligation
+    of a law is the law itself, served by one of its entries (`serves_over`); for a law whose body
+    is a conjunction of laws (D-2026-10-18-f), each conjunct its entries at the demand's hash list,
+    a conjunct's entry never serving the conjunction alone; for a law with no entry of its own that
+    serves, or with no model parameter (`byModel`), the conjuncts of its theory's law it stands for
+    (`_obligations`), each served at the theory law's hash for the model the run gives."""
     if demand.get("byModel"):
         # a law of the model's theory that takes no model parameter (`doubles: Commutative`): an
         # entry of the law itself is about whatever model its line bound, so only the theory's
         # entries about the run's model serve it (the coordinator, 2026-10-22, on report-bite-12a.md)
-        return "conjunction" in demand and _served_by_conjuncts(demand["conjunction"], entries)
+        return _conjunct_witness(demand["conjunction"], entries) if "conjunction" in demand else None
     at_hash = [e for e in _laws_own(entries) if e["law"] == demand["law"] and at(demand, e)]
     conjuncts = list(dict.fromkeys(c for e in at_hash for c in e.get("conjuncts") or ()))
-    if not conjuncts:
-        return (any(serves_over(demand, e, entries) for e in entries)
-                or "conjunction" in demand and _served_by_conjuncts(demand["conjunction"], entries))
-    return all(any(serves_over(demand, e, [f for f in entries if f.get("conjunct") == c])
-                   for e in entries if e.get("conjunct") == c) for c in conjuncts)
+    if conjuncts:
+        return _each(demand, entries, conjuncts)
+    found = next((e for e in entries if serves_over(demand, e, entries)), None)
+    if found is not None:
+        return [found]
+    return _conjunct_witness(demand["conjunction"], entries) if "conjunction" in demand else None
 
 
-def _served_by_conjuncts(conjunction, entries):
-    """[proposed, core bite 12a] A law demanded by its own name as one of a theory's laws
-    (`doubles: Neutral`), served by the entries the tester records under the theory's law for the
-    conjuncts the law stands for (`conjunction["heads"]`, the conjunct's text headed by one of
-    them; D-2026-10-18-f): each such conjunct served at the theory law's hash, for the model the run
-    gives. Not served when no conjunct of the theory is headed so."""
+def _each(demand, entries, conjuncts):
+    """One entry serving each conjunct (its own conjunct's entries read over its regions), or None."""
+    found = []
+    for c in conjuncts:
+        mine = [f for f in entries if f.get("conjunct") == c]
+        e = next((e for e in mine if serves_over(demand, e, mine)), None)
+        if e is None:
+            return None
+        found.append(e)
+    return found
+
+
+def _obligations(conjunction, entries):
+    """[proposed, core bite 12a] The conjuncts of the theory's law a law demanded by its own name
+    stands for (`doubles: Neutral`): those the tester records under the theory's law at its hash
+    (D-2026-10-18-f) whose text is headed by one of `conjunction["heads"]`."""
     at_hash = [e for e in _laws_own(entries) if e["law"] == conjunction["law"] and at(conjunction, e)]
     texts = dict.fromkeys(c for e in at_hash for c in e.get("conjuncts") or ())
-    mine = [c for c in texts if _text_head(c) in conjunction["heads"]]
-    return bool(mine) and all(any(serves_over(conjunction, e, [f for f in entries if f.get("conjunct") == c])
-                                  for e in entries if e.get("conjunct") == c) for c in mine)
+    return [c for c in texts if _text_head(c) in conjunction["heads"]]
+
+
+def _conjunct_witness(conjunction, entries):
+    """`witness` through the theory's conjuncts (`_obligations`); None when no conjunct is headed so."""
+    mine = _obligations(conjunction, entries)
+    return _each(conjunction, entries, mine) if mine else None
+
+
+def veto(demand, entries):
+    """[bite 13c, audit 1.5 A] What refuses a law's demand whatever serves it: a disagreement, else a
+    failure, among the entries of each subject the demand resolves to, at that subject's hash
+    (`ADisagreementIsRefused`, `ACurrentFailureIsRefused`, 6.S15). The subjects are the law's own
+    entries (not for a `byModel` demand, whose own entries are about other models), and, when the
+    demand carries its theory's conjunction, the theory's entries about the run's model (their reach
+    holds it) for the conjuncts the law stands for: serving a demand by another route keeps its
+    refusals. A (state, demand) pair, the demand the one whose subject refused; None when nothing
+    vetoes."""
+    routes = []
+    if not demand.get("byModel"):
+        routes.append((demand, lambda e, d=demand: at(d, e)))
+    m = demand.get("conjunction")
+    if m is not None:
+        mine = set(_obligations(m, entries))
+        routes.append((m, lambda e, m=m: (e.get("conjunct") in mine and at(m, e)
+                                          and covers_all(e.get("reach") or [], m["given"]))))
+    for d, here in routes:
+        dispute = dispute_of(entries, d["law"], here)
+        if dispute is not None:
+            return ("Disagrees", dispute), d
+    for d, here in routes:
+        failure = next((e for e in _laws_own(entries) if e["law"] == d["law"] and here(e) and _failed(e)), None)
+        if failure is not None:
+            return ("Current", failure["outcome"]), d
+    return None
 
 
 def _text_head(text):
@@ -1323,14 +1377,21 @@ def refuse(entries, cone):
     both entries (`ADisagreementIsRefused`, D-2026-10-15-f). Else a law with a
     failure at the demand's hash (`at`) is refused whatever serves, listed with that failure
     (certification_model's `refuseLaws` at 82c4cb4, `ACurrentFailureIsRefused`, C5 of the layer 3
-    review: record/IA/layer-3-review-2026-10-15/report-fix-certification.md)."""
+    review: record/IA/layer-3-review-2026-10-15/report-fix-certification.md). [bite 13c] The two
+    vetoes are read once, over every subject the demand resolves to (`veto`), whatever route then
+    serves it: a `byModel` demand is refused by a failure of its theory's conjunct on the run's
+    model as a direct demand is by its own (audit 1.5 A)."""
     refusals = []
     for c in cone:
         if c["provisional"]:
             refusals.append({"name": c["name"], "law": None, "state": ("Provisional", None)})
             continue
         for d in c["laws"]:
-            if d.get("byModel"):
+            vetoed = veto(d, entries)
+            if vetoed is not None:
+                state, by = vetoed
+                refusals.append({"name": c["name"], "law": d["law"], "state": state, "demand": by})
+            elif d.get("byModel"):
                 # read against the theory's entries about the run's model (`served`); the law's own
                 # entries are about other models, so neither their failures nor their states count
                 if not served(d, entries):
@@ -1339,15 +1400,6 @@ def refuse(entries, cone):
                     refusals.append({"name": c["name"], "law": d["law"],
                                      "state": state_of(m, mine) if m is not None else ("Uncertified", None),
                                      "demand": m if m is not None else d})
-                continue
-            dispute = dispute_of(entries, d["law"], lambda e: at(d, e))
-            failure = next((e for e in _laws_own(entries) if e["law"] == d["law"] and at(d, e) and _failed(e)),
-                           None)
-            if dispute is not None:
-                refusals.append({"name": c["name"], "law": d["law"], "state": ("Disagrees", dispute), "demand": d})
-            elif failure is not None:
-                refusals.append({"name": c["name"], "law": d["law"], "state": ("Current", failure["outcome"]),
-                                 "demand": d})
             elif not served(d, entries):
                 refusals.append({"name": c["name"], "law": d["law"], "state": state_of(d, entries),
                                  "demand": d})

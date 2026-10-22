@@ -2511,17 +2511,11 @@ def certification(loaded, program, entry, demand, refuse=True):
         refused.setdefault(r["name"], {"Provisional": "provisional", "Stale": "stale"}.get(
             kind, "failed" if kind == "Current" and isinstance(what, dict) and "Failed" in what else "uncertified"))
     with_laws = [c for c in cone if c["laws"] and c["name"] not in refused]
-    # the certificates that served the cone (8.S8): for each law demanded, the latest entry that
-    # serves it, by the hash of its canonical JSON
-    def serving(d):
-        # a law without a model parameter is served by its theory's entries about the run's model
-        if d.get("byModel"):
-            m = d.get("conjunction")
-            return None if m is None else next(
-                (e for e in entries if certify.serves_over(m, e, [f for f in entries if f.get("conjunct") == e.get("conjunct")])),
-                None)
-        return next((e for e in entries if certify.serves_over(d, e, entries)), None)
-    served = {_entry_hash(e) for c in with_laws for d in c["laws"] if (e := serving(d)) is not None}
+    # the certificates that served the cone (8.S8): for each law demanded, the witness admission
+    # read (`certify.witness`, bite 13c): one entry per obligation, every conjunct of a conjunction
+    # and every conjunct of its theory a law without a model parameter stands for, by the hash of
+    # each entry's canonical JSON
+    served = {_entry_hash(e) for c in with_laws for d in c["laws"] for e in certify.witness(d, entries) or ()}
     at_first = {f["name"] for f in firsts}
     code_only = {"code": cones.cone(entry)["code"], "hosts": [], "interpreter": ""}
     return {"cone": cones.hash(entry), "interpreter": certify.interpreter_revision(),

@@ -174,7 +174,7 @@ entries of the theory's law for the model the run gives, at its hash, whose conj
 or, for a law that is itself a conjunction (`TotalOrder`), one of the laws it splits into, each such
 conjunct served. A law that takes no model parameter is served by those entries only, never by an
 entry of the law about another model (the coordinator, 2026-10-22: a certificate means the model
-that runs was tested). A control of the law passes when it refutes one conjunct: the conjuncts run in order
+that runs was tested). [proposed, bite 13c, on the audit of 2026-10-22, 1.5] Serving has one witness and one refusal rule whatever the route: a demand resolves to its obligations (the law, each conjunct of it, or the conjuncts of its theory it stands for) and is served by one entry per obligation (`certify.witness`), the set a run's record and its result key list (8.S8, L5.6); a failure or a disagreement among the entries of any subject the demand resolves to, the theory's for the run's model included, refuses it (`certify.veto`, 6.S15). A control of the law passes when it refutes one conjunct: the conjuncts run in order
 until one is refuted, and the line writes one control entry, the law's, with the conjunct it refuted.
 A binding by name binds every conjunct's variable of that name, so two conjuncts whose variables
 share a name and differ in type are bound apart by type. [implemented] In `tester.py`
