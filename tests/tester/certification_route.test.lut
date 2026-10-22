@@ -14,7 +14,7 @@ import "certification.lth" Routing Routed Theory Members Printed Hash Entry Outc
   ConeDemand
 import "certification_model.lut" certifying routing
 
-bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+onGenerator (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
 certifyingModels : List Certifying := [certifying]
 
 -- The route of a demand (before the tag, 2026-10-22, by Claude Sonnet 5.5, on record/plan/core-2026-10-17/
@@ -61,12 +61,12 @@ routeds : List Routed := [
   { demand := mDemand "L" "hL" "M", byModel := false, models := ["m"], theory := nothing },
   { demand := mDemand "L" "hL" "N", byModel := false, models := ["m"], theory := just (theoryOn "N" ["L"]) } ]
 routings : List (Routing certifying) := [routing]
-routeBindings : List Binding := [bind "k" "certifyingModels", bind "r" "routings", bind "d" "routeds", bind "es" "routeStores"]
+routeBindings : List Binding := [onGenerator "k" "certifyingModels", onGenerator "r" "routings", onGenerator "d" "routeds", onGenerator "es" "routeStores"]
 test "AWitnessCoversEveryObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- routeBindings)
 test "AWitnessIsOneEntryPerObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- routeBindings)
 test "AnEntryForEveryObligationWitnesses" ExhaustiveMode (seed <- 20261022) (whereBindings <- routeBindings)
 test "AVetoNamesItsCause" ExhaustiveMode (seed <- 20261022) (whereBindings <- routeBindings)
 test "ADisagreementInASubjectVetoesFirst" ExhaustiveMode (seed <- 20261022) (whereBindings <- routeBindings)
 test "AConsequenceRefutesEveryModel" ExhaustiveMode (seed <- 20261022) (whereBindings <- routeBindings)
-test "AFailureInASubjectVetoes" ExhaustiveMode (seed <- 20261022) (whereBindings <- cons (bind "e" "routeEntries") routeBindings)
-test "AnEntryAboutAnotherModelVetoesNothing" ExhaustiveMode (seed <- 20261022) (whereBindings <- cons (bind "e" "routeEntries") routeBindings)
+test "AFailureInASubjectVetoes" ExhaustiveMode (seed <- 20261022) (whereBindings <- cons (onGenerator "e" "routeEntries") routeBindings)
+test "AnEntryAboutAnotherModelVetoesNothing" ExhaustiveMode (seed <- 20261022) (whereBindings <- cons (onGenerator "e" "routeEntries") routeBindings)

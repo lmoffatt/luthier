@@ -13,7 +13,7 @@ import "certification.lth" Routing Routed Theory Veto Members Printed Disagrees 
   ConeDemand
 import "certification_model.lut" certifying routing entryFailed
 
-bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+onGenerator (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
 certifyingModels : List Certifying := [certifying]
 
 rEntry (l : String) (h : Hash) (m fp : String) (c : Maybe String) (cs : List String) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
@@ -83,12 +83,12 @@ ownOnlyRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witn
 failureFirstRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := routing.witness, veto := failureFirst }]
 unscopedRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := routing.witness, veto := unscoped }]
 noExceptionRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := routing.witness, veto := noException }]
-test "AWitnessCoversEveryObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "certifyingModels", bind "r" "droppingRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
-test "AWitnessIsOneEntryPerObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "certifyingModels", bind "r" "paddingRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
-test "AnEntryForEveryObligationWitnesses" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "certifyingModels", bind "r" "neverRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
-test "AWitnessCoversEveryObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "certifyingModels", bind "r" "ownRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
-test "AVetoNamesItsCause" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "certifyingModels", bind "r" "inventingRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
-test "AFailureInASubjectVetoes" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "certifyingModels", bind "r" "ownOnlyRoutings", bind "d" "routeds", bind "es" "routeStores", bind "e" "routeEntries"]) (control <- true)
-test "ADisagreementInASubjectVetoesFirst" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "certifyingModels", bind "r" "failureFirstRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
-test "AnEntryAboutAnotherModelVetoesNothing" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "certifyingModels", bind "r" "unscopedRoutings", bind "d" "routeds", bind "es" "routeStores", bind "e" "routeEntries"]) (control <- true)
-test "AConsequenceRefutesEveryModel" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "certifyingModels", bind "r" "noExceptionRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
+test "AWitnessCoversEveryObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- [onGenerator "k" "certifyingModels", onGenerator "r" "droppingRoutings", onGenerator "d" "routeds", onGenerator "es" "routeStores"]) (control <- true)
+test "AWitnessIsOneEntryPerObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- [onGenerator "k" "certifyingModels", onGenerator "r" "paddingRoutings", onGenerator "d" "routeds", onGenerator "es" "routeStores"]) (control <- true)
+test "AnEntryForEveryObligationWitnesses" ExhaustiveMode (seed <- 20261022) (whereBindings <- [onGenerator "k" "certifyingModels", onGenerator "r" "neverRoutings", onGenerator "d" "routeds", onGenerator "es" "routeStores"]) (control <- true)
+test "AWitnessCoversEveryObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- [onGenerator "k" "certifyingModels", onGenerator "r" "ownRoutings", onGenerator "d" "routeds", onGenerator "es" "routeStores"]) (control <- true)
+test "AVetoNamesItsCause" ExhaustiveMode (seed <- 20261022) (whereBindings <- [onGenerator "k" "certifyingModels", onGenerator "r" "inventingRoutings", onGenerator "d" "routeds", onGenerator "es" "routeStores"]) (control <- true)
+test "AFailureInASubjectVetoes" ExhaustiveMode (seed <- 20261022) (whereBindings <- [onGenerator "k" "certifyingModels", onGenerator "r" "ownOnlyRoutings", onGenerator "d" "routeds", onGenerator "es" "routeStores", onGenerator "e" "routeEntries"]) (control <- true)
+test "ADisagreementInASubjectVetoesFirst" ExhaustiveMode (seed <- 20261022) (whereBindings <- [onGenerator "k" "certifyingModels", onGenerator "r" "failureFirstRoutings", onGenerator "d" "routeds", onGenerator "es" "routeStores"]) (control <- true)
+test "AnEntryAboutAnotherModelVetoesNothing" ExhaustiveMode (seed <- 20261022) (whereBindings <- [onGenerator "k" "certifyingModels", onGenerator "r" "unscopedRoutings", onGenerator "d" "routeds", onGenerator "es" "routeStores", onGenerator "e" "routeEntries"]) (control <- true)
+test "AConsequenceRefutesEveryModel" ExhaustiveMode (seed <- 20261022) (whereBindings <- [onGenerator "k" "certifyingModels", onGenerator "r" "noExceptionRoutings", onGenerator "d" "routeds", onGenerator "es" "routeStores"]) (control <- true)
