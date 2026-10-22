@@ -13,6 +13,15 @@ design leaves to Luciano are in `decisions.md` beside this file; every choice ma
 the agent's, one commit undoes it. The first version of this plan (54f6228) had the core imported by
 name; D-2026-10-18-b decided otherwise and this version replaces it (git keeps the first).
 
+Status, 2026-10-22 night (coordinator): the core is closed and ready for Luciano's tag at d4c090e.
+Before the tag: refuse's route and witness stated in certification.lth's `Routing` (011bcf5), a
+naive review of the close (review-close.md, eda8d7c) and its cleanup (bb5e40e to d4c090e). Counts:
+homonyms 0 (2 accepted with their reasons), list helpers 45 (each with its reason; about 20 wait
+for `foldLeft`, `takeWhile` and `find` in the core, first in the queue after the tag), unclaimed 7
+(none a law), loose 1407 (the count over-reports: about half are parametrised laws or type
+constructors, review-close.md item 4). The second certify pass ran 0 lines; the suite passes in
+every file.
+
 Status, 2026-10-22 night (bite 13b's agent): bite 13b landed (report-bite-13b.md). core_metrics:
 homonyms 0 (two accepted with their reason in the script: `Unresolved`, which the host's Python reads
 in two places, and `scale`, plot's public name against the `Arrays` field), list helpers 48 (29 in
