@@ -83,7 +83,7 @@ Design = { nodes : Nat, i : Vec (Fin nodes), j : PairsAmong nodes i }
 -- Claude Opus 5.5, 2026-10-22] The claim is the core's `Isomorphism` (properties/functions.lth:
 -- `Inverse` each way) at the layout's types for a number of nodes, exactly, under arrays.lth's
 -- equalities of matrices and vectors; algebra.lth's `Iso` record, whose last user this file was,
--- user of, is gone (execution.md section 5.1). The two functions are parameters with the layout's
+-- is gone (execution.md section 5.1). The two functions are parameters with the layout's
 -- as defaults, so that a control passes a wrong one (sonolocalizacion_controls.test.lut).
 flatten (m : MatRows 3) : Vec Float64 := vec Float64 (m.m * m.n) (fn c { m.f (c mod 3) (c / 3) })
 unflatten (p : Positions) : Mat Float64 := mat Float64 3 (p.n / 3) (fn a n { p.f (3 * n + a) })
