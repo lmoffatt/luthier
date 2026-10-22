@@ -126,6 +126,13 @@ Queue after 3g:
   tautological). Direction: write at once, check what the OS accepted, fail the action otherwise;
   stdout observed according to what fd 1 is.
 
+Status 2026-10-22 (core closed, bite 13b): the core is done to its measurable end
+(record/plan/core-2026-10-17/execution.md, Status 2026-10-22 night; report-bite-13b.md): homonyms 0
+(two accepted), list helpers 48 (searches kept with reasons), unclaimed 7 (predicates), loose real 1343
+named by the metric; stores re-certified, the examples reproduce their records, the suite is green.
+The queue below, which waited for the core (D-2026-10-18-a), is reopened: its next item is Luciano's
+to choose after the tag.
+
 Status 2026-10-18: 3j's code (j2a) closed at 6df1ba9 (814 passed; PinvSymmetric and PinvScales'
 error model corrected to a normwise bound after the rank-deficient family refuted them, the
 refutations archived; a parameter fixed to one value gives no regions; grades 122 sampled, 81

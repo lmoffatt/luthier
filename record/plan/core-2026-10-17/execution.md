@@ -13,6 +13,19 @@ design leaves to Luciano are in `decisions.md` beside this file; every choice ma
 the agent's, one commit undoes it. The first version of this plan (54f6228) had the core imported by
 name; D-2026-10-18-b decided otherwise and this version replaces it (git keeps the first).
 
+Status, 2026-10-22 night (bite 13b's agent): bite 13b landed (report-bite-13b.md). core_metrics:
+homonyms 0 (two accepted with their reason in the script: `Unresolved`, which the host's Python reads
+in two places, and `scale`, plot's public name against the `Arrays` field), list helpers 48 (29 in
+the self-description files, the rest searches and state-threading recursions each kept with a
+comment), unclaimed 7 (predicates and constants, named in the report), loose 1411 (real 1343, the
+rest 68 absorbed by a theory; check.py's notice now reports only a function no theory of its file
+names). `Settling` has a model (laws_model.lut) and test lines (settling_laws, settling_controls: 18
+conjuncts graded, 18 controls refuted); certification.lth states bite 13c's sampling budgets in
+`Identity`, the census readings and the retention law `Pruning` with controls; the conjunction route
+and witness of `refuse` (13c's items 3 and 4) are not stated yet. Every store re-certified (pass 2:
+0 lines ran for the 42 programs), validate_graph and experiment_zero reproduce their records, the
+suite passes in all 42 files, check_spec prints only its known finding. The tag is Luciano's.
+
 Status, 2026-10-22 afternoon (coordinator): bites 12a and 12b landed with their reports
 (report-bite-12a.md, report-bite-12b.md): the stores re-certified, validate_graph and experiment_zero
 reproduce their records, the suite passes in all 42 files (the regions test LUTHIER_SLOW). Left:
