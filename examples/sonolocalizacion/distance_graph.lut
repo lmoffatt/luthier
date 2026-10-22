@@ -63,7 +63,7 @@ GraphWithColumns : U := { g : DistanceGraph | HasNodeColumns g and HasMeasuremen
 
 iOf (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Int := intAt g.measurements "i" k
 jOf (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Int := intAt g.measurements "j" k
-dOf (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Float64 := realAt g.measurements "d" k
+measuredOf (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Float64 := realAt g.measurements "d" k
 priorAt (g : GraphWithColumns) (a : Int) (n : Fin g.nodes.nRows) : Float64 := realAt g.nodes (coordName a) n
 sdAt (g : GraphWithColumns) (a : Int) (n : Fin g.nodes.nRows) : Float64 := realAt g.nodes (sdName a) n
 nameOf (g : GraphWithColumns) (n : Fin g.nodes.nRows) : String := textAt g.nodes "name" n
@@ -77,7 +77,7 @@ indexOk (g : GraphWithColumns) (n : Int) : Bool := 0 <= n and n < g.nodes.nRows
 -- each row-wise invariant is a predicate on one row, so a failure can name its row
 rowIndicesInRange (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Bool := indexOk g (iOf g k) and indexOk g (jOf g k)
 rowNoSelfPair (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Bool := iOf g k /= jOf g k
-rowDistancePositive (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Bool := dOf g k > 0.0
+rowDistancePositive (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Bool := measuredOf g k > 0.0
 -- the prior means of two measured nodes differ on the floor: the Jacobian of a distance divides by it
 rowPriorSeparated (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Bool :=
   if indexOk g (iOf g k) then (if indexOk g (jOf g k) then pairDistance (priorPositions g) (iOf g k) (jOf g k) > 0.0 else false) else false
@@ -104,6 +104,31 @@ ValidGraph (g : DistanceGraph) : Bool :=
   else false
 
 ValidDistanceGraph : U := { g : DistanceGraph | ValidGraph g }
+
+-- ---------------------------------------------------------------- the join (D-2026-10-17-g)
+-- [core bite 12, Claude Opus 5.5, 2026-10-22, proposed] The measurements joined with the nodes on
+-- a pair's end, D-2026-10-16-a's relational join, is the core's `Pullback` (structures/
+-- universal.lth) of the end's index `iOf g` (or `jOf g`) along the nodes' rows, read as indices:
+-- on a valid graph each measurement row meets exactly one node row there, so the rows of the
+-- measurements, with the row itself as the first projection and its end as the second, are the
+-- pullback. The claim says that reading a measurement's node by its index (as `designOf` does)
+-- is the join; a model whose second projection reads another column is refuted.
+nodeIndex (g : ValidDistanceGraph) (n : Fin g.nodes.nRows) : Int := n
+-- the join's model: the measurement rows, each its own pair with the node at its end
+firstEndJoin (g : ValidDistanceGraph) : Pullback (Fin g.measurements.nRows) (Fin g.nodes.nRows) Int (Fin g.measurements.nRows)
+    (structural (Fin g.measurements.nRows)) (structural (Fin g.nodes.nRows)) (structural Int) (structural (Fin g.measurements.nRows)) (iOf g) (nodeIndex g) :=
+  { first := fn k { k }, second := fn k { iOf g k }, pair := fn v { v.x } }
+secondEndJoin (g : ValidDistanceGraph) : Pullback (Fin g.measurements.nRows) (Fin g.nodes.nRows) Int (Fin g.measurements.nRows)
+    (structural (Fin g.measurements.nRows)) (structural (Fin g.nodes.nRows)) (structural Int) (structural (Fin g.measurements.nRows)) (jOf g) (nodeIndex g) :=
+  { first := fn k { k }, second := fn k { jOf g k }, pair := fn v { v.x } }
+JoinOnFirstEnd (g : ValidDistanceGraph) (join : (h : ValidDistanceGraph) -> Pullback (Fin h.measurements.nRows) (Fin h.nodes.nRows) Int (Fin h.measurements.nRows)
+    (structural (Fin h.measurements.nRows)) (structural (Fin h.nodes.nRows)) (structural Int) (structural (Fin h.measurements.nRows)) (iOf h) (nodeIndex h) <- firstEndJoin) : Bool :=
+  Pullback (Fin g.measurements.nRows) (Fin g.nodes.nRows) Int (Fin g.measurements.nRows)
+    (structural (Fin g.measurements.nRows)) (structural (Fin g.nodes.nRows)) (structural Int) (structural (Fin g.measurements.nRows)) (iOf g) (nodeIndex g) (join g)
+JoinOnSecondEnd (g : ValidDistanceGraph) (join : (h : ValidDistanceGraph) -> Pullback (Fin h.measurements.nRows) (Fin h.nodes.nRows) Int (Fin h.measurements.nRows)
+    (structural (Fin h.measurements.nRows)) (structural (Fin h.nodes.nRows)) (structural Int) (structural (Fin h.measurements.nRows)) (jOf h) (nodeIndex h) <- secondEndJoin) : Bool :=
+  Pullback (Fin g.measurements.nRows) (Fin g.nodes.nRows) Int (Fin g.measurements.nRows)
+    (structural (Fin g.measurements.nRows)) (structural (Fin g.nodes.nRows)) (structural Int) (structural (Fin g.measurements.nRows)) (jOf g) (nodeIndex g) (join g)
 
 -- ---------------------------------------------------------------- the first violation
 -- What a check of a graph read from files reports: the first invariant that fails, in the order
@@ -140,6 +165,8 @@ firstViolation (g : DistanceGraph) : Maybe Violation :=
 -- a check reports nothing exactly when the graph is valid
 ReportsValidity (f : DistanceGraph -> Maybe Violation) (g : DistanceGraph) : Bool :=
   match f g { nothing -> ValidGraph g ; just v -> not (ValidGraph g) }
+-- [core bite 12] the laws of this file, gathered so that it claims them (4.S14)
+GraphLaws := ReportsValidity & JoinOnFirstEnd & JoinOnSecondEnd
 
 -- ---------------------------------------------------------------- the report of a violation
 -- whole numbers and doubles as text, as Python writes them. v0.1 routed `intToString` to
@@ -151,14 +178,11 @@ realToString (x : Float64) : String := extern "python:builtins.repr" x
 
 -- row r of a table as text, `name=value` for each column in order, joined by ", "
 -- (v0.1's extern row_text, src/distance_graph.py:202, written here)
-cellText (c : Maybe Cell) : String :=
+showCell (c : Maybe Cell) : String :=
   match c { nothing -> "" ; just v -> match v { int k -> intToString k ; real x -> realToString x ; text s -> s } }
+-- [core bite 12] a fold of the columns, each `name=value` (never empty) joined to the rest's text
 rowCells (t : Table) (r : Fin t.nRows) (ns : List String) : String :=
-  match ns {
-    nil -> "" ;
-    cons n rest -> match rest {
-      nil -> n <> "=" <> cellText (t.cell n r) ;
-      cons m more -> n <> "=" <> cellText (t.cell n r) <> ", " <> rowCells t r rest } }
+  fold String String (fn a b { if b == "" then a else a <> ", " <> b }) "" (fn n { n <> "=" <> showCell (t.cell n r) }) ns
 rowText (t : Table) (r : Int) : String := if 0 <= r and r < t.nRows then rowCells t r t.names else ""
 
 -- the line a check prints for a violation: `FAIL <invariant>`, and for a row-wise one its table,
@@ -187,7 +211,7 @@ toMapInput (g : ValidDistanceGraph) : MapInput := {
   sdx := mat Float64 3 g.nodes.nRows (fn a n { sdAt g a n }),
   i := vec (Fin g.nodes.nRows) g.measurements.nRows (fn k { iOf g k }),
   j := vec (Fin g.nodes.nRows) g.measurements.nRows (fn k { jOf g k }),
-  d := vec Float64 g.measurements.nRows (fn k { dOf g k }),
+  d := vec Float64 g.measurements.nRows (fn k { measuredOf g k }),
 }
 
 -- the design a graph measures: its nodes and its pairs

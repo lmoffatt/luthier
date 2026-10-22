@@ -48,7 +48,7 @@ import "belief.lth" GaussianBelief Settings MaxResult Maximizer laplaceMode lapl
 import "belief_model.lut" lm : Maximizer
 import "positions.lut" Design Separated flatten
 import "positions_model.lut" positionsModel nodesOf
-import "distance_graph.lut" DistanceGraph GraphWithColumns ValidDistanceGraph ValidGraph MapInput toMapInput designOf readGraph nameOf iOf jOf dOf intToString realToString
+import "distance_graph.lut" DistanceGraph GraphWithColumns ValidDistanceGraph ValidGraph MapInput toMapInput designOf readGraph nameOf iOf jOf measuredOf intToString realToString
 
 -- ---------------------------------------------------------------- the model on the full position vector
 -- theta is the positions of the graph's nodes, node by node (positions.lut), and the mean model is
@@ -196,10 +196,10 @@ positionsTable (g : GraphWithColumns) (mean sd prior : Vec Float64) : Table := {
 residualCell (g : GraphWithColumns) (predicted : Vec Float64) (sigma : Float64) (c : String) (r : Fin g.measurements.nRows) : Maybe Cell :=
   if c == "i" then just (int (iOf g r))
   else if c == "j" then just (int (jOf g r))
-  else if c == "d" then just (real (dOf g r))
+  else if c == "d" then just (real (measuredOf g r))
   else if c == "predicted" then just (real (entry predicted r))
-  else if c == "residual" then just (real (dOf g r - entry predicted r))
-  else if c == "standardized" then just (real ((dOf g r - entry predicted r) / sigma))
+  else if c == "residual" then just (real (measuredOf g r - entry predicted r))
+  else if c == "standardized" then just (real ((measuredOf g r - entry predicted r) / sigma))
   else nothing
 residualsTable (g : ValidDistanceGraph) (predicted : Vec Float64) (sigma : Float64) : Table := {
   nRows := g.measurements.nRows,

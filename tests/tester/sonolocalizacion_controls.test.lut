@@ -19,7 +19,8 @@ import "probability.lth" Likelihood log2pi
 import "../../examples/sonolocalizacion/positions.lut" LayoutIsAnIsomorphism flatten
 import "../../examples/sonolocalizacion/distances.lut" FullAgrees ProfileAgrees ProfileIsFullAtItsSigma nativeFull nativeProfile
   freeDim nPairs
-import "../../examples/sonolocalizacion/distance_graph.lut" DistanceGraph Violation ReportsValidity graphOf parseTable
+import "../../examples/sonolocalizacion/distance_graph.lut" DistanceGraph ValidDistanceGraph Violation ReportsValidity
+  JoinOnFirstEnd JoinOnSecondEnd firstEndJoin secondEndJoin nodeIndex iOf jOf graphOf parseTable
   HasNodeColumns HasMeasurementColumns schema
 import "../../examples/sonolocalizacion/session_a.lut" nodesTextA measurementsTextA the graphA
 
@@ -68,3 +69,19 @@ listedGraphs : List Binding := [
   { parameter := just "f", type := nothing, generator := "checks", coverage := Listed },
   { parameter := just "g", type := nothing, generator := "graphs", coverage := Listed } ]
 test "ReportsValidity" ExhaustiveMode (whereBindings <- listedGraphs) (control <- true)
+
+-- distance_graph.lut's joins (core bite 12, 2026-10-22): each end's join given the other end's
+-- column as its second projection, refuted where a pair's two ends differ (every row of session A)
+validGraphs : List ValidDistanceGraph := [graphA]
+firstJoins : List ((h : ValidDistanceGraph) -> Pullback (Fin h.measurements.nRows) (Fin h.nodes.nRows) Int (Fin h.measurements.nRows)
+    (structural (Fin h.measurements.nRows)) (structural (Fin h.nodes.nRows)) (structural Int) (structural (Fin h.measurements.nRows)) (iOf h) (nodeIndex h)) := [fn (h : ValidDistanceGraph) { { first := fn k { k }, second := fn k { jOf h k }, pair := fn v { v.x } } }]
+secondJoins : List ((h : ValidDistanceGraph) -> Pullback (Fin h.measurements.nRows) (Fin h.nodes.nRows) Int (Fin h.measurements.nRows)
+    (structural (Fin h.measurements.nRows)) (structural (Fin h.nodes.nRows)) (structural Int) (structural (Fin h.measurements.nRows)) (jOf h) (nodeIndex h)) := [fn (h : ValidDistanceGraph) { { first := fn k { k }, second := fn k { iOf h k }, pair := fn v { v.x } } }]
+onFirstJoin : List Binding := [
+  { parameter := just "g", type := nothing, generator := "validGraphs", coverage := Listed },
+  { parameter := just "join", type := nothing, generator := "firstJoins", coverage := Listed } ]
+onSecondJoin : List Binding := [
+  { parameter := just "g", type := nothing, generator := "validGraphs", coverage := Listed },
+  { parameter := just "join", type := nothing, generator := "secondJoins", coverage := Listed } ]
+test "JoinOnFirstEnd" ExhaustiveMode (seed <- 20261022) (whereBindings <- onFirstJoin) (control <- true)
+test "JoinOnSecondEnd" ExhaustiveMode (seed <- 20261022) (whereBindings <- onSecondJoin) (control <- true)

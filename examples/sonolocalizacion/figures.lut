@@ -30,7 +30,6 @@ cellInt (t : Table) (c : String) (r : Int) : Int :=
   if 0 <= r and r < t.nRows then (match t.cell c r { nothing -> 0 - 1 ; just x -> match x { int k -> k ; _ -> 0 - 1 } }) else 0 - 1
 cellText (t : Table) (c : String) (r : Int) : String :=
   if 0 <= r and r < t.nRows then (match t.cell c r { nothing -> "" ; just x -> match x { text s -> s ; _ -> "" } }) else ""
-appendNames (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (appendNames rest ys) }
 
 -- [proposed] What the three plots share and the demand states (P11): the size of a point and of a
 -- text in points, the width of a line or an ellipse's outline in points, and the fraction of the
@@ -62,8 +61,8 @@ touchLevel (positions residuals : Table) (node : String) (r : Int) : String :=
   then "touches " <> node else "other"
 withPairs (positions residuals : Table) (node : String) : Table := {
   nRows := residuals.nRows,
-  names := appendNames residuals.names ["pair"],
-  kinds := appendNames residuals.kinds ["str"],
+  names := residuals.names <> ["pair"],
+  kinds := residuals.kinds <> ["str"],
   cell := fn c r { if c == "pair" then just (text (touchLevel positions residuals node r)) else residuals.cell c r },
 }
 
@@ -94,10 +93,10 @@ nthKeptFrom (t : Table) (r k : Int) : Int :=
   else if keptRow t r then (if k == 0 then r else nthKeptFrom t (r + 1) (k - 1))
   else nthKeptFrom t (r + 1) k
 -- how many kept transforms come before row r's in the order of u, ties by row
-rankOf (t : Table) (r : Int) : Int :=
+rankAmongKept (t : Table) (r : Int) : Int :=
   countBelow t.nRows (fn q { keptRow t q and (cellReal t "u" q < cellReal t "u" r or (cellReal t "u" q == cellReal t "u" r and q < r)) })
 quantileCell (t : Table) (c : String) (k : Int) : Maybe Cell :=
-  if c == "quantile" then just (real (toFloat64 (rankOf t (nthKeptFrom t 0 k) + 1) / toFloat64 (keptCount t + 1)))
+  if c == "quantile" then just (real (toFloat64 (rankAmongKept t (nthKeptFrom t 0 k) + 1) / toFloat64 (keptCount t + 1)))
   else if c == "u" then just (real (cellReal t "u" (nthKeptFrom t 0 k)))
   else nothing
 -- one row per kept transform: its uniform quantile and its u
