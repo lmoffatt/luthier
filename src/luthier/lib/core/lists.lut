@@ -85,6 +85,18 @@ insertSorted (A : U) (leq : A -> A -> Bool) (x : A) (xs : List A) : List A :=
 sortBy (A : U) (leq : A -> A -> Bool) (xs : List A) : List A :=
   foldList A (List A) (fn front tail { match front { nil -> tail ; cons x ignored -> insertSorted A leq x tail } }) nil (singleton A) xs
 
+-- Left fold and the searches that stop early (Haskell's foldl, takeWhile, dropWhile, find; L7.6).
+-- foldList is the right fold into a monoid; foldLeft threads an accumulator from the head, so
+-- each step sees what the earlier ones made. The searches stop at the first element that decides.
+foldLeft (A B : U) (step : B -> A -> B) (e : B) (xs : List A) : B :=
+  match xs { nil -> e ; cons x rest -> foldLeft A B step (step e x) rest }
+takeWhile (A : U) (p : A -> Bool) (xs : List A) : List A :=
+  match xs { nil -> nil ; cons x rest -> if p x then cons x (takeWhile A p rest) else nil }
+dropWhile (A : U) (p : A -> Bool) (xs : List A) : List A :=
+  match xs { nil -> nil ; cons x rest -> if p x then dropWhile A p rest else xs }
+find (A : U) (p : A -> Bool) (xs : List A) : Maybe A :=
+  match xs { nil -> nothing ; cons x rest -> if p x then just x else find A p rest }
+
 -- Hamming's metric on Boolean lists of a fixed length. The explicit carrier bound
 -- keeps counts and sums exact when represented as Float64 (core MetricInteger's bound).
 BoolListOf (n : Nat) : U := { xs : List Bool | lengthList Bool xs == n }
@@ -109,6 +121,16 @@ ListEmptiness (A : Concrete) (candidate : List A -> Bool <- isEmpty A) (xs : Lis
   EmptyBySize (List A) A (listIndexed A) candidate xs
 ListDistinctness (A : Concrete) (candidate : List A -> Bool <- distinct A (structural A)) (xs : List A) : Bool :=
   DistinctByIndices (List A) A (listIndexed A) (structural A) candidate xs
+FoldLeftIsFoldRightOfReverse (A B : Concrete) (candidate : (B -> A -> B) -> B -> List A -> B <- foldLeft A B) (step : B -> A -> B) (e : B) (xs : List A) : Bool :=
+  candidate step e xs == (foldList A (B -> B) (fn g h { compose B B B g h }) (id B) (fn x { fn acc { step acc x } }) (reverse A xs)) e
+FoldLeftAppends (A B : Concrete) (candidate : (B -> A -> B) -> B -> List A -> B <- foldLeft A B) (step : B -> A -> B) (e : B) (xs ys : List A) : Bool :=
+  candidate step e (combineList A xs ys) == candidate step (candidate step e xs) ys
+TakeWhileDropWhileSplit (A : Concrete) (p : A -> Bool) (taking : List A -> List A <- takeWhile A p) (dropping : List A -> List A <- dropWhile A p) (xs : List A) : Bool :=
+  combineList A (taking xs) (dropping xs) == xs
+TakeWhileStopsAtFailure (A : Concrete) (p : A -> Bool) (taking : List A -> List A <- takeWhile A p) (dropping : List A -> List A <- dropWhile A p) (xs : List A) : Bool :=
+  all List A { fold := foldList } p (taking xs) and (match dropping xs { nil -> true ; cons y rest -> not (p y) })
+FindIsHeadOfFilter (A : Concrete) (p : A -> Bool) (candidate : List A -> Maybe A <- find A p) (xs : List A) : Bool :=
+  candidate xs == nth A (filter List A { fold := foldList } p xs) 0
 ListLibrary := ListIsFoldable & ListIsTabulated & ListIsAMonoid & MapKeepsLength & AppendAddsLengths
   & ListFoldOfBuild & ReverseIsAnInvolution & ReverseReindexes & FilterKeeps & SortIsSorted & SortIsAPermutation & HammingListIsAMetric
-  & ListEmptiness & ListDistinctness
+  & ListEmptiness & ListDistinctness & FoldLeftIsFoldRightOfReverse & FoldLeftAppends & TakeWhileDropWhileSplit & TakeWhileStopsAtFailure & FindIsHeadOfFilter

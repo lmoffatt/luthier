@@ -48,6 +48,21 @@ noSort : List Int -> List Int := id (List Int)
 uniqueSort (xs : List Int) : List Int := sortBy Int ordered (foldList Int (List Int) (fn front tail { if member List Int (atList Int front 0) tail then tail else combineList Int front tail }) nil (singleton Int) xs)
 badHamming : Metric (BoolListOf 2) (structural (BoolListOf 2)) := { d := fn xs ys { 0.0 } }
 
+-- Left fold and early-stop searches (lists.lut, the list searches brief): a step that does not commute,
+-- and lists with a failing element in first, middle and last place.
+searchValues : List (List Int) := [[], [0], [1], [1, 2], [1, 0], [0, 1], [1, 0, 1], [2, 1, 0, 3]]
+horner : Int -> Int -> Int := fn acc x { 2 * acc + x }
+leftFoldModel : (Int -> Int -> Int) -> Int -> List Int -> Int := foldLeft Int Int
+takingModel : List Int -> List Int := takeWhile Int predicate
+droppingModel : List Int -> List Int := dropWhile Int predicate
+findModel : List Int -> Maybe Int := find Int predicate
+
+badLeftFlipped : (Int -> Int -> Int) -> Int -> List Int -> Int := fn step e xs { foldLeft Int Int (fn acc x { step x acc }) e xs }
+badLeftReversed : (Int -> Int -> Int) -> Int -> List Int -> Int := fn step e xs { foldLeft Int Int step e (reverse Int xs) }
+badTaking : List Int -> List Int := filter List Int foldModel predicate
+badDropping : List Int -> List Int := id (List Int)
+badFind : List Int -> Maybe Int := fn xs { nth Int (reverse Int (filter List Int foldModel predicate xs)) 0 }
+
 onListIsAFunctor : List Binding := [
   { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
   { parameter := just "B", type := nothing, generator := "testedType", coverage := Listed },
@@ -171,3 +186,45 @@ onListDistinctness : List Binding := [
   { parameter := just "candidate", type := nothing, generator := "distinctPredicate", coverage := Listed },
   { parameter := just "xs", type := nothing, generator := "values", coverage := Listed } ]
 test "ListDistinctness" ExhaustiveMode (seed <- 20261021) (profile <- onListDistinctness) (control <- true)
+
+onFoldLeftIsFoldRightOfReverse : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "B", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "candidate", type := nothing, generator := "badLeftFlipped", coverage := Listed },
+  { parameter := just "step", type := nothing, generator := "horner", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "foldNeutral", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "searchValues", coverage := Listed } ]
+test "FoldLeftIsFoldRightOfReverse" ExhaustiveMode (seed <- 20261021) (profile <- onFoldLeftIsFoldRightOfReverse) (control <- true)
+
+onFoldLeftAppends : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "B", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "candidate", type := nothing, generator := "badLeftReversed", coverage := Listed },
+  { parameter := just "step", type := nothing, generator := "horner", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "foldNeutral", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "searchValues", coverage := Listed },
+  { parameter := just "ys", type := nothing, generator := "searchValues", coverage := Listed } ]
+test "FoldLeftAppends" ExhaustiveMode (seed <- 20261021) (profile <- onFoldLeftAppends) (control <- true)
+
+onTakeWhileDropWhileSplit : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "predicate", coverage := Listed },
+  { parameter := just "taking", type := nothing, generator := "badTaking", coverage := Listed },
+  { parameter := just "dropping", type := nothing, generator := "droppingModel", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "searchValues", coverage := Listed } ]
+test "TakeWhileDropWhileSplit" ExhaustiveMode (seed <- 20261021) (profile <- onTakeWhileDropWhileSplit) (control <- true)
+
+onTakeWhileStopsAtFailure : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "predicate", coverage := Listed },
+  { parameter := just "taking", type := nothing, generator := "takingModel", coverage := Listed },
+  { parameter := just "dropping", type := nothing, generator := "badDropping", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "searchValues", coverage := Listed } ]
+test "TakeWhileStopsAtFailure" ExhaustiveMode (seed <- 20261021) (profile <- onTakeWhileStopsAtFailure) (control <- true)
+
+onFindIsHeadOfFilter : List Binding := [
+  { parameter := just "A", type := nothing, generator := "testedType", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "predicate", coverage := Listed },
+  { parameter := just "candidate", type := nothing, generator := "badFind", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "searchValues", coverage := Listed } ]
+test "FindIsHeadOfFilter" ExhaustiveMode (seed <- 20261021) (profile <- onFindIsHeadOfFilter) (control <- true)
