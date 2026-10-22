@@ -29,14 +29,15 @@
 
 import "test.lth" test ExhaustiveMode SampledMode withFuel defaultBudgets
 import "generators_model.lut" linear unitList
-import "generators.lth" Binding byParameter
+import "generators.lth" Binding byParameter Gen Seed nextSeed
 import "laws.lth" Listed Sequential StatisticalLaw NoAlternativeAtZero RatioNonNegative
 import "numbers.lth" Tolerance
 import "arrays.lth" Vec vec
 import "probability.lth" Resolution KolmogorovOfNothing KolmogorovOfOne KolmogorovOfMultiset KolmogorovBounded
   KolmogorovAgrees UnitList uniformValues MeanShape JacShape JacIsJacobian ScaledShapes DLogSigmaIsGradient TangentShapes
   ScoreIsGradient InfoSymmetric InfoNonNegative GaussianPeaksAtMean ProfiledIsGaussianAtItsSigma
-import "probability_model.lut" numpySort gaussianConstruction
+import "probability_model.lut" PushingDraws pushGen numpySort
+import "probability.lth" Pushforward gaussianConstruction
 import "../../examples/sonolocalizacion/distances.lut" posModel fullModel nativeFull nativeProfile pitResolution freeDim
 import "../../examples/sonolocalizacion/session_a.lut" dimA modelA likelihoodA
 
@@ -136,3 +137,21 @@ onConstruction : List Binding := [
 test "GaussianPeaksAtMean" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- onConstruction)
 test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onModelA) (profile <- onConstruction)
 test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onPosModel) (profile <- onConstruction) (budgets <- withFuel 10000000 defaultBudgets)
+
+-- §6 the pushforward (core bite 12, 2026-10-22): draws of two listed samplers of `Int` pushed
+-- through negation, at listed sizes and seeds; seed 20261022
+pushedType : Concrete := Int
+negated : Int -> Int := fn x { 0 - x }
+pushModel : Pushforward Int Int negated := { push := pushGen Int Int negated }
+pushSamplers : List (Gen Int) := [fn n s { (n + s, nextSeed s) }, fn n s { (n - 3, s) }]
+pushSizes : List Nat := [0, 1, 7]
+pushSeeds : List Seed := [0, 12345]
+onPush : List Binding := [
+  { parameter := just "A", type := nothing, generator := "pushedType", coverage := Listed },
+  { parameter := just "B", type := nothing, generator := "pushedType", coverage := Listed },
+  { parameter := just "f", type := nothing, generator := "negated", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "pushModel", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "pushSamplers", coverage := Listed },
+  { parameter := just "n", type := nothing, generator := "pushSizes", coverage := Listed },
+  { parameter := just "s", type := nothing, generator := "pushSeeds", coverage := Listed } ]
+test "PushingDraws" ExhaustiveMode (seed <- 20261022) (whereBindings <- onPush)

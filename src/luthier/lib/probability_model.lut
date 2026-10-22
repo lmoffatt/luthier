@@ -17,7 +17,7 @@
 -- statistical-2026-10-15/prompt-theory.md: `lump`, a source broken on purpose, the control of
 -- `SourceIsUniform` (L9.14, 7.S19) that needs no host.
 
-import "probability.lth" Kolmogorov Vec UnitList SourceIsUniform GaussianConstruction gaussian profiled
+import "probability.lth" Kolmogorov Vec UnitList SourceIsUniform GaussianConstruction gaussian profiled Pushforward
 import "arrays.lth" vec
 import "generators.lth" Gen Seed nextSeed
 import "laws.lth" Law Sequential
@@ -41,3 +41,9 @@ gaussianConstruction : GaussianConstruction := { full := gaussian, profile := pr
 -- host's calibrated sample is generators_model.lut's `UniformSampleIsUniform`.
 lump : Gen UnitList := fn size seed { ([vec Float64 size (fn k { 0.9 })], nextSeed seed) }
 LumpIsUniform (c : Sequential) : Law := SourceIsUniform numpySort lump c
+
+-- [core bite 12, Claude Opus 5.5, 2026-10-22] The push of a sampler along a function, the model of
+-- probability.lth's `Pushforward` (§6): each draw mapped by f, the seed after it unchanged.
+pushGen (A B : U) (f : A -> B) (g : Gen A) : Gen B := fn n s { match g n s { (x, s1) -> (f x, s1) } }
+PushingDraws (A : U) (B : Concrete) (f : A -> B) (model : Pushforward A B f <- { push := pushGen A B f }) : Bool :=
+  Pushforward A B f model

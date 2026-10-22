@@ -47,6 +47,8 @@
 --   §5 Uniform values: `normalCdf`, `normalTail`, `valueSums`, Kolmogorov's distance as a
 --      theory, `kolmogorovTail`, `uniformPValue`, and `SourceIsUniform`, the statistical
 --      law of a source of unit values (v0.1 probability.lut:36-86; laws.lth §4).          done
+--   §6 The pushforward of a distribution along a function, as a structure (D-2026-10-17-g;
+--      core bite 12).                                                                       done
 
 import "numbers.lth" Tolerance Positive within withinOf abs
 import "numbers_model.lut" elementary : Elementary
@@ -237,38 +239,33 @@ normalTail (z : Float64) : Float64 := 1.0 - elementary.erf (z / sqrt2)
 -- the sums of u and u^2 over every entry of a list of vectors, and how many entries: a triple,
 -- as v0.1 gave it (probability.lut:57-58) and experiment_zero.lut matches it
 valueSums (vs : List (Vec Float64)) : Float64 * Float64 * Int :=
-  match vs {
-    nil -> (0.0, 0.0, 0) ;
-    cons u rest -> match valueSums rest { (s1, s2, c) -> (s1 + sumTo u.n (fn k { u.f k }), s2 + dot u u, c + u.n) } }
+  fold (Vec Float64) (Float64 * Float64 * Int)
+    (fn a b { match a { (s1, s2, c) -> match b { (t1, t2, d) -> (s1 + t1, s2 + t2, c + d) } } })
+    (0.0, 0.0, 0) (fn (u : Vec Float64) { (sumTo u.n (fn k { u.f k }), dot u u, u.n) }) vs
 
 -- Kolmogorov's distance of the values from the uniform on [0, 1]: on the values sorted, the
 -- largest of i/n - u_i and u_i - (i - 1)/n, zero on no values. The native definition sorts by
 -- insertion (v0.1 probability.lut:63-76).
-entriesOnto (v : Vec Float64) (k : Nat) (tail : List Float64) : List Float64 :=
-  if k >= v.n then tail else cons (v.f k) (entriesOnto v (k + 1) tail)
-pooled (vs : List (Vec Float64)) : List Float64 := match vs { nil -> nil ; cons v rest -> entriesOnto v 0 (pooled rest) }
-insertSortedValue (x : Float64) (xs : List Float64) : List Float64 :=
-  match xs { nil -> cons x nil ; cons y ys -> if x <= y then cons x xs else cons y (insertSortedValue x ys) }
-sortedValues (xs : List Float64) : List Float64 := match xs { nil -> nil ; cons y ys -> insertSortedValue y (sortedValues ys) }
+-- [core bite 12] The values pooled are the core's `concat` of each vector's entries, sorted by
+-- the core's `sortBy` (insertion through the one fold, as before); the largest of the two gaps at
+-- the i-th value is a fold over `Fin (size us)` with `larger`, whose order does not change a
+-- maximum (execution.md section 5.2: `entriesOnto`, `sortedValues`, `insertSortedValue`,
+-- `lengthOf`, `reverseOnto` gone). A vector's entries are `Vec`'s `fold` into a list: the core's
+-- `toList Vec` does not find `VecIsFoldable` (it takes the vector for the model; report-bite-12b.md).
 larger (a b : Float64) : Float64 := if a > b then a else b
-kolmogorovFrom (n i : Int) (us : List Float64) (acc : Float64) : Float64 :=
-  match us {
-    nil -> acc ;
-    cons u rest -> {
-      a := toFloat64 i / toFloat64 n - u
-      b := u - toFloat64 (i - 1) / toFloat64 n
-      kolmogorovFrom n (i + 1) rest (larger acc (larger a b)) } }
-lengthOf (xs : List Float64) : Int := match xs { nil -> 0 ; cons x rest -> 1 + lengthOf rest }
+entries (v : Vec Float64) : List Float64 := fold Float64 (List Float64) (fn a b { a <> b }) nil (fn x { singleton Float64 x }) v
+pooled (vs : List (Vec Float64)) : List Float64 := concat Float64 (map entries vs)
 kolmogorovDistanceDef (vs : List (Vec Float64)) : Float64 :=
-  { us := sortedValues (pooled vs)
-    kolmogorovFrom (lengthOf us) 1 us 0.0 }
-reverseOnto (vs acc : List (Vec Float64)) : List (Vec Float64) := match vs { nil -> acc ; cons v rest -> reverseOnto rest (cons v acc) }
+  { us := sortBy Float64 (fn a b { a <= b }) (pooled vs)
+    n := size us
+    foldWith Float64 larger 0.0 n (fn k {
+      u := at us k
+      larger (toFloat64 (k + 1) / toFloat64 n - u) (u - toFloat64 k / toFloat64 n) }) }
 
 -- the values the distance is stated on: in [0, 1], where it is bounded by one; a list of such
 -- vectors is a subtype of the list (not a list of a subtype), so that it refines the leaf's domain
 unitVec (v : Vec Float64) : Bool := forallBelow v.n (fn k { 0.0 <= v.f k and v.f k <= 1.0 })
-allUnit (vs : List (Vec Float64)) : Bool := match vs { nil -> true ; cons v rest -> unitVec v and allUnit rest }
-UnitList : U := { vs : List (Vec Float64) | allUnit vs }
+UnitList : U := { vs : List (Vec Float64) | all List (Vec Float64) unitVec vs }
 UnitValue : U := { u : Float64 | 0.0 <= u and u <= 1.0 }
 single (u : Float64) : List (Vec Float64) := cons (vec Float64 1 (fn k { u })) nil
 
@@ -281,9 +278,10 @@ single (u : Float64) : List (Vec Float64) := cons (vec Float64 1 (fn k { u })) n
 Kolmogorov : { distance : List (Vec Float64) -> Float64 }
 KolmogorovOfNothing (d : Kolmogorov) : Bool := d.distance nil == 0.0
 KolmogorovOfOne (d : Kolmogorov) (u : UnitValue) : Bool := d.distance (single u) == larger u (1.0 - u)
-KolmogorovOfMultiset (d : Kolmogorov) (vs : UnitList) : Bool := d.distance vs == d.distance (reverseOnto vs nil)
+KolmogorovOfMultiset (d : Kolmogorov) (vs : UnitList) : Bool :=
+  Pointwise UnitList Float64 (structural Float64) d.distance (fn (ws : UnitList) { d.distance (reverse (Vec Float64) ws) }) vs
 KolmogorovBounded (d : Kolmogorov) (vs : UnitList) : Bool := 0.0 <= d.distance vs and d.distance vs <= 1.0
-KolmogorovAgrees (d : Kolmogorov) (vs : UnitList) : Bool := d.distance vs == kolmogorovDistanceDef vs
+KolmogorovAgrees (d : Kolmogorov) (vs : UnitList) : Bool := Pointwise UnitList Float64 (structural Float64) d.distance kolmogorovDistanceDef vs
 Kolmogorov := KolmogorovOfNothing & KolmogorovOfOne & KolmogorovOfMultiset & KolmogorovBounded & KolmogorovAgrees
 
 -- Kolmogorov's limit of the tail P(sqrt n D > x), 2 sum_k (-1)^(k-1) exp(-2 k^2 x^2), with
@@ -319,3 +317,19 @@ uniformPValue (d : Kolmogorov) (vs : List (Vec Float64)) : Float64 :=
 uniformValues (d : Kolmogorov) : StatisticalLaw UnitList := byPValue UnitList (fn vs { uniformPValue d vs })
 SourceIsUniform (d : Kolmogorov) (source : Gen UnitList) (c : Sequential) : Law :=
   Statistical UnitList Seed (uniformValues d) source c
+
+-- ---------------------------------------------------------------- §6 The pushforward (D-2026-10-17-g)
+
+-- [core bite 12, Claude Opus 5.5, 2026-10-22, proposed] The pushforward of a distribution mu on A
+-- along f : A -> B is the distribution of f x for x drawn from mu: (f_* mu) (S) = mu (f^-1 S) for
+-- every event S of B (Billingsley, Probability and Measure, 3rd ed., 1995, section 13, eq. 13.7).
+-- Here a distribution is given by its sampler, a `Gen` (generators.lth, 7.S1), so the structure
+-- is the push of a sampler, and its law is stated draw by draw: at the same size and seed, the
+-- pushed sampler gives f of what the sampler gives and leaves the same seed after it. That
+-- implies the identity of the measures for every event and every seed; the generators the tester
+-- draws through a function (the probability integral transform, a belief pushed through a mean
+-- model) are its uses, not yet rewritten over it. The model is probability_model.lut's `pushGen`.
+Pushforward (A : U) (B : Concrete) (f : A -> B) : { push : Gen A -> Gen B }
+PushedDraw (A : U) (B : Concrete) (f : A -> B) (p : Pushforward A B f) (g : Gen A) (n : Nat) (s : Seed) : Bool :=
+  match g n s { (x, s1) -> match p.push g n s { (y, s2) -> y == f x and s1 == s2 } }
+Pushforward (A : U) (B : Concrete) (f : A -> B) (p : Pushforward A B f) := PushedDraw A B f p

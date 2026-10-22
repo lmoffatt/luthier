@@ -27,13 +27,14 @@
 
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear unitList
-import "generators.lth" Binding byParameter
+import "generators.lth" Binding byParameter Gen Seed nextSeed
 import "laws.lth" Listed Sequential StatisticalLaw NoAlternativeAtZero RatioNonNegative
 import "numbers.lth" Tolerance
 import "arrays.lth" Vec Mat vec mat
 import "probability.lth" Resolution Kolmogorov MeanModel ScaledModel Likelihood UnitList uniformPValue
   GaussianConstruction GaussianPeaksAtMean ProfiledIsGaussianAtItsSigma gaussian profiled pi
-import "probability_model.lut" numpySort
+import "probability_model.lut" PushingDraws pushGen numpySort
+import "probability.lth" Pushforward
 import "numbers_model.lut" elementary
 import "arrays_model.lut" sub dot scale matVec matMul transpose mscale
 import "../../examples/sonolocalizacion/distances.lut" pitResolution freeDim fullModel posModel
@@ -246,3 +247,21 @@ onRatioNegative : List Binding := [
   byParameter "x" "unitList" ]
 test "NoAlternativeAtZero" (SampledMode linear) (seed <- 20261015) (whereBindings <- onRatioTwo) (control <- true)
 test "RatioNonNegative" (SampledMode linear) (seed <- 20261015) (whereBindings <- onRatioNegative) (control <- true)
+
+-- §6 the pushforward (core bite 12, 2026-10-22): a push that forgets the function, giving the
+-- draw itself (the identity in place of f), refuted where a draw is not zero
+pushedType : Concrete := Int
+negated : Int -> Int := fn x { 0 - x }
+pushModel : Pushforward Int Int negated := { push := fn (g : Gen Int) { fn n s { match g n s { (x, s1) -> (x, s1) } } } }
+pushSamplers : List (Gen Int) := [fn n s { (n + s, nextSeed s) }, fn n s { (n - 3, s) }]
+pushSizes : List Nat := [0, 1, 7]
+pushSeeds : List Seed := [0, 12345]
+onPush : List Binding := [
+  { parameter := just "A", type := nothing, generator := "pushedType", coverage := Listed },
+  { parameter := just "B", type := nothing, generator := "pushedType", coverage := Listed },
+  { parameter := just "f", type := nothing, generator := "negated", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "pushModel", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "pushSamplers", coverage := Listed },
+  { parameter := just "n", type := nothing, generator := "pushSizes", coverage := Listed },
+  { parameter := just "s", type := nothing, generator := "pushSeeds", coverage := Listed } ]
+test "PushingDraws" ExhaustiveMode (seed <- 20261022) (whereBindings <- onPush) (control <- true)
