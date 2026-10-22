@@ -72,9 +72,8 @@ names (ns : List Node) : List String := map Node String (fn (n : Node) { n.name 
 readsOf (ns : List Node) (x : String) : List String :=
   concat String (map Node (List String) (fn (n : Node) { n.reads }) (take Node 1 (filter List Node (fn (n : Node) { n.name == x }) ns)))
 -- the names added at the end, each once, in the order met
--- kept as a recursion (bite 13b): an accumulator grows by the names not yet in it, left to right; the core folds from the right
 addNew (xs new : List String) : List String :=
-  match new { nil -> xs ; cons n rest -> if member List String n xs then addNew xs rest else addNew (xs <> [n]) rest }
+  foldLeft String (List String) (fn (acc : List String) (n : String) { if member List String n acc then acc else acc <> [n] }) xs new
 readsOfAll (ns : List Node) (xs : List String) : List String :=
   fold String (List String) (fn a b { addNew a b }) nil (fn x { readsOf ns x }) xs
 -- an environment that agrees with `env` on the names listed and with `other` elsewhere
@@ -118,9 +117,8 @@ LinearizesOn (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (live : List Stri
 -- Running a schedule: each name in its order, from the values so far; a name not scheduled keeps
 -- `init`.
 update (A : U) (env : String -> A) (n : String) (v : A) : String -> A := fn m { if m == n then v else env m }
--- kept as a recursion (bite 13b): the environment is updated name by name along the schedule (state threaded left to right)
 runFrom (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (s : Schedule) (env : String -> A) : String -> A :=
-  match s { nil -> env ; cons n rest -> runFrom A eq d rest (update A env n (d.step n env)) }
+  foldLeft String (String -> A) (fn (e : String -> A) (n : String) { update A e n (d.step n e) }) env s
 run (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (s : Schedule) : String -> A := runFrom A eq d s (fn m { d.init })
 
 -- Two schedules are equivalent on a set of names when every name of it gets the same value under
@@ -180,9 +178,8 @@ byLevels (ns : List Node) (live : List String) (prev : Nat) (s : Schedule) : Boo
 -- node lists them, and once; bounded by the number of nodes
 demandFrom (ns : List Node) (x : String) (done : List String) (k : Nat) : List String :=
   if member List String x done or k == 0 then done else demandAll ns (readsOf ns x) done (k - 1) <> [x]
--- kept as a recursion (bite 13b): the names done are threaded left to right, each visit sees the earlier ones
 demandAll (ns : List Node) (xs : List String) (done : List String) (k : Nat) : List String :=
-  match xs { nil -> done ; cons x rest -> demandAll ns rest (demandFrom ns x done k) k }
+  foldLeft String (List String) (fn (dn : List String) (x : String) { demandFrom ns x dn k }) done xs
 firstDemand (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (entry : String) : Schedule :=
   demandFrom d.nodes entry nil (1 + size d.nodes)
 
