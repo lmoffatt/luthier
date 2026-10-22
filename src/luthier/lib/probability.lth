@@ -249,14 +249,13 @@ valueSums (vs : List (Vec Float64)) : Float64 * Float64 * Int :=
 -- [core bite 12] The values pooled are the core's `concat` of each vector's entries, sorted by
 -- the core's `sortBy` (insertion through the one fold, as before); the largest of the two gaps at
 -- the i-th value is a fold over `Fin (size us)` with `larger`, whose order does not change a
--- maximum (execution.md section 5.2: `entriesOnto`, `sortedValues`, `insertSortedValue`,
+-- maximum (execution.md section 5.2: `pooled`, `entriesOnto`, `sortedValues`, `insertSortedValue`,
 -- `lengthOf`, `reverseOnto` gone). A vector's entries are `Vec`'s `fold` into a list: the core's
 -- `toList Vec` does not find `VecIsFoldable` (it takes the vector for the model; report-bite-12b.md).
 larger (a b : Float64) : Float64 := if a > b then a else b
 vecEntries (v : Vec Float64) : List Float64 := fold Float64 (List Float64) (fn a b { a <> b }) nil (fn x { singleton Float64 x }) v
-pooled (vs : List (Vec Float64)) : List Float64 := concat Float64 (map vecEntries vs)
 kolmogorovDistanceDef (vs : List (Vec Float64)) : Float64 :=
-  { us := sortBy Float64 (fn a b { a <= b }) (pooled vs)
+  { us := sortBy Float64 (fn a b { a <= b }) (concat Float64 (map vecEntries vs))
     n := size us
     foldWith Float64 larger 0.0 n (fn k {
       u := at us k
