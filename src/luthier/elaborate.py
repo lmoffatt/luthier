@@ -1433,13 +1433,14 @@ def plain(x):
 
 def operator_binding(op, ty, c):
     """The binding of `op` at the type `ty` of its left operand, matched under instantiation and
-    then through the type's bases (4.R13): (Binding, sigma) or None."""
+    then through the type's bases (4.R13): (Binding, sigma) or None. A binding at a subtype serves
+    that subtype and the subtypes declared inside it, never a sibling (`sibling_subtype`, as claims)."""
     candidates = bases(ty, c)
     for candidate in candidates + [plain(x) for x in candidates if plain(x) != x]:
         found = []
         for b in c.bindings.get(op, ()):
             sigma = {}
-            if solve(b.domain, candidate, frozenset(b.vars), sigma, c):
+            if solve(b.domain, candidate, frozenset(b.vars), sigma, c) and not sibling_subtype(b.domain, sigma, ty, c):
                 found.append((b, sigma))
         if found:
             exact = [x for x in found if not x[0].vars]

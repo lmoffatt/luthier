@@ -624,3 +624,17 @@ def test_a_container_given_to_a_core_function_is_not_taken_as_its_model():
     from luthier.elaborate import show
     assert "boxFold" in show(r) and show(r).endswith(") b)"), show(r)
 
+
+OPERATOR_SIBLINGS = ('Wide : U := { k : Int | k <= 100 }\nNarrow : U := { k : Int | k <= 10 }\n'
+                     'Inner : U := { k : Wide | 0 <= k }\n'
+                     'wideJoin (x y : Wide) : Wide := x\noperator + := wideJoin\n'
+                     'a : Narrow\nb : Inner\nw : Wide\n')
+
+
+def test_an_operator_bound_at_a_subtype_does_not_serve_a_sibling_subtype():
+    # report-bite-12a.md, item 2's leftover: operator bindings go through a subtype's bases as claims
+    # do (4.R13), never landing on a binding made at a sibling subtype
+    from luthier.elaborate import show
+    for x in ('w', 'b'):
+        assert 'wideJoin' in show(term(f'{x} + {x}', OPERATOR_SIBLINGS))
+    assert 'wideJoin' not in show(term('a + a', OPERATOR_SIBLINGS))

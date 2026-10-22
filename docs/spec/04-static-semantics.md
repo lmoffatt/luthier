@@ -300,6 +300,7 @@ headed by a parameter of the structure, under instantiation and through a subtyp
 A claim at a subtype serves a value of that subtype or of a subtype declared inside it, never a
 sibling: with `Mark` and `MetricInteger` both subtypes of `Int`, `d` at `Mark` does not reach a
 claim at `MetricInteger` (the coordinator, 2026-10-21, on docs/concepts.md 4.3; core bite 12a).
+An operator's binding at a subtype is read the same way (core bite 13a).
 `S.f` names the structure, `S.f m` the model. A parameter typed by a structure applied to types,
 omitted at a call, is the model its types name; another is passed by name (D-2026-10-18-g). An
 argument whose type is a record without the structure's fields is not its model, so it is not taken
