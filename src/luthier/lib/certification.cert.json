@@ -1,5 +1,850 @@
 [
  {
+  "law": "CombineNeverRaises",
+  "cone": "sha256:1cd21f82bb50ff8e483dd8ef6af70f60c1ea3d9605e6ce154bd3cc1aa10f2c1b",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:4cc3ef018a3de8c49a599076a3d6ef534e6a334d54f66b8b4af61e24d00ba5a5"
+   },
+   {
+    "parameter": "q",
+    "generator": "provedCombines (Listed)",
+    "fingerprint": "sha256:191ca72cb08dedcdcb54821c34b532fb09c0b0763c344149baa4bd0a2b8ab4e1"
+   },
+   {
+    "parameter": "g",
+    "generator": "grades (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:ef309234e263bb8f76ac36d85c705c622bcdf2dd7fe73248739efac9017453aa"
+   },
+   {
+    "parameter": "h",
+    "generator": "grades (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:ef309234e263bb8f76ac36d85c705c622bcdf2dd7fe73248739efac9017453aa"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "q",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "provedCombine"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nothing"
+      },
+      {
+       "Printed": "(just Sampled)"
+      },
+      {
+       "Printed": "(just Cases)"
+      },
+      {
+       "Printed": "(just Proved)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nothing"
+      },
+      {
+       "Printed": "(just Sampled)"
+      },
+      {
+       "Printed": "(just Cases)"
+      },
+      {
+       "Printed": "(just Proved)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "k = certifying, q = provedCombine, g = nothing, h = nothing"
+  },
+  "date": "2026-10-22T14:59:42+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "NothingIsTheUnit",
+  "cone": "sha256:168c23be775f4796bce6d5b2060cb67d6f448e40a37ffc74707137a2390b837a",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:4cc3ef018a3de8c49a599076a3d6ef534e6a334d54f66b8b4af61e24d00ba5a5"
+   },
+   {
+    "parameter": "q",
+    "generator": "firstCombines (Listed)",
+    "fingerprint": "sha256:c5f16e910071d8a9b32c0261721b6bee66d001abef140eca209d1d28d434b4db"
+   },
+   {
+    "parameter": "g",
+    "generator": "grades (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:ef309234e263bb8f76ac36d85c705c622bcdf2dd7fe73248739efac9017453aa"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "q",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "firstCombine"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nothing"
+      },
+      {
+       "Printed": "(just Sampled)"
+      },
+      {
+       "Printed": "(just Cases)"
+      },
+      {
+       "Printed": "(just Proved)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "k = certifying, q = firstCombine, g = (just Sampled)"
+  },
+  "date": "2026-10-22T14:59:42+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "CombinesAcrossBindings",
+  "cone": "sha256:e03bc461d39b75f34de2f0a4596b68be87650924c39e80f12e301a9b868daf47",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:4cc3ef018a3de8c49a599076a3d6ef534e6a334d54f66b8b4af61e24d00ba5a5"
+   },
+   {
+    "parameter": "q",
+    "generator": "firstBindingOnlys (Listed)",
+    "fingerprint": "sha256:acaf3938b463dde3e0723357ce90f946f60983b27e48e902fb97e2f9daa0e947"
+   },
+   {
+    "parameter": "c",
+    "generator": "certificates (Listed)",
+    "fingerprint": "sha256:17a7a4f344cf9d8e12ee5f327126078b7de16f443894edaf5ea63b0c397b2e3a"
+   },
+   {
+    "parameter": "rs",
+    "generator": "regionLists (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:d34c62178ebd0c91598b25c362e315ca247f7d67cd63a92bb1d4e5f7410afb10"
+   },
+   {
+    "parameter": "ev",
+    "generator": "evidences (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:b10ac18543f08ae24a7c2c74ece8bb1a96133b0608095745e748dd7df5a1d107"
+   },
+   {
+    "parameter": "p",
+    "generator": "passes (Listed)",
+    "fingerprint": "sha256:fb32be91b7ff8a37ca76fd0561a1b280bdf7a5ea548e989dbca429d042f7cbb5,sha256:c3c4b096564630ef0e9ede875d8b0ec2d670bcd6dd8f6d06acf63bbaf56f5d30,sha256:d417122500cc46961da5f92a9c43544cf4c2162569f2cf1996149d753adc704b"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "q",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "firstBindingOnly"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(cert nil)"
+      },
+      {
+       "Printed": "(cert ((cons passA) nil))"
+      },
+      {
+       "Printed": "(cert ((cons passB) ((cons passA) nil)))"
+      },
+      {
+       "Printed": "(cert ((cons failA) ((cons passA) nil)))"
+      },
+      {
+       "Printed": "(cert ((cons provedA) ((cons passB) nil)))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "rs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons zero) nil)"
+      },
+      {
+       "Printed": "((cons kappa) ((cons branch) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ev",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 3 }) nil) }) nil)"
+      },
+      {
+       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 0 }) ((cons { region := tolAbove, n := 2 }) nil)) }) ((cons { binding := bB, regions := ((cons { region := zero, n := 1 }) ((cons { region := kappa, n := 5 }) nil)) }) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "passA"
+      },
+      {
+       "Printed": "passB"
+      },
+      {
+       "Printed": "provedA"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 135,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "k = certifying, q = firstBindingOnly, c = (cert ((cons passB) ((cons passA) nil))), rs = nil, ev = nil, p = passA"
+  },
+  "date": "2026-10-22T14:58:22+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "p boundary"
+    },
+    "n": 135
+   }
+  ]
+ },
+ {
+  "law": "CombinesOverRegions",
+  "cone": "sha256:8d1aebce21ede254cbd798d3d578de0ad87102eb66bbcdefb93342eaae93c8f9",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:4cc3ef018a3de8c49a599076a3d6ef534e6a334d54f66b8b4af61e24d00ba5a5"
+   },
+   {
+    "parameter": "q",
+    "generator": "strongestCombines (Listed)",
+    "fingerprint": "sha256:fa9915c8b33c4dff11072fee203cb44d7f48bc416751331d3f128784da7ed538"
+   },
+   {
+    "parameter": "c",
+    "generator": "certificates (Listed)",
+    "fingerprint": "sha256:17a7a4f344cf9d8e12ee5f327126078b7de16f443894edaf5ea63b0c397b2e3a"
+   },
+   {
+    "parameter": "r",
+    "generator": "regions (Listed)",
+    "fingerprint": "sha256:f3ce0c081800213c977295c987344a829c23c896ea3578928db065a07ccd5fe2,sha256:1683a2e67309c3a9b051434df2940b585f45fd6fffb9db1176dbb5b22b6496fd,sha256:fc07929d652637fff21ddc3a1e81120821f0fd57dc292d9344f5ee2d68a8c796"
+   },
+   {
+    "parameter": "rs",
+    "generator": "regionLists (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:d34c62178ebd0c91598b25c362e315ca247f7d67cd63a92bb1d4e5f7410afb10"
+   },
+   {
+    "parameter": "ev",
+    "generator": "evidences (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:b10ac18543f08ae24a7c2c74ece8bb1a96133b0608095745e748dd7df5a1d107"
+   },
+   {
+    "parameter": "p",
+    "generator": "passes (Listed)",
+    "fingerprint": "sha256:fb32be91b7ff8a37ca76fd0561a1b280bdf7a5ea548e989dbca429d042f7cbb5,sha256:c3c4b096564630ef0e9ede875d8b0ec2d670bcd6dd8f6d06acf63bbaf56f5d30,sha256:d417122500cc46961da5f92a9c43544cf4c2162569f2cf1996149d753adc704b"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "q",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "strongestCombine"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(cert nil)"
+      },
+      {
+       "Printed": "(cert ((cons passA) nil))"
+      },
+      {
+       "Printed": "(cert ((cons passB) ((cons passA) nil)))"
+      },
+      {
+       "Printed": "(cert ((cons failA) ((cons passA) nil)))"
+      },
+      {
+       "Printed": "(cert ((cons provedA) ((cons passB) nil)))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "zero"
+      },
+      {
+       "Printed": "tolAbove"
+      },
+      {
+       "Printed": "branch"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "rs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons zero) nil)"
+      },
+      {
+       "Printed": "((cons kappa) ((cons branch) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ev",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 3 }) nil) }) nil)"
+      },
+      {
+       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 0 }) ((cons { region := tolAbove, n := 2 }) nil)) }) ((cons { binding := bB, regions := ((cons { region := zero, n := 1 }) ((cons { region := kappa, n := 5 }) nil)) }) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "passA"
+      },
+      {
+       "Printed": "passB"
+      },
+      {
+       "Printed": "provedA"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 405,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "k = certifying, q = strongestCombine, c = (cert nil), r = zero, rs = nil, ev = nil, p = passA"
+  },
+  "date": "2026-10-22T14:52:33+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "r boundary"
+    },
+    "n": 405
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "p boundary"
+    },
+    "n": 405
+   }
+  ]
+ },
+ {
+  "law": "RefutedInEveryRegion",
+  "cone": "sha256:a7ad20d1e6807ef10a299c12772a9ecc84798dd45b59202a3c96f72437e7e77b",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:4cc3ef018a3de8c49a599076a3d6ef534e6a334d54f66b8b4af61e24d00ba5a5"
+   },
+   {
+    "parameter": "q",
+    "generator": "blindToFailures (Listed)",
+    "fingerprint": "sha256:e76ce850cb87c62745fe78e1bca7c2a7a24f79c6c596540ff3fc0518baaf3d33"
+   },
+   {
+    "parameter": "c",
+    "generator": "certificates (Listed)",
+    "fingerprint": "sha256:17a7a4f344cf9d8e12ee5f327126078b7de16f443894edaf5ea63b0c397b2e3a"
+   },
+   {
+    "parameter": "rs",
+    "generator": "regionLists (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:d34c62178ebd0c91598b25c362e315ca247f7d67cd63a92bb1d4e5f7410afb10"
+   },
+   {
+    "parameter": "ev",
+    "generator": "evidences (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:b10ac18543f08ae24a7c2c74ece8bb1a96133b0608095745e748dd7df5a1d107"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "q",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blindToFailure"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(cert nil)"
+      },
+      {
+       "Printed": "(cert ((cons passA) nil))"
+      },
+      {
+       "Printed": "(cert ((cons passB) ((cons passA) nil)))"
+      },
+      {
+       "Printed": "(cert ((cons failA) ((cons passA) nil)))"
+      },
+      {
+       "Printed": "(cert ((cons provedA) ((cons passB) nil)))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "rs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons zero) nil)"
+      },
+      {
+       "Printed": "((cons kappa) ((cons branch) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ev",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 3 }) nil) }) nil)"
+      },
+      {
+       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 0 }) ((cons { region := tolAbove, n := 2 }) nil)) }) ((cons { binding := bB, regions := ((cons { region := zero, n := 1 }) ((cons { region := kappa, n := 5 }) nil)) }) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 45,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "k = certifying, q = blindToFailure, c = (cert ((cons failA) ((cons passA) nil))), rs = nil, ev = nil"
+  },
+  "date": "2026-10-22T14:52:30+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "NoRegionsLeaveTheGrade",
+  "cone": "sha256:6b4d198d21113cab9b381f29d1202458ae52d38383487459ccc5c9d43a1b22f8",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:4cc3ef018a3de8c49a599076a3d6ef534e6a334d54f66b8b4af61e24d00ba5a5"
+   },
+   {
+    "parameter": "q",
+    "generator": "gradingNothingAlones (Listed)",
+    "fingerprint": "sha256:2ae6bd63b856c8c2362eb78d9356ae70d1eb8ccce6051947e727e05d679d74d7"
+   },
+   {
+    "parameter": "c",
+    "generator": "certificates (Listed)",
+    "fingerprint": "sha256:17a7a4f344cf9d8e12ee5f327126078b7de16f443894edaf5ea63b0c397b2e3a"
+   },
+   {
+    "parameter": "ev",
+    "generator": "evidences (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:b10ac18543f08ae24a7c2c74ece8bb1a96133b0608095745e748dd7df5a1d107"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "q",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "gradingNothingAlone"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(cert nil)"
+      },
+      {
+       "Printed": "(cert ((cons passA) nil))"
+      },
+      {
+       "Printed": "(cert ((cons passB) ((cons passA) nil)))"
+      },
+      {
+       "Printed": "(cert ((cons failA) ((cons passA) nil)))"
+      },
+      {
+       "Printed": "(cert ((cons provedA) ((cons passB) nil)))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ev",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 3 }) nil) }) nil)"
+      },
+      {
+       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 0 }) ((cons { region := tolAbove, n := 2 }) nil)) }) ((cons { binding := bB, regions := ((cons { region := zero, n := 1 }) ((cons { region := kappa, n := 5 }) nil)) }) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 15,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "k = certifying, q = gradingNothingAlone, c = (cert ((cons passA) nil)), ev = nil"
+  },
+  "date": "2026-10-22T14:52:29+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
   "law": "AConsequenceRefutesEveryModel",
   "cone": "sha256:0e0ce6ae912e0a90e24aa7c63ab10571644aaf595f850af0f271e53408bc97bb",
   "binding": [
@@ -11,7 +856,7 @@
    {
     "parameter": "r",
     "generator": "noExceptionRoutings (Listed)",
-    "fingerprint": "sha256:0bfe0dc5ff4e92dc5a46a636c62bb6b295883adc98cee91741999c3864cb63e7"
+    "fingerprint": "sha256:ba47d2889ccfc25cb0e3e4f29e5eeba4606f13e6062593569c0d9eda9d744f89"
    },
    {
     "parameter": "d",
@@ -158,12 +1003,12 @@
   "outcome": {
    "ControlRefuted": "k = certifying, r = { headOf := (routing).headOf, witness := (routing).witness, veto := noException }, d = { demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"L\") nil))) }, es = ((cons lNFails) ((cons tpN) ((cons tqN) ((cons lM) nil))))"
   },
-  "date": "2026-10-22T13:41:09+00:00",
+  "date": "2026-10-22T14:28:11+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
     "python:luthier.certify._text_head",
-    "sha256:02be3f12391311791873a4c8995155dc62ee2ec5b72ad6953e46c13ae420aec9"
+    "sha256:22d2108ad42551acac552cb50862e11d0e4593a8bcaa8c515788e7ebbb3e2c41"
    ]
   ],
   "kind": "Control",
@@ -181,7 +1026,7 @@
    {
     "parameter": "r",
     "generator": "unscopedRoutings (Listed)",
-    "fingerprint": "sha256:bbd10e67836109595ef2c4f1c0adcef4248ccfafc67409ee29d1b35966471241"
+    "fingerprint": "sha256:a45dc85353bd216f6f3b512dda68c7fbd030c851ed108b5dd6df1ef459f4dcfd"
    },
    {
     "parameter": "d",
@@ -364,12 +1209,12 @@
   "outcome": {
    "ControlRefuted": "k = certifying, r = { headOf := (routing).headOf, witness := (routing).witness, veto := unscoped }, d = { demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing }, es = nil, e = tpNFails"
   },
-  "date": "2026-10-22T13:40:37+00:00",
+  "date": "2026-10-22T14:27:41+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
     "python:luthier.certify._text_head",
-    "sha256:02be3f12391311791873a4c8995155dc62ee2ec5b72ad6953e46c13ae420aec9"
+    "sha256:22d2108ad42551acac552cb50862e11d0e4593a8bcaa8c515788e7ebbb3e2c41"
    ]
   ],
   "kind": "Control",
@@ -387,7 +1232,7 @@
    {
     "parameter": "r",
     "generator": "failureFirstRoutings (Listed)",
-    "fingerprint": "sha256:fe192a495dddb8b9d309aa8f880a00c5e5e4a993a998ae0929f52a5e8a937e26"
+    "fingerprint": "sha256:ab7a0e9cfbe66fb9908562e4757debc9bba5bdbe082f945cae2360abba735437"
    },
    {
     "parameter": "d",
@@ -534,12 +1379,12 @@
   "outcome": {
    "ControlRefuted": "k = certifying, r = { headOf := (routing).headOf, witness := (routing).witness, veto := failureFirst }, d = { demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))) }, es = ((cons tpMDisagrees) ((cons tpM) ((cons tqM) nil)))"
   },
-  "date": "2026-10-22T13:40:22+00:00",
+  "date": "2026-10-22T14:27:27+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
     "python:luthier.certify._text_head",
-    "sha256:02be3f12391311791873a4c8995155dc62ee2ec5b72ad6953e46c13ae420aec9"
+    "sha256:22d2108ad42551acac552cb50862e11d0e4593a8bcaa8c515788e7ebbb3e2c41"
    ]
   ],
   "kind": "Control",
@@ -557,7 +1402,7 @@
    {
     "parameter": "r",
     "generator": "ownOnlyRoutings (Listed)",
-    "fingerprint": "sha256:1dbd5958572478611c3eeb7b62a9f1e8cdcabd47e2727a89ec55b8ad1ec325aa"
+    "fingerprint": "sha256:a4ffeefaea343711c9735838cc54c9aac24a1d30fd749106c6447ce01629884b"
    },
    {
     "parameter": "d",
@@ -740,12 +1585,12 @@
   "outcome": {
    "ControlRefuted": "k = certifying, r = { headOf := (routing).headOf, witness := (routing).witness, veto := ownOnly }, d = { demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))) }, es = ((cons tpMFails) ((cons tpM) ((cons tqM) nil))), e = tpMFails"
   },
-  "date": "2026-10-22T13:40:12+00:00",
+  "date": "2026-10-22T14:27:18+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
     "python:luthier.certify._text_head",
-    "sha256:02be3f12391311791873a4c8995155dc62ee2ec5b72ad6953e46c13ae420aec9"
+    "sha256:22d2108ad42551acac552cb50862e11d0e4593a8bcaa8c515788e7ebbb3e2c41"
    ]
   ],
   "kind": "Control",
@@ -763,7 +1608,7 @@
    {
     "parameter": "r",
     "generator": "inventingRoutings (Listed)",
-    "fingerprint": "sha256:9618ca04922944926d3bef9a93bd573a5ff82ab0abcc8f27b2e97a555d48c500"
+    "fingerprint": "sha256:e4be9f7b832e9d6b2cd18910f300140542120e8b0be39d031b32c3e5f237144f"
    },
    {
     "parameter": "d",
@@ -910,12 +1755,12 @@
   "outcome": {
    "ControlRefuted": "k = certifying, r = { headOf := (routing).headOf, witness := (routing).witness, veto := invents }, d = { demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))) }, es = nil"
   },
-  "date": "2026-10-22T13:40:11+00:00",
+  "date": "2026-10-22T14:27:17+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
     "python:luthier.certify._text_head",
-    "sha256:02be3f12391311791873a4c8995155dc62ee2ec5b72ad6953e46c13ae420aec9"
+    "sha256:22d2108ad42551acac552cb50862e11d0e4593a8bcaa8c515788e7ebbb3e2c41"
    ]
   ],
   "kind": "Control",
@@ -933,7 +1778,7 @@
    {
     "parameter": "r",
     "generator": "ownRoutings (Listed)",
-    "fingerprint": "sha256:0aa506b48b5100c6e617abe63265e1db1ad8b57063abf42971e49e7f7f5ba698"
+    "fingerprint": "sha256:d8bc41360f002cc9673eb3c8989c99f57d10111838c403fe2a35719b4f463f78"
    },
    {
     "parameter": "d",
@@ -1080,12 +1925,12 @@
   "outcome": {
    "ControlRefuted": "k = certifying, r = { headOf := (routing).headOf, witness := ownForByModel, veto := (routing).veto }, d = { demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))) }, es = ((cons pM) nil)"
   },
-  "date": "2026-10-22T13:39:58+00:00",
+  "date": "2026-10-22T14:27:06+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
     "python:luthier.certify._text_head",
-    "sha256:02be3f12391311791873a4c8995155dc62ee2ec5b72ad6953e46c13ae420aec9"
+    "sha256:22d2108ad42551acac552cb50862e11d0e4593a8bcaa8c515788e7ebbb3e2c41"
    ]
   ],
   "kind": "Control",
@@ -1103,7 +1948,7 @@
    {
     "parameter": "r",
     "generator": "neverRoutings (Listed)",
-    "fingerprint": "sha256:e12c033cb17d8f44ec66dfa6b7557499f353579d1ddfdd6cb82fac7e21b649bc"
+    "fingerprint": "sha256:036027686e012a8feae913f6e4c68a4f866a54d0e7a440323c3feb76f5e89bf3"
    },
    {
     "parameter": "d",
@@ -1250,12 +2095,12 @@
   "outcome": {
    "ControlRefuted": "k = certifying, r = { headOf := (routing).headOf, witness := never, veto := (routing).veto }, d = { demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))) }, es = ((cons tpM) ((cons tqM) nil))"
   },
-  "date": "2026-10-22T13:39:49+00:00",
+  "date": "2026-10-22T14:26:57+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
     "python:luthier.certify._text_head",
-    "sha256:02be3f12391311791873a4c8995155dc62ee2ec5b72ad6953e46c13ae420aec9"
+    "sha256:22d2108ad42551acac552cb50862e11d0e4593a8bcaa8c515788e7ebbb3e2c41"
    ]
   ],
   "kind": "Control",
@@ -1273,7 +2118,7 @@
    {
     "parameter": "r",
     "generator": "paddingRoutings (Listed)",
-    "fingerprint": "sha256:1b705867ace16e70f323c4ceeeaf9c8552a0ea043623231b08b6d668119f1018"
+    "fingerprint": "sha256:7a9c1c7a3f88437bb475b6bf78176609663f57a1b299fe2a340e679c04ceb65c"
    },
    {
     "parameter": "d",
@@ -1420,12 +2265,12 @@
   "outcome": {
    "ControlRefuted": "k = certifying, r = { headOf := (routing).headOf, witness := padded, veto := (routing).veto }, d = { demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))) }, es = ((cons tpM) ((cons tqM) nil))"
   },
-  "date": "2026-10-22T13:39:38+00:00",
+  "date": "2026-10-22T14:26:47+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
     "python:luthier.certify._text_head",
-    "sha256:02be3f12391311791873a4c8995155dc62ee2ec5b72ad6953e46c13ae420aec9"
+    "sha256:22d2108ad42551acac552cb50862e11d0e4593a8bcaa8c515788e7ebbb3e2c41"
    ]
   ],
   "kind": "Control",
@@ -1443,7 +2288,7 @@
    {
     "parameter": "r",
     "generator": "droppingRoutings (Listed)",
-    "fingerprint": "sha256:c0482546c0f77172caf6cf638c7e6b7a798907edb98cb95d6bf2674eab1f74fc"
+    "fingerprint": "sha256:ba48dee5a4e1eec9e65046bb76e17382e5042dfc68b6a3a050bd129d91aea5ad"
    },
    {
     "parameter": "d",
@@ -1590,16 +2435,183 @@
   "outcome": {
    "ControlRefuted": "k = certifying, r = { headOf := (routing).headOf, witness := firstOnly, veto := (routing).veto }, d = { demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing }, es = ((cons tpM) ((cons tqM) nil))"
   },
-  "date": "2026-10-22T13:39:25+00:00",
+  "date": "2026-10-22T14:26:36+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
     "python:luthier.certify._text_head",
-    "sha256:02be3f12391311791873a4c8995155dc62ee2ec5b72ad6953e46c13ae420aec9"
+    "sha256:22d2108ad42551acac552cb50862e11d0e4593a8bcaa8c515788e7ebbb3e2c41"
    ]
   ],
   "kind": "Control",
   "regions": []
+ },
+ {
+  "law": "ADisagreementRefutes",
+  "cone": "sha256:86f1437b29fb8c874349b7115909fd005cdee87d99027d578eb98495fadc26d5",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "blindModels (Listed)",
+    "fingerprint": "sha256:3ea74fbfa5375f8bd25a1a31a59859c8020dbcebb1bbbec4bc3cd2efad4c8a02"
+   },
+   {
+    "parameter": "c",
+    "generator": "certificates (Listed)",
+    "fingerprint": "sha256:49c29e2fe96025a62b6b400d73ff8caa42317394928e1064b9b9bffd9c1c7f97"
+   },
+   {
+    "parameter": "e",
+    "generator": "ofTheLaw (Listed)",
+    "fingerprint": "sha256:fc68186a5f4eeb2965387587ebe0faf1f0088befb4b67f7f25809d1238808a44,sha256:246e575faf3f82317be5d08ce5d09a400e3e348e102e503fd0b075cb40b017fb,sha256:aa2f9d205231310f810a1fa0ba1dbada874d470e45cd7370f2497b5e0c413392,sha256:7d1e52099681c7d6f7c1101370a7f19bd179817fe9714a9c3e27cf379dc99914"
+   },
+   {
+    "parameter": "o",
+    "generator": "outcomes (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:31d6b26811d1ec5892a3372db4cafd2316694080761baf6af6572332f931256a"
+   },
+   {
+    "parameter": "g",
+    "generator": "grades (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:e2e191f8b2e1c00acbfdec17d28ab250bb0c843a120e93ee027b1f094453a46f"
+   },
+   {
+    "parameter": "es",
+    "generator": "behindStores (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:a840b6e377a0d439ad7989570fc9c61b35b98a79656ed805fcaafe1d4c15984f"
+   }
+  ],
+  "seed": 20261016,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blind"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ law := \"L\", cone := \"sha256:cccc\", entries := nil }"
+      },
+      {
+       "Printed": "{ law := \"L\", cone := \"sha256:cccc\", entries := ((cons passTwo) nil) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "passOne"
+      },
+      {
+       "Printed": "failOne"
+      },
+      {
+       "Printed": "passTwo"
+      },
+      {
+       "Printed": "notRunOne"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Passed"
+      },
+      {
+       "Printed": "(Failed \"x = 2\")"
+      },
+      {
+       "Printed": "(NotRunFor \"no generator\")"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nothing"
+      },
+      {
+       "Printed": "(just Cases)"
+      },
+      {
+       "Printed": "(just Proved)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "es",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons passTwo) nil)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 144,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "k = blind, c = { law := \"L\", cone := \"sha256:cccc\", entries := nil }, e = passOne, o = Passed, g = nothing, es = nil"
+  },
+  "date": "2026-10-22T14:26:12+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "e boundary"
+    },
+    "n": 144
+   }
+  ]
  },
  {
   "law": "AConsequenceRefutesEveryModel",
@@ -3204,590 +4216,6 @@
   "regions": []
  },
  {
-  "law": "CombineNeverRaises",
-  "cone": "sha256:1cd21f82bb50ff8e483dd8ef6af70f60c1ea3d9605e6ce154bd3cc1aa10f2c1b",
-  "binding": [
-   {
-    "parameter": "k",
-    "generator": "models (Listed)",
-    "fingerprint": "sha256:4cc3ef018a3de8c49a599076a3d6ef534e6a334d54f66b8b4af61e24d00ba5a5"
-   },
-   {
-    "parameter": "q",
-    "generator": "provedCombines (Listed)",
-    "fingerprint": "sha256:67c7d60fcb0f530d498fc87863ab5264f2fa900de3c46397d98481355b63b21a"
-   },
-   {
-    "parameter": "g",
-    "generator": "grades (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:ef309234e263bb8f76ac36d85c705c622bcdf2dd7fe73248739efac9017453aa"
-   },
-   {
-    "parameter": "h",
-    "generator": "grades (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:ef309234e263bb8f76ac36d85c705c622bcdf2dd7fe73248739efac9017453aa"
-   }
-  ],
-  "seed": 20261017,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "k",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "certifying"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "q",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "provedCombine"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "g",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nothing"
-      },
-      {
-       "Printed": "(just Sampled)"
-      },
-      {
-       "Printed": "(just Cases)"
-      },
-      {
-       "Printed": "(just Proved)"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "h",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nothing"
-      },
-      {
-       "Printed": "(just Sampled)"
-      },
-      {
-       "Printed": "(just Cases)"
-      },
-      {
-       "Printed": "(just Proved)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 16,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "k = certifying, q = provedCombine, g = nothing, h = nothing"
-  },
-  "date": "2026-10-22T09:32:03+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "NothingIsTheUnit",
-  "cone": "sha256:168c23be775f4796bce6d5b2060cb67d6f448e40a37ffc74707137a2390b837a",
-  "binding": [
-   {
-    "parameter": "k",
-    "generator": "models (Listed)",
-    "fingerprint": "sha256:4cc3ef018a3de8c49a599076a3d6ef534e6a334d54f66b8b4af61e24d00ba5a5"
-   },
-   {
-    "parameter": "q",
-    "generator": "firstCombines (Listed)",
-    "fingerprint": "sha256:8f976555d19b9ba506e82c8d747059da6d84fd15ff51e63859e6b297dbee4192"
-   },
-   {
-    "parameter": "g",
-    "generator": "grades (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:ef309234e263bb8f76ac36d85c705c622bcdf2dd7fe73248739efac9017453aa"
-   }
-  ],
-  "seed": 20261017,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "k",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "certifying"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "q",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "firstCombine"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "g",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nothing"
-      },
-      {
-       "Printed": "(just Sampled)"
-      },
-      {
-       "Printed": "(just Cases)"
-      },
-      {
-       "Printed": "(just Proved)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 4,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "k = certifying, q = firstCombine, g = (just Sampled)"
-  },
-  "date": "2026-10-22T09:32:03+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "CombinesAcrossBindings",
-  "cone": "sha256:e03bc461d39b75f34de2f0a4596b68be87650924c39e80f12e301a9b868daf47",
-  "binding": [
-   {
-    "parameter": "k",
-    "generator": "models (Listed)",
-    "fingerprint": "sha256:4cc3ef018a3de8c49a599076a3d6ef534e6a334d54f66b8b4af61e24d00ba5a5"
-   },
-   {
-    "parameter": "q",
-    "generator": "firstBindingOnlys (Listed)",
-    "fingerprint": "sha256:d826d57bc48a696d864b545039aa9e301e459ea95d6b96efc6f13e34f23d37a7"
-   },
-   {
-    "parameter": "c",
-    "generator": "certificates (Listed)",
-    "fingerprint": "sha256:17a7a4f344cf9d8e12ee5f327126078b7de16f443894edaf5ea63b0c397b2e3a"
-   },
-   {
-    "parameter": "rs",
-    "generator": "regionLists (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:d34c62178ebd0c91598b25c362e315ca247f7d67cd63a92bb1d4e5f7410afb10"
-   },
-   {
-    "parameter": "ev",
-    "generator": "evidences (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:b10ac18543f08ae24a7c2c74ece8bb1a96133b0608095745e748dd7df5a1d107"
-   },
-   {
-    "parameter": "p",
-    "generator": "passes (Listed)",
-    "fingerprint": "sha256:fb32be91b7ff8a37ca76fd0561a1b280bdf7a5ea548e989dbca429d042f7cbb5,sha256:c3c4b096564630ef0e9ede875d8b0ec2d670bcd6dd8f6d06acf63bbaf56f5d30,sha256:d417122500cc46961da5f92a9c43544cf4c2162569f2cf1996149d753adc704b"
-   }
-  ],
-  "seed": 20261017,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "k",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "certifying"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "q",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "firstBindingOnly"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(cert nil)"
-      },
-      {
-       "Printed": "(cert ((cons passA) nil))"
-      },
-      {
-       "Printed": "(cert ((cons passB) ((cons passA) nil)))"
-      },
-      {
-       "Printed": "(cert ((cons failA) ((cons passA) nil)))"
-      },
-      {
-       "Printed": "(cert ((cons provedA) ((cons passB) nil)))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "rs",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons zero) nil)"
-      },
-      {
-       "Printed": "((cons kappa) ((cons branch) nil))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "ev",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 3 }) nil) }) nil)"
-      },
-      {
-       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 0 }) ((cons { region := tolAbove, n := 2 }) nil)) }) ((cons { binding := bB, regions := ((cons { region := zero, n := 1 }) ((cons { region := kappa, n := 5 }) nil)) }) nil))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "passA"
-      },
-      {
-       "Printed": "passB"
-      },
-      {
-       "Printed": "provedA"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 135,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "k = certifying, q = firstBindingOnly, c = (cert ((cons passB) ((cons passA) nil))), rs = nil, ev = nil, p = passA"
-  },
-  "date": "2026-10-22T09:30:30+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "p boundary"
-    },
-    "n": 135
-   }
-  ]
- },
- {
-  "law": "CombinesOverRegions",
-  "cone": "sha256:8d1aebce21ede254cbd798d3d578de0ad87102eb66bbcdefb93342eaae93c8f9",
-  "binding": [
-   {
-    "parameter": "k",
-    "generator": "models (Listed)",
-    "fingerprint": "sha256:4cc3ef018a3de8c49a599076a3d6ef534e6a334d54f66b8b4af61e24d00ba5a5"
-   },
-   {
-    "parameter": "q",
-    "generator": "strongestCombines (Listed)",
-    "fingerprint": "sha256:1e51578eaa0c37ce8fdcfb84e58808f2e21c867333405bb3be5ffa9db7b3c8b8"
-   },
-   {
-    "parameter": "c",
-    "generator": "certificates (Listed)",
-    "fingerprint": "sha256:17a7a4f344cf9d8e12ee5f327126078b7de16f443894edaf5ea63b0c397b2e3a"
-   },
-   {
-    "parameter": "r",
-    "generator": "regions (Listed)",
-    "fingerprint": "sha256:f3ce0c081800213c977295c987344a829c23c896ea3578928db065a07ccd5fe2,sha256:1683a2e67309c3a9b051434df2940b585f45fd6fffb9db1176dbb5b22b6496fd,sha256:fc07929d652637fff21ddc3a1e81120821f0fd57dc292d9344f5ee2d68a8c796"
-   },
-   {
-    "parameter": "rs",
-    "generator": "regionLists (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:d34c62178ebd0c91598b25c362e315ca247f7d67cd63a92bb1d4e5f7410afb10"
-   },
-   {
-    "parameter": "ev",
-    "generator": "evidences (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:b10ac18543f08ae24a7c2c74ece8bb1a96133b0608095745e748dd7df5a1d107"
-   },
-   {
-    "parameter": "p",
-    "generator": "passes (Listed)",
-    "fingerprint": "sha256:fb32be91b7ff8a37ca76fd0561a1b280bdf7a5ea548e989dbca429d042f7cbb5,sha256:c3c4b096564630ef0e9ede875d8b0ec2d670bcd6dd8f6d06acf63bbaf56f5d30,sha256:d417122500cc46961da5f92a9c43544cf4c2162569f2cf1996149d753adc704b"
-   }
-  ],
-  "seed": 20261017,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "k",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "certifying"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "q",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "strongestCombine"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(cert nil)"
-      },
-      {
-       "Printed": "(cert ((cons passA) nil))"
-      },
-      {
-       "Printed": "(cert ((cons passB) ((cons passA) nil)))"
-      },
-      {
-       "Printed": "(cert ((cons failA) ((cons passA) nil)))"
-      },
-      {
-       "Printed": "(cert ((cons provedA) ((cons passB) nil)))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "r",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "zero"
-      },
-      {
-       "Printed": "tolAbove"
-      },
-      {
-       "Printed": "branch"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "rs",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons zero) nil)"
-      },
-      {
-       "Printed": "((cons kappa) ((cons branch) nil))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "ev",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 3 }) nil) }) nil)"
-      },
-      {
-       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 0 }) ((cons { region := tolAbove, n := 2 }) nil)) }) ((cons { binding := bB, regions := ((cons { region := zero, n := 1 }) ((cons { region := kappa, n := 5 }) nil)) }) nil))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "passA"
-      },
-      {
-       "Printed": "passB"
-      },
-      {
-       "Printed": "provedA"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 405,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "k = certifying, q = strongestCombine, c = (cert nil), r = zero, rs = nil, ev = nil, p = passA"
-  },
-  "date": "2026-10-22T09:23:53+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "r boundary"
-    },
-    "n": 405
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "p boundary"
-    },
-    "n": 405
-   }
-  ]
- },
- {
   "law": "TheThreeSourcesGrade",
   "cone": "sha256:e78b02228e3b5e1801a3df1658041e0881a082dd2b59e543241cb0fba1b88ea4",
   "binding": [
@@ -4382,267 +4810,6 @@
     "n": 270
    }
   ]
- },
- {
-  "law": "RefutedInEveryRegion",
-  "cone": "sha256:a7ad20d1e6807ef10a299c12772a9ecc84798dd45b59202a3c96f72437e7e77b",
-  "binding": [
-   {
-    "parameter": "k",
-    "generator": "models (Listed)",
-    "fingerprint": "sha256:4cc3ef018a3de8c49a599076a3d6ef534e6a334d54f66b8b4af61e24d00ba5a5"
-   },
-   {
-    "parameter": "q",
-    "generator": "blindToFailures (Listed)",
-    "fingerprint": "sha256:45d2255f40f429d9f806b33f3d821746f1cb399b16fe53b1acbcb9080856f61c"
-   },
-   {
-    "parameter": "c",
-    "generator": "certificates (Listed)",
-    "fingerprint": "sha256:17a7a4f344cf9d8e12ee5f327126078b7de16f443894edaf5ea63b0c397b2e3a"
-   },
-   {
-    "parameter": "rs",
-    "generator": "regionLists (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:d34c62178ebd0c91598b25c362e315ca247f7d67cd63a92bb1d4e5f7410afb10"
-   },
-   {
-    "parameter": "ev",
-    "generator": "evidences (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:b10ac18543f08ae24a7c2c74ece8bb1a96133b0608095745e748dd7df5a1d107"
-   }
-  ],
-  "seed": 20261017,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "k",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "certifying"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "q",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "blindToFailure"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(cert nil)"
-      },
-      {
-       "Printed": "(cert ((cons passA) nil))"
-      },
-      {
-       "Printed": "(cert ((cons passB) ((cons passA) nil)))"
-      },
-      {
-       "Printed": "(cert ((cons failA) ((cons passA) nil)))"
-      },
-      {
-       "Printed": "(cert ((cons provedA) ((cons passB) nil)))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "rs",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons zero) nil)"
-      },
-      {
-       "Printed": "((cons kappa) ((cons branch) nil))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "ev",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 3 }) nil) }) nil)"
-      },
-      {
-       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 0 }) ((cons { region := tolAbove, n := 2 }) nil)) }) ((cons { binding := bB, regions := ((cons { region := zero, n := 1 }) ((cons { region := kappa, n := 5 }) nil)) }) nil))"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 45,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "k = certifying, q = blindToFailure, c = (cert ((cons failA) ((cons passA) nil))), rs = nil, ev = nil"
-  },
-  "date": "2026-10-22T09:17:38+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "NoRegionsLeaveTheGrade",
-  "cone": "sha256:6b4d198d21113cab9b381f29d1202458ae52d38383487459ccc5c9d43a1b22f8",
-  "binding": [
-   {
-    "parameter": "k",
-    "generator": "models (Listed)",
-    "fingerprint": "sha256:4cc3ef018a3de8c49a599076a3d6ef534e6a334d54f66b8b4af61e24d00ba5a5"
-   },
-   {
-    "parameter": "q",
-    "generator": "gradingNothingAlones (Listed)",
-    "fingerprint": "sha256:519746fa1881bae3fbee568e10580fc7de7f60dedd2e852b396244165e4b1afa"
-   },
-   {
-    "parameter": "c",
-    "generator": "certificates (Listed)",
-    "fingerprint": "sha256:17a7a4f344cf9d8e12ee5f327126078b7de16f443894edaf5ea63b0c397b2e3a"
-   },
-   {
-    "parameter": "ev",
-    "generator": "evidences (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:b10ac18543f08ae24a7c2c74ece8bb1a96133b0608095745e748dd7df5a1d107"
-   }
-  ],
-  "seed": 20261017,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "k",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "certifying"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "q",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "gradingNothingAlone"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(cert nil)"
-      },
-      {
-       "Printed": "(cert ((cons passA) nil))"
-      },
-      {
-       "Printed": "(cert ((cons passB) ((cons passA) nil)))"
-      },
-      {
-       "Printed": "(cert ((cons failA) ((cons passA) nil)))"
-      },
-      {
-       "Printed": "(cert ((cons provedA) ((cons passB) nil)))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "ev",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 3 }) nil) }) nil)"
-      },
-      {
-       "Printed": "((cons { binding := nil, regions := ((cons { region := zero, n := 0 }) ((cons { region := tolAbove, n := 2 }) nil)) }) ((cons { binding := bB, regions := ((cons { region := zero, n := 1 }) ((cons { region := kappa, n := 5 }) nil)) }) nil))"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 15,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "k = certifying, q = gradingNothingAlone, c = (cert ((cons passA) nil)), ev = nil"
-  },
-  "date": "2026-10-22T09:17:37+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
  },
  {
   "law": "AReplayIsNotANewStretch",
@@ -6194,173 +6361,6 @@
      "name": "e boundary"
     },
     "n": 72
-   }
-  ]
- },
- {
-  "law": "ADisagreementRefutes",
-  "cone": "sha256:b3c6e5fcc18c111a3876600deb9aca929567f70c9536dbd90271e907a84dae19",
-  "binding": [
-   {
-    "parameter": "k",
-    "generator": "blindModels (Listed)",
-    "fingerprint": "sha256:3ea74fbfa5375f8bd25a1a31a59859c8020dbcebb1bbbec4bc3cd2efad4c8a02"
-   },
-   {
-    "parameter": "c",
-    "generator": "certificates (Listed)",
-    "fingerprint": "sha256:49c29e2fe96025a62b6b400d73ff8caa42317394928e1064b9b9bffd9c1c7f97"
-   },
-   {
-    "parameter": "e",
-    "generator": "ofTheLaw (Listed)",
-    "fingerprint": "sha256:fc68186a5f4eeb2965387587ebe0faf1f0088befb4b67f7f25809d1238808a44,sha256:246e575faf3f82317be5d08ce5d09a400e3e348e102e503fd0b075cb40b017fb,sha256:aa2f9d205231310f810a1fa0ba1dbada874d470e45cd7370f2497b5e0c413392,sha256:7d1e52099681c7d6f7c1101370a7f19bd179817fe9714a9c3e27cf379dc99914"
-   },
-   {
-    "parameter": "o",
-    "generator": "outcomes (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:31d6b26811d1ec5892a3372db4cafd2316694080761baf6af6572332f931256a"
-   },
-   {
-    "parameter": "g",
-    "generator": "grades (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:e2e191f8b2e1c00acbfdec17d28ab250bb0c843a120e93ee027b1f094453a46f"
-   },
-   {
-    "parameter": "es",
-    "generator": "behindStores (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:a840b6e377a0d439ad7989570fc9c61b35b98a79656ed805fcaafe1d4c15984f"
-   }
-  ],
-  "seed": 20261016,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "k",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "blind"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ law := \"L\", cone := \"sha256:cccc\", entries := nil }"
-      },
-      {
-       "Printed": "{ law := \"L\", cone := \"sha256:cccc\", entries := ((cons passTwo) nil) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "passOne"
-      },
-      {
-       "Printed": "failOne"
-      },
-      {
-       "Printed": "passTwo"
-      },
-      {
-       "Printed": "notRunOne"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "Passed"
-      },
-      {
-       "Printed": "(Failed \"x = 2\")"
-      },
-      {
-       "Printed": "(NotRunFor \"no generator\")"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "g",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nothing"
-      },
-      {
-       "Printed": "(just Cases)"
-      },
-      {
-       "Printed": "(just Proved)"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "es",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons passTwo) nil)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 144,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "k = blind, c = { law := \"L\", cone := \"sha256:cccc\", entries := nil }, e = passOne, o = Passed, g = nothing, es = nil"
-  },
-  "date": "2026-10-22T08:19:03+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "e boundary"
-    },
-    "n": 144
    }
   ]
  },
