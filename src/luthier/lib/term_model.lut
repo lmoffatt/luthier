@@ -26,9 +26,8 @@ textJoin : List String -> String
 natDecimal : Nat -> String
 textAppend (x y : String) : String := textJoin (textParts x <> textParts y)
 unqualified (s : String) : String := textJoin (lastComponent (textParts s) nil)
--- kept as a recursion (bite 13b): a left scan with an accumulator reset at each dot; the core has only the right fold
-lastComponent (xs acc : List String) : List String := match xs {
-  nil -> acc ; cons x rest -> lastComponent rest (if x == "." then nil else acc <> [x]) }
+lastComponent (xs acc : List String) : List String :=
+  foldLeft String (List String) (fn (a : List String) (x : String) { if x == "." then nil else a <> [x] }) acc xs
 freshName (x : String) (avoid : List String) : String :=
   if member List String x avoid then freshName (textAppend x "'") avoid else x
 
@@ -215,9 +214,8 @@ stageBindings (xs : Bindings) (b : Term) (avoid : List String) (ready : Bindings
 stageBinding (x : String) (v : Term) (rest : Bindings) (b : Term)
              (avoid : List String) (ready : Bindings) (z : String) : Term :=
   stageBindings rest (substTerm x (Var z) b) (cons z avoid) (cons (z, v) ready)
--- kept as a recursion (bite 13b): a left fold substituting into the body one binding after another; the core has only the right fold
-finishBindings (xs : Bindings) (b : Term) : Term := match xs {
-  nil -> b ; cons (x, v) rest -> finishBindings rest (substTerm x v b) }
+finishBindings (xs : Bindings) (b : Term) : Term :=
+  foldLeft (String * Term) Term (fn (t : Term) (xv : String * Term) { match xv { (x, v) -> substTerm x v t } }) b xs
 truthTerm (b : Bool) : Term := Var (if b then "true" else "false")
 primitiveResult (op : String) (i j : Term) : Maybe Term := match (i, j) {
   (Lit (IntConst a), Lit (IntConst b)) ->
@@ -298,16 +296,17 @@ demandParts (p : Program) (t : Term) : Maybe Term := match t {
     if dataConstructor p c
     then (match demandTerms p vs { just ws -> just (rebuildConstructor c ws) ; nothing -> nothing })
     else nothing } }
--- kept as a recursion (bite 13b): finds the leftmost part that is not yet a value and rebuilds the list around it (search with a result)
-demandFields (p : Program) (fs : List (String * Term)) : Maybe (List (String * Term)) := match fs {
-  nil -> nothing ; cons (k, v) rest -> if concreteValue p v
-    then (match demandFields p rest { just gs -> just (cons (k, v) gs) ; nothing -> nothing })
-    else (match stepValue p v { just w -> just (cons (k, w) rest) ; nothing -> nothing }) }
--- kept as a recursion (bite 13b): finds the leftmost part that is not yet a value and rebuilds the list around it (search with a result)
-demandTerms (p : Program) (vs : List Term) : Maybe (List Term) := match vs {
-  nil -> nothing ; cons v rest -> if concreteValue p v
-    then (match demandTerms p rest { just ws -> just (cons v ws) ; nothing -> nothing })
-    else (match stepValue p v { just w -> just (cons w rest) ; nothing -> nothing }) }
+-- the leftmost part that is not yet a value takes a step; the list is rebuilt around it
+demandFields (p : Program) (fs : List (String * Term)) : Maybe (List (String * Term)) :=
+  match dropWhile (String * Term) (fn (kv : String * Term) { match kv { (k, v) -> concreteValue p v } }) fs {
+    nil -> nothing ; cons (k, v) rest -> match stepValue p v {
+      just w -> just (takeWhile (String * Term) (fn (kv : String * Term) { match kv { (j, u) -> concreteValue p u } }) fs <> cons (k, w) rest) ;
+      nothing -> nothing } }
+demandTerms (p : Program) (vs : List Term) : Maybe (List Term) :=
+  match dropWhile Term (fn (v : Term) { concreteValue p v }) vs {
+    nil -> nothing ; cons v rest -> match stepValue p v {
+      just w -> just (takeWhile Term (fn (u : Term) { concreteValue p u }) vs <> cons w rest) ;
+      nothing -> nothing } }
 stepEquality (p : Program) (i j : Term) : HeadStep :=
   if concreteValue p i and concreteValue p j then Next (truthTerm (equalValues p i j))
   else match stepValue p i {
@@ -383,9 +382,7 @@ stepPatternList (env : Program) (ps : List Pattern) (vs : List Term) : PatternLi
       ListMiss -> ListMiss ; ListBlocked -> ListBlocked ; ListDemand ws -> ListDemand (cons v ws) ;
       ListHit ys -> ListHit (xs <> ys) } } ; _ -> ListMiss }
 rebuildConstructor (c : String) (args : List Term) : Term := applyArguments (Var c) args
--- kept as a recursion (bite 13b): a left fold, App (App f a) b; the core has only the right fold
-applyArguments (f : Term) (args : List Term) : Term := match args {
-  nil -> f ; cons a rest -> applyArguments (App f a) rest }
+applyArguments (f : Term) (args : List Term) : Term := foldLeft Term Term (fn (g : Term) (a : Term) { App g a }) f args
 ArmStep = { ArmSelected : Term || ScrutineeNext : Term || NoArm : Unit }
 -- kept as a recursion (bite 13b): the first arm that hits decides, and a demand or a block stops the scan (search with a result)
 chooseArm (p : Program) (s : Term) (arms : List (Pattern * Term)) : ArmStep := match arms {

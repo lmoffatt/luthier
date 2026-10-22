@@ -98,10 +98,9 @@ leftCalls (e : Ebnf) (r : Rhs) : List String := match r {
   opt a -> leftCalls e a ;
   rep a -> leftCalls e a ;
 }
--- kept as a recursion (bite 13b): a prefix up to the first element that is not nullable (early stop); the core has no takeWhile
 leftCallsSeq (e : Ebnf) (rs : List Rhs) : List String :=
-  match rs { nil -> nil ; cons r rest ->
-    if nullable e r then leftCalls e r <> leftCallsSeq e rest else leftCalls e r }
+  leftCallsAll e (takeWhile Rhs (fn (r : Rhs) { nullable e r }) rs)
+  <> (match dropWhile Rhs (fn (r : Rhs) { nullable e r }) rs { nil -> nil ; cons r rest -> leftCalls e r })
 leftCallsAll (e : Ebnf) (rs : List Rhs) : List String := concat String (map (leftCalls e) rs)
 leftCallsOf (e : Ebnf) (n : String) : List String := leftCallsAll e (rulesOf e n)
 
