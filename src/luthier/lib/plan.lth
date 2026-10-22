@@ -289,6 +289,8 @@ Keying (A : U) := KeySeesTheDemand A & KeySeesTheCone A & KeySeesTheMode A & Key
 -- certificate that disagrees does, D-2026-10-15-f), until the discrepancy is resolved.
 eqHash (a b : Hash) : Bool := a == b
 ResultsDetermined (rs : List (Stored Hash)) : Bool := determined Hash eqHash rs
+-- [core bite 13b] gathered so that this file claims it (4.S14); a model of the results store tests it
+ResultsStore := ResultsDetermined
 
 -- ---------------------------------------------------------------- §5 The theory
 

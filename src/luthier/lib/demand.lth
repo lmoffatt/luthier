@@ -198,6 +198,8 @@ NoPriceRefusesAssumed (k : Certifying) (d : Demand) (law : String) (cone : Hash)
 -- almost never)
 LoweringLosesNothing (k : Certifying) (d : Demand) (law : String) (cone : Hash) (e : EntryFor (lawDemand d law cone)) (g : Grade) : Bool :=
   ServesIsMonotoneInTheCutoff k (lawDemand d law cone) e g
+-- [core bite 13b] the two laws, gathered so that this file claims them (4.S14)
+DemandPassesDown := NoPriceRefusesAssumed & LoweringLosesNothing
 
 -- ---------------------------------------------------------------- §6 The strategy that ran
 

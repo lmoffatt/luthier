@@ -68,3 +68,5 @@ schedulesAgree : Bool := Confluent Nat eqNat example needPlan.live needPlan.sche
   and EquivalentOn Nat eqNat example needPlan.live needPlan.schedule forwardPlan.schedule
 -- the schedule that computes d before what it reads is not a linearization (it gave d = 0)
 readersFirstRefused : Bool := not (LinearizesOn Nat eqNat example needPlan.live ["d", "b", "c", "a"])
+-- [core bite 13b] the four facts about the example, gathered so that this file claims them (4.S14)
+ExampleFacts := exampleIsADag & bothLinearize & schedulesAgree & readersFirstRefused

@@ -119,6 +119,9 @@ UniformSampleIsUniform (source : Gen UnitList) (c : Sequential) : Law := SourceI
 ClearDiagonalGivesClear (g : Gen ClearDiagonal) (size : Nat) (seed : Seed) : Bool :=
   match g size seed { (d, next) ->
     forallBelow d.n (fn k { d.f k == 0.0 or (1.0 <= abs (d.f k) and abs (d.f k) <= 1000.0) }) }
+-- [core bite 13b] the families' laws, gathered so that this file claims them (4.S14)
+FamilyLaws := SymmetricGivesSymmetric & SymmetricOfGivesItsSize & GramGivesPsd & OrthogonalGivesOrthogonal
+  & UnitListGivesUnitValues & ClearDiagonalGivesClear
 
 -- ---------------------------------------------------------------- the controls of Random (L9.14)
 
