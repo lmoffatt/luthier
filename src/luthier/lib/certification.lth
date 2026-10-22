@@ -220,9 +220,8 @@ agree (e f : Entry) : Bool := e.outcome == f.outcome and e.grade == f.grade
 -- read its store with them.
 latestWith (ident : Entry -> Identity) (i : Identity) (es : List Entry) : Maybe Entry :=
   nth Entry (filter List Entry (fn (e : Entry) { ident e == i }) es) 0
--- kept as a recursion (bite 13b): the entries after the first of an identity: a position, not a per-element map
 behind (ident : Entry -> Identity) (i : Identity) (es : List Entry) : List Entry :=
-  match es { nil -> nil ; cons e rest -> if ident e == i then rest else behind ident i rest }
+  drop Entry 1 (dropWhile Entry (fn (e : Entry) { not (ident e == i) }) es)
 seenIdentity (i : Identity) (is : List Identity) : Bool := any List Identity (fn (j : Identity) { i == j }) is
 -- kept as a recursion (bite 13b): an identity is seen once, a seen list threaded left to right
 disputes (ident : Entry -> Identity) (seen : List Identity) (es : List Entry) : List (Entry * Entry) :=
@@ -508,10 +507,9 @@ Link = { from : String, to : String, standing : Standing }
 -- [proposed, C7] Each step names the next name and the standing of its identity with the last, so
 -- the link starts where the path stands; a link the model refuses ends the path with nothing.
 linkFrom (b : Standing) (a : String) (i : Standing) : Link := { from := b.law, to := a, standing := i }
--- kept as a recursion (bite 13b): stops at the first link the transport refuses
 along (k : Certifying) (b : Standing) (path : List (String * Standing)) : Maybe Standing :=
-  match path { nil -> just b ; cons (a, i) rest ->
-    (match k.transport b (linkFrom b a i) { nothing -> nothing ; just s -> along k s rest }) }
+  foldLeft (String * Standing) (Maybe Standing) (fn (acc : Maybe Standing) (step : String * Standing) {
+    match acc { nothing -> nothing ; just s -> match step { (a, i) -> k.transport s (linkFrom s a i) } } }) (just b) path
 
 -- ---------------------------------------------------------------- §3 What a run requires
 

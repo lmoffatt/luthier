@@ -117,9 +117,8 @@ WeightedSupport (T : Concrete) : { weights : List (T * Float64), pick : Float64 
 weightOf (T : Concrete) (ws : List (T * Float64)) (x : T) : Float64 :=
   fold (T * Float64) Float64 (fn a b { a + b }) 0.0 (fn (yw : T * Float64) { match yw { (y, w) -> if x == y then w else 0.0 } }) ws
 -- the running sum before the first occurrence of `x`
--- kept as a recursion (bite 13b): stops at the first occurrence of the value
 before (T : Concrete) (ws : List (T * Float64)) (x : T) : Float64 :=
-  match ws { nil -> 0.0 ; cons (y, w) rest -> if x == y then 0.0 else w + before T rest x }
+  total T (takeWhile (T * Float64) (fn (yw : T * Float64) { match yw { (y, w) -> not (x == y) } }) ws)
 occurs (T : Concrete) (ws : List (T * Float64)) (x : T) : Bool :=
   any List (T * Float64) (fn (yw : T * Float64) { match yw { (y, w) -> x == y } }) ws
 SupportNonNegative (T : Concrete) (s : WeightedSupport T) : Bool :=
