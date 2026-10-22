@@ -1496,3 +1496,28 @@ def test_the_store_reader_bounds_a_listed_pass_by_its_cases():
     whole = [{"parameter": "k", "generator": "ExhaustiveMode over (Fin n)", "fingerprint": ""}]
     assert certify.store_errors([listed([support], binding=whole)]) == []
     assert certify.store_errors([listed([three], evaluated=0)]) == []
+
+
+def test_pruning_keeps_a_current_failure_so_passes_never_restore_the_grade():
+    """Audit 1.4 A, spec 6.S15: one failure then four passes of the same law, cone and binding. The
+    bounded store keeps the failure, and the law stays without a grade."""
+    entries = certify.record([], _entry(seed=0, outcome={"Failed": "x = 1"}, date="2026-10-15T00:00:00+00:00"))
+    for k in range(1, 7):
+        entries = certify.record(entries, _entry(seed=k, date=f"2026-10-15T00:00:0{k}+00:00"))
+    assert 0 in [e["seed"] for e in entries]
+    assert certify.certificate_grade(entries, "L", "sha256:a") is None
+    assert [e["seed"] for e in certify.prune(entries)] == [6, 5, 4, 3, 0]
+    # a stale failure still goes once a current entry exists: only a current refutation refuses
+    assert [e["seed"] for e in certify.record(entries, _entry(cone="sha256:b", seed=9))] == [9]
+
+
+def test_pruning_keeps_a_confirmed_control():
+    """A control whose broken model came out confirmed (the control failed) is kept past four refutations."""
+    def control(seed, outcome):
+        return dict(_entry(seed=seed, date=f"2026-10-15T00:00:0{seed}+00:00"), kind="Control", outcome=outcome, binding=[],
+                    grade=None)
+    entries = certify.record([], control(0, {"ControlConfirmed": "held"}))
+    for k in range(1, 6):
+        entries = certify.record(entries, control(k, {"ControlRefuted": f"x = {k}"}))
+    assert 0 in [e["seed"] for e in entries]
+    assert certify.control_status(entries, "L", "sha256:a").startswith(certify.CONTROL_FAILED)
