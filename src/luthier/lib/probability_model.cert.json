@@ -1,5 +1,1125 @@
 [
  {
+  "law": "PushingDraws",
+  "cone": "sha256:a2542f6d6a98f1dfe8275cbc3d2b9a8600d93321f34cb126f9e1c8e756bb9830",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "pushedType (Listed)",
+    "fingerprint": "sha256:9b59c16c1e54b62f96f86b24477ac1b30a32e03eed2abf178434a9ccc019cf31"
+   },
+   {
+    "parameter": "B",
+    "generator": "pushedType (Listed)",
+    "fingerprint": "sha256:9b59c16c1e54b62f96f86b24477ac1b30a32e03eed2abf178434a9ccc019cf31"
+   },
+   {
+    "parameter": "f",
+    "generator": "negated (Listed)",
+    "fingerprint": "sha256:3f8de15c6cd8b10bd6f99190f91c12bcf355033b3df18d6845b815b23c7a7a0f"
+   },
+   {
+    "parameter": "model",
+    "generator": "pushModel (Listed)",
+    "fingerprint": "sha256:1382ea90c95e645f0ef226ada7a52d098a0c6a8c0242c63d7ca34f300017359b"
+   },
+   {
+    "parameter": "g",
+    "generator": "pushSamplers (Listed)",
+    "fingerprint": "sha256:bc5f8114c92062938761447fe16e41712c3ac797b64925d3b68e5c4e6996c646"
+   },
+   {
+    "parameter": "n",
+    "generator": "pushSizes (Listed)",
+    "fingerprint": "sha256:6c26b4433b95c3de2848a3ad1209d1451d7926bcf3082143a5de97e89719fc96"
+   },
+   {
+    "parameter": "s",
+    "generator": "pushSeeds (Listed)",
+    "fingerprint": "sha256:d885efa0653fe85b7bfe75baef75e022b332872e3d14f1137d5c5c7bffbb48b8"
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "pushedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "pushedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "negated"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "pushModel"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (n : Nat) { fn (s : Seed) { (((+ n) s), (nextSeed s)) } }"
+      },
+      {
+       "Printed": "fn (n : Nat) { fn (s : Seed) { (((- n) 3), s) } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      },
+      {
+       "Number": 1.0
+      },
+      {
+       "Number": 7.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      },
+      {
+       "Number": 12345.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 12,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "PushedDraw A B f model: A = pushedType, B = pushedType, f = negated, model = pushModel, g = fn (n : Nat) { fn (s : Seed) { (((+ n) s), (nextSeed s)) } }, n = 0, s = 12345"
+  },
+  "date": "2026-10-22T05:18:21+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "n boundary"
+    },
+    "n": 8
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "s boundary"
+    },
+    "n": 6
+   }
+  ]
+ },
+ {
+  "law": "PushingDraws",
+  "cone": "sha256:a2542f6d6a98f1dfe8275cbc3d2b9a8600d93321f34cb126f9e1c8e756bb9830",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "pushedType (Listed)",
+    "fingerprint": "sha256:9b59c16c1e54b62f96f86b24477ac1b30a32e03eed2abf178434a9ccc019cf31"
+   },
+   {
+    "parameter": "B",
+    "generator": "pushedType (Listed)",
+    "fingerprint": "sha256:9b59c16c1e54b62f96f86b24477ac1b30a32e03eed2abf178434a9ccc019cf31"
+   },
+   {
+    "parameter": "f",
+    "generator": "negated (Listed)",
+    "fingerprint": "sha256:3f8de15c6cd8b10bd6f99190f91c12bcf355033b3df18d6845b815b23c7a7a0f"
+   },
+   {
+    "parameter": "model",
+    "generator": "pushModel (Listed)",
+    "fingerprint": "sha256:f2aa15f24ab1cec65d7399899a94293f7b983432c1e90de1ae8d371721e35f00"
+   },
+   {
+    "parameter": "g",
+    "generator": "pushSamplers (Listed)",
+    "fingerprint": "sha256:bc5f8114c92062938761447fe16e41712c3ac797b64925d3b68e5c4e6996c646"
+   },
+   {
+    "parameter": "n",
+    "generator": "pushSizes (Listed)",
+    "fingerprint": "sha256:6c26b4433b95c3de2848a3ad1209d1451d7926bcf3082143a5de97e89719fc96"
+   },
+   {
+    "parameter": "s",
+    "generator": "pushSeeds (Listed)",
+    "fingerprint": "sha256:d885efa0653fe85b7bfe75baef75e022b332872e3d14f1137d5c5c7bffbb48b8"
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "pushedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "pushedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "negated"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "pushModel"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (n : Nat) { fn (s : Seed) { (((+ n) s), (nextSeed s)) } }"
+      },
+      {
+       "Printed": "fn (n : Nat) { fn (s : Seed) { (((- n) 3), s) } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      },
+      {
+       "Number": 1.0
+      },
+      {
+       "Number": 7.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      },
+      {
+       "Number": 12345.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 12,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T05:07:47+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "conjunct": "PushedDraw A B f model",
+  "conjuncts": [
+   "PushedDraw A B f model"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "n boundary"
+    },
+    "n": 8
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "s boundary"
+    },
+    "n": 6
+   }
+  ]
+ },
+ {
+  "law": "KolmogorovAgrees",
+  "cone": "sha256:642171a64e19e7c11dfb560aa0185b1bc8016fcb583dab203aa70e750398aff3",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
+   },
+   {
+    "parameter": "vs",
+    "generator": "unitList (generator, size 10)",
+    "fingerprint": "sha256:02af9094f69f74aea0453abfd747fc40ab394fe2dc1c608f0fe5b536c49fcf1d,sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:14:38+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.generators.clear_diagonal",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.gram",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.orthogonal",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.symmetric",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.symmetric_of",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.uniform_sample",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.unit_list",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "vs boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "KolmogorovBounded",
+  "cone": "sha256:bbc2ed7fc0070b4bb4376cb8c1cc7989926fd1172ff852b8adeb62870d89b008",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
+   },
+   {
+    "parameter": "vs",
+    "generator": "unitList (generator, size 10)",
+    "fingerprint": "sha256:02af9094f69f74aea0453abfd747fc40ab394fe2dc1c608f0fe5b536c49fcf1d,sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:14:33+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.generators.clear_diagonal",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.gram",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.orthogonal",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.symmetric",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.symmetric_of",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.uniform_sample",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.unit_list",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "vs boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "KolmogorovOfMultiset",
+  "cone": "sha256:c279bb3d0c3ed866d574a5355714cfc56725b9a5c67e130746836e60f587d27b",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
+   },
+   {
+    "parameter": "vs",
+    "generator": "unitList (generator, size 10)",
+    "fingerprint": "sha256:02af9094f69f74aea0453abfd747fc40ab394fe2dc1c608f0fe5b536c49fcf1d,sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:14:24+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.generators.clear_diagonal",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.gram",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.orthogonal",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.symmetric",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.symmetric_of",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.uniform_sample",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ],
+   [
+    "python:luthier.generators.unit_list",
+    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "vs boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "KolmogorovAgrees",
+  "cone": "sha256:642171a64e19e7c11dfb560aa0185b1bc8016fcb583dab203aa70e750398aff3",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
+   },
+   {
+    "parameter": "vs",
+    "generator": "unitLists (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:1d7847606d27dd644d9ebf4034fc028f6a3c4f0571ffe2508dd39487e11bcbc4"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "vs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 0) fn (k : (Fin 0)) { 0.0 })) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 101) 0)) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
+      },
+      {
+       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 20) fn (k : (Fin 20)) { 0.9 })) ((cons ((spread 10) 0)) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:11:51+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "vs boundary"
+    },
+    "n": 6
+   }
+  ]
+ },
+ {
+  "law": "KolmogorovBounded",
+  "cone": "sha256:bbc2ed7fc0070b4bb4376cb8c1cc7989926fd1172ff852b8adeb62870d89b008",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
+   },
+   {
+    "parameter": "vs",
+    "generator": "unitLists (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:1d7847606d27dd644d9ebf4034fc028f6a3c4f0571ffe2508dd39487e11bcbc4"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "vs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 0) fn (k : (Fin 0)) { 0.0 })) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 101) 0)) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
+      },
+      {
+       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 20) fn (k : (Fin 20)) { 0.9 })) ((cons ((spread 10) 0)) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:11:51+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "vs boundary"
+    },
+    "n": 6
+   }
+  ]
+ },
+ {
+  "law": "KolmogorovOfMultiset",
+  "cone": "sha256:c279bb3d0c3ed866d574a5355714cfc56725b9a5c67e130746836e60f587d27b",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
+   },
+   {
+    "parameter": "vs",
+    "generator": "unitLists (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:1d7847606d27dd644d9ebf4034fc028f6a3c4f0571ffe2508dd39487e11bcbc4"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "vs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 0) fn (k : (Fin 0)) { 0.0 })) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 101) 0)) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
+      },
+      {
+       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 20) fn (k : (Fin 20)) { 0.9 })) ((cons ((spread 10) 0)) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:11:50+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "vs boundary"
+    },
+    "n": 6
+   }
+  ]
+ },
+ {
+  "law": "KolmogorovAgrees",
+  "cone": "sha256:642171a64e19e7c11dfb560aa0185b1bc8016fcb583dab203aa70e750398aff3",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
+   },
+   {
+    "parameter": "vs",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitList",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "date": "2026-10-22T04:11:50+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovBounded",
+  "cone": "sha256:bbc2ed7fc0070b4bb4376cb8c1cc7989926fd1172ff852b8adeb62870d89b008",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
+   },
+   {
+    "parameter": "vs",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitList",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "date": "2026-10-22T04:11:50+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovOfMultiset",
+  "cone": "sha256:c279bb3d0c3ed866d574a5355714cfc56725b9a5c67e130746836e60f587d27b",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
+   },
+   {
+    "parameter": "vs",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitList",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "date": "2026-10-22T04:11:50+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
   "law": "ProfiledIsGaussianAtItsSigma",
   "cone": "sha256:9cfb940b4174ff1a0d28b9b317a8347a87358bdf68fb12fa8d9b740755fe95aa",
   "binding": [
@@ -197,306 +1317,6 @@
   ]
  },
  {
-  "law": "KolmogorovAgrees",
-  "cone": "sha256:6a4bceda9bbaa119657517dda4070a8246c7050283ec60cbdf343d1124fafc57",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "numpySort (Listed)",
-    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
-   },
-   {
-    "parameter": "vs",
-    "generator": "unitList (generator, size 10)",
-    "fingerprint": "sha256:4feb9a151c662fe4da666c4f5de5f1ac07f660b59239249ea00eea9fd348d866,sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   }
-  ],
-  "seed": 20261014,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "numpySort"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-21T14:54:09+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.kolmogorov_distance",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.generators.clear_diagonal",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.gram",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.orthogonal",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.symmetric",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.symmetric_of",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.uniform_sample",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.unit_list",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "vs boundary"
-    },
-    "n": 100
-   }
-  ]
- },
- {
-  "law": "KolmogorovBounded",
-  "cone": "sha256:1970e7558b91808fea682ca9d34cb8adb94cf3b96b106dea751e91687b3ab449",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "numpySort (Listed)",
-    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
-   },
-   {
-    "parameter": "vs",
-    "generator": "unitList (generator, size 10)",
-    "fingerprint": "sha256:4feb9a151c662fe4da666c4f5de5f1ac07f660b59239249ea00eea9fd348d866,sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   }
-  ],
-  "seed": 20261014,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "numpySort"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-21T14:54:04+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.kolmogorov_distance",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.generators.clear_diagonal",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.gram",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.orthogonal",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.symmetric",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.symmetric_of",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.uniform_sample",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.unit_list",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "vs boundary"
-    },
-    "n": 100
-   }
-  ]
- },
- {
-  "law": "KolmogorovOfMultiset",
-  "cone": "sha256:8a9820966370b0726b2ee1f49ee6bf79c0695fbc1f20938470ae066c6889b445",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "numpySort (Listed)",
-    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
-   },
-   {
-    "parameter": "vs",
-    "generator": "unitList (generator, size 10)",
-    "fingerprint": "sha256:4feb9a151c662fe4da666c4f5de5f1ac07f660b59239249ea00eea9fd348d866,sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   }
-  ],
-  "seed": 20261014,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "numpySort"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-21T14:53:58+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.kolmogorov_distance",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.generators.clear_diagonal",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.gram",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.orthogonal",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.symmetric",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.symmetric_of",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.uniform_sample",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ],
-   [
-    "python:luthier.generators.unit_list",
-    "sha256:de26ee0908eb17d504a32eaf3d0c068337ac5a08162603cacaac475fbd4ef780"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "vs boundary"
-    },
-    "n": 100
-   }
-  ]
- },
- {
   "law": "GaussianPeaksAtMean",
   "cone": "sha256:16b4af290fdf61cd7810e0089dff791902b15148ddc4d26e4fd93a6c89e53c49",
   "binding": [
@@ -679,297 +1499,6 @@
   ]
  },
  {
-  "law": "KolmogorovAgrees",
-  "cone": "sha256:6a4bceda9bbaa119657517dda4070a8246c7050283ec60cbdf343d1124fafc57",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "numpySort (Listed)",
-    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
-   },
-   {
-    "parameter": "vs",
-    "generator": "unitLists (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:1d7847606d27dd644d9ebf4034fc028f6a3c4f0571ffe2508dd39487e11bcbc4"
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "numpySort"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "vs",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons (((vec Float64) 0) fn (k : (Fin 0)) { 0.0 })) nil)"
-      },
-      {
-       "Printed": "((cons ((spread 101) 0)) nil)"
-      },
-      {
-       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
-      },
-      {
-       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
-      },
-      {
-       "Printed": "((cons (((vec Float64) 20) fn (k : (Fin 20)) { 0.9 })) ((cons ((spread 10) 0)) nil))"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 6,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T09:13:29+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.kolmogorov_distance",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromType",
-     "name": "empty"
-    },
-    "n": 1
-   },
-   {
-    "region": {
-     "source": "FromType",
-     "name": "one element"
-    },
-    "n": 2
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "vs boundary"
-    },
-    "n": 6
-   }
-  ]
- },
- {
-  "law": "KolmogorovAgrees",
-  "cone": "sha256:6a4bceda9bbaa119657517dda4070a8246c7050283ec60cbdf343d1124fafc57",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "numpySort (Listed)",
-    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
-   },
-   {
-    "parameter": "vs",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitList",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   }
-  ],
-  "seed": 20261014,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "numpySort"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "NotRun": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
-  },
-  "grade": null,
-  "outcome": {
-   "NotRunFor": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
-  },
-  "date": "2026-10-21T09:13:29+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.kolmogorov_distance",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ]
-  ]
- },
- {
-  "law": "KolmogorovBounded",
-  "cone": "sha256:1970e7558b91808fea682ca9d34cb8adb94cf3b96b106dea751e91687b3ab449",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "numpySort (Listed)",
-    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
-   },
-   {
-    "parameter": "vs",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitList",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   }
-  ],
-  "seed": 20261014,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "numpySort"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "NotRun": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
-  },
-  "grade": null,
-  "outcome": {
-   "NotRunFor": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
-  },
-  "date": "2026-10-21T06:35:30+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.kolmogorov_distance",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ]
-  ]
- },
- {
-  "law": "KolmogorovOfMultiset",
-  "cone": "sha256:8a9820966370b0726b2ee1f49ee6bf79c0695fbc1f20938470ae066c6889b445",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "numpySort (Listed)",
-    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
-   },
-   {
-    "parameter": "vs",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitList",
-    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
-   }
-  ],
-  "seed": 20261014,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "numpySort"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "NotRun": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
-  },
-  "grade": null,
-  "outcome": {
-   "NotRunFor": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
-  },
-  "date": "2026-10-21T06:35:30+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.kolmogorov_distance",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ]
-  ]
- },
- {
   "law": "KolmogorovOfOne",
   "cone": "sha256:87fad90035943a94f02f79d0047b00383702596981c8598a0dee9d7cbe293359",
   "binding": [
@@ -1047,228 +1576,6 @@
      "name": "u boundary"
     },
     "n": 11
-   }
-  ]
- },
- {
-  "law": "KolmogorovBounded",
-  "cone": "sha256:1970e7558b91808fea682ca9d34cb8adb94cf3b96b106dea751e91687b3ab449",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "numpySort (Listed)",
-    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
-   },
-   {
-    "parameter": "vs",
-    "generator": "unitLists (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:1d7847606d27dd644d9ebf4034fc028f6a3c4f0571ffe2508dd39487e11bcbc4"
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "numpySort"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "vs",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons (((vec Float64) 0) fn (k : (Fin 0)) { 0.0 })) nil)"
-      },
-      {
-       "Printed": "((cons ((spread 101) 0)) nil)"
-      },
-      {
-       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
-      },
-      {
-       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
-      },
-      {
-       "Printed": "((cons (((vec Float64) 20) fn (k : (Fin 20)) { 0.9 })) ((cons ((spread 10) 0)) nil))"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 6,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T05:18:50+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.kolmogorov_distance",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromType",
-     "name": "empty"
-    },
-    "n": 1
-   },
-   {
-    "region": {
-     "source": "FromType",
-     "name": "one element"
-    },
-    "n": 2
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "vs boundary"
-    },
-    "n": 6
-   }
-  ]
- },
- {
-  "law": "KolmogorovOfMultiset",
-  "cone": "sha256:8a9820966370b0726b2ee1f49ee6bf79c0695fbc1f20938470ae066c6889b445",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "numpySort (Listed)",
-    "fingerprint": "sha256:ac9ea0b36e2cba55a5d2ff6c4cc216636e1854acc86cfbd1c6283d509936e710"
-   },
-   {
-    "parameter": "vs",
-    "generator": "unitLists (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:1d7847606d27dd644d9ebf4034fc028f6a3c4f0571ffe2508dd39487e11bcbc4"
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "numpySort"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "vs",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nil"
-      },
-      {
-       "Printed": "((cons (((vec Float64) 0) fn (k : (Fin 0)) { 0.0 })) nil)"
-      },
-      {
-       "Printed": "((cons ((spread 101) 0)) nil)"
-      },
-      {
-       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
-      },
-      {
-       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
-      },
-      {
-       "Printed": "((cons (((vec Float64) 20) fn (k : (Fin 20)) { 0.9 })) ((cons ((spread 10) 0)) nil))"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 6,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T05:18:50+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.kolmogorov_distance",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromType",
-     "name": "empty"
-    },
-    "n": 1
-   },
-   {
-    "region": {
-     "source": "FromType",
-     "name": "one element"
-    },
-    "n": 2
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "vs boundary"
-    },
-    "n": 6
    }
   ]
  },

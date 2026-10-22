@@ -1,5 +1,1993 @@
 [
  {
+  "law": "HostChangesOnlyDeclared",
+  "cone": "sha256:ec650c4a7a4512bd220630937f50b97264d552f5bfbcc896f4ef8f6cb9ad6250",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+   },
+   {
+    "parameter": "A",
+    "generator": "unitTypes (Listed)",
+    "fingerprint": "sha256:f1ec8f162b87786760e70b0e1baab65dbd0b681bc1c0c652d5a7f1d1d921de4d"
+   },
+   {
+    "parameter": "h",
+    "generator": "helloHeld (Listed)",
+    "fingerprint": "sha256:276131a9849c922335d48384985de884469b3a4d842cec0e2dec3239fe4e9402"
+   },
+   {
+    "parameter": "extra",
+    "generator": "extras (Listed)",
+    "fingerprint": "sha256:bc6401f9ed9d947aeecfed8adec03b0663bfb3b64b8074ae88769bb1c672f343"
+   },
+   {
+    "parameter": "c",
+    "generator": "clobbersCases (Listed)",
+    "fingerprint": "sha256:bc64acedabb076c61ae77d1fc73bdd0bf806bd73c5625ae36a3db15b76e822ce"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Unit"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((held { stdout : String, files : (List (_ : String) * String) }) Unit) theWorld) fn (w : W) { (((listedHost).print w) \"hello, world\") }) (((printDescription { stdout : String, files : (List (_ : String) * String) }) console) \"hello, world\"))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"stdout\") ((cons \"input.txt\") ((cons \"other.txt\") nil)))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) withFiles) unit) clobbered)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, A = Unit, h = (((((held { stdout : String, files : (List (_ : String) * String) }) Unit) theWorld) fn (w : W) { (((listedHost).print w) \"hello, world\") }) (((printDescription { stdout : String, files : (List (_ : String) * String) }) console) \"hello, world\")), extra = ((cons \"stdout\") ((cons \"input.txt\") ((cons \"other.txt\") nil))), c = (((((case { stdout : String, files : (List (_ : String) * String) }) Unit) withFiles) unit) clobbered)"
+  },
+  "date": "2026-10-22T04:24:02+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "HostObserveChangesNothing",
+  "cone": "sha256:78887cd3e32143beb8d43e0282da5e8ab1de54beb85114597338873c36109bc0",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+   },
+   {
+    "parameter": "ps",
+    "generator": "observed (Listed)",
+    "fingerprint": "sha256:b9a1db4e5fe79fe71002b50660738e07d26b64d09256dcbfee3deaa0aac87d3f"
+   },
+   {
+    "parameter": "c",
+    "generator": "clearsCases (Listed)",
+    "fingerprint": "sha256:c177a4d0dde42a02e10a29de9a856764b8c1674a7100c731b9aeac5dda5a2e3d"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ps",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"stdout\") ((cons \"input.txt\") nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) printed) printed) blank)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, ps = ((cons \"stdout\") ((cons \"input.txt\") nil)), c = (((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) printed) printed) blank)"
+  },
+  "date": "2026-10-22T04:24:02+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "HostAgreesReadFile",
+  "cone": "sha256:22a70745ded06c0ca871a3df1a334115576e3710f4f8f25ffd8cbf5111efa218",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+   },
+   {
+    "parameter": "p",
+    "generator": "input (Listed)",
+    "fingerprint": "sha256:59298cec30e70e5ddb3963abc3e02d399ffde0814793a8948935c3560c59fcb1"
+   },
+   {
+    "parameter": "c",
+    "generator": "readsNothingCases (Listed)",
+    "fingerprint": "sha256:6f5422203eee92581c35291763fb4b2d0efe11162b8c5e1587b1eee5d9506ca0"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"input.txt\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) nothing) withFiles)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, p = \"input.txt\", c = (((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) nothing) withFiles)"
+  },
+  "date": "2026-10-22T04:24:02+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "HostAgreesPrint",
+  "cone": "sha256:25cf4e1a410f03cc490e9d94ab1944a357c1b9a84de220b5295e8b96965bfac4",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+   },
+   {
+    "parameter": "s",
+    "generator": "hello (Listed)",
+    "fingerprint": "sha256:ace8102a595283e9f314d04e120bd31da09b378da007bd77d32379005b9f66e1"
+   },
+   {
+    "parameter": "c",
+    "generator": "noNewlineCases (Listed)",
+    "fingerprint": "sha256:50a79784fd620d49e348e428f1e4c64e4d121222d55a2bfe6283c50ce3e72be8"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"hello, world\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"hello, world\"))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, s = \"hello, world\", c = (((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"hello, world\"))"
+  },
+  "date": "2026-10-22T04:24:02+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "ReadChangesNothing",
+  "cone": "sha256:2100c0179385caa68e9100134f6688a823360202aae0b373480867b03937e3ff",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "c",
+    "generator": "readClearsList (Listed)",
+    "fingerprint": "sha256:f187743e46a0507ef6107ce869caeddb64c083de13f3658d690928e964c7ce81"
+   },
+   {
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
+   },
+   {
+    "parameter": "p",
+    "generator": "places (Listed)",
+    "fingerprint": "sha256:adfdf2d93bf73ced797a6f6178f7a18a4686862092962591bd5ef05881a8987b"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "readClears"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blank"
+      },
+      {
+       "Printed": "printed"
+      },
+      {
+       "Printed": "withFiles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"stdout\""
+      },
+      {
+       "Printed": "\"input.txt\""
+      },
+      {
+       "Printed": "\"empty.txt\""
+      },
+      {
+       "Printed": "\"other.txt\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 12,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = readClears, st = printed, p = \"stdout\""
+  },
+  "date": "2026-10-22T04:24:02+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "ReadGivesThePlace",
+  "cone": "sha256:b2ea8b2b85e4b2499e80ed75576aefec9113d2cf7f9dfd01d8c352b38115e4c2",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "c",
+    "generator": "readsNothingList (Listed)",
+    "fingerprint": "sha256:621c944f76049f4e967380fac5c7d2614e83a4098e76ce5a63b879907b30ec4a"
+   },
+   {
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
+   },
+   {
+    "parameter": "p",
+    "generator": "places (Listed)",
+    "fingerprint": "sha256:adfdf2d93bf73ced797a6f6178f7a18a4686862092962591bd5ef05881a8987b"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "readsNothing"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blank"
+      },
+      {
+       "Printed": "printed"
+      },
+      {
+       "Printed": "withFiles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"stdout\""
+      },
+      {
+       "Printed": "\"input.txt\""
+      },
+      {
+       "Printed": "\"empty.txt\""
+      },
+      {
+       "Printed": "\"other.txt\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 12,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = readsNothing, st = withFiles, p = \"input.txt\""
+  },
+  "date": "2026-10-22T04:24:02+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "PrintChangesOnlyStdout",
+  "cone": "sha256:331bbe103676fb5a2d8b9c24ddb60a6f2a78493c6595970c4d66e37bd6a26391",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "c",
+    "generator": "dropsFilesList (Listed)",
+    "fingerprint": "sha256:f8384e7f6affd2f8e9d26585dd2fb4d9f11537a2ba970cb7ef622353039ba09f"
+   },
+   {
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
+   },
+   {
+    "parameter": "s",
+    "generator": "lines (Listed)",
+    "fingerprint": "sha256:5cb1d5d4343b2b0d2936ac50d927897493be918fd3fffd27c8fa8b4e0454aab4"
+   },
+   {
+    "parameter": "p",
+    "generator": "places (Listed)",
+    "fingerprint": "sha256:adfdf2d93bf73ced797a6f6178f7a18a4686862092962591bd5ef05881a8987b"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "dropsFiles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blank"
+      },
+      {
+       "Printed": "printed"
+      },
+      {
+       "Printed": "withFiles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"\""
+      },
+      {
+       "Printed": "\"hello, world\""
+      },
+      {
+       "Printed": "\"two\\nlines\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"stdout\""
+      },
+      {
+       "Printed": "\"input.txt\""
+      },
+      {
+       "Printed": "\"empty.txt\""
+      },
+      {
+       "Printed": "\"other.txt\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 36,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = dropsFiles, st = withFiles, s = \"\", p = \"input.txt\""
+  },
+  "date": "2026-10-22T04:24:02+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "PrintAppendsALine",
+  "cone": "sha256:7f33907cd612af1a6b3ee320f22ab2be3119636d4a4d37d03061ddec748702d9",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "c",
+    "generator": "noNewlines (Listed)",
+    "fingerprint": "sha256:4de7618943a0defbc737f032d2a37140ea104164b26c8bd71e7b4794be531917"
+   },
+   {
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
+   },
+   {
+    "parameter": "s",
+    "generator": "lines (Listed)",
+    "fingerprint": "sha256:5cb1d5d4343b2b0d2936ac50d927897493be918fd3fffd27c8fa8b4e0454aab4"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noNewline"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blank"
+      },
+      {
+       "Printed": "printed"
+      },
+      {
+       "Printed": "withFiles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"\""
+      },
+      {
+       "Printed": "\"hello, world\""
+      },
+      {
+       "Printed": "\"two\\nlines\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 9,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = noNewline, st = blank, s = \"\""
+  },
+  "date": "2026-10-22T04:24:02+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "HostChangesOnlyDeclared",
+  "cone": "sha256:ec650c4a7a4512bd220630937f50b97264d552f5bfbcc896f4ef8f6cb9ad6250",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "hostStates (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+   },
+   {
+    "parameter": "A",
+    "generator": "maybeTypes (Listed)",
+    "fingerprint": "sha256:37190227b23a104588bffd011066a368c78a8bf2470598437268b05a2d25146f"
+   },
+   {
+    "parameter": "h",
+    "generator": "inputHeld (Listed)",
+    "fingerprint": "sha256:faa93b88aca29c810f6341ff2c842d273cc58971f3df0bd6d53441f0362cb785"
+   },
+   {
+    "parameter": "extra",
+    "generator": "extras (Listed)",
+    "fingerprint": "sha256:e946272c36337fc3c42145631e7c1d8955751aca938b97a830c72e6fa984cc5d"
+   },
+   {
+    "parameter": "c",
+    "generator": "inputCases (Listed)",
+    "fingerprint": "sha256:60ff9849258a88683763fe1a1fc5876624b70cf5765763ebcaf9f715765a7485"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(Maybe String)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((held { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) theWorld) fn (w : W) { (((listedHost).readFile w) \"input.txt\") }) (((readFileDescription { stdout : String, files : (List (_ : String) * String) }) console) \"input.txt\"))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"stdout\") nil)"
+      },
+      {
+       "Printed": "((cons \"stdout\") ((cons \"input.txt\") ((cons \"other.txt\") nil)))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) (just \"first\\nsecond\\n\")) withFiles)"
+      },
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) blank) nothing) blank)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:23:57+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "HostChangesOnlyDeclared",
+  "cone": "sha256:ec650c4a7a4512bd220630937f50b97264d552f5bfbcc896f4ef8f6cb9ad6250",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "hostStates (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+   },
+   {
+    "parameter": "A",
+    "generator": "unitTypes (Listed)",
+    "fingerprint": "sha256:f1ec8f162b87786760e70b0e1baab65dbd0b681bc1c0c652d5a7f1d1d921de4d"
+   },
+   {
+    "parameter": "h",
+    "generator": "helloHeld (Listed)",
+    "fingerprint": "sha256:276131a9849c922335d48384985de884469b3a4d842cec0e2dec3239fe4e9402"
+   },
+   {
+    "parameter": "extra",
+    "generator": "extras (Listed)",
+    "fingerprint": "sha256:e946272c36337fc3c42145631e7c1d8955751aca938b97a830c72e6fa984cc5d"
+   },
+   {
+    "parameter": "c",
+    "generator": "helloCases (Listed)",
+    "fingerprint": "sha256:a8fa394e8900377fa39105be5c97420eb2ff329cb804bbd7540e7156072f4450"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Unit"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((held { stdout : String, files : (List (_ : String) * String) }) Unit) theWorld) fn (w : W) { (((listedHost).print w) \"hello, world\") }) (((printDescription { stdout : String, files : (List (_ : String) * String) }) console) \"hello, world\"))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"stdout\") nil)"
+      },
+      {
+       "Printed": "((cons \"stdout\") ((cons \"input.txt\") ((cons \"other.txt\") nil)))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"hello, world\\n\"))"
+      },
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) printed) unit) ((after printed) \"one\\nhello, world\\n\"))"
+      },
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) withFiles) unit) ((after withFiles) \"hello, world\\n\"))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:23:57+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "HostObserveChangesNothing",
+  "cone": "sha256:78887cd3e32143beb8d43e0282da5e8ab1de54beb85114597338873c36109bc0",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "hostStates (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+   },
+   {
+    "parameter": "ps",
+    "generator": "observed (Listed)",
+    "fingerprint": "sha256:b9a1db4e5fe79fe71002b50660738e07d26b64d09256dcbfee3deaa0aac87d3f"
+   },
+   {
+    "parameter": "c",
+    "generator": "observeCases (Listed)",
+    "fingerprint": "sha256:a6cec4a0b8090040e743f33c4284bb47b3bd01a47a092ef0b2a2704f54d79ad8"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ps",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"stdout\") ((cons \"input.txt\") nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) withFiles) withFiles) withFiles)"
+      },
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) printed) printed) printed)"
+      },
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) blank) blank) blank)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 3,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:23:57+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "HostAgreesReadFile",
+  "cone": "sha256:22a70745ded06c0ca871a3df1a334115576e3710f4f8f25ffd8cbf5111efa218",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "hostStates (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+   },
+   {
+    "parameter": "p",
+    "generator": "otherFile (Listed)",
+    "fingerprint": "sha256:05501c6901db9922a808622300320d3e17dd644489a29e710bd84f37ca10f40c"
+   },
+   {
+    "parameter": "c",
+    "generator": "otherCases (Listed)",
+    "fingerprint": "sha256:c84348f07029454bf7daead4e2d95a599cd71e8e0272db455ddc239445dee376"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"other.txt\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) nothing) withFiles)"
+      },
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) printed) nothing) printed)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:23:57+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "HostAgreesReadFile",
+  "cone": "sha256:22a70745ded06c0ca871a3df1a334115576e3710f4f8f25ffd8cbf5111efa218",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "hostStates (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+   },
+   {
+    "parameter": "p",
+    "generator": "input (Listed)",
+    "fingerprint": "sha256:59298cec30e70e5ddb3963abc3e02d399ffde0814793a8948935c3560c59fcb1"
+   },
+   {
+    "parameter": "c",
+    "generator": "inputCases (Listed)",
+    "fingerprint": "sha256:60ff9849258a88683763fe1a1fc5876624b70cf5765763ebcaf9f715765a7485"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"input.txt\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) (just \"first\\nsecond\\n\")) withFiles)"
+      },
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) blank) nothing) blank)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:23:57+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "HostAgreesPrint",
+  "cone": "sha256:25cf4e1a410f03cc490e9d94ab1944a357c1b9a84de220b5295e8b96965bfac4",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "hostStates (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+   },
+   {
+    "parameter": "s",
+    "generator": "empty (Listed)",
+    "fingerprint": "sha256:e68727ae54fef2e36f9f3e66a2bc6ae7a156c2c5346f1777d1d1128487bc1c52"
+   },
+   {
+    "parameter": "c",
+    "generator": "emptyCases (Listed)",
+    "fingerprint": "sha256:8b955355c81655e8c74551bae1bffb4e5a839a0bd9e04745f734a154318a8f10"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"\\n\"))"
+      },
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) printed) unit) ((after printed) \"one\\n\\n\"))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:23:57+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "HostAgreesPrint",
+  "cone": "sha256:25cf4e1a410f03cc490e9d94ab1944a357c1b9a84de220b5295e8b96965bfac4",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "hostStates (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:3c563abd76196392b5bc2a512631f9e1649d217a74d03870132628fb015c9605"
+   },
+   {
+    "parameter": "s",
+    "generator": "hello (Listed)",
+    "fingerprint": "sha256:ace8102a595283e9f314d04e120bd31da09b378da007bd77d32379005b9f66e1"
+   },
+   {
+    "parameter": "c",
+    "generator": "helloCases (Listed)",
+    "fingerprint": "sha256:a8fa394e8900377fa39105be5c97420eb2ff329cb804bbd7540e7156072f4450"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"hello, world\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"hello, world\\n\"))"
+      },
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) printed) unit) ((after printed) \"one\\nhello, world\\n\"))"
+      },
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) withFiles) unit) ((after withFiles) \"hello, world\\n\"))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 3,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:23:57+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "WriteThenRead",
+  "cone": "sha256:ea6a26cbb67539a91c1fe42fc452774229718f94c87db2ec71fbe5d98304b01b",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "s",
+    "generator": "writesEmptyList (Listed)",
+    "fingerprint": "sha256:107a6dcdbd7efddf526e7e45d41c9baab816d01991b29541f0836ec23f4eb019"
+   },
+   {
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:dc56a88f24d28b83028c3e2feafb12e49912081267755101c454076fd509cb64"
+   },
+   {
+    "parameter": "p",
+    "generator": "paths (Listed)",
+    "fingerprint": "sha256:063661d11a6a8c06a075fa5bfe9ac8f1b84c5b6edf657b778e2c462e852a8ca1"
+   },
+   {
+    "parameter": "c",
+    "generator": "contents (Listed)",
+    "fingerprint": "sha256:8dccd2bd4761a99f97aaebbe35b9a21d929c3eb0808fba4c361f1aea9f4e801a"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "writesEmpty"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blank"
+      },
+      {
+       "Printed": "withFile"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"plot.png\""
+      },
+      {
+       "Printed": "\"plot.svg\""
+      },
+      {
+       "Printed": "\"other.txt\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"\""
+      },
+      {
+       "Printed": "\"x\""
+      },
+      {
+       "Printed": "\"PNG\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 18,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, s = writesEmpty, st = blank, p = \"plot.png\", c = \"x\""
+  },
+  "date": "2026-10-22T04:18:37+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
   "law": "WriteChangesOnlyItsPlace",
   "cone": "sha256:f279ab6a7057c2b3c930484e37d343ec9aab2393c2d69c198d1a671f0187682f",
   "binding": [
@@ -149,628 +2137,6 @@
   "date": "2026-10-21T14:44:19+00:00",
   "interpreter": "v0.2",
   "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "WriteThenRead",
-  "cone": "sha256:ea6a26cbb67539a91c1fe42fc452774229718f94c87db2ec71fbe5d98304b01b",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "s",
-    "generator": "writesEmptyList (Listed)",
-    "fingerprint": "sha256:fc8b9dae785085e6f5c8f5b59a8879268e2054390e83d4877872d1cbb8e43caf"
-   },
-   {
-    "parameter": "st",
-    "generator": "worlds (Listed)",
-    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:dc56a88f24d28b83028c3e2feafb12e49912081267755101c454076fd509cb64"
-   },
-   {
-    "parameter": "p",
-    "generator": "paths (Listed)",
-    "fingerprint": "sha256:063661d11a6a8c06a075fa5bfe9ac8f1b84c5b6edf657b778e2c462e852a8ca1"
-   },
-   {
-    "parameter": "c",
-    "generator": "contents (Listed)",
-    "fingerprint": "sha256:8dccd2bd4761a99f97aaebbe35b9a21d929c3eb0808fba4c361f1aea9f4e801a"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "s",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "writesEmpty"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "st",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "blank"
-      },
-      {
-       "Printed": "withFile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"plot.png\""
-      },
-      {
-       "Printed": "\"plot.svg\""
-      },
-      {
-       "Printed": "\"other.txt\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"\""
-      },
-      {
-       "Printed": "\"x\""
-      },
-      {
-       "Printed": "\"PNG\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 18,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, s = writesEmpty, st = blank, p = \"plot.png\", c = \"x\""
-  },
-  "date": "2026-10-21T14:44:18+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "HostChangesOnlyDeclared",
-  "cone": "sha256:9b498baa07ebc6a2065d8030d65882d9518ec784dab57960079f76a9a57a40fb",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:1efd4ceccd8bce6173bbd9f93944c5c22e9cc5d49084f869df99877569552a75"
-   },
-   {
-    "parameter": "A",
-    "generator": "unitTypes (Listed)",
-    "fingerprint": "sha256:f1ec8f162b87786760e70b0e1baab65dbd0b681bc1c0c652d5a7f1d1d921de4d"
-   },
-   {
-    "parameter": "h",
-    "generator": "helloHeld (Listed)",
-    "fingerprint": "sha256:7f8d0104c806728cb98beaefc3e979212bbe417fd9046149cbdef039320bcce9"
-   },
-   {
-    "parameter": "extra",
-    "generator": "extras (Listed)",
-    "fingerprint": "sha256:bc6401f9ed9d947aeecfed8adec03b0663bfb3b64b8074ae88769bb1c672f343"
-   },
-   {
-    "parameter": "c",
-    "generator": "clobbersCases (Listed)",
-    "fingerprint": "sha256:bc64acedabb076c61ae77d1fc73bdd0bf806bd73c5625ae36a3db15b76e822ce"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "A",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "Unit"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "h",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((held { stdout : String, files : (List (_ : String) * String) }) Unit) theWorld) fn (w : W) { (((listedHost).print w) \"hello, world\") }) (((printDescription { stdout : String, files : (List (_ : String) * String) }) console) \"hello, world\"))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "extra",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "((cons \"stdout\") ((cons \"input.txt\") ((cons \"other.txt\") nil)))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) withFiles) unit) clobbered)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, A = Unit, h = (((((held { stdout : String, files : (List (_ : String) * String) }) Unit) theWorld) fn (w : W) { (((listedHost).print w) \"hello, world\") }) (((printDescription { stdout : String, files : (List (_ : String) * String) }) console) \"hello, world\")), extra = ((cons \"stdout\") ((cons \"input.txt\") ((cons \"other.txt\") nil))), c = (((((case { stdout : String, files : (List (_ : String) * String) }) Unit) withFiles) unit) clobbered)"
-  },
-  "date": "2026-10-21T12:56:14+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "HostObserveChangesNothing",
-  "cone": "sha256:3daafa281e90de116b09f4f15b7b5f6a0215b9c49bea068f0d3281a80f67ee64",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:1efd4ceccd8bce6173bbd9f93944c5c22e9cc5d49084f869df99877569552a75"
-   },
-   {
-    "parameter": "ps",
-    "generator": "observed (Listed)",
-    "fingerprint": "sha256:b9a1db4e5fe79fe71002b50660738e07d26b64d09256dcbfee3deaa0aac87d3f"
-   },
-   {
-    "parameter": "c",
-    "generator": "clearsCases (Listed)",
-    "fingerprint": "sha256:c177a4d0dde42a02e10a29de9a856764b8c1674a7100c731b9aeac5dda5a2e3d"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "ps",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "((cons \"stdout\") ((cons \"input.txt\") nil))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) printed) printed) blank)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, ps = ((cons \"stdout\") ((cons \"input.txt\") nil)), c = (((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) printed) printed) blank)"
-  },
-  "date": "2026-10-21T12:56:14+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "HostAgreesReadFile",
-  "cone": "sha256:7a4b8e2400f560ca3256faddb0abbf5357f03ae0f9d8aafb4e45ecf90d3f4905",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:1efd4ceccd8bce6173bbd9f93944c5c22e9cc5d49084f869df99877569552a75"
-   },
-   {
-    "parameter": "p",
-    "generator": "input (Listed)",
-    "fingerprint": "sha256:59298cec30e70e5ddb3963abc3e02d399ffde0814793a8948935c3560c59fcb1"
-   },
-   {
-    "parameter": "c",
-    "generator": "readsNothingCases (Listed)",
-    "fingerprint": "sha256:6f5422203eee92581c35291763fb4b2d0efe11162b8c5e1587b1eee5d9506ca0"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"input.txt\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) nothing) withFiles)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, p = \"input.txt\", c = (((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) nothing) withFiles)"
-  },
-  "date": "2026-10-21T12:56:14+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "HostAgreesPrint",
-  "cone": "sha256:c2391aec3684d0ab9c7e9a07c587cd2bb578bde27936b43776bfea4e26214ce6",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:1efd4ceccd8bce6173bbd9f93944c5c22e9cc5d49084f869df99877569552a75"
-   },
-   {
-    "parameter": "s",
-    "generator": "hello (Listed)",
-    "fingerprint": "sha256:ace8102a595283e9f314d04e120bd31da09b378da007bd77d32379005b9f66e1"
-   },
-   {
-    "parameter": "c",
-    "generator": "noNewlineCases (Listed)",
-    "fingerprint": "sha256:50a79784fd620d49e348e428f1e4c64e4d121222d55a2bfe6283c50ce3e72be8"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "s",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"hello, world\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"hello, world\"))"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, o = listedHost, s = \"hello, world\", c = (((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"hello, world\"))"
-  },
-  "date": "2026-10-21T12:56:14+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
   "kind": "Control",
   "regions": []
  },
@@ -1900,1372 +3266,6 @@
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control",
-  "regions": []
- },
- {
-  "law": "ReadChangesNothing",
-  "cone": "sha256:07e85b16691f9d8e5b22cf4fdb698f9ab674373a02d8fc0224909710339afdce",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "c",
-    "generator": "readClearsList (Listed)",
-    "fingerprint": "sha256:88763997ec880dd4030318b732e73cfbb77eaf6c683d73d72753a97b32dfeecf"
-   },
-   {
-    "parameter": "st",
-    "generator": "worlds (Listed)",
-    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
-   },
-   {
-    "parameter": "p",
-    "generator": "places (Listed)",
-    "fingerprint": "sha256:adfdf2d93bf73ced797a6f6178f7a18a4686862092962591bd5ef05881a8987b"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "readClears"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "st",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "blank"
-      },
-      {
-       "Printed": "printed"
-      },
-      {
-       "Printed": "withFiles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"stdout\""
-      },
-      {
-       "Printed": "\"input.txt\""
-      },
-      {
-       "Printed": "\"empty.txt\""
-      },
-      {
-       "Printed": "\"other.txt\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 12,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = readClears, st = printed, p = \"stdout\""
-  },
-  "date": "2026-10-21T12:56:12+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "ReadGivesThePlace",
-  "cone": "sha256:5fa1041924a482900fde8e068ccd327c9b2d8d50de5fb7a5fec33d52c7e562ed",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "c",
-    "generator": "readsNothingList (Listed)",
-    "fingerprint": "sha256:5f75f52ea538283d7034e05e2d694f3682776564a4c7852213284b3d3ad262ee"
-   },
-   {
-    "parameter": "st",
-    "generator": "worlds (Listed)",
-    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
-   },
-   {
-    "parameter": "p",
-    "generator": "places (Listed)",
-    "fingerprint": "sha256:adfdf2d93bf73ced797a6f6178f7a18a4686862092962591bd5ef05881a8987b"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "readsNothing"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "st",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "blank"
-      },
-      {
-       "Printed": "printed"
-      },
-      {
-       "Printed": "withFiles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"stdout\""
-      },
-      {
-       "Printed": "\"input.txt\""
-      },
-      {
-       "Printed": "\"empty.txt\""
-      },
-      {
-       "Printed": "\"other.txt\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 12,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = readsNothing, st = withFiles, p = \"input.txt\""
-  },
-  "date": "2026-10-21T12:56:12+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "PrintChangesOnlyStdout",
-  "cone": "sha256:966a0d5164d7a4afe7e6f04f971363f9acc7e68e70e21ad899609b0e9fdab651",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "c",
-    "generator": "dropsFilesList (Listed)",
-    "fingerprint": "sha256:fab02df5a14654a0f696711a34e19aab92f6f51a094c08715db4b0c611fc8a8f"
-   },
-   {
-    "parameter": "st",
-    "generator": "worlds (Listed)",
-    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
-   },
-   {
-    "parameter": "s",
-    "generator": "lines (Listed)",
-    "fingerprint": "sha256:5cb1d5d4343b2b0d2936ac50d927897493be918fd3fffd27c8fa8b4e0454aab4"
-   },
-   {
-    "parameter": "p",
-    "generator": "places (Listed)",
-    "fingerprint": "sha256:adfdf2d93bf73ced797a6f6178f7a18a4686862092962591bd5ef05881a8987b"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "dropsFiles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "st",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "blank"
-      },
-      {
-       "Printed": "printed"
-      },
-      {
-       "Printed": "withFiles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "s",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"\""
-      },
-      {
-       "Printed": "\"hello, world\""
-      },
-      {
-       "Printed": "\"two\\nlines\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"stdout\""
-      },
-      {
-       "Printed": "\"input.txt\""
-      },
-      {
-       "Printed": "\"empty.txt\""
-      },
-      {
-       "Printed": "\"other.txt\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 36,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = dropsFiles, st = withFiles, s = \"\", p = \"input.txt\""
-  },
-  "date": "2026-10-21T12:56:11+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "PrintAppendsALine",
-  "cone": "sha256:35e026b3468714aeaa8fb66be140274d40115d1b5119f3403e4ede161e6307ad",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "c",
-    "generator": "noNewlines (Listed)",
-    "fingerprint": "sha256:11f5ef6b4758ea049bddbaba2aabd2465c4008a9146bebeee31ff26c2c4686e9"
-   },
-   {
-    "parameter": "st",
-    "generator": "worlds (Listed)",
-    "fingerprint": "sha256:d33b79a895a569857492c8012bffc36d09e8187e3987635635f2c0b07fff6d46,sha256:e06a588d32709a07fc2ca5ef9e21cfb4d3074eb584b51164e25c430cc10d83fc,sha256:e70a0fd8ab088d840cc6f118900e9cd43318e1bef8f3dcef810ae25b49a4a973"
-   },
-   {
-    "parameter": "s",
-    "generator": "lines (Listed)",
-    "fingerprint": "sha256:5cb1d5d4343b2b0d2936ac50d927897493be918fd3fffd27c8fa8b4e0454aab4"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "noNewline"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "st",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "blank"
-      },
-      {
-       "Printed": "printed"
-      },
-      {
-       "Printed": "withFiles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "s",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"\""
-      },
-      {
-       "Printed": "\"hello, world\""
-      },
-      {
-       "Printed": "\"two\\nlines\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 9,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, c = noNewline, st = blank, s = \"\""
-  },
-  "date": "2026-10-21T12:56:11+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": []
- },
- {
-  "law": "HostChangesOnlyDeclared",
-  "cone": "sha256:9b498baa07ebc6a2065d8030d65882d9518ec784dab57960079f76a9a57a40fb",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "hostStates (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:1efd4ceccd8bce6173bbd9f93944c5c22e9cc5d49084f869df99877569552a75"
-   },
-   {
-    "parameter": "A",
-    "generator": "maybeTypes (Listed)",
-    "fingerprint": "sha256:37190227b23a104588bffd011066a368c78a8bf2470598437268b05a2d25146f"
-   },
-   {
-    "parameter": "h",
-    "generator": "inputHeld (Listed)",
-    "fingerprint": "sha256:1031775dc0269330398ef20c4a56d914c54d1db606adca1d45065090ba12a490"
-   },
-   {
-    "parameter": "extra",
-    "generator": "extras (Listed)",
-    "fingerprint": "sha256:e946272c36337fc3c42145631e7c1d8955751aca938b97a830c72e6fa984cc5d"
-   },
-   {
-    "parameter": "c",
-    "generator": "inputCases (Listed)",
-    "fingerprint": "sha256:60ff9849258a88683763fe1a1fc5876624b70cf5765763ebcaf9f715765a7485"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "A",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(Maybe String)"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "h",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((held { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) theWorld) fn (w : W) { (((listedHost).readFile w) \"input.txt\") }) (((readFileDescription { stdout : String, files : (List (_ : String) * String) }) console) \"input.txt\"))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "extra",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "((cons \"stdout\") nil)"
-      },
-      {
-       "Printed": "((cons \"stdout\") ((cons \"input.txt\") ((cons \"other.txt\") nil)))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) (just \"first\\nsecond\\n\")) withFiles)"
-      },
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) blank) nothing) blank)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 4,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:07+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
-  "regions": []
- },
- {
-  "law": "HostChangesOnlyDeclared",
-  "cone": "sha256:9b498baa07ebc6a2065d8030d65882d9518ec784dab57960079f76a9a57a40fb",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "hostStates (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:1efd4ceccd8bce6173bbd9f93944c5c22e9cc5d49084f869df99877569552a75"
-   },
-   {
-    "parameter": "A",
-    "generator": "unitTypes (Listed)",
-    "fingerprint": "sha256:f1ec8f162b87786760e70b0e1baab65dbd0b681bc1c0c652d5a7f1d1d921de4d"
-   },
-   {
-    "parameter": "h",
-    "generator": "helloHeld (Listed)",
-    "fingerprint": "sha256:7f8d0104c806728cb98beaefc3e979212bbe417fd9046149cbdef039320bcce9"
-   },
-   {
-    "parameter": "extra",
-    "generator": "extras (Listed)",
-    "fingerprint": "sha256:e946272c36337fc3c42145631e7c1d8955751aca938b97a830c72e6fa984cc5d"
-   },
-   {
-    "parameter": "c",
-    "generator": "helloCases (Listed)",
-    "fingerprint": "sha256:a8fa394e8900377fa39105be5c97420eb2ff329cb804bbd7540e7156072f4450"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "A",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "Unit"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "h",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((held { stdout : String, files : (List (_ : String) * String) }) Unit) theWorld) fn (w : W) { (((listedHost).print w) \"hello, world\") }) (((printDescription { stdout : String, files : (List (_ : String) * String) }) console) \"hello, world\"))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "extra",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "((cons \"stdout\") nil)"
-      },
-      {
-       "Printed": "((cons \"stdout\") ((cons \"input.txt\") ((cons \"other.txt\") nil)))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"hello, world\\n\"))"
-      },
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) printed) unit) ((after printed) \"one\\nhello, world\\n\"))"
-      },
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) withFiles) unit) ((after withFiles) \"hello, world\\n\"))"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 6,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:06+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
-  "regions": []
- },
- {
-  "law": "HostObserveChangesNothing",
-  "cone": "sha256:3daafa281e90de116b09f4f15b7b5f6a0215b9c49bea068f0d3281a80f67ee64",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "hostStates (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:1efd4ceccd8bce6173bbd9f93944c5c22e9cc5d49084f869df99877569552a75"
-   },
-   {
-    "parameter": "ps",
-    "generator": "observed (Listed)",
-    "fingerprint": "sha256:b9a1db4e5fe79fe71002b50660738e07d26b64d09256dcbfee3deaa0aac87d3f"
-   },
-   {
-    "parameter": "c",
-    "generator": "observeCases (Listed)",
-    "fingerprint": "sha256:a6cec4a0b8090040e743f33c4284bb47b3bd01a47a092ef0b2a2704f54d79ad8"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "ps",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "((cons \"stdout\") ((cons \"input.txt\") nil))"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) withFiles) withFiles) withFiles)"
-      },
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) printed) printed) printed)"
-      },
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) blank) blank) blank)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 3,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:06+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
-  "regions": []
- },
- {
-  "law": "HostAgreesReadFile",
-  "cone": "sha256:7a4b8e2400f560ca3256faddb0abbf5357f03ae0f9d8aafb4e45ecf90d3f4905",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "hostStates (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:1efd4ceccd8bce6173bbd9f93944c5c22e9cc5d49084f869df99877569552a75"
-   },
-   {
-    "parameter": "p",
-    "generator": "otherFile (Listed)",
-    "fingerprint": "sha256:05501c6901db9922a808622300320d3e17dd644489a29e710bd84f37ca10f40c"
-   },
-   {
-    "parameter": "c",
-    "generator": "otherCases (Listed)",
-    "fingerprint": "sha256:c84348f07029454bf7daead4e2d95a599cd71e8e0272db455ddc239445dee376"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"other.txt\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) nothing) withFiles)"
-      },
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) printed) nothing) printed)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 2,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:06+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
-  "regions": []
- },
- {
-  "law": "HostAgreesReadFile",
-  "cone": "sha256:7a4b8e2400f560ca3256faddb0abbf5357f03ae0f9d8aafb4e45ecf90d3f4905",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "hostStates (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:1efd4ceccd8bce6173bbd9f93944c5c22e9cc5d49084f869df99877569552a75"
-   },
-   {
-    "parameter": "p",
-    "generator": "input (Listed)",
-    "fingerprint": "sha256:59298cec30e70e5ddb3963abc3e02d399ffde0814793a8948935c3560c59fcb1"
-   },
-   {
-    "parameter": "c",
-    "generator": "inputCases (Listed)",
-    "fingerprint": "sha256:60ff9849258a88683763fe1a1fc5876624b70cf5765763ebcaf9f715765a7485"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "p",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"input.txt\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) withFiles) (just \"first\\nsecond\\n\")) withFiles)"
-      },
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) (Maybe String)) blank) nothing) blank)"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 2,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:06+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
-  "regions": []
- },
- {
-  "law": "HostAgreesPrint",
-  "cone": "sha256:c2391aec3684d0ab9c7e9a07c587cd2bb578bde27936b43776bfea4e26214ce6",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "hostStates (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:1efd4ceccd8bce6173bbd9f93944c5c22e9cc5d49084f869df99877569552a75"
-   },
-   {
-    "parameter": "s",
-    "generator": "empty (Listed)",
-    "fingerprint": "sha256:e68727ae54fef2e36f9f3e66a2bc6ae7a156c2c5346f1777d1d1128487bc1c52"
-   },
-   {
-    "parameter": "c",
-    "generator": "emptyCases (Listed)",
-    "fingerprint": "sha256:8b955355c81655e8c74551bae1bffb4e5a839a0bd9e04745f734a154318a8f10"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "s",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"\\n\"))"
-      },
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) printed) unit) ((after printed) \"one\\n\\n\"))"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 2,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:06+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
-  "regions": []
- },
- {
-  "law": "HostAgreesPrint",
-  "cone": "sha256:c2391aec3684d0ab9c7e9a07c587cd2bb578bde27936b43776bfea4e26214ce6",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "hostStates (Listed)",
-    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
-   },
-   {
-    "parameter": "o",
-    "generator": "hosts (Listed)",
-    "fingerprint": "sha256:1efd4ceccd8bce6173bbd9f93944c5c22e9cc5d49084f869df99877569552a75"
-   },
-   {
-    "parameter": "s",
-    "generator": "hello (Listed)",
-    "fingerprint": "sha256:ace8102a595283e9f314d04e120bd31da09b378da007bd77d32379005b9f66e1"
-   },
-   {
-    "parameter": "c",
-    "generator": "helloCases (Listed)",
-    "fingerprint": "sha256:a8fa394e8900377fa39105be5c97420eb2ff329cb804bbd7540e7156072f4450"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "o",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "listedHost"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "s",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"hello, world\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) blank) unit) ((after blank) \"hello, world\\n\"))"
-      },
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) printed) unit) ((after printed) \"one\\nhello, world\\n\"))"
-      },
-      {
-       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) Unit) withFiles) unit) ((after withFiles) \"hello, world\\n\"))"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 3,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T12:56:06+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.host.observe",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.print_line",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ],
-   [
-    "python:luthier.host.read_file",
-    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
-   ]
-  ],
   "regions": []
  },
  {

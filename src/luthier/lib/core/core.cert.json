@@ -1,5 +1,421 @@
 [
  {
+  "law": "PairsAreTheProduct",
+  "cone": "sha256:5759a95b091f5772be560016d1201b28909bfe06e930e577b5248210439ae0e3",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "coreType (Listed)",
+    "fingerprint": "sha256:b5e2d7db9f28d3373dfee47341f8123036db1c5a555334ec1efbd238811e4814"
+   },
+   {
+    "parameter": "B",
+    "generator": "coreType (Listed)",
+    "fingerprint": "sha256:b5e2d7db9f28d3373dfee47341f8123036db1c5a555334ec1efbd238811e4814"
+   },
+   {
+    "parameter": "model",
+    "generator": "badPairsAreTheProduct (Listed)",
+    "fingerprint": "sha256:ea7da6cdadc90fc9fd27573b52bb93a42c264d895f1a3d8865a206773bb6f5d2"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over A",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over B",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   },
+   {
+    "parameter": "q",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (_ : A) * B",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "coreType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "coreType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badPairsAreTheProduct"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261020)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "PairFst A B (_ : A) * B (structural A) (structural B) (structural (_ : A) * B) model: A = coreType, B = coreType, model = badPairsAreTheProduct, x = true, y = false"
+  },
+  "date": "2026-10-22T03:52:49+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "PairsAreTheProduct",
+  "cone": "sha256:5759a95b091f5772be560016d1201b28909bfe06e930e577b5248210439ae0e3",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "coreType (Listed)",
+    "fingerprint": "sha256:b5e2d7db9f28d3373dfee47341f8123036db1c5a555334ec1efbd238811e4814"
+   },
+   {
+    "parameter": "B",
+    "generator": "coreType (Listed)",
+    "fingerprint": "sha256:b5e2d7db9f28d3373dfee47341f8123036db1c5a555334ec1efbd238811e4814"
+   },
+   {
+    "parameter": "model",
+    "generator": "goodPairsAreTheProduct (Listed)",
+    "fingerprint": "sha256:c8b9f0869b580c95bf5771f6dedc34432a89386f16e5f73f13ba06fcac3311a0"
+   },
+   {
+    "parameter": "q",
+    "generator": "corePairCensus (Listed)",
+    "fingerprint": "sha256:30e9bcd3019fa7c81d0d7de82ea91a5d117bec36eb3049a2dc69a30e56b9717a"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "coreType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "coreType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "goodPairsAreTheProduct"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "q",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(false, false)"
+      },
+      {
+       "Printed": "(false, true)"
+      },
+      {
+       "Printed": "(true, false)"
+      },
+      {
+       "Printed": "(true, true)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261020)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-22T03:52:34+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "conjunct": "Pairing A B (_ : A) * B (structural A) (structural B) (structural (_ : A) * B) model",
+  "conjuncts": [
+   "PairFst A B (_ : A) * B (structural A) (structural B) (structural (_ : A) * B) model",
+   "PairSnd A B (_ : A) * B (structural A) (structural B) (structural (_ : A) * B) model",
+   "Pairing A B (_ : A) * B (structural A) (structural B) (structural (_ : A) * B) model"
+  ],
+  "regions": []
+ },
+ {
+  "law": "PairsAreTheProduct",
+  "cone": "sha256:5759a95b091f5772be560016d1201b28909bfe06e930e577b5248210439ae0e3",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "coreType (Listed)",
+    "fingerprint": "sha256:b5e2d7db9f28d3373dfee47341f8123036db1c5a555334ec1efbd238811e4814"
+   },
+   {
+    "parameter": "B",
+    "generator": "coreType (Listed)",
+    "fingerprint": "sha256:b5e2d7db9f28d3373dfee47341f8123036db1c5a555334ec1efbd238811e4814"
+   },
+   {
+    "parameter": "model",
+    "generator": "goodPairsAreTheProduct (Listed)",
+    "fingerprint": "sha256:c8b9f0869b580c95bf5771f6dedc34432a89386f16e5f73f13ba06fcac3311a0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over A",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over B",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "coreType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "coreType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "goodPairsAreTheProduct"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261020)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-22T03:52:34+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "conjunct": "PairSnd A B (_ : A) * B (structural A) (structural B) (structural (_ : A) * B) model",
+  "conjuncts": [
+   "PairFst A B (_ : A) * B (structural A) (structural B) (structural (_ : A) * B) model",
+   "PairSnd A B (_ : A) * B (structural A) (structural B) (structural (_ : A) * B) model",
+   "Pairing A B (_ : A) * B (structural A) (structural B) (structural (_ : A) * B) model"
+  ],
+  "regions": []
+ },
+ {
+  "law": "PairsAreTheProduct",
+  "cone": "sha256:5759a95b091f5772be560016d1201b28909bfe06e930e577b5248210439ae0e3",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "coreType (Listed)",
+    "fingerprint": "sha256:b5e2d7db9f28d3373dfee47341f8123036db1c5a555334ec1efbd238811e4814"
+   },
+   {
+    "parameter": "B",
+    "generator": "coreType (Listed)",
+    "fingerprint": "sha256:b5e2d7db9f28d3373dfee47341f8123036db1c5a555334ec1efbd238811e4814"
+   },
+   {
+    "parameter": "model",
+    "generator": "goodPairsAreTheProduct (Listed)",
+    "fingerprint": "sha256:c8b9f0869b580c95bf5771f6dedc34432a89386f16e5f73f13ba06fcac3311a0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over A",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over B",
+    "fingerprint": "sha256:6dc1d62afe0137b9d1152ab0439427160a0911cea789b03aec2c253cb1f68f7f"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "coreType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "coreType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "goodPairsAreTheProduct"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261020)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-22T03:52:34+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "conjunct": "PairFst A B (_ : A) * B (structural A) (structural B) (structural (_ : A) * B) model",
+  "conjuncts": [
+   "PairFst A B (_ : A) * B (structural A) (structural B) (structural (_ : A) * B) model",
+   "PairSnd A B (_ : A) * B (structural A) (structural B) (structural (_ : A) * B) model",
+   "Pairing A B (_ : A) * B (structural A) (structural B) (structural (_ : A) * B) model"
+  ],
+  "regions": []
+ },
+ {
   "law": "ListIsAFunctor",
   "cone": "sha256:0efa9eb9673f9d1573cf26ec6b807f8e0ebdd2b0d029e4ca692c07fbe5d3ef76",
   "binding": [
