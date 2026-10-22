@@ -90,3 +90,7 @@ Argon when off the VPN. Claude only coordinates, in short turns.
 - Claude Code subagents, Sonnet 5.5, on the Team quota: bite 9, 269,832 tokens after its resume
   (17 tool calls, 10 min); bite 10, 256,975 tokens after its resume (33 tool calls, 14 min). Their
   first legs' counts were lost with the interruption.
+
+## The algebra audit, 2026-10-22
+
+- Codex, gpt-6.1-sol, reasoning high, sandbox read-only, the audit of `record/plan/audit-algebras-2026-10-22/prompt.md`: 14:16 to 14:54 (38 min); input 7,818,837 tokens of which 7,412,480 cached, output 31,769, reasoning 9,554. Plan limits read by Luciano (shared by Codex, Work and ChatGPT): at 14:21, five hours after start, 89% left of the 5-hour window and 67% of the week; at 15:10, 74% and 64%. So the audit used about 15 points of the 5-hour window after 14:21 (up to 11 more before, if nothing else ran) and about 3 points of the week. The week stood at 90% left after bite 7's run was never read, so the drop to 67% before the audit mixes bite 7 and his other use.
