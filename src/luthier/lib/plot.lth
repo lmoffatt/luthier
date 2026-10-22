@@ -127,18 +127,11 @@ Plot : {
 -- is ggplot's `ggplot(tbl, m) + geom_point(size = 4) + geom_text(size = 8) + coord_equal() +
 -- labs(title = t)`, drawn at ggsave's size `cv`. [proposed] The brief's `point m` takes the
 -- table and the parameters too: a plot has several tables, and a size is a parameter (P11).
-appendLayer (ls : List Layer) (l : Layer) : List Layer := match ls { nil -> [l] ; cons a rest -> cons a (appendLayer rest l) }
 withLayers (p : Plot) (ls : List Layer) : Plot :=
   { canvas := p.canvas, tables := p.tables, mapping := p.mapping, layers := ls, scales := p.scales, coord := p.coord, facet := p.facet, labels := p.labels }
-addLayer (p : Plot) (l : Layer) : Plot := withLayers p (appendLayer p.layers l)
+addLayer (p : Plot) (l : Layer) : Plot := withLayers p (p.layers <> [l])
 withData (p : Plot) (ds : List (String * Table)) : Plot :=
   { canvas := p.canvas, tables := ds, mapping := p.mapping, layers := p.layers, scales := p.scales, coord := p.coord, facet := p.facet, labels := p.labels }
-dropTable (ds : List (String * Table)) (name : String) : List (String * Table) :=
-  match ds { nil -> nil ; cons (n, t) rest -> if n == name then dropTable rest name else cons (n, t) (dropTable rest name) }
-appendTable (ds : List (String * Table)) (name : String) (t : Table) : List (String * Table) :=
-  match ds { nil -> [(name, t)] ; cons d rest -> cons d (appendTable rest name t) }
-dropScale (ss : List (String * Scale)) (a : String) : List (String * Scale) :=
-  match ss { nil -> nil ; cons (b, s) rest -> if a == b then dropScale rest a else cons (b, s) (dropScale rest a) }
 
 -- plan G2: a plot on a canvas from one table, named, and the mapping its layers inherit; no layer,
 -- no scale, cartesian coordinates, no facet, no labels. [proposed] The canvas comes first and has
@@ -147,7 +140,8 @@ plot (cv : Canvas) (name : String) (t : Table) (m : Mapping) : Plot :=
   { canvas := cv, tables := [(name, t)], mapping := m, layers := nil, scales := nil, coord := cartesian unit, facet := nothing,
     labels := { title := "", x := "", y := "" } }
 -- plan G2: a further table, by name (it replaces a table of that name)
-table (name : String) (t : Table) (p : Plot) : Plot := withData p (appendTable (dropTable p.tables name) name t)
+table (name : String) (t : Table) (p : Plot) : Plot :=
+  withData p (filter List (String * Table) (fn (d : String * Table) { match d { (n, u) -> not (n == name) } }) p.tables <> [(name, t)])
 -- plan G2: points at x, y; colour and size if mapped
 point (tbl : String) (m : Mapping) (size : Float64) (p : Plot) : Plot :=
   addLayer p { geom := points { size := size }, mapping := m, table := tbl }
@@ -171,7 +165,7 @@ abline (intercept slope width : Float64) (p : Plot) : Plot :=
   addLayer p { geom := ablines { intercept := intercept, slope := slope, width := width }, mapping := nil, table := "" }
 -- plan G2: the scale of an aesthetic ("x", "y" or "colour"), replacing any earlier one
 scale (a : String) (s : Scale) (p : Plot) : Plot :=
-  { canvas := p.canvas, tables := p.tables, mapping := p.mapping, layers := p.layers, scales := cons (a, s) (dropScale p.scales a), coord := p.coord,
+  { canvas := p.canvas, tables := p.tables, mapping := p.mapping, layers := p.layers, scales := cons (a, s) (filter List (String * Scale) (fn (e : String * Scale) { match e { (b, u) -> not (a == b) } }) p.scales), coord := p.coord,
     facet := p.facet, labels := p.labels }
 -- plan G2: the coordinates
 coord (c : Coord) (p : Plot) : Plot :=
@@ -186,28 +180,16 @@ labels (title xlab ylab : String) (p : Plot) : Plot :=
 
 -- ---------------------------------------------------------------- §3 Reading a plot
 
-allLayers (ls : List Layer) (f : Layer -> Bool) : Bool := match ls { nil -> true ; cons l rest -> f l and allLayers rest f }
-anyLayer (ls : List Layer) (f : Layer -> Bool) : Bool := match ls { nil -> false ; cons l rest -> f l or anyLayer rest f }
-allStr (xs : List String) (f : String -> Bool) : Bool := match xs { nil -> true ; cons x rest -> f x and allStr rest f }
-keysOf (m : Mapping) : List String := match m { nil -> nil ; cons (a, c) rest -> cons a (keysOf rest) }
-namesOf (ds : List (String * Table)) : List String := match ds { nil -> nil ; cons (n, t) rest -> cons n (namesOf rest) }
-isNilStr (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> false }
+keysOf (m : Mapping) : List String := map (fn (kv : String * String) { match kv { (a, c) -> a } }) m
+namesOf (ds : List (String * Table)) : List String := map (fn (d : String * Table) { match d { (n, t) -> n } }) ds
 isJustStr (m : Maybe String) : Bool := match m { nothing -> false ; just c -> true }
-lookupStr (m : Mapping) (k : String) : Maybe String :=
-  match m { nil -> nothing ; cons (a, c) rest -> if a == k then just c else lookupStr rest k }
-lookupTable (ds : List (String * Table)) (name : String) : Maybe Table :=
-  match ds { nil -> nothing ; cons (n, t) rest -> if n == name then just t else lookupTable rest name }
-lookupScale (ss : List (String * Scale)) (a : String) : Maybe Scale :=
-  match ss { nil -> nothing ; cons (b, s) rest -> if a == b then just s else lookupScale rest a }
-nthLayer (ls : List Layer) (i : Int) : Maybe Layer :=
-  match ls { nil -> nothing ; cons l rest -> if i == 0 then just l else nthLayer rest (i - 1) }
 
 -- the column of an aesthetic in a layer: the layer's own mapping first, then the plot's, and the
 -- plot's only for an aesthetic the layer's geometry draws (ggplot's inheritance)
 aesOf (p : Plot) (l : Layer) (a : String) : Maybe String :=
-  match lookupStr l.mapping a {
+  match lookup List String String a l.mapping {
     just c -> just c ;
-    nothing -> if member List String a (draws l.geom) then lookupStr p.mapping a else nothing }
+    nothing -> if member List String a (draws l.geom) then lookup List String String a p.mapping else nothing }
 
 -- what each geometry needs mapped, and what else it may draw (plan G3: "of the kind the geometry
 -- asks")
@@ -220,8 +202,7 @@ mayDraw (g : Geom) : List String :=
   match g {
     points s -> ["colour", "size"] ; lines s -> ["colour", "group"] ; errorbars s -> ["xerr", "colour"] ;
     ellipses s -> ["colour"] ; texts s -> ["colour"] ; segments s -> ["colour"] ; ablines s -> nil }
-appendStrs (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (appendStrs rest ys) }
-draws (g : Geom) : List String := appendStrs (needs g) (mayDraw g)
+draws (g : Geom) : List String := needs g <> mayDraw g
 -- the reach of an error column: an error bar spans one half-width, an ellipse `level` of them
 reach (g : Geom) : Float64 := match g { errorbars s -> 1.0 ; ellipses s -> s.level ; _ -> 0.0 }
 -- whether a geometry draws its rows in the order of the rows: none of the seven does (`lines`
@@ -257,11 +238,11 @@ rowRange (p : Plot) (l : Layer) (t : Table) (a : String) (r : Fin t.nRows) : May
         just e -> unionRange (pointRange (v - reach l.geom * e)) (pointRange (v + reach l.geom * e)) } })
 -- what a layer occupies on an aesthetic, over its rows; nothing for a layer with no table or rows
 layerRange (p : Plot) (l : Layer) (a : String) : Maybe Range :=
-  match lookupTable p.tables l.table {
+  match lookup List String Table l.table p.tables {
     nothing -> nothing ;
     just t -> foldWith (Maybe Range) unionRange nothing t.nRows (fn r { rowRange p l t a r }) }
 rangeOver (p : Plot) (ls : List Layer) (a : String) : Maybe Range :=
-  match ls { nil -> nothing ; cons l rest -> unionRange (layerRange p l a) (rangeOver p rest a) }
+  fold Layer (Maybe Range) unionRange nothing (fn (l : Layer) { layerRange p l a }) ls
 -- the range of the data on an aesthetic, over every layer
 dataRange (p : Plot) (a : String) : Maybe Range := rangeOver p p.layers a
 
@@ -274,7 +255,7 @@ limitsFrom (isLog : Bool) (l : Limits) (d : Maybe Range) : Maybe Range :=
     stated g -> just g ;
     auto e -> match d { nothing -> nothing ; just g -> just (expandRange isLog e.expand g) } }
 resolvedLimits (p : Plot) (a : String) : Maybe Range :=
-  match lookupScale p.scales a {
+  match lookup List String Scale a p.scales {
     nothing -> nothing ;
     just s -> match s {
       linear l -> limitsFrom false l (dataRange p a) ;
@@ -290,52 +271,52 @@ levels (t : Table) (c : String) : Int :=
 -- plan G3 [proposed]: every aesthetic a mapping names is a known one, so a misspelt aesthetic is
 -- refused and not ignored
 AestheticsKnown (p : Plot) : Bool :=
-  allStr (keysOf p.mapping) (fn a { member List String a knownAesthetics })
-    and allLayers p.layers (fn l { allStr (keysOf l.mapping) (fn a { member List String a knownAesthetics }) })
+  all List String (fn a { member List String a knownAesthetics }) (keysOf p.mapping)
+    and all List Layer (fn l { all List String (fn a { member List String a knownAesthetics }) (keysOf l.mapping) }) p.layers
 -- P11 [proposed]: the canvas has a positive width, height and resolution
 CanvasPositive (p : Plot) : Bool := p.canvas.width > 0.0 and p.canvas.height > 0.0 and p.canvas.dpi > 0.0
 -- plan G2: the tables are named once each
 TablesNamedOnce (p : Plot) : Bool := distinct String (structural String) (namesOf p.tables)
 -- plan G3: a layer that draws columns names a table of the plot
 LayersNameTheirTables (p : Plot) : Bool :=
-  allLayers p.layers (fn l { isNilStr (needs l.geom) or isJustTable (lookupTable p.tables l.table) })
+  all List Layer (fn l { isEmpty String (needs l.geom) or isJustTable (lookup List String Table l.table p.tables) }) p.layers
 isJustTable (m : Maybe Table) : Bool := match m { nothing -> false ; just t -> true }
 -- plan G3 [proposed]: a layer's own mapping names only aesthetics its geometry draws
 LayerMapsWhatItDraws (p : Plot) : Bool :=
-  allLayers p.layers (fn l { allStr (keysOf l.mapping) (fn a { member List String a (draws l.geom) }) })
+  all List Layer (fn l { all List String (fn a { member List String a (draws l.geom) }) (keysOf l.mapping) }) p.layers
 -- plan G3: every aesthetic a geometry needs is mapped, by the layer or by the plot
 NeedsMapped (p : Plot) : Bool :=
-  allLayers p.layers (fn l { allStr (needs l.geom) (fn a { isJustStr (aesOf p l a) }) })
+  all List Layer (fn l { all List String (fn a { isJustStr (aesOf p l a) }) (needs l.geom) }) p.layers
 -- plan G3, tables.lth §3 (`hasColumn`, `kinds`): every aesthetic a layer draws names a column of
 -- its table, a number ("int" or "float") where the aesthetic is drawn as a number, any kind for
 -- colour, group and label
 columnFits (p : Plot) (l : Layer) (a : String) : Bool :=
   match aesOf p l a {
     nothing -> true ;
-    just c -> match lookupTable p.tables l.table {
+    just c -> match lookup List String Table l.table p.tables {
       nothing -> false ;
       just t -> if numericAesthetic a then hasColumn t c "float" or hasColumn t c "int" else member List String c t.names } }
-AestheticsAreColumns (p : Plot) : Bool := allLayers p.layers (fn l { allStr (draws l.geom) (fn a { columnFits p l a }) })
+AestheticsAreColumns (p : Plot) : Bool := all List Layer (fn l { all List String (fn a { columnFits p l a }) (draws l.geom) }) p.layers
 -- plan G2, P11 [proposed]: a geometry's sizes, widths and level are positive
 geomParametersPositive (g : Geom) : Bool :=
   match g {
     points s -> s.size > 0.0 ; lines s -> s.width > 0.0 ; errorbars s -> s.width > 0.0 ;
     ellipses s -> s.level > 0.0 and s.width > 0.0 ; texts s -> s.size > 0.0 ; segments s -> s.width > 0.0 ;
     ablines s -> s.width > 0.0 }
-GeometryParametersPositive (p : Plot) : Bool := allLayers p.layers (fn l { geomParametersPositive l.geom })
+GeometryParametersPositive (p : Plot) : Bool := all List Layer (fn l { geomParametersPositive l.geom }) p.layers
 -- plan G3, P11 [proposed]: every scale a layer is drawn on is stated by the demand, none taken by
 -- default: x and y for a plot with a layer, colour for a plot that maps it
-hasScale (p : Plot) (a : String) : Bool := match lookupScale p.scales a { nothing -> false ; just s -> true }
-mapsColour (p : Plot) : Bool := anyLayer p.layers (fn l { isJustStr (aesOf p l "colour") })
+hasScale (p : Plot) (a : String) : Bool := match lookup List String Scale a p.scales { nothing -> false ; just s -> true }
+mapsColour (p : Plot) : Bool := any List Layer (fn l { isJustStr (aesOf p l "colour") }) p.layers
 ScalesStated (p : Plot) : Bool :=
   (match p.layers { nil -> true ; cons l rest -> hasScale p "x" and hasScale p "y" })
     and (not (mapsColour p) or hasScale p "colour")
 -- plan G2 [proposed]: positions take a linear or log scale, colour a palette
 scaleFits (a : String) (s : Scale) : Bool :=
   match s { linear l -> a == "x" or a == "y" ; log l -> a == "x" or a == "y" ; palette cs -> a == "colour" }
-allScales (ss : List (String * Scale)) (f : String -> Scale -> Bool) : Bool :=
-  match ss { nil -> true ; cons (a, s) rest -> f a s and allScales rest f }
-ScalesFitTheirAesthetics (p : Plot) : Bool := allScales p.scales scaleFits
+-- [core bite 12] a predicate of an aesthetic and its scale, read on a pair of the plot's list
+scalePair (f : String -> Scale -> Bool) (e : String * Scale) : Bool := match e { (a, u) -> f a u }
+ScalesFitTheirAesthetics (p : Plot) : Bool := all List (String * Scale) (scalePair scaleFits) p.scales
 -- plan G3, P11: stated limits are an interval, of positive numbers on a log scale; an expansion is
 -- not negative, and a log scale's factor is at least one; a palette has a colour
 limitsWellFormed (isLog : Bool) (l : Limits) : Bool :=
@@ -344,8 +325,8 @@ limitsWellFormed (isLog : Bool) (l : Limits) : Bool :=
     auto e -> if isLog then e.expand >= 1.0 else e.expand >= 0.0 }
 scaleWellFormed (s : Scale) : Bool :=
   match s { linear l -> limitsWellFormed false l ; log l -> limitsWellFormed true l ;
-            palette cs -> not (isNilStr cs) }
-ScaleLimitsWellFormed (p : Plot) : Bool := allScales p.scales (fn a s { scaleWellFormed s })
+            palette cs -> not (isEmpty String cs) }
+ScaleLimitsWellFormed (p : Plot) : Bool := all List (String * Scale) (scalePair (fn a s { scaleWellFormed s })) p.scales
 -- plan G3: a scale's limits contain the data or are stated by the demand. Computed limits exist
 -- (there is data to compute them from), are an interval (not one point: a single value needs
 -- stated limits), and contain every value drawn on the aesthetic, its ends and errors included.
@@ -359,29 +340,29 @@ limitsContain (p : Plot) (a : String) (l : Limits) : Bool :=
       nothing -> false ;
       just g -> g.lo < g.hi and (match dataRange p a { nothing -> false ; just d -> contains g d }) } }
 LimitsContainTheData (p : Plot) : Bool :=
-  allScales p.scales (fn a s { match s { linear l -> limitsContain p a l ; log l -> limitsContain p a l ; palette cs -> true } })
+  all List (String * Scale) (scalePair (fn a s { match s { linear l -> limitsContain p a l ; log l -> limitsContain p a l ; palette cs -> true } })) p.scales
 -- plan G3 [proposed]: a log scale draws positive data only
 LogScaleOnPositiveData (p : Plot) : Bool :=
-  allScales p.scales (fn a s { match s {
+  all List (String * Scale) (scalePair (fn a s { match s {
     log l -> (match dataRange p a { nothing -> true ; just d -> d.lo > 0.0 }) ;
-    _ -> true } })
+    _ -> true } })) p.scales
 -- plan G3 [proposed]: a palette has a colour for every level of the colour column of each layer
 -- that maps colour, so that two levels never share one
 paletteLength (p : Plot) : Int :=
-  match lookupScale p.scales "colour" { nothing -> 0 ; just s -> match s { palette cs -> size cs ; _ -> 0 } }
+  match lookup List String Scale "colour" p.scales { nothing -> 0 ; just s -> match s { palette cs -> size cs ; _ -> 0 } }
 PaletteCoversLevels (p : Plot) : Bool :=
-  allLayers p.layers (fn l { match aesOf p l "colour" {
+  all List Layer (fn l { match aesOf p l "colour" {
     nothing -> true ;
-    just c -> match lookupTable p.tables l.table { nothing -> true ; just t -> levels t c <= paletteLength p } } })
+    just c -> match lookup List String Table l.table p.tables { nothing -> true ; just t -> levels t c <= paletteLength p } } }) p.layers
 -- plan G2 [proposed]: the facet is a column of the table of some layer; a layer whose table lacks
 -- it is drawn in every panel (ggplot's rule)
 FacetIsAColumn (p : Plot) : Bool :=
   match p.facet {
     nothing -> true ;
-    just c -> anyLayer p.layers (fn l { match lookupTable p.tables l.table { nothing -> false ; just t -> member List String c t.names } }) }
+    just c -> any List Layer (fn l { match lookup List String Table l.table p.tables { nothing -> false ; just t -> member List String c t.names } }) p.layers }
 -- plan G2 [proposed]: equal aspect draws one unit of x as one of y (positions in metres), so it
 -- asks the two position scales of one kind, both linear or both log
-scaleKind (p : Plot) (a : String) : String := match lookupScale p.scales a { nothing -> "" ; just s -> (scaleKey s).kind }
+scaleKind (p : Plot) (a : String) : String := match lookup List String Scale a p.scales { nothing -> "" ; just s -> (scaleKey s).kind }
 CoordFitsScales (p : Plot) : Bool := match p.coord { cartesian u -> true ; equal u -> scaleKind p "x" == scaleKind p "y" }
 
 Plot := CanvasPositive & AestheticsKnown & TablesNamedOnce & LayersNameTheirTables & LayerMapsWhatItDraws & NeedsMapped
@@ -415,19 +396,14 @@ scaleKey (s : Scale) : ScaleKey :=
     palette cs -> { kind := "palette", limits := ("", nil), colours := cs } }
 coordKey (c : Coord) : String := match c { cartesian u -> "cartesian" ; equal u -> "equal" }
 sameLayers (xs ys : List Layer) : Bool :=
-  match xs {
-    nil -> (match ys { nil -> true ; cons b rest -> false }) ;
-    cons a more -> match ys {
-      nil -> false ;
-      cons b rest -> geomKey a.geom == geomKey b.geom and a.mapping == b.mapping and a.table == b.table and sameLayers more rest } }
+  size xs == size ys and all List (Layer * Layer) (fn (ab : Layer * Layer) { match ab { (a, b) ->
+    geomKey a.geom == geomKey b.geom and a.mapping == b.mapping and a.table == b.table } }) (zip Layer Layer xs ys)
 sameScales (xs ys : List (String * Scale)) : Bool :=
-  match xs {
-    nil -> (match ys { nil -> true ; cons b rest -> false }) ;
-    cons (a, s) more -> match ys { nil -> false ; cons (b, u) rest -> a == b and scaleKey s == scaleKey u and sameScales more rest } }
+  size xs == size ys and all List ((String * Scale) * (String * Scale)) (fn (e : (String * Scale) * (String * Scale)) { match e { ((a, s), (b, u)) ->
+    a == b and scaleKey s == scaleKey u } }) (zip (String * Scale) (String * Scale) xs ys)
 sameData (ds es : List (String * Table)) : Bool :=
-  match ds {
-    nil -> (match es { nil -> true ; cons e rest -> false }) ;
-    cons (n, t) more -> match es { nil -> false ; cons (m, u) rest -> n == m and sameTable t u and sameData more rest } }
+  size ds == size es and all List ((String * Table) * (String * Table)) (fn (e : (String * Table) * (String * Table)) { match e { ((n, t), (m, u)) ->
+    n == m and sameTable t u } }) (zip (String * Table) (String * Table) ds es)
 samePlot (p q : Plot) : Bool :=
   p.canvas == q.canvas and sameData p.tables q.tables and p.mapping == q.mapping and sameLayers p.layers q.layers and sameScales p.scales q.scales
     and coordKey p.coord == coordKey q.coord and p.facet == q.facet and p.labels == q.labels
@@ -499,9 +475,9 @@ bijective (n : Int) (f : Fin n -> Fin n) : Bool := forallBelow n (fn i { existsB
 permuteRows (t : Table) (f : Fin t.nRows -> Fin t.nRows) : Table :=
   { nRows := t.nRows, names := t.names, kinds := t.kinds, cell := fn c r { t.cell c (f r) } }
 replaceTable (ds : List (String * Table)) (name : String) (t : Table) : List (String * Table) :=
-  match ds { nil -> nil ; cons (n, u) rest -> if n == name then cons (n, t) (replaceTable rest name t) else cons (n, u) (replaceTable rest name t) }
+  map (fn (d : String * Table) { match d { (n, u) -> if n == name then (n, t) else (n, u) } }) ds
 put (p : Plot) (name : String) (t : Table) : Plot := withData p (replaceTable p.tables name t)
-tableOrderedByRows (p : Plot) (name : String) : Bool := anyLayer p.layers (fn l { l.table == name and ordersByRows l.geom })
+tableOrderedByRows (p : Plot) (name : String) : Bool := any List Layer (fn l { l.table == name and ordersByRows l.geom }) p.layers
 RowOrderInvariant (S : Concrete) (d : Drawing S) (p : Plot) (name : String) (t : Table) (f : Fin t.nRows -> Fin t.nRows) (ext : String) : Bool :=
   not (wellFormed (put p name t)) or not (member List String ext d.formats) or not (bijective t.nRows f)
     or tableOrderedByRows p name or d.image (put p name (permuteRows t f)) ext == d.image (put p name t) ext
@@ -535,9 +511,9 @@ swapAt (ls : List Layer) (i : Int) : List Layer :=
     cons a rest -> if i == 0 then (match rest { nil -> ls ; cons b more -> cons b (cons a more) }) else cons a (swapAt rest (i - 1)) }
 LayerOrderInvariant (S : Concrete) (d : Drawing S) (margin : Margin) (p : Plot) (i : Nat) (ext : String) : Bool :=
   not (wellFormed p) or not (member List String ext d.formats) or not (member List String ext d.rasters)
-    or (match nthLayer p.layers i {
+    or (match nth Layer p.layers i {
       nothing -> true ;
-      just a -> match nthLayer p.layers (i + 1) {
+      just a -> match nth Layer p.layers (i + 1) {
         nothing -> true ;
         just b -> not (layersApart margin p a b) or d.image (withLayers p (swapAt p.layers i)) ext == d.image p ext } })
 

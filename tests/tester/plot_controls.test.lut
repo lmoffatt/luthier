@@ -16,7 +16,7 @@ import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed
 import "tables.lth" Table int real
-import "plot.lth" Plot Drawing lookupTable nthLayer retitle FileExistsAfter FormatByExtension ImageOfTheValue
+import "plot.lth" Plot Drawing Layer retitle FileExistsAfter FormatByExtension ImageOfTheValue
   RowOrderInvariant LayerOrderInvariant ImageSeesTheTitle
 import "world.lth" Persistence WriteThenRead WriteChangesOnlyItsPlace
 import "world_model.lut" State theWorld
@@ -34,17 +34,17 @@ allPng : Drawing State := { store := files, formats := matplotlibDrawing.formats
 -- the image reads a cell at a name the schema does not have (ImageOfTheValue): two tables with the
 -- same cells may differ there
 offCell (p : Plot) : String :=
-  match lookupTable p.tables "obs" { nothing -> "" ; just t -> match t.cell "zz" 0 { nothing -> "" ; just c -> "zz" } }
+  match lookup List String Table "obs" p.tables { nothing -> "" ; just t -> match t.cell "zz" 0 { nothing -> "" ; just c -> "zz" } }
 readsOffSchema : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
   image := fn p e { matplotlibDrawing.image p e <> offCell p }, formatOf := matplotlibDrawing.formatOf }
 -- the image marks the first row of obs apart (RowOrderInvariant): the off-by-one of a reader that
 -- takes the first row for something else
 firstRow (p : Plot) : String :=
-  match lookupTable p.tables "obs" { nothing -> "" ; just t -> if t.cell "x" 0 == just (real 1.0) then "first" else "" }
+  match lookup List String Table "obs" p.tables { nothing -> "" ; just t -> if t.cell "x" 0 == just (real 1.0) then "first" else "" }
 firstRowApart : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
   image := fn p e { matplotlibDrawing.image p e <> firstRow p }, formatOf := matplotlibDrawing.formatOf }
 -- the image depends on which table the first layer draws (LayerOrderInvariant), apart or not
-firstLayer (p : Plot) : String := match nthLayer p.layers 0 { nothing -> "" ; just l -> l.table }
+firstLayer (p : Plot) : String := match nth Layer p.layers 0 { nothing -> "" ; just l -> l.table }
 layerOrdered : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
   image := fn p e { matplotlibDrawing.image p e <> firstLayer p }, formatOf := matplotlibDrawing.formatOf }
 -- the image drops the title (ImageSeesTheTitle)
