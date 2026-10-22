@@ -68,11 +68,12 @@ WellFormed (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a s
 -- removing a bound name removes the dotted names it prefixes: `c.parse` with `c` a binder is the
 -- projection of a bound variable, not a free name (2.S14; check.py, step 4.1)
 removeName (x : String) (xs : List String) : List String :=
-  match xs { nil -> nil ; cons y rest -> if x == y or namePrefix y == x then removeName x rest else cons y (removeName x rest) }
-removeNames (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> removeNames rest (removeName x ys) }
+  filter List String (fn (y : String) { not (x == y or namePrefix y == x) }) xs
+removeNames (xs ys : List String) : List String :=
+  filter List String (fn (y : String) { not (any List String (fn (x : String) { x == y or namePrefix y == x }) xs) }) ys
 
 reported (fs : List Failure) (rule n : String) : Bool :=
-  match fs { nil -> false ; cons f rest -> (f.rule == rule and f.name == n) or reported rest rule n }
+  any List Failure (fn (f : Failure) { f.rule == rule and f.name == n }) fs
 
 -- The programs a rule is tested on, and its two laws (review of layers 0-1, B). A law stated over
 -- every program with one of its names would be vacuous in practice: a random program violates
@@ -98,7 +99,7 @@ ReportsNoFalseFailure (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t :
 ReportsOnItsNames (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (w : WellFormed a sb e t)
                   (p : SurfaceProgram) : Bool := failuresNamed (w.check p) (actNames p)
 failuresNamed (fs : List Failure) (ns : List String) : Bool :=
-  match fs { nil -> true ; cons f rest -> member List String f.name ns and failuresNamed rest ns }
+  all List Failure (fn (f : Failure) { member List String f.name ns }) fs
 
 -- ---------------------------------------------------------------- §2 Names
 
@@ -108,18 +109,18 @@ actName (a : SurfaceAct) : Maybe String := match a {
   importAct f ns -> nothing ; operatorAct o t -> nothing ; datum t -> nothing ;
 }
 actNames (p : SurfaceProgram) : List String :=
-  match p { nil -> nil ; cons a rest -> match actName a { nothing -> actNames rest ; just x -> cons x (actNames rest) } }
-importedNames (p : SurfaceProgram) : List String := match p { nil -> nil ;
-  cons a rest -> match a { importAct f ns -> ((importNames ns) <> (importedNames rest)) ; _ -> importedNames rest } }
-importNames (ns : List ImportName) : List String := match ns { nil -> nil ;
-  cons i rest -> cons (match i.asName { nothing -> i.name ; just y -> y }) (importNames rest) }
+  concat String (map (fn (a : SurfaceAct) { match actName a { nothing -> nil ; just x -> [x] } }) p)
+importedNames (p : SurfaceProgram) : List String :=
+  concat String (map (fn (a : SurfaceAct) { match a { importAct f ns -> importNames ns ; _ -> nil } }) p)
+importNames (ns : List ImportName) : List String :=
+  map (fn (i : ImportName) { match i.asName { nothing -> i.name ; just y -> y } }) ns
 
 isDeclared (p : SurfaceProgram) (n : String) : Bool :=
-  match p { nil -> false ; cons a rest -> match a { declare x bs t -> x == n or isDeclared rest n ; _ -> isDeclared rest n } }
+  any List SurfaceAct (fn (a : SurfaceAct) { match a { declare x bs t -> x == n ; _ -> false } }) p
 isDefined (p : SurfaceProgram) (n : String) : Bool :=
-  match p { nil -> false ; cons a rest -> match a { define x bs t b -> x == n or isDefined rest n ; _ -> isDefined rest n } }
+  any List SurfaceAct (fn (a : SurfaceAct) { match a { define x bs t b -> x == n ; _ -> false } }) p
 isAlias (p : SurfaceProgram) (n : String) : Bool :=
-  match p { nil -> false ; cons a rest -> match a { alias x bs t -> x == n or isAlias rest n ; _ -> isAlias rest n } }
+  any List SurfaceAct (fn (a : SurfaceAct) { match a { alias x bs t -> x == n ; _ -> false } }) p
 -- a name is known when the program introduces it, imports it, makes it a constructor, or core
 -- gives it (`core` the list of core's names: core is not written yet, 12.S21). A dotted name
 -- `m.f` is known when the whole name is, or its first part (2.S14: a qualified name, or a
@@ -136,21 +137,21 @@ knownWhole (core : List String) (p : SurfaceProgram) (n : String) : Bool :=
 -- and a variable otherwise (2.S10, 2.S13).
 -- (a label of a labeled sum, `{ a : A || b : B }`, named by an alias or a definition, is its
 -- injection, and so a constructor here; check.py, step 4.1)
-constructors (p : SurfaceProgram) : List String := match p { nil -> nil ;
-  cons a rest -> match a {
-    define x bs t b -> ((bodyConstructors b) <> (((typeLabels t) <> (constructors rest)))) ;
-    alias x bs t -> ((sumLabels t) <> (constructors rest)) ;
-    declare x bs t -> ((sumLabels t) <> (((binderLabels bs) <> (constructors rest)))) ;
-    _ -> constructors rest } }
+constructors (p : SurfaceProgram) : List String :=
+  concat String (map (fn (a : SurfaceAct) { match a {
+    define x bs t b -> ((bodyConstructors b) <> (typeLabels t)) ;
+    alias x bs t -> sumLabels t ;
+    declare x bs t -> ((sumLabels t) <> (binderLabels bs)) ;
+    _ -> nil } }) p)
 -- the labels of a labeled sum anywhere in a term are its injections, used as constructors where
 -- the sum is written in a type: `{ one : A || two : B }` in a field's type (check.py, bite 2)
 sumLabels (t : Surface) : List String := ((match t { sumSurface kvs -> surfacePairNames kvs ; _ -> nil }) <> (sumLabelsIn (children t)))
-sumLabelsIn (ts : List Surface) : List String := match ts { nil -> nil ; cons t rest -> ((sumLabels t) <> (sumLabelsIn rest)) }
+sumLabelsIn (ts : List Surface) : List String := concat String (map sumLabels ts)
 typeLabels (t : Maybe Surface) : List String := match t { nothing -> nil ; just u -> sumLabels u }
-binderLabels (bs : List Binder) : List String := match bs { nil -> nil ;
-  cons b rest -> ((match b { explicit xs t d -> sumLabels t ; implicit xs t -> sumLabels t }) <> (binderLabels rest)) }
+binderLabels (bs : List Binder) : List String :=
+  concat String (map (fn (b : Binder) { match b { explicit xs t d -> sumLabels t ; implicit xs t -> sumLabels t } }) bs)
 bodyConstructors (b : Body) : List String := match b { dataBody cs -> surfacePairNames cs ; termBody t -> sumLabels t ; clausesBody cs -> nil }
-surfacePairNames (kvs : List (String * Surface)) : List String := match kvs { nil -> nil ; cons (k, v) rest -> cons k (surfacePairNames rest) }
+surfacePairNames (kvs : List (String * Surface)) : List String := map (fn (kv : String * Surface) { match kv { (k, v) -> k } }) kvs
 
 -- the variables a pattern binds, given the constructors `k`
 patternBinds (k : List String) (q : SurfacePattern) : List String := match q {
@@ -158,8 +159,7 @@ patternBinds (k : List String) (q : SurfacePattern) : List String := match q {
   pApp n qs -> if member List String n k then patternsBind k qs else (match qs { nil -> [n] ; _ -> patternsBind k qs }) ;
   pTuple qs -> patternsBind k qs ;
 }
-patternsBind (k : List String) (qs : List SurfacePattern) : List String :=
-  match qs { nil -> nil ; cons q rest -> ((patternBinds k q) <> (patternsBind k rest)) }
+patternsBind (k : List String) (qs : List SurfacePattern) : List String := concat String (map (patternBinds k) qs)
 
 -- spec 1.S7: the names found in a term, less those it binds; operators are core's and not counted
 namesIn (k : List String) (t : Surface) : List String := match t {
@@ -180,44 +180,47 @@ namesIn (k : List String) (t : Surface) : List String := match t {
   matchOf s arms -> ((namesIn k s) <> (armsNames k arms)) ;
   ifThen c a b -> ((namesIn k c) <> (((namesIn k a) <> (match b { nothing -> nil ; just e -> namesIn k e })))) ;
 }
-namesInAll (k : List String) (ts : List Surface) : List String :=
-  match ts { nil -> nil ; cons t rest -> ((namesIn k t) <> (namesInAll k rest)) }
+namesInAll (k : List String) (ts : List Surface) : List String := concat String (map (namesIn k) ts)
 pairsNames (k : List String) (kvs : List (String * Surface)) : List String :=
-  match kvs { nil -> nil ; cons (x, v) rest -> ((namesIn k v) <> (pairsNames k rest)) }
-fieldLabels (fs : List RecordField) : List String := match fs { nil -> nil ; cons f rest -> (f.names <> (fieldLabels rest)) }
+  concat String (map (fn (kv : String * Surface) { match kv { (x, v) -> namesIn k v } }) kvs)
+fieldLabels (fs : List RecordField) : List String := concat String (map (fn (f : RecordField) { f.names }) fs)
 -- a field's names are in scope in the fields after it (a dependent record, 2.S14)
+-- kept as a recursion (bite 13b): a telescope: each entry's names bind in what follows it, so the tail is rewritten by the head; no fold of a monoid says that
 fieldsNames (k : List String) (fs : List RecordField) : List String :=
   match fs { nil -> nil ; cons f rest -> ((namesIn k f.type) <> (removeNames f.names (fieldsNames k rest))) }
 -- a block's items bind in what follows them
+-- kept as a recursion (bite 13b): a telescope: each entry's names bind in what follows it, so the tail is rewritten by the head; no fold of a monoid says that
 itemsNames (k : List String) (items : List Item) (e : Surface) : List String := match items {
   nil -> namesIn k e ;
   cons it rest -> match it {
     bind x t -> ((namesIn k t) <> (removeName x (itemsNames k rest e))) ;
     rebind q t -> ((namesIn k t) <> (removeNames (patternBinds k q) (itemsNames k rest e))) } }
-paramsBind (k : List String) (ps : List LambdaParam) : List String := match ps { nil -> nil ;
-  cons q rest -> ((match q { plainParam x -> [x] ; typedParam xs t -> xs ; shapeParam qs -> patternsBind k qs }) <> (paramsBind k rest)) }
+paramsBind (k : List String) (ps : List LambdaParam) : List String :=
+  concat String (map (fn (q : LambdaParam) { match q { plainParam x -> [x] ; typedParam xs t -> xs ; shapeParam qs -> patternsBind k qs } }) ps)
 -- a parameter's names are in scope in the parameters after it
+-- kept as a recursion (bite 13b): a telescope: each entry's names bind in what follows it, so the tail is rewritten by the head; no fold of a monoid says that
 paramsNames (k : List String) (ps : List LambdaParam) : List String := match ps { nil -> nil ;
   cons q rest -> ((match q { typedParam xs t -> namesIn k t ; _ -> nil }) <> (removeNames (paramsBind k [q]) (paramsNames k rest))) }
-armsNames (k : List String) (arms : List (SurfacePattern * Surface)) : List String := match arms { nil -> nil ;
-  cons (q, b) rest -> ((removeNames (patternBinds k q) (namesIn k b)) <> (armsNames k rest)) }
+armsNames (k : List String) (arms : List (SurfacePattern * Surface)) : List String :=
+  concat String (map (fn (arm : SurfacePattern * Surface) { match arm { (q, b) -> removeNames (patternBinds k q) (namesIn k b) } }) arms)
 
 -- D(n) and B(n) of 1.S7: the names in the declared type of `n` (its binders included) and in its
 -- body, each less the binders' own names
 -- a binder's names are in scope in the binders after it: `(a : Alpha) (sb : Substitution a)`, a
 -- default mentioning an earlier parameter, `{A : U} (x : A)` (2.S7, 2.S16)
+-- kept as a recursion (bite 13b): a telescope: each entry's names bind in what follows it, so the tail is rewritten by the head; no fold of a monoid says that
 binderNames (k : List String) (bs : List Binder) : List String := match bs { nil -> nil ;
   cons b rest -> ((match b { explicit xs t d -> ((namesIn k t) <> (match d { nothing -> nil ; just e -> namesIn k e })) ;
                                    implicit xs t -> namesIn k t }) <> (removeNames (binderBound [b]) (binderNames k rest))) }
-binderBound (bs : List Binder) : List String := match bs { nil -> nil ;
-  cons b rest -> ((match b { explicit xs t d -> xs ; implicit xs t -> xs }) <> (binderBound rest)) }
+binderBound (bs : List Binder) : List String :=
+  concat String (map (fn (b : Binder) { match b { explicit xs t d -> xs ; implicit xs t -> xs } }) bs)
 bodyNames (k : List String) (b : Body) : List String := match b {
   termBody t -> namesIn k t ;
   dataBody cs -> pairsNames k cs ;
   clausesBody cs -> clausesNames k cs ;
 }
-clausesNames (k : List String) (cs : List Clause) : List String := match cs { nil -> nil ;
-  cons c rest -> ((removeNames (patternsBind k c.patterns) (namesIn k c.body)) <> (clausesNames k rest)) }
+clausesNames (k : List String) (cs : List Clause) : List String :=
+  concat String (map (fn (c : Clause) { removeNames (patternsBind k c.patterns) (namesIn k c.body) }) cs)
 dOf (p : SurfaceProgram) (a : SurfaceAct) : List String := match a {
   declare x bs t -> ((binderNames (constructors p) bs) <> (removeNames (binderBound bs) (namesIn (constructors p) t))) ;
   define x bs t b -> ((binderNames (constructors p) bs) <> (match t { nothing -> nil ; just u -> removeNames (binderBound bs) (namesIn (constructors p) u) })) ;
@@ -234,12 +237,11 @@ bOf (p : SurfaceProgram) (a : SurfaceAct) : List String := match a {
 -- core's names: core encloses every file (12.S21) and is not written yet, so its names are a hole
 coreNames : List String
 
-actsNamed (p : SurfaceProgram) (n : String) : List SurfaceAct := match p { nil -> nil ;
-  cons a rest -> match actName a { just x -> if x == n then cons a (actsNamed rest n) else actsNamed rest n ;
-                                   nothing -> actsNamed rest n } }
-countName (n : String) (xs : List String) : Nat := match xs { nil -> 0 ; cons x rest -> (if x == n then 1 else 0) + countName n rest }
+actsNamed (p : SurfaceProgram) (n : String) : List SurfaceAct :=
+  filter List SurfaceAct (fn (a : SurfaceAct) { match actName a { just x -> x == n ; nothing -> false } }) p
+countName (n : String) (xs : List String) : Nat := count List String (fn (x : String) { x == n }) xs
 definedNames (p : SurfaceProgram) : List String :=
-  match p { nil -> nil ; cons a rest -> match a { define x bs t b -> cons x (definedNames rest) ; _ -> definedNames rest } }
+  concat String (map (fn (a : SurfaceAct) { match a { define x bs t b -> [x] ; _ -> nil } }) p)
 
 -- 4.R1: a declaration mentions only names that exist, declared or defined (or imported, or core's)
 violatesR1 (p : SurfaceProgram) (n : String) : Bool :=
@@ -264,9 +266,9 @@ violatesR2Exists (p : SurfaceProgram) (n : String) : Bool :=
 -- (`namesIn` gives `v.n` whole). [proposed] Reading 1.S7's occurrence as 4.R3's touch: arrays.lth's
 -- `VecOf`, `{ v : Vec A | v.n == k }`, touches `v` (report of the leftovers agent, f8c5f40).
 untouched (k : List String) (labels : List String) (law : Surface) : Bool :=
-  match labels { nil -> false ; cons l rest -> not (touchesName l (namesIn k law)) or untouched k rest law }
+  any List String (fn (l : String) { not (touchesName l (namesIn k law)) }) labels
 touchesName (l : String) (ns : List String) : Bool :=
-  match ns { nil -> false ; cons m rest -> m == l or namePrefix m == l or touchesName l rest }
+  any List String (fn (m : String) { m == l or namePrefix m == l }) ns
 predicateUntouched (k : List String) (isPredicate : Bool) (t : Surface) : Bool := match t {
   recordSurface fs law -> match law { nothing -> false ; just l -> untouched k (fieldLabels fs) l } ;
   subtype q a law -> (match patternBinds k q { nil -> true ; vs -> untouched k vs law }) ;
@@ -305,14 +307,13 @@ isConjunction (t : Surface) : Bool := match t { binop o l r -> o == "&" ; _ -> f
 -- declared as a theory (`T : { ... }` then `T := L`)
 -- (a declaration anywhere in the program makes a definition of that name a head; check.py found the
 -- search ran on what followed the definition only)
-theoryHeads (whole acts : SurfaceProgram) : List SurfaceAct := match acts { nil -> nil ; cons act rest -> match act {
-  define x bs t b -> (match b { termBody u -> if isConjunction u or isDeclared whole x then cons act (theoryHeads whole rest)
-                                              else theoryHeads whole rest ;
-                                _ -> theoryHeads whole rest }) ;
-  _ -> theoryHeads whole rest } }
+theoryHeads (whole acts : SurfaceProgram) : List SurfaceAct :=
+  filter List SurfaceAct (fn (act : SurfaceAct) { match act {
+    define x bs t b -> (match b { termBody u -> isConjunction u or isDeclared whole x ; _ -> false }) ;
+    _ -> false } }) acts
 claimedLaws (p : SurfaceProgram) : List String := claimedBy (theoryHeads p p)
-claimedBy (hs : List SurfaceAct) : List String := match hs { nil -> nil ;
-  cons h rest -> ((match h { define x bs t b -> (match b { termBody u -> conjuncts u ; _ -> nil }) ; _ -> nil }) <> (claimedBy rest)) }
+claimedBy (hs : List SurfaceAct) : List String :=
+  concat String (map (fn (h : SurfaceAct) { match h { define x bs t b -> (match b { termBody u -> conjuncts u ; _ -> nil }) ; _ -> nil } }) hs)
 -- the names the claimed laws' bodies mention, and the constructors their own matches name.
 -- [proposed] A match in a law's body states what holds for each constructor it names (test.lth's
 -- `CountsCases`: a sampled run has exactly the cases asked), and for a constructor whose payload
@@ -321,29 +322,26 @@ claimedBy (hs : List SurfaceAct) : List String := match hs { nil -> nil ;
 -- it, without unfolding definitions), and an observer that only lists the constructors is such a
 -- helper (4.R3). Group 2 of record/IA/check-2026-10-13/opus-3b.md, part 2.
 lawNames (p : SurfaceProgram) : List String := lawBodies p (claimedLaws p) p
-lawBodies (p : SurfaceProgram) (laws : List String) (acts : SurfaceProgram) : List String := match acts { nil -> nil ;
-  cons act rest -> match act {
-    define x bs t b -> if member List String x laws then ((bOf p act) <> (((bodyMatched (constructors p) b) <> (lawBodies p laws rest))))
-                       else lawBodies p laws rest ;
-    _ -> lawBodies p laws rest } }
+lawBodies (p : SurfaceProgram) (laws : List String) (acts : SurfaceProgram) : List String :=
+  concat String (map (fn (act : SurfaceAct) { match act {
+    define x bs t b -> if member List String x laws then ((bOf p act) <> (bodyMatched (constructors p) b)) else nil ;
+    _ -> nil } }) acts)
 -- the constructors named by the patterns of the matches and clauses of a body, given the constructors `k`
 bodyMatched (k : List String) (b : Body) : List String := match b {
   termBody u -> matchedIn k u ; clausesBody cs -> clausesMatched k cs ; dataBody cs -> nil }
-clausesMatched (k : List String) (cs : List Clause) : List String := match cs { nil -> nil ;
-  cons c rest -> ((patternsNamed k c.patterns) <> (((matchedIn k c.body) <> (clausesMatched k rest)))) }
+clausesMatched (k : List String) (cs : List Clause) : List String :=
+  concat String (map (fn (c : Clause) { ((patternsNamed k c.patterns) <> (matchedIn k c.body)) }) cs)
 matchedIn (k : List String) (t : Surface) : List String :=
   ((match t { matchOf s arms -> armsMatched k arms ; _ -> nil }) <> (matchedInAll k (children t)))
-matchedInAll (k : List String) (ts : List Surface) : List String :=
-  match ts { nil -> nil ; cons t rest -> ((matchedIn k t) <> (matchedInAll k rest)) }
-armsMatched (k : List String) (arms : List (SurfacePattern * Surface)) : List String := match arms { nil -> nil ;
-  cons (q, b) rest -> ((patternNamed k q) <> (armsMatched k rest)) }
+matchedInAll (k : List String) (ts : List Surface) : List String := concat String (map (matchedIn k) ts)
+armsMatched (k : List String) (arms : List (SurfacePattern * Surface)) : List String :=
+  concat String (map (fn (arm : SurfacePattern * Surface) { match arm { (q, b) -> patternNamed k q } }) arms)
 patternNamed (k : List String) (q : SurfacePattern) : List String := match q {
   pWild -> nil ; pLit l -> nil ;
   pApp n qs -> if member List String n k then cons n (patternsNamed k qs) else patternsNamed k qs ;
   pTuple qs -> patternsNamed k qs ;
 }
-patternsNamed (k : List String) (qs : List SurfacePattern) : List String :=
-  match qs { nil -> nil ; cons q rest -> ((patternNamed k q) <> (patternsNamed k rest)) }
+patternsNamed (k : List String) (qs : List SurfacePattern) : List String := concat String (map (patternNamed k) qs)
 -- a field of a declared theory is touched when a claimed law reads it as `m.field`. A law reads
 -- its model through the model's binder, so a dotted name there is rooted at that binder and the
 -- field of the model is the part after the first `.`: `s.world.read` reads the field `world` of
@@ -352,9 +350,10 @@ patternsNamed (k : List String) (qs : List SurfacePattern) : List String :=
 -- `nameRest` gives the part after the first `.` (a function of core's `String`, declared until
 -- core names it), and `namePrefix` of it is the field.
 nameRest : String -> String
-fieldsOfDeclared (p : SurfaceProgram) (n : String) : List String := match p { nil -> nil ; cons act rest -> match act {
-  declare x bs t -> if x == n then (match t { recordSurface fs law -> fieldLabels fs ; _ -> nil }) else fieldsOfDeclared rest n ;
-  _ -> fieldsOfDeclared rest n } }
+fieldsOfDeclared (p : SurfaceProgram) (n : String) : List String :=
+  match lookup List String (List String) n (concat (String * List String) (map (fn (act : SurfaceAct) {
+    match act { declare x bs t -> [(x, (match t { recordSurface fs law -> fieldLabels fs ; _ -> nil }))] ; _ -> nil } }) p)) {
+    nothing -> nil ; just fs -> fs }
 -- the fields a term reads: the field after the first `.` of every dotted name, and every projection,
 -- bound or not, since a law reads a field through its model parameter, `m.parse` (check.py, bite 2:
 -- `lawNames` removes what a binder binds, so the reads through `m` were lost)
@@ -362,23 +361,22 @@ fieldsRead (t : Surface) : List String := ((match t {
     name s -> if namePrefix s == s then nil else [namePrefix (nameRest s)] ;
     proj a x -> [x] ;
     _ -> nil }) <> (fieldsReadIn (children t)))
-fieldsReadIn (ts : List Surface) : List String := match ts { nil -> nil ; cons t rest -> ((fieldsRead t) <> (fieldsReadIn rest)) }
+fieldsReadIn (ts : List Surface) : List String := concat String (map fieldsRead ts)
 lawReads (p : SurfaceProgram) : List String := lawReadsIn (claimedLaws p) p
-lawReadsIn (laws : List String) (acts : SurfaceProgram) : List String := match acts { nil -> nil ;
-  cons act rest -> match act {
-    define x bs t b -> if member List String x laws then ((bindersReads bs) <> (((bodyReads b) <> (lawReadsIn laws rest))))
-                       else lawReadsIn laws rest ;
-    _ -> lawReadsIn laws rest } }
+lawReadsIn (laws : List String) (acts : SurfaceProgram) : List String :=
+  concat String (map (fn (act : SurfaceAct) { match act {
+    define x bs t b -> if member List String x laws then ((bindersReads bs) <> (bodyReads b)) else nil ;
+    _ -> nil } }) acts)
 -- 4.R3 with 1.S7: "the annotation of a binder" is an occurrence (in type position), so a law reads
 -- the fields its binders' types and defaults name, as it reads those of its body. [proposed]
 -- Reading 1.S7 for 4.R3's reads: tables.lth's `NoCellsOffSchema (t : Table) (c : String) (r : Fin
 -- t.nRows)` reads `nRows` (report of the leftovers agent, f8c5f40).
-bindersReads (bs : List Binder) : List String := match bs { nil -> nil ;
-  cons b rest -> ((match b { explicit xs t d -> ((fieldsRead t) <> (match d { nothing -> nil ; just e -> fieldsRead e })) ;
-                                   implicit xs t -> fieldsRead t }) <> (bindersReads rest)) }
+bindersReads (bs : List Binder) : List String :=
+  concat String (map (fn (b : Binder) { match b { explicit xs t d -> ((fieldsRead t) <> (match d { nothing -> nil ; just e -> fieldsRead e })) ;
+                                   implicit xs t -> fieldsRead t } }) bs)
 bodyReads (b : Body) : List String := match b {
   termBody u -> fieldsRead u ; clausesBody cs -> clausesReads cs ; dataBody cs -> nil }
-clausesReads (cs : List Clause) : List String := match cs { nil -> nil ; cons c rest -> ((fieldsRead c.body) <> (clausesReads rest)) }
+clausesReads (cs : List Clause) : List String := concat String (map (fn (c : Clause) { fieldsRead c.body }) cs)
 untouchedFields (p : SurfaceProgram) (n : String) : Bool :=
   isDeclared p n and isDefined p n and any List String (fn (x : String) { not (member List String x (lawReads p)) }) (fieldsOfDeclared p n)
 violatesR3 (p : SurfaceProgram) (n : String) : Bool :=
@@ -392,8 +390,8 @@ violatesR3 (p : SurfaceProgram) (n : String) : Bool :=
 -- definition writes none (`P : U` then `P := ...`; review of layers 0-1, B)
 typeOfAct (p : SurfaceProgram) (n : String) (t : Maybe Surface) : Maybe Surface :=
   match t { just u -> just u ; nothing -> declaredSurface p n }
-declaredSurface (p : SurfaceProgram) (n : String) : Maybe Surface := match p { nil -> nothing ;
-  cons act rest -> match act { declare x bs t -> if x == n then just t else declaredSurface rest n ; _ -> declaredSurface rest n } }
+declaredSurface (p : SurfaceProgram) (n : String) : Maybe Surface :=
+  lookup List String Surface n (concat (String * Surface) (map (fn (act : SurfaceAct) { match act { declare x bs t -> [(x, t)] ; _ -> nil } }) p))
 atUniverse (p : SurfaceProgram) (n : String) (t : Maybe Surface) : Bool := typeOfAct p n t == just universe
 
 -- 4.R4: a definition at `U` makes a new type only if its body is a subtype with a predicate, a
@@ -437,9 +435,10 @@ children (t : Surface) : List Surface := match t {
   matchOf x arms -> cons x (armBodies arms) ;
   ifThen c x m -> cons c (cons x (match m { nothing -> nil ; just y -> [y] })) ;
   _ -> nil }
-fieldTypes (fs : List RecordField) : List Surface := match fs { nil -> nil ; cons f rest -> cons f.type (fieldTypes rest) }
+fieldTypes (fs : List RecordField) : List Surface := map (fn (f : RecordField) { f.type }) fs
 itemValues (items : List Item) : List Surface := map (fn (it : Item) { match it { bind x v -> v ; rebind q v -> v } }) items
 armBodies (arms : List (SurfacePattern * Surface)) : List Surface := map (fn (arm : SurfacePattern * Surface) { match arm { (q, b) -> b } }) arms
+-- kept as a recursion (bite 13b): a search over the subterms of one term (its children), not over a list; the name is the family's
 anyTerm (f : Surface -> Bool) (t : Surface) : Bool := f t or any List Surface (anyTerm f) (children t)
 inBody (f : Surface -> Bool) (b : Body) : Bool := match b { termBody u -> anyTerm f u ; clausesBody cs -> any List Clause (fn (c : Clause) { anyTerm f c.body }) cs ; _ -> false }
 
@@ -448,10 +447,11 @@ inBody (f : Surface -> Bool) (b : Body) : Bool := match b { termBody u -> anyTer
 headName (t : Surface) : Maybe String := match t { app f x -> headName f ; name s -> just s ; _ -> nothing }
 namedArgsOf (t : Surface) : List String := match t {
   app f x -> ((namedArgsOf f) <> (match x { namedArg y v -> [y] ; _ -> nil })) ; _ -> nil }
-parametersOf (p : SurfaceProgram) (f : String) : List String := match p { nil -> nil ; cons act rest -> match act {
-  declare x bs t -> if x == f then binderBound bs else parametersOf rest f ;
-  define x bs t b -> if x == f and nonEmptyBinders bs then binderBound bs else parametersOf rest f ;
-  _ -> parametersOf rest f } }
+parametersOf (p : SurfaceProgram) (f : String) : List String :=
+  match lookup List String (List String) f (concat (String * List String) (map (fn (act : SurfaceAct) { match act {
+    declare x bs t -> [(x, binderBound bs)] ;
+    define x bs t b -> if nonEmptyBinders bs then [(x, binderBound bs)] else nil ;
+    _ -> nil } }) p)) { nothing -> nil ; just ns -> ns }
 unknownNamedArg (p : SurfaceProgram) (t : Surface) : Bool := match headName t {
   nothing -> false ;
   just f -> member List String f (actNames p) and any List String (fn (x : String) { not (member List String x (parametersOf p f)) }) (namedArgsOf t) }
@@ -461,8 +461,9 @@ violatesR2R1 (p : SurfaceProgram) (n : String) : Bool :=
 -- 2.R6: in a file, a `<-` whose previous binding of the same name was never used is an error
 -- ("unused binding"); a session allows and reports it (check.py, step 4.1). `pending` holds the
 -- names bound and not yet used, the definition's parameters first.
-removeUsed (pending : List String) (v : Surface) : List String := match pending { nil -> nil ;
-  cons y rest -> if member List String y (namesIn nil v) then removeUsed rest v else cons y (removeUsed rest v) }
+removeUsed (pending : List String) (v : Surface) : List String :=
+  filter List String (fn (y : String) { not (member List String y (namesIn nil v)) }) pending
+-- kept as a recursion (bite 13b): scans items carrying the pending names forward, each item changing what the next sees (state threaded left to right)
 unusedRebinding (pending : List String) (items : List Item) : Bool := match items { nil -> false ;
   cons it rest -> match it {
     bind x v -> unusedRebinding (removeUsed pending v) rest ;
@@ -485,21 +486,22 @@ violatesR2R6 (p : SurfaceProgram) (n : String) : Bool :=
 -- declared type, compared in order; two spellings of one type (`(a : Int) : Int` and `: Int ->
 -- Int`) still differ on the surface, which the checker, comparing elaborated types, does not.
 signatureOf (p : SurfaceProgram) (n : String) : List Surface * Maybe Surface := signatureIn p p n
-signatureIn (whole acts : SurfaceProgram) (n : String) : List Surface * Maybe Surface := match acts {
-  nil -> (nil, declaredSurface whole n) ;
-  cons act rest -> match act { define x bs t b -> if x == n then (binderTypes bs, typeOfAct whole n t) else signatureIn whole rest n ;
-                               _ -> signatureIn whole rest n } }
-binderTypes (bs : List Binder) : List Surface := match bs { nil -> nil ;
-  cons b rest -> ((match b { explicit xs t d -> repeatFor xs t ; implicit xs t -> repeatFor xs t }) <> (binderTypes rest)) }
-repeatFor (xs : List String) (t : Surface) : List Surface := match xs { nil -> nil ; cons x rest -> cons t (repeatFor rest t) }
-operatorBindings (p : SurfaceProgram) : List (String * String) := match p { nil -> nil ; cons act rest -> match act {
-  operatorAct o t -> (match t { name f -> cons (o, f) (operatorBindings rest) ; _ -> operatorBindings rest }) ;
-  _ -> operatorBindings rest } }
-rivalModel (p : SurfaceProgram) (n : String) (bs : List (String * String)) (o : String) : Bool := match bs { nil -> false ;
-  cons (o2, g) rest -> (o2 == o and not (g == n) and signatureOf p g == signatureOf p n) or rivalModel p n rest o }
+signatureIn (whole acts : SurfaceProgram) (n : String) : List Surface * Maybe Surface :=
+  match lookup List String (List Surface * Maybe Surface) n (concat (String * (List Surface * Maybe Surface)) (map (fn (act : SurfaceAct) {
+    match act { define x bs t b -> [(x, (binderTypes bs, typeOfAct whole x t))] ; _ -> nil } }) acts)) {
+    nothing -> (nil, declaredSurface whole n) ; just s -> s }
+binderTypes (bs : List Binder) : List Surface :=
+  concat Surface (map (fn (b : Binder) { match b { explicit xs t d -> repeatFor xs t ; implicit xs t -> repeatFor xs t } }) bs)
+repeatFor (xs : List String) (t : Surface) : List Surface := map (fn (x : String) { t }) xs
+operatorBindings (p : SurfaceProgram) : List (String * String) :=
+  concat (String * String) (map (fn (act : SurfaceAct) { match act {
+    operatorAct o t -> (match t { name f -> [(o, f)] ; _ -> nil }) ;
+    _ -> nil } }) p)
+rivalModel (p : SurfaceProgram) (n : String) (bs : List (String * String)) (o : String) : Bool :=
+  any List (String * String) (fn (b : String * String) { match b { (o2, g) -> o2 == o and not (g == n) and signatureOf p g == signatureOf p n } }) bs
 violatesR13 (p : SurfaceProgram) (n : String) : Bool := bindsTwice p n (operatorBindings p) (operatorBindings p)
-bindsTwice (p : SurfaceProgram) (n : String) (all bs : List (String * String)) : Bool := match bs { nil -> false ;
-  cons (o, f) rest -> (f == n and rivalModel p n all o) or bindsTwice p n all rest }
+bindsTwice (p : SurfaceProgram) (n : String) (all bs : List (String * String)) : Bool :=
+  any List (String * String) (fn (b : String * String) { match b { (o, f) -> f == n and rivalModel p n all o } }) bs
 
 -- 4.R7: an alias is neither declared nor defined
 violatesR7 (p : SurfaceProgram) (n : String) : Bool := isAlias p n and (isDeclared p n or isDefined p n)
@@ -527,6 +529,7 @@ blockFault (defined params : List String) (t : Surface) : Bool := match t {
   recordValue kvs -> any List Surface (blockFault defined params) (pairValues kvs) ;
   _ -> false ;
 }
+-- kept as a recursion (bite 13b): scans items carrying the names bound so far forward (state threaded left to right)
 itemsFault (defined params : List String) (items : List Item) (e : Surface) : Bool := match items {
   nil -> blockFault defined params e ;
   cons it rest -> match it {
@@ -534,15 +537,14 @@ itemsFault (defined params : List String) (items : List Item) (e : Surface) : Bo
     rebind q v -> any List String (fn (x : String) { member List String x defined }) (patternBinds nil q) or blockFault defined params v
                   or itemsFault defined (((patternBinds nil q) <> params)) rest e } }
 armsFault (defined params : List String) (arms : List (SurfacePattern * Surface)) : Bool :=
-  match arms { nil -> false ; cons (q, b) rest -> blockFault defined params b or armsFault defined params rest }
+  any List (SurfacePattern * Surface) (fn (arm : SurfacePattern * Surface) { match arm { (q, b) -> blockFault defined params b } }) arms
 pairValues (kvs : List (String * Surface)) : List Surface := map (fn (kv : String * Surface) { match kv { (k, v) -> v } }) kvs
 
 -- 4.S14: a law no type claims defines nothing; it is a branch, and 4.R2 applies to it, so it is
 -- reported, not rejected (§6; review of layers 0-1, B). Read, as in 4.R3, as a definition at
 -- `Bool` that no other definition's body mentions.
-otherBodies (p : SurfaceProgram) (n : String) : List String := match p { nil -> nil ; cons a rest -> match a {
-  define x bs t b -> if x == n then otherBodies rest n else ((bOf p a) <> (otherBodies rest n)) ;
-  _ -> otherBodies rest n } }
+otherBodies (p : SurfaceProgram) (n : String) : List String :=
+  concat String (map (fn (a : SurfaceAct) { match a { define x bs t b -> if x == n then nil else bOf p a ; _ -> nil } }) p)
 violatesS14 (p : SurfaceProgram) (n : String) : Bool :=
   any List SurfaceAct (fn a { match a { define x bs t b -> t == just (name "Bool") and not (member List String n (otherBodies p n)) ; _ -> false } })
          (actsNamed p n)
@@ -666,10 +668,10 @@ Typing (a : Alpha) (sb : Substitution a) := TypeOfVar a sb & TypeOfConstant a sb
 -- ---------------------------------------------------------------- §5 The rules that read types
 
 -- the elaborated acts of a name, and every application in a term with the context it sits in
-declaredType (ep : Program) (n : String) : Maybe Term := match ep { nil -> nothing ;
-  cons act rest -> match act { Declare x ty -> if x == n then just ty else declaredType rest n ; _ -> declaredType rest n } }
-definedBody (ep : Program) (n : String) : Maybe Term := match ep { nil -> nothing ;
-  cons act rest -> match act { Define x ty b -> if x == n then just b else definedBody rest n ; _ -> definedBody rest n } }
+declaredType (ep : Program) (n : String) : Maybe Term :=
+  lookup List String Term n (concat (String * Term) (map (fn (act : Act) { match act { Declare x ty -> [(x, ty)] ; _ -> nil } }) ep))
+definedBody (ep : Program) (n : String) : Maybe Term :=
+  lookup List String Term n (concat (String * Term) (map (fn (act : Act) { match act { Define x ty b -> [(x, b)] ; _ -> nil } }) ep))
 Application = { context : Context, function : Term, argument : Term }
 applications (ctx : Context) (u : Term) : List Application := match u {
   App f x -> cons { context := ctx, function := f, argument := x } (((applications ctx f) <> (applications ctx x))) ;
@@ -684,7 +686,7 @@ applications (ctx : Context) (u : Term) : List Application := match u {
   _ -> nil ;
 }
 armsApplications (ctx : Context) (arms : List (Pattern * Term)) : List Application :=
-  match arms { nil -> nil ; cons (q, b) rest -> ((applications ctx b) <> (armsApplications ctx rest)) }
+  concat Application (map (fn (arm : Pattern * Term) { match arm { (q, b) -> applications ctx b } }) arms)
 bodyApplications (a : Alpha) (e : Elaboration a) (p : SurfaceProgram) (n : String) : List Application :=
   match definedBody (e.elaborate p) n { nothing -> nil ; just b -> applications nil b }
 
@@ -752,6 +754,7 @@ violatesR9 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a s
 -- 6.R1: what `cite name ref checked who` cites is a `Reference` (12.R1): a datum citing the name,
 -- whose second argument does not type as `Reference` (check.py, step 4.1)
 spine (u : Term) : List Term := match u { App f x -> ((spine f) <> [x]) ; _ -> [u] }
+-- kept as a recursion (bite 13b): reads the shape of the application spine (head, first argument, second argument), no iteration
 badCitation (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ep : Program) (n : String) (u : Term) : Bool :=
   match spine u { cons h args -> h == Var "cite" and (match args {
     cons x more -> x == Var n and (match more { cons r rest -> not (typed a sb t (t.typeOf ep nil r) (Var "Reference")) ;
@@ -771,14 +774,14 @@ violates6R1 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a 
 -- `data` whose constructors no law mentions (4.R3, reported besides). Whether a law characterizes
 -- or only compares (4.R10, 4.S20) is the author's judgement, reported by name only.
 reportedAs (rs : List Report) (kind n : String) : Bool :=
-  match rs { nil -> false ; cons r rest -> (r.kind == kind and r.name == n) or reportedAs rest kind n }
+  any List Report (fn (r : Report) { r.kind == kind and r.name == n }) rs
 provisionalExtern (p : SurfaceProgram) (n : String) : Bool :=
   any List SurfaceAct (fn act { match act { define x bs t b -> (match b { termBody u -> isExtern u and isProvisionalExtern u ; _ -> false }) ;
                               _ -> false } }) (actsNamed p n)
 looseFunction (p : SurfaceProgram) (n : String) : Bool :=
   any List SurfaceAct (fn act { match act { define x bs t b -> nonEmptyBinders bs or (match t { just (binop o l r) -> o == "->" ; _ -> false }) ;
                               _ -> false } }) (actsNamed p n)
-nonEmptyBinders (bs : List Binder) : Bool := match bs { nil -> false ; cons b rest -> true }
+nonEmptyBinders (bs : List Binder) : Bool := not (isEmpty Binder bs)
 ReportsWhen (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (kind : String)
             (holds : SurfaceProgram -> String -> Bool) (w : WellFormed a sb e t) (c : Violating holds) : Bool :=
   reportedAs (w.report c.p) kind c.n
