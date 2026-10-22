@@ -1312,10 +1312,14 @@ def certify_file(path, seed=None, deep=False, fuel=None, store=True):
     # each control line with its own entry's outcome (the run's, or the store's when known)
     controls = [(o.spec.law, ", ".join(d["generator"] for d in o.entry["binding"]), show_outcome(o.entry["outcome"]))
                 for o in outcomes if o.spec.control and o.entry is not None]
+    # the controls are the law's (D-2026-10-22-a): read also from the stores of the files that state
+    # the laws, where a control line writes, though no line of this file wrote there (core bite 13a)
+    stated = read_stores({o.law_store for o in outcomes if o.law_store is not None} - {o.store for o in outcomes}) \
+        if store else []
     return {"path": str(path),
             "laws": [(law, cone, standing(entries, law, cone)) for law, cone in laws.items()],
             "controls": controls,
-            "control entries": [e for e in entries if is_control(e)],
+            "control entries": [e for e in entries + stated if is_control(e)],
             "ran": sum(1 for o in outcomes if o.known is None),
             "known": sum(1 for o in outcomes if o.known is not None),
             "graded": all(certificate_grade(entries, law, cone) is not None for law, cone in laws.items())}

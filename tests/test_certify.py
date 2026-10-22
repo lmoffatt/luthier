@@ -1420,3 +1420,43 @@ def test_a_model_certified_by_its_passes_needs_no_control_at_that_model(tmp_path
     controls = [e for e in entries if certify.is_control(e)]
     assert controls and all("wrong" in json.dumps(e["binding"]) for e in controls)
     assert main(["run", str(tmp_path / "ops.run.lut")]) == 0, capsys.readouterr()
+
+
+# report-bite-12b.md finding 2: a control that binds a library model besides the broken one
+# (`doubles`, beside arrays_controls' own wrong `Arrays`) was written to that model's store, so a
+# certify of the laws' program never saw it and read the law "uncontrolled ... its controls are at
+# another hash of its cone". A control is the law's (D-2026-10-22-a): it lives with the law's file.
+WITHK = '''import "ops.lth" Ops
+Konst : { v : Int }
+OpsWith (o : Ops) (k : Konst) (x : Int) : Bool := o.plus x k.v == o.plus k.v x
+'''
+KONST = '''import "withk.lth" Konst
+konst : Konst := { v := 3 }
+'''
+WITHK_LAWS = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "ops.lut" ops
+import "konst.lut" konst
+import "withk.lth" OpsWith
+smallInts : List Int := [0, 1, 2]
+onOps : List Binding := [ { parameter := just "o", type := nothing, generator := "ops", coverage := Listed },
+  { parameter := just "k", type := nothing, generator := "konst", coverage := Listed },
+  { parameter := nothing, type := just "Int", generator := "smallInts", coverage := Listed } ]
+test "OpsWith" ExhaustiveMode (profile <- onOps)
+'''
+WITHK_CONTROLS = WITHK_LAWS.replace('import "ops.lut" ops\n', 'import "ops.lth" Ops\nminus : Ops := { plus := fn a b { a - b } }\n') \
+    .replace('generator := "ops"', 'generator := "minus"').replace('(profile <- onOps)', '(profile <- onOps) (control <- true)')
+
+
+def test_a_control_binding_another_library_model_is_kept_with_the_law(tmp_path, capsys):
+    for name, text in [("ops.lth", CONJ_THEORY), ("ops.lut", CONJ_MODELS), ("withk.lth", WITHK), ("konst.lut", KONST),
+                       ("laws.test.lut", WITHK_LAWS), ("controls.test.lut", WITHK_CONTROLS)]:
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    main(["certify", str(tmp_path / "controls.test.lut")])
+    capsys.readouterr()
+    assert [e["kind"] for e in certify.read_store(tmp_path / "withk.lth")] == ["Control"]
+    assert not certify.store_path(tmp_path / "konst.lut").exists()
+    main(["certify", str(tmp_path / "laws.test.lut")])
+    out = capsys.readouterr().out
+    assert "OpsWith: cases; controlled (refuted on its control" in out, out

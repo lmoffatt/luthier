@@ -245,6 +245,7 @@ class Outcome:
     labels: list | None = None   # an author's labels with their share (`labels_record`), no grade
     conjunct: str | None = None  # the conjunct this outcome is of, or the one a conjunction's refutation names
     parts: list | None = None    # a conjunction's line: the outcomes of its conjuncts (D-2026-10-18-f)
+    law_store: object = None     # the file that states the line's law (`law_file`), whose store holds its controls
 
 
 # ---------------------------------------------------------------------- loading
@@ -1926,9 +1927,10 @@ def run_tests(path, seed=None, fuel=None, deep=False, store=False):
         parts = conjuncts_of(runner, _as_called(loaded, spec.law))
         if parts:
             outcomes.append(_run_conjunction(runner, loaded, spec, parts, cones, given, home, stores, deep, store))
-            continue
-        entry = new_entry(runner, loaded, spec, cones, given)
-        outcomes.append(_run_line(runner, loaded, spec, entry, given, home, stores, deep, store))
+        else:
+            entry = new_entry(runner, loaded, spec, cones, given)
+            outcomes.append(_run_line(runner, loaded, spec, entry, given, home, stores, deep, store))
+        outcomes[-1].law_store = law_file(loaded, spec.law)
     return outcomes
 
 
@@ -2064,7 +2066,13 @@ def claim_file(loaded, spec, runner):
     (`model_homes`), or, when it names none (a theory's own law tested on a census, a control on a
     model the test program breaks), the file that states the law. [proposed] When the binding names
     models of several files, the one that imports the others (a run that demands the law on all of
-    them loads it), else the first; nothing is written in two stores."""
+    them loads it), else the first; nothing is written in two stores. A control line's home is the
+    file that states the law whatever models it binds besides the broken one (D-2026-10-22-a: a
+    control is the law's; core bite 13a), unless that file is the test program itself."""
+    if spec.control:
+        stated = law_file(loaded, spec.law)
+        if stated != loaded.top:
+            return stated
     homes = model_homes(loaded, spec, runner)
     for home in homes:
         reached = _reached(loaded, home)
