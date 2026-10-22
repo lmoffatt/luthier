@@ -42,7 +42,7 @@ resolution : Resolution := { bindingOf := resolve }
 import "arrays.lth" Vec Mat Dim MatOf SymmetricMatrix SymmetricOf ClearDiagonal RankFloor approxMat exact
   transposeDef matMulDef mscaleDef identity forallBelow vec
 import "numbers.lth" Tolerance abs
-import "probability.lth" UnitList allUnit SourceIsUniform
+import "probability.lth" UnitList unitVec SourceIsUniform
 import "probability_model.lut" numpySort
 import "arrays_model.lut" numpy : Arrays
 
@@ -108,7 +108,7 @@ GramGivesPsd (g : Gen SymmetricMatrix) (fl : RankFloor) (size : Nat) (seed : See
 -- `transpose q * q == identity` within a tolerance, the demand's (P11)
 OrthogonalGivesOrthogonal (g : (k : Dim) -> Gen (MatOf k k)) (tol : Tolerance) (k : Dim) (size : Nat) (seed : Seed) : Bool :=
   match g k size seed { (q, next) -> q.m == k and q.n == k and approxMat tol (matMulDef (transposeDef q) q) (identity k) }
-UnitListGivesUnitValues (g : Gen UnitList) (size : Nat) (seed : Seed) : Bool := match g size seed { (vs, next) -> allUnit vs }
+UnitListGivesUnitValues (g : Gen UnitList) (size : Nat) (seed : Seed) : Bool := match g size seed { (vs, next) -> all List (Vec Float64) unitVec vs }
 -- calibrated: the source is uniform (probability.lth's `SourceIsUniform` on numpy's sort), a
 -- statistical law in the form of laws.lth §4 whose verdict is the sequential test's at the
 -- demand's cutoffs (7.S17, L9.15). [proposed, 2026-10-15, L9.14] The source is the law's
