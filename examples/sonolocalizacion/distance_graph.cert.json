@@ -1,20 +1,30 @@
 [
  {
-  "law": "ReportsValidity",
-  "cone": "sha256:452e25f5ccfefaac66e13939391b3e06974b6045b4c15c394299f7d04260222c",
+  "law": "JoinOnSecondEnd",
+  "cone": "sha256:f3f864f5527fa5a42554d93dd9860bce64f28df3222bb7ffb83b83f33824b37b",
   "binding": [
    {
-    "parameter": "f",
-    "generator": "checks (Listed)",
-    "fingerprint": "sha256:cab9dcbc3a87fca2b527c66f253e5aa93304e813104b8565e6a6e8152e5e0885"
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:d11a933cc403a7cc5299d9b4d1b9be9dc2398335742c9da70647998da1f95abe"
    },
    {
-    "parameter": "g",
-    "generator": "graphs (Listed)",
-    "fingerprint": "sha256:d11a933cc403a7cc5299d9b4d1b9be9dc2398335742c9da70647998da1f95abe,sha256:6c1a89dccc76a9ff085932c131bf99b6cc3718e8554282c81b01443929442d52"
+    "parameter": "join",
+    "generator": "secondJoins (Listed)",
+    "fingerprint": "sha256:5b6752da3bc68f7903a77a862bea0ff35145df87e451d14ed7d10c272caefb3c"
+   },
+   {
+    "parameter": "x",
+    "generator": "ExhaustiveMode over (Fin ((g).measurements).nRows)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "v",
+    "generator": "ExhaustiveMode over ((((((agreeing (Fin ((g).measurements).nRows)) (Fin ((g).nodes).nRows)) Int) (structural Int)) (jOf g)) (nodeIndex g))",
+    "fingerprint": ""
    }
   ],
-  "seed": 0,
+  "seed": 20261022,
   "cases": 100,
   "budgets": {
    "tries": 2000,
@@ -33,61 +43,47 @@
   },
   "reach": [
    {
-    "parameter": "f",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "firstViolation"
-      }
-     ]
-    }
-   },
-   {
     "parameter": "g",
     "reach": {
      "Members": [
       {
        "Printed": "graphA"
-      },
-      {
-       "Printed": "((graphFrom \"name:str,x:float,y:float,z:float\\nmic1,0.0,0.0,1.69\\n\") measurementsTextA)"
-      },
-      {
-       "Printed": "((graphFrom nodesTextA) \"i:int,j:int\\n1,2\\n\")"
-      },
-      {
-       "Printed": "((graphFrom nodesTextA) ((({ neutral := \"\", combine := stringAppend }).combine measurementsTextA) \"1,99,2.0\\n\"))"
-      },
-      {
-       "Printed": "((graphFrom nodesTextA) ((({ neutral := \"\", combine := stringAppend }).combine measurementsTextA) \"3,3,1.0\\n\"))"
-      },
-      {
-       "Printed": "((graphFrom nodesTextA) ((({ neutral := \"\", combine := stringAppend }).combine measurementsTextA) \"1,2,0.0\\n\"))"
-      },
-      {
-       "Printed": "((graphFrom ((({ neutral := \"\", combine := stringAppend }).combine nodesTextA) \"extra,9.0,9.0,1.0,0.0,1.0,0.01\\n\")) measurementsTextA)"
-      },
-      {
-       "Printed": "((graphFrom ((({ neutral := \"\", combine := stringAppend }).combine nodesTextA) \"mic1,9.0,9.0,1.0,1.0,1.0,0.01\\n\")) measurementsTextA)"
-      },
-      {
-       "Printed": "((graphFrom nodesTextA) ((({ neutral := \"\", combine := stringAppend }).combine measurementsTextA) \"6,7,1.0\\n\"))"
       }
      ]
     }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((iOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (jOf h)) (nodeIndex h))) { (v).x } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": "Support"
+   },
+   {
+    "parameter": "v",
+    "reach": "Support"
    }
   ],
   "evidence": {
    "Points": {
-    "evaluated": 9,
+    "evaluated": 22,
     "raised": 0,
     "coverage": "Listed",
-    "verdict": "Supported"
+    "verdict": "Refuted"
    }
   },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-21T20:59:38+00:00",
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g): g = graphA, join = fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((iOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (jOf h)) (nodeIndex h))) { (v).x } } }, x = 0"
+  },
+  "date": "2026-10-22T04:44:05+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -115,11 +111,143 @@
     "python 3.12.9"
    ]
   ],
-  "regions": []
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "JoinOnFirstEnd",
+  "cone": "sha256:f53e557844081596a73e2601afb9ce34292a2ec851e13f347f1f54f1f7a67cc7",
+  "binding": [
+   {
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:d11a933cc403a7cc5299d9b4d1b9be9dc2398335742c9da70647998da1f95abe"
+   },
+   {
+    "parameter": "join",
+    "generator": "firstJoins (Listed)",
+    "fingerprint": "sha256:736955843346eb6d673cdc47193be2f8bd39aa6a88ed9586fe72f65ed618947b"
+   },
+   {
+    "parameter": "x",
+    "generator": "ExhaustiveMode over (Fin ((g).measurements).nRows)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "v",
+    "generator": "ExhaustiveMode over ((((((agreeing (Fin ((g).measurements).nRows)) (Fin ((g).nodes).nRows)) Int) (structural Int)) (iOf g)) (nodeIndex g))",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((jOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (iOf h)) (nodeIndex h))) { (v).x } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": "Support"
+   },
+   {
+    "parameter": "v",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 22,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g): g = graphA, join = fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((jOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (iOf h)) (nodeIndex h))) { (v).x } } }, x = 0"
+  },
+  "date": "2026-10-22T04:44:04+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 4
+   }
+  ]
  },
  {
   "law": "ReportsValidity",
-  "cone": "sha256:452e25f5ccfefaac66e13939391b3e06974b6045b4c15c394299f7d04260222c",
+  "cone": "sha256:9d5c0b00e30c4adcfb2efb832d5d5f5adb4f12c0cd146aff9941b261887b9648",
   "binding": [
    {
     "parameter": "f",
@@ -207,7 +335,7 @@
   "outcome": {
    "ControlRefuted": "f = schemaOnly, g = ((graphFrom nodesTextA) ((({ neutral := \"\", combine := stringAppend }).combine measurementsTextA) \"1,99,2.0\\n\"))"
   },
-  "date": "2026-10-21T20:24:18+00:00",
+  "date": "2026-10-22T04:43:56+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -236,6 +364,826 @@
    ]
   ],
   "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "JoinOnSecondEnd",
+  "cone": "sha256:f3f864f5527fa5a42554d93dd9860bce64f28df3222bb7ffb83b83f33824b37b",
+  "binding": [
+   {
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:d11a933cc403a7cc5299d9b4d1b9be9dc2398335742c9da70647998da1f95abe"
+   },
+   {
+    "parameter": "join",
+    "generator": "secondJoins (Listed)",
+    "fingerprint": "sha256:ca17477938fbdcb2171ebb737f5dff6bdbd05e1b163ff95c5df6d3b7a08c6746"
+   },
+   {
+    "parameter": "x",
+    "generator": "ExhaustiveMode over (Fin ((g).measurements).nRows)",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "secondEndJoin"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 22,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:40:54+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+  "conjuncts": [
+   "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+   "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+   "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "JoinOnSecondEnd",
+  "cone": "sha256:f3f864f5527fa5a42554d93dd9860bce64f28df3222bb7ffb83b83f33824b37b",
+  "binding": [
+   {
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:d11a933cc403a7cc5299d9b4d1b9be9dc2398335742c9da70647998da1f95abe"
+   },
+   {
+    "parameter": "join",
+    "generator": "secondJoins (Listed)",
+    "fingerprint": "sha256:ca17477938fbdcb2171ebb737f5dff6bdbd05e1b163ff95c5df6d3b7a08c6746"
+   },
+   {
+    "parameter": "v",
+    "generator": "ExhaustiveMode over ((((((agreeing (Fin ((g).measurements).nRows)) (Fin ((g).nodes).nRows)) Int) (structural Int)) (jOf g)) (nodeIndex g))",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "secondEndJoin"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "v",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 22,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:40:54+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+  "conjuncts": [
+   "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+   "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+   "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "v boundary"
+    },
+    "n": 22
+   }
+  ]
+ },
+ {
+  "law": "JoinOnSecondEnd",
+  "cone": "sha256:f3f864f5527fa5a42554d93dd9860bce64f28df3222bb7ffb83b83f33824b37b",
+  "binding": [
+   {
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:d11a933cc403a7cc5299d9b4d1b9be9dc2398335742c9da70647998da1f95abe"
+   },
+   {
+    "parameter": "join",
+    "generator": "secondJoins (Listed)",
+    "fingerprint": "sha256:ca17477938fbdcb2171ebb737f5dff6bdbd05e1b163ff95c5df6d3b7a08c6746"
+   },
+   {
+    "parameter": "x",
+    "generator": "ExhaustiveMode over (Fin ((g).measurements).nRows)",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "secondEndJoin"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 22,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:40:54+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+  "conjuncts": [
+   "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+   "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+   "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "JoinOnFirstEnd",
+  "cone": "sha256:f53e557844081596a73e2601afb9ce34292a2ec851e13f347f1f54f1f7a67cc7",
+  "binding": [
+   {
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:d11a933cc403a7cc5299d9b4d1b9be9dc2398335742c9da70647998da1f95abe"
+   },
+   {
+    "parameter": "join",
+    "generator": "firstJoins (Listed)",
+    "fingerprint": "sha256:c528f864e4cb1cbf3ca69b24905f60035f6f9b56f0b8ab3611fa43f2f0b523b2"
+   },
+   {
+    "parameter": "x",
+    "generator": "ExhaustiveMode over (Fin ((g).measurements).nRows)",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "firstEndJoin"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 22,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:40:50+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+  "conjuncts": [
+   "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+   "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+   "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "JoinOnFirstEnd",
+  "cone": "sha256:f53e557844081596a73e2601afb9ce34292a2ec851e13f347f1f54f1f7a67cc7",
+  "binding": [
+   {
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:d11a933cc403a7cc5299d9b4d1b9be9dc2398335742c9da70647998da1f95abe"
+   },
+   {
+    "parameter": "join",
+    "generator": "firstJoins (Listed)",
+    "fingerprint": "sha256:c528f864e4cb1cbf3ca69b24905f60035f6f9b56f0b8ab3611fa43f2f0b523b2"
+   },
+   {
+    "parameter": "v",
+    "generator": "ExhaustiveMode over ((((((agreeing (Fin ((g).measurements).nRows)) (Fin ((g).nodes).nRows)) Int) (structural Int)) (iOf g)) (nodeIndex g))",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "firstEndJoin"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "v",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 22,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:40:50+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+  "conjuncts": [
+   "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+   "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+   "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "v boundary"
+    },
+    "n": 22
+   }
+  ]
+ },
+ {
+  "law": "JoinOnFirstEnd",
+  "cone": "sha256:f53e557844081596a73e2601afb9ce34292a2ec851e13f347f1f54f1f7a67cc7",
+  "binding": [
+   {
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:d11a933cc403a7cc5299d9b4d1b9be9dc2398335742c9da70647998da1f95abe"
+   },
+   {
+    "parameter": "join",
+    "generator": "firstJoins (Listed)",
+    "fingerprint": "sha256:c528f864e4cb1cbf3ca69b24905f60035f6f9b56f0b8ab3611fa43f2f0b523b2"
+   },
+   {
+    "parameter": "x",
+    "generator": "ExhaustiveMode over (Fin ((g).measurements).nRows)",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "firstEndJoin"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 22,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:40:50+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+  "conjuncts": [
+   "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+   "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+   "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "ReportsValidity",
+  "cone": "sha256:9d5c0b00e30c4adcfb2efb832d5d5f5adb4f12c0cd146aff9941b261887b9648",
+  "binding": [
+   {
+    "parameter": "f",
+    "generator": "checks (Listed)",
+    "fingerprint": "sha256:6cb4fc30e97e8770469aab8ccbc43dacb69f61a786de1e3b43675ea15a6531b7"
+   },
+   {
+    "parameter": "g",
+    "generator": "graphs (Listed)",
+    "fingerprint": "sha256:d11a933cc403a7cc5299d9b4d1b9be9dc2398335742c9da70647998da1f95abe,sha256:6c1a89dccc76a9ff085932c131bf99b6cc3718e8554282c81b01443929442d52"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "firstViolation"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      },
+      {
+       "Printed": "((graphFrom \"name:str,x:float,y:float,z:float\\nmic1,0.0,0.0,1.69\\n\") measurementsTextA)"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) \"i:int,j:int\\n1,2\\n\")"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) ((({ neutral := \"\", combine := stringAppend }).combine measurementsTextA) \"1,99,2.0\\n\"))"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) ((({ neutral := \"\", combine := stringAppend }).combine measurementsTextA) \"3,3,1.0\\n\"))"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) ((({ neutral := \"\", combine := stringAppend }).combine measurementsTextA) \"1,2,0.0\\n\"))"
+      },
+      {
+       "Printed": "((graphFrom ((({ neutral := \"\", combine := stringAppend }).combine nodesTextA) \"extra,9.0,9.0,1.0,0.0,1.0,0.01\\n\")) measurementsTextA)"
+      },
+      {
+       "Printed": "((graphFrom ((({ neutral := \"\", combine := stringAppend }).combine nodesTextA) \"mic1,9.0,9.0,1.0,1.0,1.0,0.01\\n\")) measurementsTextA)"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) ((({ neutral := \"\", combine := stringAppend }).combine measurementsTextA) \"6,7,1.0\\n\"))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 9,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-22T04:40:41+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
   "regions": []
  }
 ]
