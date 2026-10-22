@@ -15,7 +15,7 @@ import "certification.lth" Certifying Recording Entry Certificate ConeDemand Con
   fuelSpent outOfFuel known recordEntry failureAt Current agree disputedAt
   ANewIdentityGoesInFront AnAgreeingReplayAddsNothing AnAgreeingPairSettles ADisagreeingReplayIsKept AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused
 import "certification.lth" Routing Routed Theory Veto Members Printed Disagrees
-import "certification_model.lut" routing witness veto firstDispute firstFailure routesOf entryIdentity
+import "certification_model.lut" routing entryIdentity entryFailed
 import "certification_model.lut" certifying hasFailure passes weakestOfBests serves stateOf entryFailed
 import "term.lth" Term Act Program Alpha Substitution Reduction Var Lit Lam App Pi Pair Match Let Define
   IntConst PVar PPair
@@ -228,31 +228,33 @@ routeds : List Routed := [
 -- and one scoped by reach that never treats a consequence as refuting all (it passes the defining
 -- laws of N and still refutes only N's runs). The demands, entries and stores are the laws' file's.
 firstOnly (d : Routed) (es : List Entry) : Maybe (List Entry) :=
-  match witness d es { nothing -> nothing ; just w -> just (take Entry 1 w) }
+  match routing.witness d es { nothing -> nothing ; just w -> just (take Entry 1 w) }
 padded (d : Routed) (es : List Entry) : Maybe (List Entry) :=
-  match witness d es { nothing -> nothing ; just w -> just (w <> take Entry 1 es) }
+  match routing.witness d es { nothing -> nothing ; just w -> just (w <> take Entry 1 es) }
 never (d : Routed) (es : List Entry) : Maybe (List Entry) := nothing
 ownForByModel (d : Routed) (es : List Entry) : Maybe (List Entry) :=
-  witness { demand := d.demand, byModel := false, models := d.models, theory := d.theory } es
+  routing.witness { demand := d.demand, byModel := false, models := d.models, theory := d.theory } es
 invents (d : Routed) (es : List Entry) : Maybe Veto := just { state := Current (Failed "invented"), exception := false }
 ownOnly (d : Routed) (es : List Entry) : Maybe Veto :=
-  veto { demand := d.demand, byModel := d.byModel, models := d.models, theory := nothing } es
+  routing.veto { demand := d.demand, byModel := d.byModel, models := d.models, theory := nothing } es
 failureFirst (d : Routed) (es : List Entry) : Maybe Veto :=
-  match firstFailure (routesOf d es) es { just f -> just { state := Current f.outcome, exception := false } ; nothing -> veto d es }
+  match routing.veto d es { nothing -> nothing ; just v -> (match v.state {
+    Disagrees a b -> if entryFailed a then just { state := Current a.outcome, exception := false }
+                     else if entryFailed b then just { state := Current b.outcome, exception := false } else just v ;
+    _ -> just v }) }
 unscoped (d : Routed) (es : List Entry) : Maybe Veto :=
-  veto { demand := d.demand, byModel := d.byModel, models := nil, theory := d.theory } es
+  routing.veto { demand := d.demand, byModel := d.byModel, models := nil, theory := d.theory } es
 noException (d : Routed) (es : List Entry) : Maybe Veto :=
-  match firstDispute (routesOf d es) es { just p -> (match p { (a, b) -> just { state := Disagrees a b, exception := false } }) ; nothing ->
-    (match firstFailure (routesOf d es) es { just f -> just { state := Current f.outcome, exception := false } ; nothing -> nothing }) }
-droppingRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := firstOnly, veto := veto }]
-paddingRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := padded, veto := veto }]
-neverRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := never, veto := veto }]
-ownRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := ownForByModel, veto := veto }]
-inventingRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := witness, veto := invents }]
-ownOnlyRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := witness, veto := ownOnly }]
-failureFirstRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := witness, veto := failureFirst }]
-unscopedRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := witness, veto := unscoped }]
-noExceptionRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := witness, veto := noException }]
+  match routing.veto d es { nothing -> nothing ; just v -> if v.exception then nothing else just v }
+droppingRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := firstOnly, veto := routing.veto }]
+paddingRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := padded, veto := routing.veto }]
+neverRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := never, veto := routing.veto }]
+ownRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := ownForByModel, veto := routing.veto }]
+inventingRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := routing.witness, veto := invents }]
+ownOnlyRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := routing.witness, veto := ownOnly }]
+failureFirstRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := routing.witness, veto := failureFirst }]
+unscopedRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := routing.witness, veto := unscoped }]
+noExceptionRoutings : List (Routing certifying) := [{ headOf := routing.headOf, witness := routing.witness, veto := noException }]
 test "AWitnessCoversEveryObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models", bind "r" "droppingRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
 test "AWitnessIsOneEntryPerObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models", bind "r" "paddingRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
 test "AnEntryForEveryObligationWitnesses" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "k" "models", bind "r" "neverRoutings", bind "d" "routeds", bind "es" "routeStores"]) (control <- true)
