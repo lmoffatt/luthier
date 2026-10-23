@@ -1,0 +1,33 @@
+# Wave A, agent 3: bite A3b
+
+Claude Opus 5.5, 2026-10-23, on the coordinator's answer to report-wave-a-3.md's question (`q or not p` counts as the premise `p`, in the same bite as generators that draw the antecedent, the scan rerun, no re-certification). Base commit 1e9d456. Committed by the coordinator from the agent's hand-back. Commits: 740ee0e, 6c4cccf, c8d7d7e, cd0ce47, 96c11d0, b17af80. Files: `src/luthier/tester.py`, `src/luthier/lib/generators.lth`, `src/luthier/lib/generators_model.lut`, `tests/test_tester.py`, `tests/tester/vacuity.test.lut`, `tests/tester/core_laws.test.lut`, `tests/tester/core_controls.test.lut`, `tests/tester/numbers_laws.test.lut`, `tests/tester/numbers_controls.test.lut`, `tests/tester/world_laws.test.lut`, `docs/concepts/tape.test.lut`. Scratch under `~/.cache/luthier-wave-a/agent3/`.
+
+The rule as built differs from the coordinator's instruction in one way: a disjunction is read as a premise only when exactly one of its disjuncts is negated (decision 2).
+
+## What was done
+
+- tester.py (740ee0e, 96c11d0). `_premise_split` reads a chain of `or` as stating a premise when exactly one disjunct is negated: `q or not p` (or `not p or q`) states `p`, the rest stays the disjunction of the others. The first version took the right-hand negation whenever there were two; the rescan showed it wrong on plot.lth's `ImageSeesTheTitle` (`not (wellFormed p) or not (member ...) or s == title or not (image ... == image ...)`), whose last negated disjunct is the conclusion. With two negations or more the split is the author's, so nothing is read and no vacuity is claimed. vacuity.test.lut gains `NeverNegativeOr` (vacuous), `NotNegative` (no premise) and `TwoNegations` (no premise), tested in test_tester.py. Outside `_drawing_code`: `drawing_revision()` is still `sha256:6cd60eb7…`.
+- generators.lth §4 (6c4cccf, c8d7d7e). `mixture A share g h` draws from `g` with probability `share`, else from `h`; `equalOr A share g x` is the mixture whose first part is the constant `x`, the generator of a second parameter equal to the first in a share of the draws. The choice and the draw read the seed through `scrambled`, multiplication modulo 2^31 - 1 by the integer nearest (2^31 - 1) times 0.618… (the golden ratio's fraction); the returned seed is always `nextSeed s`.
+- generators_model.lut. Fallback draws `intsWithin` ([-n, n]), `natsWithin` ([0, n]), `floatsWithin` ([-n, n]), `pickFrom`, and `doubleSpecials` (0, ±1, ±1e100, ±1e-100, admitted by both `Moderate` and `Tame`). Families taking the binder named `x`: `sameOrInt`, `sameOrNat`, `sameOrString`, `sameOrFloat` (y equal to x in a quarter of the draws; otherwise a special value in a quarter, else uniform). The 0.25 share is a literal inside each family, so it is in the family's cone, the binding's fingerprint and the line's identity (bite 13c item 2).
+- The lines. core_laws and core_controls: `StringIsOrdered`, `FloatIsOrdered`, `IntIsAMetric` bind `byParameter "y"` to a `sameOr…` family (6c4cccf). numbers_laws and numbers_controls: the sampled `Doubles` lines bind `(whereBindings <- sameY)` (c8d7d7e); the ExhaustiveMode `leqSlack` control is unchanged (a generator cannot bind under ExhaustiveMode). tape.test.lut: `MarkIsAMetric` and its control bind `y` to `sameOrNat` (cd0ce47). world_laws: the rescan found `OwnIsIdempotent` (`not d.own or ...`) vacuous on the read and observe censuses, where no action owns anything; each census now also lists an own action of its result type (`lockGiven`, `lockObserved`) (b17af80). Binding `y` by name also changes the draws of the other conjuncts of these claims that have a `y` (Total, Commutative, Triangular, and the `Doubles` laws over `Moderate` and `Tame`); hence the doubles' fallback keeps special values.
+
+## Checks
+
+- Full rescan of the 52 test programs with the final tester (135 premise lines, run without a store): no law line is vacuous. Laws that were vacuous now see their premise: `StringIsOrdered`, `FloatIsOrdered`, `IntIsAMetric` 26 of 100; `MarkIsAMetric` 49 of 200; `OwnIsIdempotent` on read and observe 4 of 16 and 4 of 12; `Doubles`' Antisymmetric graded (held count not recorded). Every control line is refuted. Control conjuncts still vacuous, each in a control refuted at another conjunct: Antisymmetric under `leq := false` or strict (the core order controls and `Doubles`' `leqStrict`, refuted at Reflexive, inherent); MetricIndiscernible under `hookedMetric`, refuted at MetricZeroOnEqual (docs/concepts.md line 517 says so); the four `MetricCandidate` controls, with no law line, refuted at Triangular or Commutative.
+- Without a store: core_laws' `IntIsOrdered`, `NatIsOrdered`, `BoolIsOrdered`, `StringIsOrdered`, `FloatIsOrdered`, `IntIsAMetric` graded sampled, their controls refuted; both `Doubles` lines graded sampled (25 of 25 conjuncts ran), each of the 10 `Doubles` controls refuted at the conjunct its comment names; `MarkIsAMetric` and the world lines graded, their controls refuted.
+- test_tester.py, test_tester_conjunction.py, test_check.py: 131 passed, 1 skipped. test_core_structures, test_regions and the erasure and census tests of test_certify: 25 passed, 1 skipped. `luthier check` passes on every edited file; `scripts/check_spec.py` prints only its known finding.
+- Still thin, above zero, unchanged: `IntAntisymmetric`, `IntInjective`, `IntBijective`, `IntPartialOrder` see their premise in 2 of 100 cases; the plan digest laws in 2 of 4 to 6.
+
+## Decisions taken on my own
+
+1. Generic combinators in generators.lth, concrete families in generators_model.lut, one family per type, the 0.25 share fixed in each family.
+2. A disjunction states a premise only with exactly one negated disjunct (the plot case).
+3. The golden-ratio multiplier: the tester hands a family consecutive seeds, and the first multiplier tried, 48271, kept 100 seeds within 0.2% of [0, 1), so `StringIsOrdered` saw its premise once and `FloatIsOrdered` never.
+4. The doubles' fallback includes special values valid in both `Moderate` and `Tame`, since `y` is bound for every conjunct of `Doubles`.
+5. The world censuses gain own actions instead of the two vacuous lines being removed.
+
+## For others
+
+A function whose type parameter is named `A` gets "4.R13 size: the model ListIsIndexed gives depends on A" from `size` on a `List A`, with the elaborator of 7e06717 too. It looks like a name capture in `solve` (`if actual != pattern: sigma[key] = actual` leaves the binder unsolved when the names coincide). Not fixed here, since the change may move elaborated terms; `pickFrom`'s parameter renamed to `T`.
+
+No question.
