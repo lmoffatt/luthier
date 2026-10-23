@@ -14,7 +14,7 @@ import "laws.lth" Listed Cited
 import "certification.lth" Certifying Entry Hash Outcome Passed Failed
 import "certification_model.lut" certifying
 import "demand.lth" Demand LawDemand RunRecord Stored RunStore recorded OneIdentityOneResult NoPriceRefusesAssumed LoweringLosesNothing
-  Ran RanIsASpecimenOfTheAsked Strategy ForwardOnDemand CallByNeed
+  Ran RanIsASpecimenOfTheAsked RecordKeepsThePolicies Strategy ForwardOnDemand CallByNeed
 import "demand_model.lut" theDemand
 
 eqRecord (a b : RunRecord) : Bool := a == b
@@ -70,3 +70,28 @@ test "LoweringLosesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- 
 swappedRun : Ran := { asked := CallByNeed, ran := ForwardOnDemand }
 swappedRuns : List Ran := [swappedRun]
 test "RanIsASpecimenOfTheAsked" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "r" "swappedRuns"]) (control <- true)
+
+-- §3 a record that drops a policy (2026-10-23, audit II.2): the record `recorded` makes, with the
+-- grade accepted for axioms put back at the default, so a demand that set it says nothing of it;
+-- likewise for the roots and for the way grades combine
+dropAxioms (d : Demand) (h : Hash) : RunRecord := { entry := (recorded d h).entry, cone := h, parameters := (recorded d h).parameters,
+  accept := (recorded d h).accept, assumes := (recorded d h).assumes, delta := (recorded d h).delta, fuel := (recorded d h).fuel,
+  timeLimit := (recorded d h).timeLimit, checked := (recorded d h).checked, lock := (recorded d h).lock,
+  decoration := (recorded d h).decoration, strategy := (recorded d h).strategy, fresh := (recorded d h).fresh,
+  axioms := AssumedGrade, roots := (recorded d h).roots, combine := (recorded d h).combine }
+dropRoots (d : Demand) (h : Hash) : RunRecord := { entry := (recorded d h).entry, cone := h, parameters := (recorded d h).parameters,
+  accept := (recorded d h).accept, assumes := (recorded d h).assumes, delta := (recorded d h).delta, fuel := (recorded d h).fuel,
+  timeLimit := (recorded d h).timeLimit, checked := (recorded d h).checked, lock := (recorded d h).lock,
+  decoration := (recorded d h).decoration, strategy := (recorded d h).strategy, fresh := (recorded d h).fresh,
+  axioms := (recorded d h).axioms, roots := nil, combine := (recorded d h).combine }
+dropCombine (d : Demand) (h : Hash) : RunRecord := { entry := (recorded d h).entry, cone := h, parameters := (recorded d h).parameters,
+  accept := (recorded d h).accept, assumes := (recorded d h).assumes, delta := (recorded d h).delta, fuel := (recorded d h).fuel,
+  timeLimit := (recorded d h).timeLimit, checked := (recorded d h).checked, lock := (recorded d h).lock,
+  decoration := (recorded d h).decoration, strategy := (recorded d h).strategy, fresh := (recorded d h).fresh,
+  axioms := (recorded d h).axioms, roots := (recorded d h).roots, combine := "weakest" }
+policyDemands : List Demand := [theDemand (entry <- "main") (axioms <- Cases), theDemand (entry <- "main") (roots <- ["Other"]),
+  theDemand (entry <- "main") (combine <- "strongest")]
+droppers : List (Demand -> Hash -> RunRecord) := [dropAxioms, dropRoots, dropCombine]
+hashes : List Hash := ["sha256:aaaa"]
+test "RecordKeepsThePolicies" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "record" "droppers",
+  bind "d" "policyDemands", bind "h" "hashes"]) (control <- true)

@@ -98,6 +98,15 @@ Strategy : U := data {
 -- (`run --strategy`), the limits on resources, none by default (`run --fuel`, in reduction steps;
 -- `run --time-limit`, in seconds; fuel only cuts a run, D-2026-10-15-g), and whether the run
 -- executes whatever the store of results holds (`run --fresh`, L5.20).
+-- [2026-10-23, audit II.2, record L5.18] Three policies run.py held as constants are fields now, with
+-- declared defaults, passed down and recorded: `axioms`, the grade accepted for a law whose body
+-- is an axiom (the price the demand sets on a root of trust, 6.S10), `roots`, the axiom laws
+-- named as accepted at that grade whatever the outer cutoff (the host-root exception, as `assumes`
+-- names provisionals: `--accept assumed:NAME`; the project's roots of trust by default, L11.9,
+-- world.lth's `ObserverIsFaithful`), and `combine`, how a law's grades combine over its regions
+-- and bindings (5.S8, D-2026-10-16-i: `weakest` or `strongest`). None changes the value any result
+-- takes, only which certificates serve, so `plan.lth`'s `demandKey` does not read them (8.S8: the
+-- key holds what the cone reads); the record does, and the run's certificate is read against it.
 -- [proposed] The entry is a name; 8.S1's term as entry waits for an action that asks for one.
 -- [proposed] `delta` is `nothing` in this draft, since no statistic becomes a cost before
 -- D-2026-10-13-m; when one does it is required as `assumed` is, with no default. Every field is a
@@ -105,7 +114,8 @@ Strategy : U := data {
 -- none is a constant of the core.
 Demand = { entry : String, decoration : Maybe Decoration, accepts : Grade, assumes : List String,
            delta : Maybe Float64, fuel : Maybe Nat, timeLimit : Maybe Float64, sets : List (String * Value),
-           checked : Bool, pinned : Maybe String, strategy : Strategy, fresh : Bool }
+           checked : Bool, pinned : Maybe String, strategy : Strategy, fresh : Bool,
+           axioms : Grade, roots : List String, combine : String }
 
 -- the value a demand gives a hole of the program, if it gives one (12.S18: a hole left without a
 -- value is an error that asks for `--set`)
@@ -139,7 +149,7 @@ lawDemand (d : Demand) (law : String) (cone : Hash) : LawDemand :=
 inner (d : Demand) (entry : String) : Demand :=
   { entry := entry, decoration := d.decoration, accepts := d.accepts, assumes := d.assumes, delta := d.delta,
     fuel := d.fuel, timeLimit := d.timeLimit, sets := d.sets, checked := d.checked, pinned := d.pinned,
-    strategy := d.strategy, fresh := d.fresh }
+    strategy := d.strategy, fresh := d.fresh, axioms := d.axioms, roots := d.roots, combine := d.combine }
 
 -- ---------------------------------------------------------------- §3 What a run records
 
@@ -148,17 +158,29 @@ inner (d : Demand) (entry : String) : Demand :=
 -- cone it ran, every parameter it set, the grade it accepted and the provisionals it runs as
 -- assumed, the confidence, the fuel and the time limit given, whether it ran checked, the lock,
 -- the type demanded, the strategy asked and whether it was fresh (D-2026-10-16-d: every mode
--- recorded). The time, the output, the fuel spent, the strategy that ran (the plan's) and the
+-- recorded), and, since 2026-10-23, the three policies of §1 (`axioms`, `roots`, `combine`). The time, the output, the fuel spent, the strategy that ran (the plan's) and the
 -- states of the cone are the run's, not the demand's, and are not here. [proposed,
 -- D-2026-10-15-h] The decoration is recorded (B1 of summary-BCD.md): the key of a result reads it
 -- (8.S8, `KeyReadsTheType`), and the key is a function of the record (plan.lth's `keyOf`).
 RunRecord = { entry : String, cone : Hash, parameters : List (String * Value), accept : Grade, assumes : List String,
            delta : Maybe Float64, fuel : Maybe Nat, timeLimit : Maybe Float64, checked : Bool, lock : Maybe String,
-           decoration : Maybe Decoration, strategy : Strategy, fresh : Bool }
+           decoration : Maybe Decoration, strategy : Strategy, fresh : Bool,
+           axioms : Grade, roots : List String, combine : String }
 recorded (d : Demand) (h : Hash) : RunRecord :=
   { entry := d.entry, cone := h, parameters := d.sets, accept := d.accepts, assumes := d.assumes, delta := d.delta,
     fuel := d.fuel, timeLimit := d.timeLimit, checked := d.checked, lock := d.pinned, decoration := d.decoration,
-    strategy := d.strategy, fresh := d.fresh }
+    strategy := d.strategy, fresh := d.fresh, axioms := d.axioms, roots := d.roots, combine := d.combine }
+
+-- L5.18: a run's record lists every policy its demand carried: the cutoff, the grade and the
+-- roots accepted for axioms, the provisionals run as assumed, and the way grades combine. A record
+-- that drops one says nothing of why a stricter cutoff admitted an axiom (audit II.2).
+-- over the function that makes the record (`recorded` here, a host's elsewhere) so that a broken
+-- one can be drawn
+RecordKeepsThePolicies (record : Demand -> Hash -> RunRecord) (d : Demand) (h : Hash) : Bool :=
+  (record d h).accept == d.accepts and (record d h).axioms == d.axioms and (record d h).roots == d.roots
+    and (record d h).assumes == d.assumes and (record d h).combine == d.combine
+-- [core bite 13b] gathered so that this file claims it (4.S14)
+RecordLaws := RecordKeepsThePolicies
 
 -- ---------------------------------------------------------------- §4 The store
 

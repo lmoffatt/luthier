@@ -15,7 +15,7 @@
 
 import "demand.lth" Demand Strategy ForwardOnDemand
 import "certification.lth" Value
-import "test.lth" Grade Sampled
+import "test.lth" Grade Sampled AssumedGrade
 
 -- The arguments of `run` (12.S17, 12.S18, 12.S13), each with the default the host holds today,
 -- named here as a default and not as a constant (L5.18, P11). [proposed] `Sampled` as the grade
@@ -29,6 +29,8 @@ import "test.lth" Grade Sampled
 theDemand (entry : String <- "main") (accepts : Grade <- Sampled) (assumes : List String <- nil)
           (fuel : Maybe Nat <- nothing) (timeLimit : Maybe Float64 <- nothing)
           (sets : List (String * Value) <- nil) (checked : Bool <- false) (pinned : Maybe String <- nothing)
-          (strategy : Strategy <- ForwardOnDemand) (fresh : Bool <- false) : Demand :=
+          (strategy : Strategy <- ForwardOnDemand) (fresh : Bool <- false)
+          (axioms : Grade <- AssumedGrade) (roots : List String <- ["ObserverIsFaithful"]) (combine : String <- "weakest") : Demand :=
   { entry := entry, decoration := nothing, accepts := accepts, assumes := assumes, delta := nothing, fuel := fuel,
-    timeLimit := timeLimit, sets := sets, checked := checked, pinned := pinned, strategy := strategy, fresh := fresh }
+    timeLimit := timeLimit, sets := sets, checked := checked, pinned := pinned, strategy := strategy, fresh := fresh,
+    axioms := axioms, roots := roots, combine := combine }

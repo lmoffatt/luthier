@@ -17,7 +17,7 @@ import "laws.lth" Listed Cited
 import "certification.lth" Certifying Entry Hash Outcome Passed Failed
 import "certification_model.lut" certifying
 import "demand.lth" Demand RunRecord Stored RunStore recorded OneIdentityOneResult NoPriceRefusesAssumed LoweringLosesNothing
-  Ran RanIsASpecimenOfTheAsked Strategy ForwardOnDemand CallByNeed
+  Ran RanIsASpecimenOfTheAsked RecordKeepsThePolicies Strategy ForwardOnDemand CallByNeed
 import "demand_model.lut" theDemand
 
 -- §4 the store of runs
@@ -73,3 +73,13 @@ byNeedRun : Ran := { asked := CallByNeed, ran := CallByNeed }
 forwardRun : Ran := { asked := ForwardOnDemand, ran := ForwardOnDemand }
 ranRecords : List Ran := [hostRun, byNeedRun, forwardRun]
 test "RanIsASpecimenOfTheAsked" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "r" "ranRecords"])
+
+-- §3 the record keeps every policy (2026-10-23, Claude Sonnet 5.5, audit II.2, L5.18): `recorded` on
+-- the demand at its defaults, with the axioms accepted at cases, with another root, and combined by
+-- the strongest
+policyDemands : List Demand := [sampledDemand, theDemand (entry <- "main") (axioms <- Cases),
+  theDemand (entry <- "main") (roots <- ["Other"]), theDemand (entry <- "main") (combine <- "strongest")]
+recorders : List (Demand -> Hash -> RunRecord) := [recorded]
+hashes : List Hash := ["sha256:aaaa"]
+test "RecordKeepsThePolicies" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "record" "recorders",
+  bind "d" "policyDemands", bind "h" "hashes"])

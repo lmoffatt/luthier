@@ -1313,6 +1313,8 @@ def _surface_value(x):
     """A default argument as demand_model.lut writes it, as Python reads it."""
     if isinstance(x, s.Literal):
         return x.literal.value
+    if isinstance(x, s.List):
+        return tuple(_surface_value(v) for v in x.values)
     return {"nil": (), "false": False, "true": True, "nothing": None}.get(x.name, x.name)
 
 
@@ -1325,6 +1327,29 @@ def test_the_runs_defaults_are_demand_models():
     the_demand = next(a for a in program if isinstance(a, s.Define) and a.name == "theDemand")
     declared = {b.names[0]: _surface_value(b.default) for b in the_demand.binders}
     assert declared == dict(DEMAND_DEFAULTS, pinned=None)
+
+
+def test_the_demand_records_every_policy(tmp_path, capsys):
+    # audit II.2, L5.18: `axioms`, `roots` and `combine` are fields of the demand with declared defaults
+    # (demand_model.lut's `theDemand`), and the run's record lists them
+    from luthier.run import demand_of
+    d = demand_of()
+    assert (d.axioms, d.roots, d.combine) == ("AssumedGrade", ("ObserverIsFaithful",), "weakest")
+    rec = demand_of(axioms="Cases", roots=["R"], combine="strongest").record("sha256:c")
+    assert (rec["axioms"], rec["roots"], rec["combine"]) == ("cases", ["R"], "strongest")
+    # an axiom is accepted as assumed under a stricter cutoff only when its law is named
+    strict = demand_of(accept="Cases")
+    assert strict.law("ObserverIsFaithful", "sha256:c", [], {}, axiom=True)["accepts"] == "AssumedGrade"
+    assert strict.law("OtherAxiom", "sha256:c", [], {}, axiom=True)["accepts"] == "Cases"
+    assert demand_of(accept="Cases", assumes=["OtherAxiom"]).law(
+        "OtherAxiom", "sha256:c", [], {}, axiom=True)["accepts"] == "AssumedGrade"
+    # and the run's record on disk
+    path = tmp_path / "holes.run.lut"
+    path.write_text(HOLES.read_text(encoding="utf-8"), encoding="utf-8")
+    assert main(["run", str(path), "--set", "graphDir=a", "--set", "loud=false"]) == 0
+    state = json.loads((tmp_path / "holes.run.json").read_text(encoding="utf-8"))[-1]
+    assert state["demand"]["axioms"] == "assumed" and state["demand"]["roots"] == ["ObserverIsFaithful"]
+    assert state["demand"]["combine"] == "weakest"
 
 
 def test_inner_keeps_every_cutoff_and_a_law_demand_carries_the_runs():
@@ -1368,7 +1393,8 @@ def test_the_record_holds_the_demand_the_plan_and_the_key(tmp_path, capsys):
     assert d == {"entry": "main", "cone": first["certification"]["cone"],
                  "parameters": {"usedHole": 1, "unusedHole": 7}, "accept": "sampled", "assumes": [], "delta": None,
                  "fuel": 5000, "timeLimit": None, "checked": False, "lock": None, "decoration": None,
-                 "strategy": "ForwardOnDemand", "fresh": False}
+                 "strategy": "ForwardOnDemand", "fresh": False,
+                 "axioms": "assumed", "roots": ["ObserverIsFaithful"], "combine": "weakest"}
     # the fields kept beside it say the same
     assert (first["entry"], first["parameters"], first["checked"], first["fuel"]["given"],
             first["certification"]["accept"]) == (d["entry"], d["parameters"], d["checked"], d["fuel"], d["accept"])

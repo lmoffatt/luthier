@@ -1939,7 +1939,8 @@ ACCEPT = "Sampled"
 # demand asked, which call by need computes as its specimen (`TheDefaultsAgree`, 8.S4); no
 # provisional run as assumed (D-2026-10-16-c).
 DEMAND_DEFAULTS = {"entry": "main", "accepts": ACCEPT, "assumes": (), "fuel": None, "timeLimit": None, "sets": (),
-                   "checked": False, "strategy": "ForwardOnDemand", "fresh": False}
+                   "checked": False, "strategy": "ForwardOnDemand", "fresh": False,
+                   "axioms": "AssumedGrade", "roots": ("ObserverIsFaithful",), "combine": "weakest"}
 
 # the strategy that computes a demand, by the strategy it asks (demand.lth's `Ran`,
 # `RanIsASpecimenOfTheAsked`): run.py reduces by call by need whatever is asked
@@ -1952,7 +1953,9 @@ RAN = {"ForwardOnDemand": "CallByNeed", "CallByNeed": "CallByNeed"}
 # need `--accept assumed`, which would lower the cutoff of every other law too. The demand prices
 # assumptions (6.S10): this is the price accepted by default for the observer. Not yet declared in
 # demand.lth or demand_model.lut (`theDemand`), so not in DEMAND_DEFAULTS.
-AXIOMS = "AssumedGrade"
+# [2026-10-23, audit II.2, L5.18] Now the demand's `axioms` field, its default declared in
+# demand_model.lut's `theDemand` and mirrored in DEMAND_DEFAULTS; the axiom laws it applies to are
+# the demand's `roots` (the host-root exception, by name), or any named by `--accept assumed:NAME`.
 
 
 @dataclass(frozen=True)
@@ -1976,16 +1979,16 @@ class Demand:
     pinned: str | None
     decoration: None = None
     delta: float | None = None
-    axioms: str = AXIOMS
+    axioms: str = DEMAND_DEFAULTS["axioms"]
+    roots: tuple = DEMAND_DEFAULTS["roots"]
     assumes: tuple = ()
     time_limit: float | None = None
     strategy: str = DEMAND_DEFAULTS["strategy"]
     fresh: bool = False
     # [proposed, 3j j2a] how a law's grades combine over its regions and bindings (5.S8,
-    # D-2026-10-16-i; certify.COMBINATIONS), the weakest by default (`run --combine`). Not yet
-    # declared in demand.lth or demand_model.lut (`theDemand`), as `axioms`, so not in DEMAND_DEFAULTS
-    # nor in the record
-    combine: str = "weakest"
+    # D-2026-10-16-i; certify.COMBINATIONS), the weakest by default (`run --combine`). Declared in
+    # demand.lth and demand_model.lut (`theDemand`) with `axioms` and `roots`, and recorded
+    combine: str = DEMAND_DEFAULTS["combine"]
 
     def inner(self, entry):
         """demand.lth's `inner`: the demand an inner action receives, every cutoff kept (L12.3)."""
@@ -1996,15 +1999,16 @@ class Demand:
         cone, what the run gives its parameters, and this demand's cutoff, never recomputed.
         [proposed] `given` is what the caller binds: the model parameter and the sets the law
         takes (`certification`), or the model and the action's arguments (`FirstActions`). For a law
-        whose body is an axiom (`axiom`), the cutoff is the weaker of `accepts` and `axioms`."""
-        return {"law": law, "cone": cone, "given": given, "accepts": self.cutoff(axiom), "fingerprints": fingerprints,
+        whose body is an axiom (`axiom`) that the demand accepts by name (`roots`, or `assumed:NAME`),
+        the cutoff is the weaker of `accepts` and `axioms`."""
+        return {"law": law, "cone": cone, "given": given, "accepts": self.cutoff(axiom, law), "fingerprints": fingerprints,
                 "combine": self.combine}
 
-    def cutoff(self, axiom=False):
-        """The weakest grade accepted for a law: `accepts`, or for an axiom the weaker of it and
-        `axioms` (`AXIOMS`)."""
+    def cutoff(self, axiom=False, law=None):
+        """The weakest grade accepted for a law: `accepts`, or for an axiom the demand accepts by
+        name (`roots`, `assumes`; every axiom when `law` is None) the weaker of it and `axioms`."""
         from . import certify
-        if axiom and certify.GRADE_RANK[self.axioms] < certify.GRADE_RANK[self.accepts]:
+        if axiom and (law is None or law in self.roots or law in self.assumes) and certify.GRADE_RANK[self.axioms] < certify.GRADE_RANK[self.accepts]:
             return self.axioms
         return self.accepts
 
@@ -2016,7 +2020,8 @@ class Demand:
         return {"entry": self.entry, "cone": cone, "parameters": dict(self.sets),
                 "accept": certify.GRADE_WORDS[self.accepts], "assumes": list(self.assumes), "delta": self.delta,
                 "fuel": self.fuel, "timeLimit": self.time_limit, "checked": self.checked, "lock": self.pinned,
-                "decoration": self.decoration, "strategy": self.strategy, "fresh": self.fresh}
+                "decoration": self.decoration, "strategy": self.strategy, "fresh": self.fresh,
+                "axioms": certify.GRADE_WORDS[self.axioms], "roots": list(self.roots), "combine": self.combine}
 
     def key(self, live_holes):
         """plan.lth's `demandKey` (8.S8, `KeyReadsOnlyTheCone`, `KeyReadsTheType`): the decoration,
@@ -2026,7 +2031,7 @@ class Demand:
 
 
 def demand_of(main=None, fuel=None, values=(), accept=None, checked=None, pinned=None, assumes=None,
-              time_limit=None, strategy=None, fresh=None, combine=None):
+              time_limit=None, strategy=None, fresh=None, combine=None, axioms=None, roots=None):
     """The run's demand from its arguments, a missing one given its default (`DEMAND_DEFAULTS`,
     demand_model.lut's `theDemand`); `pinned` is what the lock pins (`lock_status`, 12.S13)."""
     d = DEMAND_DEFAULTS
@@ -2042,7 +2047,9 @@ def demand_of(main=None, fuel=None, values=(), accept=None, checked=None, pinned
                   time_limit=d["timeLimit"] if time_limit is None else time_limit,
                   strategy=d["strategy"] if strategy is None else strategy,
                   fresh=d["fresh"] if fresh is None else fresh,
-                  combine=certify.COMBINATION if combine is None else combine)
+                  combine=d["combine"] if combine is None else combine,
+                  axioms=d["axioms"] if axioms is None else axioms,
+                  roots=tuple(dict.fromkeys(d["roots"] if roots is None else roots)))
 
 
 def _head_name(x):
@@ -2415,7 +2422,7 @@ def certification(loaded, program, entry, demand, refuse=True):
     law_cones = certify.Cones(_elaborated(runtime_slice(loaded.acts, laws[0], core_data(loaded) + tuple(laws) + tuple(conjunctions),
                                                         theory_laws=True))) \
         if laws else None
-    cone, firsts, axioms = [], [], {}
+    cone, firsts, axioms, axiom_laws = [], [], {}, set()
     for n in names:
         demands = []
         if n in stating and n not in provisional:
@@ -2451,6 +2458,7 @@ def certification(loaded, program, entry, demand, refuse=True):
                     d["byModel"] = True
                 if axiom is not None:
                     axioms[id(d)] = axiom
+                    axiom_laws.add(d["law"])
                 demands.append(d)
         cone.append({"name": n.partition("@")[0],
                      "provisional": n in provisional and n.partition("@")[0] not in demand.assumes, "laws": demands})
@@ -2493,7 +2501,7 @@ def certification(loaded, program, entry, demand, refuse=True):
             print(f"warning: running past the refuted law {r['law']} of {r['name']} as assumed "
                   f"(--accept assumed:{r['law']}): {shown}", file=sys.stderr)
     if refuse:
-        named = {n.partition("@")[0] for n in provisional} | {r["law"] for r in past}
+        named = {n.partition("@")[0] for n in provisional} | {r["law"] for r in past} | axiom_laws
         for n in demand.assumes:
             if n not in named:
                 print(f"warning: --accept assumed:{n} names no provisional extern and no refuted law of the cone",
