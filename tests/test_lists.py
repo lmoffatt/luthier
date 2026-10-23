@@ -71,7 +71,7 @@ def test_list_library_without_imports_executes_every_public_operation():
 @pytest.mark.parametrize('program, verdict', [('lists_laws', 'Supported'), ('lists_controls', 'Refuted')])
 def test_list_claims_grade_and_their_controls_refute(program, verdict):
     outcomes = tester.run_tests(ROOT / 'tester' / (program + '.test.lut'))
-    assert len({o.spec.law for o in outcomes}) == 15
+    assert len({o.spec.law for o in outcomes}) == 20
     assert all(o.verdict == verdict for o in outcomes), [
         (o.spec.law, o.verdict, o.raised[:1], o.conjunct) for o in outcomes if o.verdict != verdict]
 
