@@ -11,7 +11,7 @@
 -- `Random`'s statistical laws, sources broken on purpose (L9.14).
 
 import "generators.lth" Placement LinearPlacement LogPlacement WeightedSupport Filter Resolution Gen power pick resolve filtered Seed
-  Random DrawsAreUniform DrawsAreIndependent nextSeed
+  Random DrawsAreUniform DrawsAreIndependent nextSeed scrambled unitOf equalOr
 import "laws.lth" Law Sequential
 
 -- `linear`: uniform between the bounds, for a quantity whose meaning does not change when shifted
@@ -91,6 +91,23 @@ skewedSample : Gen UnitList := fn size seed { match uniformSample size seed { (v
 -- a diagonal clear of the floor: an atom at 0 of probability 0.25, else a sign and a magnitude
 -- log-uniform in [1, 1000], ClearDiagonal's bounds (7.S4)
 clearDiagonal : Gen ClearDiagonal := fn size seed { hostGenerators.clearDiagonalWith 0.25 1.0 1000.0 size seed }
+
+-- [bite A3b] the draws an `equalOr` falls back on (generators.lth §4), uniform over the size's range
+-- as the tester's own draws of a number are (7.S3): integers in [-n, n], integers in [0, n], doubles
+-- in [-n, n], and a pick among listed values (the first when the list is empty of others)
+intsWithin : Gen Int := fn n s { ((scrambled s) mod (2 * n + 1) - n, nextSeed s) }
+natsWithin : Gen Int := fn n s { ((scrambled s) mod (n + 1), nextSeed s) }
+floatsWithin : Gen Float64 := fn n s { (toFloat64 n * (2.0 * unitOf s - 1.0), nextSeed s) }
+pickFrom (T : U) (first : T) (rest : List T) : Gen T :=
+  fn n s { (match nth T (cons first rest) ((scrambled s) mod (size rest + 1)) { just y -> y ; nothing -> first }, nextSeed s) }
+-- the second of a pair, equal to the first in a quarter of the draws and otherwise one of the above:
+-- the families a line binds `y` to when its law's premise is `x` equal to `y` (antisymmetry,
+-- indiscernibility; generators.lth's `equalOr`). The share is fixed here, so it is in the family's
+-- cone and the line's identity (bite 13c item 2); a line that wants another writes its own family.
+sameOrInt (x : Int) : Gen Int := equalOr Int 0.25 intsWithin x
+sameOrNat (x : Int) : Gen Int := equalOr Int 0.25 natsWithin x
+sameOrFloat (x : Float64) : Gen Float64 := equalOr Float64 0.25 floatsWithin x
+sameOrString (x : String) : Gen String := equalOr String 0.25 (pickFrom String "" ["a", "b", "ab", "ba", "z"]) x
 
 symmetricGives (a : Mat Float64) : Bool := a.m == a.n and approxMat exact a (transposeDef a)
 -- [proposed, 2026-10-15, L9.14] Each law takes the family it speaks of as its first parameter, so

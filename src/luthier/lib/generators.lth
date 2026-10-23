@@ -34,7 +34,7 @@
 --      the placements of numbers by their invariance (7.S2, 7.S4).                           done
 --   §3 Exhaustive and sized generators, the size the type's (7.S3, 7.R3).                    done
 --   §4 Subtypes and dependent records: a filter with its budget; components in order
---      (7.S6, 7.S7).                                                                        done
+--      (7.S6, 7.S7); a second parameter equal to the first with a share (bite A3b).         done
 --   §5 Censuses, walked in turn (7.R4); bindings by parameter and by type (7.R1).             done
 --   §6 Budgets, every one an argument (7.S8).                                               done
 --   §7 The programs a rule of the checker is tested on (program.lth).                        done
@@ -225,6 +225,26 @@ Filter (T : U) := DrawKeeps T & DrawIsTheFirstKept T
 -- `redraws` budget (7.S8): that is the generator of a dependent subtype, a filter over the pair.
 dependent (A : U) (B : A -> U) (ga : Gen A) (gb : (x : A) -> Gen (B x)) : Gen ((x : A) * B x) :=
   fn n s { match ga n s { (x, s2) -> match gb x n s2 { (y, s3) -> ((x, y), s3) } } }
+
+-- [wave A, bite A3b; record/plan/audit-algebras-2026-10-22/prompt-wave-a.md and the coordinator's
+-- answer of 2026-10-23 to report-wave-a-3.md; D-2026-10-16-m] A law whose premise is that two values
+-- are equal (antisymmetry `o.eq x y or not (r x y and r y x)`, indiscernibility `o.eq x y or not (m.d
+-- x y == 0.0)`) is vacuous on independent draws from a type of many values, which almost never give
+-- two equal ones. `equalOr A share g x` is the generator of the second: the first, `x`, with
+-- probability `share`, and otherwise a draw of `g`. A line binds the second parameter to a family
+-- `(x : A) -> Gen A` that fixes `share` and `g`, so the mixture is the line's distribution and enters
+-- the identity by the family's fingerprint, the hash of its cone (bite 13c item 2: what changes the
+-- sample is part of it). The choice and the draw read the seed through `scrambled`, multiplied
+-- modulo 2^31 - 1 by the integer nearest (2^31 - 1) times the golden ratio's fraction 0.618...
+-- [proposed]: the tester hands a family consecutive seeds (`nextSeed`), and a multiple of a
+-- consecutive integer by the golden ratio, taken modulo one, is the most evenly spread of such
+-- sequences (Weyl's equidistribution; a small multiplier such as the minimal standard's 48271 moves
+-- the share by 2e-5 a seed, and a hundred seeds stay in one corner). The seed after is the next
+-- one, whatever `g` returns.
+scrambled (s : Seed) : Seed := (1327217884 * s) mod 2147483647
+unitOf (s : Seed) : Float64 := toFloat64 (scrambled s) / 2147483647.0
+equalOr (A : U) (share : Float64) (g : Gen A) (x : A) : Gen A :=
+  fn n s { if unitOf s < share then (x, nextSeed s) else (match g n (scrambled s) { (y, s2) -> (y, nextSeed s) }) }
 
 -- ---------------------------------------------------------------- §5 Censuses and bindings
 

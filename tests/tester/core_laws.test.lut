@@ -18,8 +18,8 @@
 
 import "core_instances.lut" boolEq
 import "test.lth" test ExhaustiveMode SampledMode
-import "generators_model.lut" linear
-import "generators.lth" Binding
+import "generators_model.lut" linear sameOrInt sameOrFloat sameOrString
+import "generators.lth" Binding byParameter
 import "laws.lth" Listed
 import "core_instances.lut" leq less equal parity plus minus times smallerInt largerInt firstInt second zero intOne
   identityInt negate succ pred double squareInt clamp timesZero remainder2 nonNegative
@@ -284,10 +284,12 @@ goodBoolIsOrdered : Order Bool (structural Bool) := boolIsOrderedModel
 onCoreBoolIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "goodBoolIsOrdered", coverage := Listed } ]
 test "BoolIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsOrdered)
 goodStringIsOrdered : Order String (structural String) := stringIsOrderedModel
-onCoreStringIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "goodStringIsOrdered", coverage := Listed } ]
+-- [bite A3b] `y` equal to `x` in a quarter of the draws, so that Antisymmetric sees its premise
+onCoreStringIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "goodStringIsOrdered", coverage := Listed }, byParameter "y" "sameOrString" ]
 test "StringIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCoreStringIsOrdered)
 goodFloatIsOrdered : Order Float64 (structural Float64) := floatIsOrderedModel
-onCoreFloatIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "goodFloatIsOrdered", coverage := Listed } ]
+-- [bite A3b] `y` equal to `x` in a quarter of the draws, so that Antisymmetric sees its premise
+onCoreFloatIsOrdered : List Binding := [ { parameter := just "model", type := nothing, generator := "goodFloatIsOrdered", coverage := Listed }, byParameter "y" "sameOrFloat" ]
 test "FloatIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCoreFloatIsOrdered)
 goodNatIsAnOrderedSemiring : OrderedSemiring Nat (structural Nat) := natIsAnOrderedSemiringModel
 onCoreNatIsAnOrderedSemiring : List Binding := [ { parameter := just "model", type := nothing, generator := "goodNatIsAnOrderedSemiring", coverage := Listed } ]
@@ -300,7 +302,8 @@ onCoreBoolIsABooleanAlgebra : List Binding := [ { parameter := just "model", typ
 test "BoolIsABooleanAlgebra" (SampledMode linear) (seed <- 20261020) (profile <- onCoreBoolIsABooleanAlgebra)
 goodIntIsAMetric : Metric MetricInteger (structural MetricInteger) := intIsAMetricModel
 coreMetricPairs : List (Related MetricInteger (structural MetricInteger).eq) := [{ x := 0, y := 0 }, { x := 1, y := 1 }]
-onCoreIntIsAMetric : List Binding := [ { parameter := just "p", type := nothing, generator := "coreMetricPairs", coverage := Listed }, { parameter := just "model", type := nothing, generator := "goodIntIsAMetric", coverage := Listed } ]
+-- [bite A3b] `y` equal to `x` in a quarter of the draws, so that MetricIndiscernible sees its premise
+onCoreIntIsAMetric : List Binding := [ { parameter := just "p", type := nothing, generator := "coreMetricPairs", coverage := Listed }, { parameter := just "model", type := nothing, generator := "goodIntIsAMetric", coverage := Listed }, byParameter "y" "sameOrInt" ]
 test "IntIsAMetric" (SampledMode linear) (seed <- 20261020) (profile <- onCoreIntIsAMetric)
 goodBoolIsAMetric : Metric Bool (structural Bool) := boolIsAMetricModel
 onCoreBoolIsAMetric : List Binding := [ { parameter := just "model", type := nothing, generator := "goodBoolIsAMetric", coverage := Listed } ]
