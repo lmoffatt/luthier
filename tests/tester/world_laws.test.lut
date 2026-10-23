@@ -71,10 +71,18 @@ dropFile (p : String) (fs : List (String * String)) : List (String * String) :=
   filter List (String * String) (fn (qc : String * String) { match qc { (q, c) -> not (p == q) } }) fs
 unitDescriptions : List (Described WorldState Unit theWorld) := [printDescription WorldState console "",
   printDescription WorldState console "hello, world", lockWrite]
+-- [bite A3b] the reads and observations own nothing, so `OwnIsIdempotent` (`not d.own or ...`) held
+-- on them with no case of its premise (D-2026-10-16-m): each census also lists an own action of its
+-- result type, the lock written as above and the content or the state after given back
+lockWritten (st : WorldState) : WorldState := { stdout := st.stdout, files := cons ("luthier.lock", "pinned") (dropFile "luthier.lock" st.files) }
+lockGiven : Described WorldState (Maybe String) theWorld := {
+  describe := fn st { (lockWritten st, just "pinned") }, own := true, places := ["luthier.lock"] }
+lockObserved : Described WorldState WorldState theWorld := {
+  describe := fn st { (lockWritten st, lockWritten st) }, own := true, places := ["luthier.lock"] }
 readDescriptions : List (Described WorldState (Maybe String) theWorld) := [readFileDescription WorldState console "input.txt",
-  readFileDescription WorldState console "other.txt", readFileDescription WorldState console "stdout"]
+  readFileDescription WorldState console "other.txt", readFileDescription WorldState console "stdout", lockGiven]
 observeDescriptions : List (Described WorldState WorldState theWorld) := [observeDescription WorldState console ["stdout", "input.txt"],
-  observeDescription WorldState console nil]
+  observeDescription WorldState console nil, lockObserved]
 locked : WorldState := { stdout := "", files := [("luthier.lock", "old"), ("input.txt", "first\n")] }
 moreWorlds : List WorldState := [blank, printed, withFiles, locked]
 morePlaces : List String := ["stdout", "input.txt", "empty.txt", "other.txt", "luthier.lock"]
