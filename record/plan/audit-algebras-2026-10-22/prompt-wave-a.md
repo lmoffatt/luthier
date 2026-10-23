@@ -23,6 +23,7 @@ first). `python scripts/check_spec.py` prints only its known finding. Scratch un
 waits. Small commits staged by path: subject, blank line, one body line, ending with
 "Co-Authored-By: Claude <Opus 5.5 or Sonnet 5.5> <noreply@anthropic.com>".
 
-Report: append to `execution.md` beside this file, under each of your bites, a line "Done (date,
-commits): ..." with the checks, and give in your final message per bite what you did, decisions
-taken on your own, at most one question.
+Report: `report-wave-a-<agent number>.md` beside this file, committed (not execution.md, which
+the three would edit at once; the coordinator marks the bites done there): per bite what you did,
+the commits, the checks, decisions taken on your own, at most one question. If your Write is
+refused for it, give its full text in your final message.
