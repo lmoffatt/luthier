@@ -69,7 +69,7 @@
 --      law's regions, `Deriving`.                                                              done
 
 import "laws.lth" Evidence Coverage Listed Confirmed Supported Cited Assumed NotRun Tested Holds Rates
-  Points Drawn spentOf
+  Points Drawn Exhaustive Bounded spentOf
 import "test.lth" Grade Proved ExhaustiveGrade Cases Sampled AssumedGrade gradeRank weakest grade coverageOf
   pointCount
 import "generators.lth" Seed Budgets
@@ -265,14 +265,42 @@ wasEnumeratedWhole (b : List DrawnParameter) (p : String) : Bool :=
 censusOfAtMost (n : Nat) (b : List DrawnParameter) (rs : List ParameterReach) : Bool :=
   all List ParameterReach (fn (r : ParameterReach) {
     match r.reach { Members vs -> n == 0 or size vs <= n ; Support -> wasEnumeratedWhole b r.parameter ; _ -> false } }) rs
+-- [wave A, bite A6; audit 1.8 (5b1a05e); L10.10 (only a certifier builds a certificate)] Each
+-- evidence form's own fields, so that reading a store is a checked construction (certify.py's
+-- `formed_errors`, each error naming the field): a proved entry names its citation or the library
+-- guarantee it rests on (`Cited r`, r not empty; O10's syntax when it comes); an exhaustive one its
+-- mode or its finite domain (each parameter a census or enumerated whole, or a `Bounded n` coverage
+-- with n above 0); a sampled one the generator of each parameter. Its seed and its sampling budgets
+-- the types give here (`Seed`, `Budgets`) and the reader checks of the JSON, as it checks a control's
+-- (no `Entry` here has a kind, §6 (c)). [left] An assumed entry's demand: laws.lth's `Assumed`
+-- carries none yet.
+filled (s : String) : Bool := not (s == "")
+censusAt (p : String) (rs : List ParameterReach) : Bool :=
+  match reachOf p rs { nothing -> false ; just r -> (match r { Members vs -> true ; _ -> false }) }
+finiteDomain (e : Entry) : Bool :=
+  match coverageOf e.evidence { nothing -> false ; just c -> (match c {
+    Exhaustive -> all List DrawnParameter (fn (d : DrawnParameter) { censusAt d.parameter e.reach or enumeratedWhole d.generator }) e.binding ;
+    Bounded n -> n > 0 ;
+    _ -> false }) }
+formedAsItsEvidence (e : Entry) : Bool :=
+  match e.grade { nothing -> true ; just g ->
+    if g == Proved then (match e.evidence { Cited r -> filled r ; _ -> false })
+    else if g == ExhaustiveGrade then finiteDomain e
+    else if g == Sampled then all List DrawnParameter (fn (d : DrawnParameter) { filled d.parameter and filled d.generator }) e.binding
+    else true }
 heldAsRun (es : List Entry) : Bool :=
   all List Entry (fn (e : Entry) {
     match e.grade { nothing -> true ; just g ->
        admits e.evidence g
-         and (not (coverageOf e.evidence == just Listed) or censusOfAtMost (pointCount e.evidence) e.binding e.reach) } }) es
+         and (not (coverageOf e.evidence == just Listed) or censusOfAtMost (pointCount e.evidence) e.binding e.reach)
+         and formedAsItsEvidence e } }) es
 -- the order of two dates as the store writes them (ISO 8601 in UTC, whose order is the order of
 -- the text), the first not before the second: a hole, since the kernel orders numbers and not
--- `String`; until it is filled, a store's predicate on two entries or more is not evaluated
+-- `String`; until it is filled, a store's predicate on two entries or more is not evaluated.
+-- [wave A, bite A6] Left a hole: the kernel has no order on `String` (11.R1; grammar.lth's
+-- `characters` is a hole too), and the predicate as stated is false of five stores of the tree,
+-- whose entries the tester dates when a line starts and parallel lines write as they end (certify.py's
+-- `latest_in_front`; record/plan/audit-algebras-2026-10-22/report-wave-a-1.md)
 notBefore : String -> String -> Bool
 latestInFront (es : List Entry) : Bool :=
   all List (Entry * Entry) (fn (ef : Entry * Entry) { match ef { (e, f) -> notBefore e.date f.date } }) (zip Entry Entry es (drop Entry 1 es))

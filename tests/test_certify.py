@@ -291,7 +291,9 @@ def test_the_route_the_model_names():
 # ---------------------------------------------------------------------- the store (§1)
 
 def entry(law="L", cone="sha256:1", seed=0, outcome="Passed", grade="Sampled", binding=()):
-    return {"law": law, "cone": cone, "binding": list(binding), "seed": seed, "cases": 100, "budgets": {},
+    # [bite A6] a sampled entry records its sampling budgets (`certify.formed_errors`)
+    return {"law": law, "cone": cone, "binding": list(binding), "seed": seed, "cases": 100,
+            "budgets": dict.fromkeys(certify.SAMPLED_REQUIRES, 1),
             "reach": [], "evidence": {"Points": {"evaluated": 100, "coverage": "Drawn 0"}}, "grade": grade, "outcome": outcome,
             "date": "2026-10-14T00:00:00+00:00", "interpreter": "abc", "hosts": []}
 
@@ -1476,7 +1478,8 @@ def test_the_store_reader_refuses_a_grade_the_evidence_does_not_admit(tmp_path):
     assert certify.store_errors([bad]) and "does not admit" in certify.store_errors([bad])[0]
     for coverage, grade in [("Drawn 0", "Sampled"), ("Drawn 0", "Cases"), ("Listed", "Cases"),
                             ("Exhaustive", "ExhaustiveGrade"), ("Bounded 4", "ExhaustiveGrade")]:
-        assert certify.store_errors([dict(_entry(), evidence=_points(coverage), grade=grade)]) == [], coverage
+        formed = dict(_entry(), evidence=_points(coverage), grade=grade, budgets=dict.fromkeys(certify.SAMPLED_REQUIRES, 1))
+        assert certify.store_errors([formed]) == [], coverage
     for coverage, grade in [("Listed", "ExhaustiveGrade"), ("Bounded 4", "Cases"), ("Exhaustive", "Proved")]:
         assert certify.store_errors([dict(_entry(), evidence=_points(coverage), grade=grade)]), coverage
     assert certify.store_errors([dict(_entry(), evidence={"NotRun": "x"}, grade="Cases")])
@@ -1781,3 +1784,95 @@ def test_two_conjuncts_stretches_never_pool():
     cutoffs = {"alpha": 0.01, "beta": 0.01, "delta": 0.5, "initial": 50, "budget": 400}
     assert certify.continuation([ps], qs, cutoffs, "c") is None
     assert certify.continuation([ps], dict(ps, seed=2), cutoffs, "c") == {"ratio": 0.5, "spent": 30, "seeds": [1]}
+
+
+# ---------------------------------------------------------------------- wave A, bite A6 (audit 1.8)
+
+def _formed(grade="Cases", coverage="Listed", evaluated=2, **fields):
+    e = {"law": "L", "cone": "h", "binding": [{"parameter": "x", "generator": "xs (Listed)", "fingerprint": ""}],
+         "seed": 7, "cases": 2, "outcome": "Passed" if grade else {"Failed": "x = 1"}, "grade": grade,
+         "reach": [{"parameter": "x", "reach": {"Members": [{"Printed": "a"}, {"Printed": "b"}]}}],
+         "budgets": dict.fromkeys(certify.SAMPLED_REQUIRES, 1),
+         "evidence": {"Points": {"evaluated": evaluated, "raised": 0, "coverage": coverage, "verdict": "Confirmed"}},
+         "date": "2026-10-23T00:00:00+00:00"}
+    e.update(fields)
+    return e
+
+
+# each a fixture, whether the reader admits it, the field its refusal names, and whether the theory's
+# `heldAsRun` reads it (the theory's types give the seed and the budgets, and its entries have no kind)
+FORMED = [
+    (_formed(), True, None, True),
+    (_formed("Proved", evidence={"Cited": "Theorem 3 of the library"}), True, None, True),
+    (_formed("Proved", evidence={"Cited": ""}), False, "evidence.Cited", True),
+    (_formed("ExhaustiveGrade", "Exhaustive"), True, None, True),
+    (_formed("ExhaustiveGrade", "Exhaustive", reach=[{"parameter": "x", "reach": {"Interval": [0.0, 1.0]}}]),
+     False, "binding.generator, reach", False),  # the theory reads `enumeratedWhole` here, a hole
+    (_formed("ExhaustiveGrade", "(Bounded 3)", reach=[{"parameter": "x", "reach": {"Interval": [0.0, 1.0]}}]), True, None, True),
+    (_formed("ExhaustiveGrade", "(Bounded 0)"), False, "binding.generator, reach", True),
+    (_formed("Sampled", "(Drawn 7)"), True, None, True),
+    (_formed("Sampled", "(Drawn 7)", binding=[{"parameter": "x", "generator": "", "fingerprint": ""}]),
+     False, "binding.generator", True),
+    (_formed("Sampled", "(Drawn 7)", seed=None), False, "seed", False),
+    (_formed("Sampled", "(Drawn 7)", budgets={"fuel": 10}), False, "budgets", False),
+    (_formed(None, kind="Control", outcome={"ControlRefuted": "x = a"}), True, None, False),
+    (_formed(None, kind="Control", outcome={"ControlRefuted": "x = a"},
+             binding=[{"parameter": "x", "generator": "", "fingerprint": ""}]), False, "binding.generator", False),
+]
+
+
+def test_each_evidence_form_is_refused_without_its_fields():
+    """Bite A6: a fixture per form, refused with a message naming the field; the well formed ones read."""
+    for e, ok, field, _ in FORMED:
+        errors = certify.store_errors([e])
+        assert (errors == []) == ok, (e, errors)
+        if field is not None:
+            assert any(f"({field})" in m for m in errors), errors
+
+
+def _lut_value(v):
+    return f'Number {float(v["Number"])!r}' if "Number" in v else f'Printed {json.dumps(v["Printed"])}'
+
+
+def _lut_reach(r):
+    if r == "Support":
+        return "Support"
+    (k, w), = r.items()
+    if k == "Interval":
+        return f"Interval {float(w[0])!r} {float(w[1])!r}"
+    return "Members [" + ", ".join(_lut_value(v) for v in w) + "]"
+
+
+def _lut_entry(e):
+    ev = e["evidence"]
+    if "Cited" in ev:
+        evidence = f'Cited {json.dumps(ev["Cited"])}'
+    else:
+        c = ev["Points"]["coverage"].strip("()")
+        cov = c if " " not in c else f"({c})"
+        point = '(true, Cited "p")'
+        evidence = f'Points Bool [{", ".join([point] * ev["Points"]["evaluated"])}] {cov}'
+    binding = ", ".join(f'{{ parameter := {json.dumps(d["parameter"])}, generator := {json.dumps(d["generator"])}, '
+                        f'fingerprint := "" }}' for d in e["binding"])
+    reach = ", ".join(f'{{ parameter := {json.dumps(r["parameter"])}, reach := {_lut_reach(r["reach"])} }}' for r in e["reach"])
+    grade = f'just {e["grade"]}' if e["grade"] else "nothing"
+    outcome = "Passed" if e["outcome"] == "Passed" else f'Failed {json.dumps(e["outcome"]["Failed"])}'
+    return (f'{{ law := "L", cone := "h", binding := [{binding}], seed := 7, cases := {e["cases"]}, conjunct := nothing, '
+            f'conjuncts := nil, budgets := defaultBudgets, reach := [{reach}], evidence := {evidence}, grade := {grade}, '
+            f'outcome := {outcome}, date := "2026-10-23", interpreter := "listed", hosts := nil }}')
+
+
+def test_the_theory_s_held_as_run_and_the_reader_agree(tmp_path):
+    """Bite A6: certification.lth's `heldAsRun` (with `formedAsItsEvidence`) and certify.py's
+    `store_errors` agree on every fixture the theory can state (the others are the reader's alone)."""
+    stated = [(e, ok) for e, ok, _, theory in FORMED if theory]
+    laws = "".join(f"Agrees{k} : Bool := heldAsRun [{_lut_entry(e)}] == {'true' if ok else 'false'}\n"
+                   f'test "Agrees{k}" ExhaustiveMode\n' for k, (e, ok) in enumerate(stated))
+    (tmp_path / "formed.test.lut").write_text('''import "test.lth" test ExhaustiveMode Grade Proved ExhaustiveGrade Cases Sampled defaultBudgets
+import "laws.lth" Listed Exhaustive Bounded Drawn Points Cited
+import "certification.lth" Entry heldAsRun Members Printed Number Support Interval Passed Failed
+
+''' + laws, encoding="utf-8")
+    outs = tester.run_tests(tmp_path / "formed.test.lut", store=False)
+    assert len(outs) == len(stated)
+    assert all(o.verdict in ("Confirmed", "Supported") for o in outs), [tester.line(o) for o in outs]

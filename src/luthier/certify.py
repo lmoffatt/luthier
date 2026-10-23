@@ -603,13 +603,82 @@ def held_as_listed(entry):
     return True
 
 
+# [wave A, bite A6, proposed] The budgets a sampled entry must record (`formed_errors`): those of
+# `SAMPLING` but the two the regions brought (D-2026-10-16-j), which entries written before them lack.
+SAMPLED_REQUIRES = ("specialMass", "atomAtZero", "coveringAbove", "levelRuns", "seedsPerControl", "distributionDraws")
+
+
+def _bounded(coverage):
+    """The bound of a `Bounded n` coverage as the store writes it (`(Bounded 3)`), else None."""
+    parts = coverage.strip("()").split() if isinstance(coverage, str) else []
+    return int(parts[1]) if len(parts) == 2 and parts[0] == "Bounded" and parts[1].isdigit() else None
+
+
+def formed_errors(e):
+    """[wave A, bite A6; audit 1.8 (5b1a05e); L10.10, 13c item 5] Each evidence form's own fields,
+    checked as the entry is read (certification.lth's `formedAsItsEvidence`, part of `heldAsRun`),
+    each error naming the field: a proved entry names its citation or the library guarantee it rests
+    on (`evidence.Cited`, not empty; O10's syntax when it comes); an exhaustive one its mode or its
+    finite domain (each parameter enumerated whole, its generator `ExhaustiveMode ...`, or a census
+    `reach`; or a `Bounded n` coverage, n above 0); a sampled one its seed, the generator of each
+    parameter and its sampling budgets (`SAMPLED_REQUIRES`); a control its broken model (each
+    parameter's generator: with no binding the law itself applies it) and no pass. The theory's types
+    give an entry its seed and full budgets, and its `Entry` has no kind (§6 (c)), so those three
+    checks are the reader's alone. [left, bite A6] An assumed entry's demand: laws.lth's `Assumed`
+    carries none yet."""
+    errors = []
+    grade, evidence = e.get("grade"), e.get("evidence")
+    def named(field):
+        # a binding not written as a list is the identity's to read, not this check's
+        binding = e.get("binding") if isinstance(e.get("binding"), list) else ()
+        return all(isinstance(d, dict) and isinstance(d.get(field), str) and d[field] for d in binding)
+    if grade == "Proved":
+        cited = evidence.get("Cited") if isinstance(evidence, dict) else None
+        if not (isinstance(cited, str) and cited.strip()):
+            errors.append("a proved entry names no citation nor library guarantee (evidence.Cited)")
+    elif grade == "ExhaustiveGrade":
+        coverage = _coverage(evidence)
+        census = {r.get("parameter") for r in e.get("reach") or () if isinstance(r.get("reach"), dict) and "Members" in r["reach"]}
+        whole = all(isinstance(d, dict) and (d.get("parameter") in census
+                                             or str(d.get("generator", "")).startswith("ExhaustiveMode"))
+                    for d in (e["binding"] if isinstance(e.get("binding"), list) else ()))
+        bound = _bounded(((evidence or {}).get("Points") or {}).get("coverage")) if isinstance(evidence, dict) else None
+        if not (coverage == "Exhaustive" and whole or coverage == "Bounded" and bound):
+            errors.append("an exhaustive entry names neither its mode nor a finite domain (binding.generator, reach)")
+    elif grade == "Sampled":
+        budgets = e.get("budgets")
+        if not isinstance(e.get("seed"), int) or isinstance(e.get("seed"), bool):
+            errors.append("a sampled entry records no seed (seed)")
+        if not named("generator"):
+            errors.append("a sampled entry names no generator for a parameter (binding.generator)")
+        if not isinstance(budgets, dict) or any(k not in budgets for k in SAMPLED_REQUIRES):
+            errors.append("a sampled entry records no sampling budgets (budgets)")
+    if is_control(e):
+        if passed(e):
+            errors.append("a control passed (outcome): it is refuted, confirmed or not run")
+        if not named("generator"):
+            errors.append("a control names no broken model (binding.generator)")
+    return errors
+
+
+def latest_in_front(entries):
+    """certification.lth's `latestInFront` over the entries' ISO 8601 dates in UTC (whose order is the
+    order of their text): no entry older than the one behind it. [wave A, bite A6] Not part of
+    `store_errors`: the tester dates an entry when its line starts and parallel lines write in the
+    order they end, so five stores of the tree break it (record/plan/audit-algebras-2026-10-22/
+    report-wave-a-1.md)."""
+    dates = [e.get("date", "") for e in entries]
+    return all(a >= b for a, b in zip(dates, dates[1:]))
+
+
 def store_errors(entries):
     """What breaks `Store`'s predicate: a grade without a pass or a pass without a grade
     (`gradedAsOutcome`); a grade the pass's evidence does not admit, or a pass over listed cases
     whose reach is more than the cases it evaluated (`heldAsRun`, `admits`, `held_as_listed`; bite
-    13c, on the audit of 2026-10-22, 1.8). Two entries of one identity that disagree are a
-    disagreement the store records (D-2026-10-15-f), read by `disputes`, not an error of the store.
-    [proposed] `latestInFront` stays unchecked here, as in the theory, whose `notBefore` is a hole."""
+    13c, on the audit of 2026-10-22, 1.8); [bite A6] an entry missing a field its evidence form owes
+    (`formed_errors`). Two entries of one identity that disagree are a disagreement the store records
+    (D-2026-10-15-f), read by `disputes`, not an error of the store. [proposed] `latestInFront` stays
+    unchecked here (`latest_in_front`, which says why)."""
     errors = []
     for k, e in enumerate(entries):
         missing = [f for f in IDENTITY + ("outcome", "grade") if f not in e]
@@ -629,6 +698,9 @@ def store_errors(entries):
             errors.append(f"entry {k} ({e['law']}): its evidence does not admit the grade {e['grade']}")
         elif _coverage(e.get("evidence")) == "Listed" and not held_as_listed(e):
             errors.append(f"entry {k} ({e['law']}): a pass over listed cases reaches more than its cases")
+    for k, e in enumerate(entries):
+        if all(f in e for f in IDENTITY + ("outcome", "grade")):
+            errors += [f"entry {k} ({e['law']}): {m}" for m in formed_errors(e)]
     return errors
 
 
