@@ -21,7 +21,7 @@
    {
     "parameter": "d",
     "generator": "observeDescriptions (Listed)",
-    "fingerprint": "sha256:02a55d92eb28629738e52ac59e70720209d65607cd615f7c30840639856f64a7"
+    "fingerprint": "sha256:b58da9a396c32449515e31af1d3369517a20d72877bb98d3ec1027a906b49643,sha256:2d37e3df9c40e29ac9658f4ff2749012c6f40fe0b5780b83f1b60d935f3f27b5"
    },
    {
     "parameter": "s",
@@ -91,6 +91,9 @@
       },
       {
        "Printed": "(((observeDescription { stdout : String, files : (List (_ : String) * String) }) console) nil)"
+      },
+      {
+       "Printed": "lockObserved"
       }
      ]
     }
@@ -139,7 +142,7 @@
   ],
   "evidence": {
    "Points": {
-    "evaluated": 40,
+    "evaluated": 60,
     "raised": 0,
     "coverage": "Listed",
     "verdict": "Supported"
@@ -147,7 +150,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-23T02:19:14+00:00",
+  "date": "2026-10-23T10:19:15+00:00",
   "interpreter": "v0.3",
   "hosts": [],
   "regions": []
@@ -174,7 +177,7 @@
    {
     "parameter": "d",
     "generator": "readDescriptions (Listed)",
-    "fingerprint": "sha256:854d5668ddcca01d33c5a71c1544f5ca71662d75f93c02a62d7637653e53f213"
+    "fingerprint": "sha256:eb2b3c4d71921b9b581bee4ef6b81714de4b5a767280b91dd08acaddf9b37187,sha256:5e847dcf773e6a7ea8ade853560345581e24896ebec454cab27ea462fac73753"
    },
    {
     "parameter": "s",
@@ -247,6 +250,9 @@
       },
       {
        "Printed": "(((readFileDescription { stdout : String, files : (List (_ : String) * String) }) console) \"stdout\")"
+      },
+      {
+       "Printed": "lockGiven"
       }
      ]
     }
@@ -295,7 +301,7 @@
   ],
   "evidence": {
    "Points": {
-    "evaluated": 60,
+    "evaluated": 80,
     "raised": 0,
     "coverage": "Listed",
     "verdict": "Supported"
@@ -303,7 +309,270 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-23T02:19:13+00:00",
+  "date": "2026-10-23T10:19:13+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "OwnIsIdempotent",
+  "cone": "sha256:03e15ecfbc0080c98411fa4b427167dc1a3f070d11dc97f45ae01296c572ca3b",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167"
+   },
+   {
+    "parameter": "A",
+    "generator": "stateTypes (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167"
+   },
+   {
+    "parameter": "m",
+    "generator": "worldModels (Listed)",
+    "fingerprint": "sha256:b1ef6c65349af7e094bcdf927d0be5ce9bb53ea7227651b850930a7adbb94272"
+   },
+   {
+    "parameter": "d",
+    "generator": "observeDescriptions (Listed)",
+    "fingerprint": "sha256:b58da9a396c32449515e31af1d3369517a20d72877bb98d3ec1027a906b49643,sha256:2d37e3df9c40e29ac9658f4ff2749012c6f40fe0b5780b83f1b60d935f3f27b5"
+   },
+   {
+    "parameter": "s",
+    "generator": "moreWorlds (Listed)",
+    "fingerprint": "sha256:0e4a20ccddd9a9e58f7fd24746fd4f01131fc04fb065f0c1bee21d7559d1640b,sha256:8a49b202305a69e98c8e80d65a976c9a64d7f08eb45ba78adcdbf952674c405e,sha256:9bc5a73ccacbd7d67db05073c636028df08801252d1341a62d074c580e70a99b,sha256:7746611177168c55ad882b26b66cc715bc9c8647ec235b806c4d45fdb7d4a3d3"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "theWorld"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((observeDescription { stdout : String, files : (List (_ : String) * String) }) console) ((cons \"stdout\") ((cons \"input.txt\") nil)))"
+      },
+      {
+       "Printed": "(((observeDescription { stdout : String, files : (List (_ : String) * String) }) console) nil)"
+      },
+      {
+       "Printed": "lockObserved"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blank"
+      },
+      {
+       "Printed": "printed"
+      },
+      {
+       "Printed": "withFiles"
+      },
+      {
+       "Printed": "locked"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 12,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 4
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:19:13+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "OwnIsIdempotent",
+  "cone": "sha256:03e15ecfbc0080c98411fa4b427167dc1a3f070d11dc97f45ae01296c572ca3b",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167"
+   },
+   {
+    "parameter": "A",
+    "generator": "maybeTypes (Listed)",
+    "fingerprint": "sha256:8fa773249c35763be16f87ada4a4517a31baeb5b77e6badebe38bfe06e8de3ad"
+   },
+   {
+    "parameter": "m",
+    "generator": "worldModels (Listed)",
+    "fingerprint": "sha256:b1ef6c65349af7e094bcdf927d0be5ce9bb53ea7227651b850930a7adbb94272"
+   },
+   {
+    "parameter": "d",
+    "generator": "readDescriptions (Listed)",
+    "fingerprint": "sha256:eb2b3c4d71921b9b581bee4ef6b81714de4b5a767280b91dd08acaddf9b37187,sha256:5e847dcf773e6a7ea8ade853560345581e24896ebec454cab27ea462fac73753"
+   },
+   {
+    "parameter": "s",
+    "generator": "moreWorlds (Listed)",
+    "fingerprint": "sha256:0e4a20ccddd9a9e58f7fd24746fd4f01131fc04fb065f0c1bee21d7559d1640b,sha256:8a49b202305a69e98c8e80d65a976c9a64d7f08eb45ba78adcdbf952674c405e,sha256:9bc5a73ccacbd7d67db05073c636028df08801252d1341a62d074c580e70a99b,sha256:7746611177168c55ad882b26b66cc715bc9c8647ec235b806c4d45fdb7d4a3d3"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(Maybe String)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "theWorld"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((readFileDescription { stdout : String, files : (List (_ : String) * String) }) console) \"input.txt\")"
+      },
+      {
+       "Printed": "(((readFileDescription { stdout : String, files : (List (_ : String) * String) }) console) \"other.txt\")"
+      },
+      {
+       "Printed": "(((readFileDescription { stdout : String, files : (List (_ : String) * String) }) console) \"stdout\")"
+      },
+      {
+       "Printed": "lockGiven"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blank"
+      },
+      {
+       "Printed": "printed"
+      },
+      {
+       "Printed": "withFiles"
+      },
+      {
+       "Printed": "locked"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 4
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:19:13+00:00",
   "interpreter": "v0.3",
   "hosts": [],
   "regions": []
@@ -452,261 +721,6 @@
   "evidence": {
    "Points": {
     "evaluated": 60,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-23T02:19:12+00:00",
-  "interpreter": "v0.3",
-  "hosts": [],
-  "regions": []
- },
- {
-  "law": "OwnIsIdempotent",
-  "cone": "sha256:03e15ecfbc0080c98411fa4b427167dc1a3f070d11dc97f45ae01296c572ca3b",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167"
-   },
-   {
-    "parameter": "A",
-    "generator": "stateTypes (Listed)",
-    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167"
-   },
-   {
-    "parameter": "m",
-    "generator": "worldModels (Listed)",
-    "fingerprint": "sha256:b1ef6c65349af7e094bcdf927d0be5ce9bb53ea7227651b850930a7adbb94272"
-   },
-   {
-    "parameter": "d",
-    "generator": "observeDescriptions (Listed)",
-    "fingerprint": "sha256:02a55d92eb28629738e52ac59e70720209d65607cd615f7c30840639856f64a7"
-   },
-   {
-    "parameter": "s",
-    "generator": "moreWorlds (Listed)",
-    "fingerprint": "sha256:0e4a20ccddd9a9e58f7fd24746fd4f01131fc04fb065f0c1bee21d7559d1640b,sha256:8a49b202305a69e98c8e80d65a976c9a64d7f08eb45ba78adcdbf952674c405e,sha256:9bc5a73ccacbd7d67db05073c636028df08801252d1341a62d074c580e70a99b,sha256:7746611177168c55ad882b26b66cc715bc9c8647ec235b806c4d45fdb7d4a3d3"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "A",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "theWorld"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((observeDescription { stdout : String, files : (List (_ : String) * String) }) console) ((cons \"stdout\") ((cons \"input.txt\") nil)))"
-      },
-      {
-       "Printed": "(((observeDescription { stdout : String, files : (List (_ : String) * String) }) console) nil)"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "s",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "blank"
-      },
-      {
-       "Printed": "printed"
-      },
-      {
-       "Printed": "withFiles"
-      },
-      {
-       "Printed": "locked"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 8,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-23T02:19:12+00:00",
-  "interpreter": "v0.3",
-  "hosts": [],
-  "regions": []
- },
- {
-  "law": "OwnIsIdempotent",
-  "cone": "sha256:03e15ecfbc0080c98411fa4b427167dc1a3f070d11dc97f45ae01296c572ca3b",
-  "binding": [
-   {
-    "parameter": "S",
-    "generator": "states (Listed)",
-    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167"
-   },
-   {
-    "parameter": "A",
-    "generator": "maybeTypes (Listed)",
-    "fingerprint": "sha256:8fa773249c35763be16f87ada4a4517a31baeb5b77e6badebe38bfe06e8de3ad"
-   },
-   {
-    "parameter": "m",
-    "generator": "worldModels (Listed)",
-    "fingerprint": "sha256:b1ef6c65349af7e094bcdf927d0be5ce9bb53ea7227651b850930a7adbb94272"
-   },
-   {
-    "parameter": "d",
-    "generator": "readDescriptions (Listed)",
-    "fingerprint": "sha256:854d5668ddcca01d33c5a71c1544f5ca71662d75f93c02a62d7637653e53f213"
-   },
-   {
-    "parameter": "s",
-    "generator": "moreWorlds (Listed)",
-    "fingerprint": "sha256:0e4a20ccddd9a9e58f7fd24746fd4f01131fc04fb065f0c1bee21d7559d1640b,sha256:8a49b202305a69e98c8e80d65a976c9a64d7f08eb45ba78adcdbf952674c405e,sha256:9bc5a73ccacbd7d67db05073c636028df08801252d1341a62d074c580e70a99b,sha256:7746611177168c55ad882b26b66cc715bc9c8647ec235b806c4d45fdb7d4a3d3"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "S",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "A",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(Maybe String)"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "theWorld"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "(((readFileDescription { stdout : String, files : (List (_ : String) * String) }) console) \"input.txt\")"
-      },
-      {
-       "Printed": "(((readFileDescription { stdout : String, files : (List (_ : String) * String) }) console) \"other.txt\")"
-      },
-      {
-       "Printed": "(((readFileDescription { stdout : String, files : (List (_ : String) * String) }) console) \"stdout\")"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "s",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "blank"
-      },
-      {
-       "Printed": "printed"
-      },
-      {
-       "Printed": "withFiles"
-      },
-      {
-       "Printed": "locked"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 12,
     "raised": 0,
     "coverage": "Listed",
     "verdict": "Supported"

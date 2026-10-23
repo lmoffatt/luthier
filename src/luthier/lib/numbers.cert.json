@@ -15,6 +15,4440 @@
    },
    {
     "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 1000000)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:22+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "TimesDistributiveWithin d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "z boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 1000000)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:22+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "TimesAssociativeWithin d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "z boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 1000000)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:22+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "PlusAssociativeWithin d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "z boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 1000000)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:21+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "UnequalIsNotEqual d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 1000000)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:21+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "GeqIsLeqReversed d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 1000000)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:21+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "GreaterIsLessReversed d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 1000000)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "tie",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Bool",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:21+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "LessIsStrict d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "leqAlways (Listed)",
+    "fingerprint": "sha256:4f889871646d9e4db7c81001044dae194f68bb0646eb42ff269baff11a6fdc91"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "c",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Chain Float64) ({ leq := (d).leq }).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related Moderate) (d).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "tie",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Bool",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZero",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "leqAlways"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 900,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq: F = Float64, d = leqAlways, x = -6.0312359869088645, y = -6.331777701308847"
+  },
+  "date": "2026-10-23T10:16:24+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 1000000)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:21+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MinusIsPlusNegated d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 1000000)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:21+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Total Float64 ({ leq := (d).leq }).leq",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": []
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 1000000)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported",
+    "held": 27
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:21+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": []
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 1000000)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:20+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Commutative Moderate Float64 (structural Float64) (d).times",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "leqIsEqual (Listed)",
+    "fingerprint": "sha256:1bd1ff9f33443d829afaff94b0169912ed221391f3ad5d6440a35a16f1d9d5f8"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "c",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Chain Float64) ({ leq := (d).leq }).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related Moderate) (d).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "tie",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Bool",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZero",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "leqIsEqual"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 900,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Total Float64 ({ leq := (d).leq }).leq: F = Float64, d = leqIsEqual, x = -6.0312359869088645, y = -6.331777701308847"
+  },
+  "date": "2026-10-23T10:16:19+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 1000000)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -1000000.0,
+      1000000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:20+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Commutative Moderate Float64 (structural Float64) (d).plus",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:08+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "TimesDistributiveWithin d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "z boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "leqStrict (Listed)",
+    "fingerprint": "sha256:8e09b65cdf8a31aa83279f32c53593526cb2ae6d72677c597fef1562f4c92d12"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "c",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Chain Float64) ({ leq := (d).leq }).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related Moderate) (d).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "tie",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Bool",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZero",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "leqStrict"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 700,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Reflexive Float64 ({ leq := (d).leq }).leq: F = Float64, d = leqStrict, x = -6.0312359869088645"
+  },
+  "date": "2026-10-23T10:16:16+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:08+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "TimesAssociativeWithin d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "z boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:08+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "PlusAssociativeWithin d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "z boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "minusDoubled (Listed)",
+    "fingerprint": "sha256:60c682782b88b1a1710adb2497c0c6e376c808985d1896d7f219f70ae7fabe27"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "c",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Chain Float64) ({ leq := (d).leq }).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related Moderate) (d).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "tie",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Bool",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZero",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "minusDoubled"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 600,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) }): F = Float64, d = minusDoubled, x = -6.0312359869088645"
+  },
+  "date": "2026-10-23T10:16:13+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:08+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "UnequalIsNotEqual d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:08+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "GeqIsLeqReversed d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:08+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "GreaterIsLessReversed d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "tie",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Bool",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:08+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "LessIsStrict d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "timesScaled (Listed)",
+    "fingerprint": "sha256:313ba07524b27bc279d46a82589cbcc6a68e2d1c2d43bcee61cf7a0ab3ebb7c6"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "c",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Chain Float64) ({ leq := (d).leq }).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related Moderate) (d).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "tie",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Bool",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZero",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "timesScaled"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 500,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Neutral Float64 (structural Float64) (d).times 1.0: F = Float64, d = timesScaled, x = -2.3027031748984284"
+  },
+  "date": "2026-10-23T10:16:11+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:08+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MinusIsPlusNegated d",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:07+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Total Float64 ({ leq := (d).leq }).leq",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": []
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "timesOff (Listed)",
+    "fingerprint": "sha256:2f44a40ced7c842c68ce136e2476cce28cedcdd65e21d408117ee33ec0fde530"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "c",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Chain Float64) ({ leq := (d).leq }).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related Moderate) (d).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "tie",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Bool",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZero",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "timesOff"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 400,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Absorbing Float64 (structural Float64) (d).times 0.0: F = Float64, d = timesOff, x = -6.0312359869088645"
+  },
+  "date": "2026-10-23T10:16:09+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported",
+    "held": 27
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:07+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": []
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:07+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Commutative Moderate Float64 (structural Float64) (d).times",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:16:07+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Commutative Moderate Float64 (structural Float64) (d).plus",
+  "conjuncts": [
+   "Commutative Moderate Float64 (structural Float64) (d).plus",
+   "Commutative Moderate Float64 (structural Float64) (d).times",
+   "Neutral Float64 (structural Float64) (d).plus 0.0",
+   "Absorbing Float64 (structural Float64) (d).times 0.0",
+   "Neutral Float64 (structural Float64) (d).times 1.0",
+   "Involutive Float64 (structural Float64) (fn (x : Float64) { (((d).minus 0.0) x) })",
+   "Reflexive Float64 ({ leq := (d).leq }).leq",
+   "Transitive Float64 ({ leq := (d).leq }).leq",
+   "Antisymmetric Float64 (structural Float64) ({ leq := (d).leq }).leq",
+   "Total Float64 ({ leq := (d).leq }).leq",
+   "PlusMonotone d",
+   "TimesMonotone d",
+   "DivideOne d",
+   "MinusSelf d",
+   "DivideSelf d",
+   "MinusIsPlusNegated d",
+   "LessIsStrict d",
+   "GreaterIsLessReversed d",
+   "GeqIsLeqReversed d",
+   "UnequalIsNotEqual d",
+   "EpsilonIsTheUlpOfOne d",
+   "PlusAssociativeWithin d",
+   "TimesAssociativeWithin d",
+   "TimesDistributiveWithin d",
+   "DivideInvertibleWithin d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "plusOff (Listed)",
+    "fingerprint": "sha256:31d1c61cdd7c024fa6c6b531022581ab5d7481f999ede4fd98387ab0e27e798e"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "c",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Chain Float64) ({ leq := (d).leq }).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related Moderate) (d).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "tie",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Bool",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZero",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "plusOff"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 300,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Neutral Float64 (structural Float64) (d).plus 0.0: F = Float64, d = plusOff, x = -6.0312359869088645"
+  },
+  "date": "2026-10-23T10:16:07+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "timesSkewed (Listed)",
+    "fingerprint": "sha256:9e250a8f3524202e2a7ebf8cc5caa58d6fac5103e379a11effdaacc13e9f6b86"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "c",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Chain Float64) ({ leq := (d).leq }).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related Moderate) (d).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "tie",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Bool",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZero",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "timesSkewed"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Commutative Moderate Float64 (structural Float64) (d).times: F = Float64, d = timesSkewed, x = -6.0312359869088645, y = -6.331777701308847"
+  },
+  "date": "2026-10-23T10:16:05+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "swapped (Listed)",
+    "fingerprint": "sha256:86260a6c6189eee079bf77f8de9280b8113be9457c7bac575bf556ca600d4150"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "c",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Chain Float64) ({ leq := (d).leq }).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Related Moderate) (d).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "tie",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Bool",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Tame",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZero",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "swapped"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Commutative Moderate Float64 (structural Float64) (d).plus: F = Float64, d = swapped, x = -6.0312359869088645, y = -6.331777701308847"
+  },
+  "date": "2026-10-23T10:16:04+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "Doubles",
+  "cone": "sha256:d7c4f3e9b4504497e254696d2e85958536cb06d816816b550d470011b7110b65",
+  "binding": [
+   {
+    "parameter": "F",
+    "generator": "Float64 (fixed by the structure's laws)",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "x",
     "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over NonZero",
     "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
    }

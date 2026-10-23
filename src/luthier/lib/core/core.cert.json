@@ -1,5 +1,1008 @@
 [
  {
+  "law": "IntIsAMetric",
+  "cone": "sha256:cb7e2a6ca689d0508b49d70fc0f10975acab5f0a97b6cb3d1391828638c1ea90",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "goodIntIsAMetric (Listed)",
+    "fingerprint": "sha256:f067a1157aeff971590d0027b64212874efff5b9b1e4593c0b5c021540b8a74a"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricInteger",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrInt x (generator, size 10)",
+    "fingerprint": "sha256:7a7592036ef017cd680da4f3e09f6a24e2cb3fb8e9332dffb7ffa87a1c314e08,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "goodIntIsAMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -4503599627370496.0,
+      4503599627370496.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:15:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MetricNonNegative MetricInteger (model).d",
+  "conjuncts": [
+   "MetricZeroOnEqual MetricInteger (structural MetricInteger) model",
+   "MetricIndiscernible MetricInteger (structural MetricInteger) model",
+   "Commutative MetricInteger Float64 (structural Float64) (model).d",
+   "Triangular MetricInteger (model).d",
+   "MetricNonNegative MetricInteger (model).d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 2
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "IntIsAMetric",
+  "cone": "sha256:cb7e2a6ca689d0508b49d70fc0f10975acab5f0a97b6cb3d1391828638c1ea90",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "goodIntIsAMetric (Listed)",
+    "fingerprint": "sha256:f067a1157aeff971590d0027b64212874efff5b9b1e4593c0b5c021540b8a74a"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricInteger",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrInt x (generator, size 10)",
+    "fingerprint": "sha256:7a7592036ef017cd680da4f3e09f6a24e2cb3fb8e9332dffb7ffa87a1c314e08,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricInteger",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "goodIntIsAMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -4503599627370496.0,
+      4503599627370496.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -4503599627370496.0,
+      4503599627370496.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:15:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Triangular MetricInteger (model).d",
+  "conjuncts": [
+   "MetricZeroOnEqual MetricInteger (structural MetricInteger) model",
+   "MetricIndiscernible MetricInteger (structural MetricInteger) model",
+   "Commutative MetricInteger Float64 (structural Float64) (model).d",
+   "Triangular MetricInteger (model).d",
+   "MetricNonNegative MetricInteger (model).d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 2
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 1
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "z boundary"
+    },
+    "n": 2
+   }
+  ]
+ },
+ {
+  "law": "IntIsAMetric",
+  "cone": "sha256:cb7e2a6ca689d0508b49d70fc0f10975acab5f0a97b6cb3d1391828638c1ea90",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "goodIntIsAMetric (Listed)",
+    "fingerprint": "sha256:f067a1157aeff971590d0027b64212874efff5b9b1e4593c0b5c021540b8a74a"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricInteger",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrInt x (generator, size 10)",
+    "fingerprint": "sha256:7a7592036ef017cd680da4f3e09f6a24e2cb3fb8e9332dffb7ffa87a1c314e08,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "goodIntIsAMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -4503599627370496.0,
+      4503599627370496.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:15:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Commutative MetricInteger Float64 (structural Float64) (model).d",
+  "conjuncts": [
+   "MetricZeroOnEqual MetricInteger (structural MetricInteger) model",
+   "MetricIndiscernible MetricInteger (structural MetricInteger) model",
+   "Commutative MetricInteger Float64 (structural Float64) (model).d",
+   "Triangular MetricInteger (model).d",
+   "MetricNonNegative MetricInteger (model).d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 2
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "IntIsAMetric",
+  "cone": "sha256:cb7e2a6ca689d0508b49d70fc0f10975acab5f0a97b6cb3d1391828638c1ea90",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "goodIntIsAMetric (Listed)",
+    "fingerprint": "sha256:f067a1157aeff971590d0027b64212874efff5b9b1e4593c0b5c021540b8a74a"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricInteger",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrInt x (generator, size 10)",
+    "fingerprint": "sha256:7a7592036ef017cd680da4f3e09f6a24e2cb3fb8e9332dffb7ffa87a1c314e08,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "goodIntIsAMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -4503599627370496.0,
+      4503599627370496.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported",
+    "held": 26
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:15:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MetricIndiscernible MetricInteger (structural MetricInteger) model",
+  "conjuncts": [
+   "MetricZeroOnEqual MetricInteger (structural MetricInteger) model",
+   "MetricIndiscernible MetricInteger (structural MetricInteger) model",
+   "Commutative MetricInteger Float64 (structural Float64) (model).d",
+   "Triangular MetricInteger (model).d",
+   "MetricNonNegative MetricInteger (model).d"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 2
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "FloatIsOrdered",
+  "cone": "sha256:ed0eae362ed4400bea3cf897f23bc3a964430cb59ae682bc4727f43ca32904ad",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "goodFloatIsOrdered (Listed)",
+    "fingerprint": "sha256:9b27b2f5f7afbcc4064b8e9eb9bfa0c3e4c6d3b6f93bc6c9965d31114ef923d0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "goodFloatIsOrdered"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:15:35+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Total Float64 (model).leq",
+  "conjuncts": [
+   "Reflexive Float64 (model).leq",
+   "Transitive Float64 (model).leq",
+   "Antisymmetric Float64 (structural Float64) (model).leq",
+   "Total Float64 (model).leq"
+  ],
+  "regions": []
+ },
+ {
+  "law": "FloatIsOrdered",
+  "cone": "sha256:ed0eae362ed4400bea3cf897f23bc3a964430cb59ae682bc4727f43ca32904ad",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "goodFloatIsOrdered (Listed)",
+    "fingerprint": "sha256:9b27b2f5f7afbcc4064b8e9eb9bfa0c3e4c6d3b6f93bc6c9965d31114ef923d0"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "goodFloatIsOrdered"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported",
+    "held": 26
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:15:35+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Antisymmetric Float64 (structural Float64) (model).leq",
+  "conjuncts": [
+   "Reflexive Float64 (model).leq",
+   "Transitive Float64 (model).leq",
+   "Antisymmetric Float64 (structural Float64) (model).leq",
+   "Total Float64 (model).leq"
+  ],
+  "regions": []
+ },
+ {
+  "law": "StringIsOrdered",
+  "cone": "sha256:fae0f346f9f728a70a836fa4aff75b1a76a73d8570481f34b67fa715e10dac33",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "goodStringIsOrdered (Listed)",
+    "fingerprint": "sha256:7435b86c29d94716cc038168e0b15686e9392af5eeeae0abb11a60e56db53b13"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over String",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrString x (generator, size 10)",
+    "fingerprint": "sha256:14abd7c739bbcc0dbd6e306a8136b776c4ed3e178197d255faf5d01440f8c95d,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "goodStringIsOrdered"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:15:34+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:operator.le",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "Total String (model).leq",
+  "conjuncts": [
+   "Reflexive String (model).leq",
+   "Transitive String (model).leq",
+   "Antisymmetric String (structural String) (model).leq",
+   "Total String (model).leq"
+  ],
+  "regions": []
+ },
+ {
+  "law": "StringIsOrdered",
+  "cone": "sha256:fae0f346f9f728a70a836fa4aff75b1a76a73d8570481f34b67fa715e10dac33",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "goodStringIsOrdered (Listed)",
+    "fingerprint": "sha256:7435b86c29d94716cc038168e0b15686e9392af5eeeae0abb11a60e56db53b13"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over String",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrString x (generator, size 10)",
+    "fingerprint": "sha256:14abd7c739bbcc0dbd6e306a8136b776c4ed3e178197d255faf5d01440f8c95d,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "goodStringIsOrdered"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported",
+    "held": 26
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-23T10:15:34+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:operator.le",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "Antisymmetric String (structural String) (model).leq",
+  "conjuncts": [
+   "Reflexive String (model).leq",
+   "Transitive String (model).leq",
+   "Antisymmetric String (structural String) (model).leq",
+   "Total String (model).leq"
+  ],
+  "regions": []
+ },
+ {
+  "law": "IntIsAMetric",
+  "cone": "sha256:cb7e2a6ca689d0508b49d70fc0f10975acab5f0a97b6cb3d1391828638c1ea90",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "badIntIsAMetric (Listed)",
+    "fingerprint": "sha256:f6506048f96bf84e5abcff4cefa91cd4d2f43116fbfd54d64a1f013c02f720e1"
+   },
+   {
+    "parameter": "p",
+    "generator": "coreMetricPairs (Listed)",
+    "fingerprint": "sha256:e7fb0202d5e2ee241ff228f0e15f00e1fd323373eb4c0ea68b8716580182c10b"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricInteger",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrInt x (generator, size 10)",
+    "fingerprint": "sha256:7a7592036ef017cd680da4f3e09f6a24e2cb3fb8e9332dffb7ffa87a1c314e08,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over MetricInteger",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badIntIsAMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := 0, y := 0 }"
+      },
+      {
+       "Printed": "{ x := 1, y := 1 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -4503599627370496.0,
+      4503599627370496.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -4503599627370496.0,
+      4503599627370496.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 400,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Triangular MetricInteger (model).d: model = badIntIsAMetric, x = -1063799580614681, y = -9, z = 0"
+  },
+  "date": "2026-10-23T10:15:27+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 2
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 1
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "z boundary"
+    },
+    "n": 2
+   }
+  ]
+ },
+ {
+  "law": "FloatIsOrdered",
+  "cone": "sha256:ed0eae362ed4400bea3cf897f23bc3a964430cb59ae682bc4727f43ca32904ad",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "badFloatIsOrdered (Listed)",
+    "fingerprint": "sha256:4325ab38abd167172a7220c5c52e767de50afd6b4f5086623716615e345a682d"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "c",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Chain Float64) (model).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrFloat x (generator, size 10)",
+    "fingerprint": "sha256:f5be6e996edc3378e0b7978506df8d9c413d682c1ba54a11f1f99773ab03a3a2,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badFloatIsOrdered"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Reflexive Float64 (model).leq: model = badFloatIsOrdered, x = 4.903022893046888"
+  },
+  "date": "2026-10-23T10:15:26+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "StringIsOrdered",
+  "cone": "sha256:fae0f346f9f728a70a836fa4aff75b1a76a73d8570481f34b67fa715e10dac33",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "badStringIsOrdered (Listed)",
+    "fingerprint": "sha256:342681126df343431094fac2f17a862dd6841e42b6ab9352217a7b6a5c01cb95"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over String",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "c",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((Chain String) (model).leq)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrString x (generator, size 10)",
+    "fingerprint": "sha256:14abd7c739bbcc0dbd6e306a8136b776c4ed3e178197d255faf5d01440f8c95d,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261020,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badStringIsOrdered"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Reflexive String (model).leq: model = badStringIsOrdered, x = \"VP0unEd\""
+  },
+  "date": "2026-10-23T10:15:26+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
   "law": "StringCommutative",
   "cone": "sha256:9801f6c97596ca556fc6e154a71dbebbda6a8d549022a5fe2ce8fe80b39739b9",
   "binding": [
