@@ -5,8 +5,8 @@
 -- tape.cert.json, beside tape.lut, which makes the claims (L10.12).
 
 import "test.lth" test SampledMode
-import "generators_model.lut" linear
-import "generators.lth" Binding
+import "generators_model.lut" linear sameOrNat
+import "generators.lth" Binding byParameter
 import "laws.lth" Listed
 import "numbers.lth" Doubles
 import "numbers_model.lut" doubles
@@ -21,11 +21,13 @@ models : List Binding := [
 -- the size bounds the integers drawn, [-size, size], filtered into the marks (7.S3, 7.S6)
 test "Tape" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- models)
 
--- a metric's diagonal is drawn from listed equal pairs, which a uniform draw almost never gives
+-- a metric's diagonal is drawn from listed equal pairs, which a uniform draw almost never gives;
+-- for the same reason `y` is drawn equal to `x` in a quarter of the cases (`sameOrNat`, bite A3b),
+-- so that MetricIndiscernible, `x` equal to `y` unless their distance is not zero, sees its premise
 equalMarks : List (Related Mark (structural Mark).eq) := [{ x := 0, y := 0 }, { x := 1234, y := 1234 }, { x := 50000, y := 50000 }]
 onMetric : List Binding := [
   { parameter := just "model", type := nothing, generator := "markIsAMetricModel", coverage := Listed },
-  { parameter := just "p", type := nothing, generator := "equalMarks", coverage := Listed } ]
+  { parameter := just "p", type := nothing, generator := "equalMarks", coverage := Listed }, byParameter "y" "sameOrNat" ]
 test "MarkIsAMetric" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onMetric)
 
 -- ---------------------------------------------------------------- the controls
@@ -40,7 +42,7 @@ onHooked : List Binding := [
 test "Tape" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onHooked) (control <- true)
 onHookedMetric : List Binding := [
   { parameter := just "model", type := nothing, generator := "hookedMetric", coverage := Listed },
-  { parameter := just "p", type := nothing, generator := "equalMarks", coverage := Listed } ]
+  { parameter := just "p", type := nothing, generator := "equalMarks", coverage := Listed }, byParameter "y" "sameOrNat" ]
 test "MarkIsAMetric" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onHookedMetric) (control <- true)
 
 -- the doubles with no room for rounding: the bound of MetresWithin becomes zero, and the rounding
