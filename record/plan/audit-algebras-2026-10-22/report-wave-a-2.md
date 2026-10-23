@@ -28,3 +28,9 @@
 
 ## Question
 Should `--accept assumed:NAME` be the only way to extend `roots`, or does a root of trust deserve its own declared list in the program (L11.9)?
+
+## Follow-ups from the coordinator (after the report)
+- A4 follow-up: `run.py` gives each law's demand `conjuncts` (`law_cones.conjuncts(law)`) and `_conjunction_demand` the theory's. New test `test_a_store_listing_two_of_three_conjuncts_does_not_serve_a_run` fails without the change, passes with it.
+- A3 follow-up: `core_data` now includes core's `implies`, so every runtime slice keeps it and `eval` of `1 < 0 -> true` gives a Bool. Test `test_the_runtime_slice_keeps_implies` fails before, passes after.
+- tests/test_run.py: 149 passed, 3 skipped, 2 xfailed.
+- Question answered by the coordinator: `--accept assumed:NAME` stays; a declared list belongs to D-2026-10-16-n's bite.

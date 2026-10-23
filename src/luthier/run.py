@@ -1814,8 +1814,13 @@ def core_data(loaded):
     reads `true`), named or not."""
     if loaded.core is None:
         return ()
-    return tuple(loaded.internal(loaded.core, a.name) for a in loaded.files[loaded.core].acts
+    data = tuple(loaded.internal(loaded.core, a.name) for a in loaded.files[loaded.core].acts
                  if isinstance(a, s.Define) and isinstance(a.body, s.DataBody))
+    # [wave A, A3 follow-up] `p -> q` of Bools elaborates to core's `implies`, which no name of the
+    # source writes, so the slice dropped it and `eval` printed `implies false true` (as the tester's
+    # `load_program` roots it, 7e06717)
+    implication = loaded.name(loaded.core, "implies")
+    return data + ((implication,) if implication else ())
 
 
 def _primitive_body(act):
@@ -2107,6 +2112,9 @@ def _conjunction_demand(demand, theories, law_cones, theory, law, name, cones, a
     d = demand.law(theory.partition("@")[0], law_cones.hash(theory), [(m, {"Printed": name.partition("@")[0]})],
                    {m: cones.hash(name)}, axiom)
     d["heads"] = theories.leaves(law)
+    # [wave A, A4; audit 1.3] the theory law's conjuncts as its definition states them, not as the
+    # entries list them
+    d["conjuncts"] = law_cones.conjuncts(theory)
     return d
 
 
@@ -2449,6 +2457,8 @@ def certification(loaded, program, entry, demand, refuse=True):
                 given += [(p, _given(values[p])) for p in params if p in values and p != m]
                 axiom = theories.axiom_of(law)
                 d = demand.law(law.partition("@")[0], law_cones.hash(law), given, fingerprints, axiom is not None)
+                # [wave A, A4; audit 1.3] the law's conjuncts as its definition states them
+                d["conjuncts"] = law_cones.conjuncts(law)
                 conjunction = _conjunction_demand(demand, theories, law_cones, theory, law, n, cones, axiom is not None)
                 if conjunction is not None:
                     d["conjunction"] = conjunction

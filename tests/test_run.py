@@ -1517,3 +1517,38 @@ def test_eval_reduces_a_term_over_the_cores_foldable_model(tmp_path, term, value
 def s_true_false(value):
     from luthier import term as t
     return t.Var(value)
+
+
+def test_a_store_listing_two_of_three_conjuncts_does_not_serve_a_run(tmp_path, capsys):
+    """Wave A, A4 follow-up (audit 1.3): the run's demand carries the law's conjuncts as its definition
+    states them (`Cones.conjuncts`). A store whose entries list only two of the theory's three
+    conjuncts, the third removed from them, no longer admits the run (before, the run read the
+    conjuncts from the entries and was served)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent))
+    from test_certify import CONJ_THEORY, CONJ_MODELS, CONJ_TEST, CONJ_RUN_OPS
+    for name, text in [("ops.lth", CONJ_THEORY), ("ops.lut", CONJ_MODELS), ("ops.test.lut", CONJ_TEST),
+                       ("ops.run.lut", CONJ_RUN_OPS)]:
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    assert main(["certify", str(tmp_path / "ops.test.lut")]) == 0
+    capsys.readouterr()
+    assert main(["run", str(tmp_path / "ops.run.lut")]) == 0, capsys.readouterr()
+    store = tmp_path / "ops.cert.json"
+    entries = json.loads(store.read_text(encoding="utf-8"))
+    dropped = sorted({e["conjunct"] for e in entries})[-1]
+    kept = [dict(e, conjuncts=[c for c in e.get("conjuncts") or () if c != dropped])
+            for e in entries if e["conjunct"] != dropped]
+    assert kept and len(kept) < len(entries)
+    store.write_text(json.dumps(kept), encoding="utf-8")
+    capsys.readouterr()
+    assert main(["run", str(tmp_path / "ops.run.lut"), "--fresh"]) != 0
+
+
+def test_the_runtime_slice_keeps_implies(tmp_path, capsys):
+    """Wave A, A3 follow-up: `1 < 0 -> true` reduces to a Bool under `eval`, core's `implies` being a root
+    of the slice (before, it printed `implies false true`)."""
+    path = tmp_path / "imp.lut"
+    path.write_text("main : Bool := 1 < 0 -> true\n", encoding="utf-8")
+    assert main(["eval", str(path), "main"]) == 0
+    out = capsys.readouterr().out
+    assert out.startswith("true") and "implies" not in out
