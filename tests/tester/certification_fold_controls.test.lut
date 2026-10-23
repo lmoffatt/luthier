@@ -1,0 +1,35 @@
+-- tests/tester/certification_fold_controls.test.lut: the controls of certification_fold.test.lut (7.S19,
+-- L9.14); each line is the law's with the model replaced by one broken on purpose, expected to be
+-- refuted. Written 2026-10-23 by Claude Opus 5.5 on record/plan/audit-algebras-2026-10-22/
+-- prompt-wave-a.md (bite A4). The broken models: `allOf` with a missing obligation as its unit (the
+-- `None` that meant both the empty fold and a conjunct with no grade, audit 1.3); an `alternative`
+-- where a later pass covers a failure; and a `restrict` that ignores the reach. The cases are the
+-- laws' file's, copied (an executive file imports nothing from another). Seed 20261023.
+
+import "test.lth" test ExhaustiveMode Grade Proved ExhaustiveGrade Cases Sampled AssumedGrade
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "certification.lth" Held EmptyFold NoEntry FailedObligation HeldAt Folding AMissingObligationLeavesNoGrade AFailureAbsorbs
+  OutsideTheReachHoldsNothing
+import "certification_model.lut" folding
+
+onGenerator (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+helds : List Held := [EmptyFold, NoEntry "a", NoEntry "b", FailedObligation "a", FailedObligation "b", HeldAt Proved,
+  HeldAt ExhaustiveGrade, HeldAt Cases, HeldAt Sampled, HeldAt AssumedGrade]
+names : List String := ["a", "b"]
+regionCases : List Nat := [0, 1, 7]
+-- a missing obligation as the unit of `allOf`
+skipsMissing (j k : Held) : Held := match j { NoEntry o -> k ; _ -> (match k { NoEntry p -> j ; _ -> folding.allOf j k }) }
+-- a later pass covers a failure among alternatives
+forgetsFailure (j k : Held) : Held := match j { FailedObligation o -> k ; _ -> folding.alternative j k }
+-- the reach ignored: only the region's cases read
+ignoresReach (c : Bool) (n : Nat) (j : Held) : Held := folding.restrict true n j
+missingAsUnit : List Folding := [{ allOf := skipsMissing, alternative := folding.alternative, restrict := folding.restrict,
+  projectGrade := folding.projectGrade, admit := folding.admit }]
+failureForgotten : List Folding := [{ allOf := folding.allOf, alternative := forgetsFailure, restrict := folding.restrict,
+  projectGrade := folding.projectGrade, admit := folding.admit }]
+reachIgnored : List Folding := [{ allOf := folding.allOf, alternative := folding.alternative, restrict := ignoresReach,
+  projectGrade := folding.projectGrade, admit := folding.admit }]
+test "AMissingObligationLeavesNoGrade" ExhaustiveMode (seed <- 20261023) (whereBindings <- [onGenerator "f" "missingAsUnit", onGenerator "o" "names", onGenerator "j" "helds"]) (control <- true)
+test "AFailureAbsorbs" ExhaustiveMode (seed <- 20261023) (whereBindings <- [onGenerator "f" "failureForgotten", onGenerator "o" "names", onGenerator "j" "helds"]) (control <- true)
+test "OutsideTheReachHoldsNothing" ExhaustiveMode (seed <- 20261023) (whereBindings <- [onGenerator "f" "reachIgnored", onGenerator "n" "regionCases"]) (control <- true)

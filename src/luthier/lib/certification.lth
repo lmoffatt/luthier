@@ -1010,9 +1010,13 @@ Deriving := EachCutoffGivesTwoSides & EachPremiseGivesItsBoundary & OnlyTheLawsR
 -- every law of §5; `Routed` holds a `ConeDemand` and the rest.
 --
 -- What it states. A demand resolves to its obligations (7.S22): the law's own conjuncts, when the
--- entries of the law at its hash list some; else the law itself, when an entry of it serves; else
--- the conjuncts of its theory's law it stands for (those whose text is headed by one of the law's
--- names), read for the model the run gives. A law that takes no model parameter (`byModel`) has only
+-- law is a conjunction; else the law itself, when an entry of it serves; else the conjuncts of its
+-- theory's law it stands for (those whose text is headed by one of the law's names), read for the
+-- model the run gives. [wave A, bite A4, on the audit of 2026-10-22 (5b1a05e), 1.3] The conjuncts
+-- are the law's, as the elaborated theory gives them (tester.py's `conjuncts_of`), carried by the
+-- demand (`Routed`'s and `Theory`'s `conjuncts`), never the ones the stored entries list: the
+-- entries are evidence for an obligation and never what decides there is one, so a store that
+-- lists two conjuncts of three serves nothing. A law that takes no model parameter (`byModel`) has only
 -- the last route: an entry of the law itself is about whatever model its line bound. The witness is
 -- one entry of the store per obligation, or nothing when an obligation has none: admission is "the
 -- witness is something", the run's record lists the witnesses of its demands, and the result key
@@ -1032,11 +1036,13 @@ Deriving := EachCutoffGivesTwoSides & EachPremiseGivesItsBoundary & OnlyTheLawsR
 -- are not entries here. (d) The demand a refusal names (`by`) and the words of the exception.
 
 -- the theory's law a law may stand for: its demand (the theory's law and hash, the model the run gives
--- under the theory's parameter, the cutoff), and the names of the laws it is headed by
-Theory = { demand : ConeDemand, heads : List String }
+-- under the theory's parameter, the cutoff), the names of the laws it is headed by, and the theory
+-- law's conjuncts as its definition states them (bite A4)
+Theory = { demand : ConeDemand, heads : List String, conjuncts : List String }
 -- a demand as the run states it: `byModel` for a law with no model parameter, the names of its model
--- parameters, and its theory's conjunction when it has one
-Routed = { demand : ConeDemand, byModel : Bool, models : List String, theory : Maybe Theory }
+-- parameters, its theory's conjunction when it has one, and the law's own conjuncts as its definition
+-- states them, nil when the law is no conjunction (bite A4)
+Routed = { demand : ConeDemand, byModel : Bool, models : List String, theory : Maybe Theory, conjuncts : List String }
 -- what a demand needs an entry for: a law's demand, and the conjunct the entry must carry (none for the law itself)
 Obligation = { demand : ConeDemand, conjunct : Maybe String }
 -- why a demand is vetoed: the state of the refuting subject (`Disagrees` or `Current` of a failure), and
@@ -1053,9 +1059,9 @@ Routing (k : Certifying) : {
 -- way): one record of operations, each written with its helpers local, so that the section adds no loose
 -- function (4.S17) and a reader finds the whole specification in one place.
 --   obligations: what a demand resolves to (7.S22, bite 13c), or nothing when no route is open to it:
---     the law's own conjuncts when the entries of the law at its hash list some; else the law itself when
---     an entry serves it (not for `byModel`); else the conjuncts of the theory's law it stands for,
---     those headed by one of its names.
+--     the law's own conjuncts when it is a conjunction; else the law itself when an entry serves it (not
+--     for `byModel`); else the conjuncts of the theory's law it stands for, those headed by one of its
+--     names. Every conjunct is the law's (`conjuncts`), none read from an entry (bite A4).
 --   meets: an entry served by an obligation: the obligation's demand serves it and it carries the conjunct.
 --   mayBeAbout: [D-2026-10-22-d] an entry may be about the model the run gives: for each model parameter
 --     of the demand, its reach does not exclude the value given (no reach recorded excludes nothing).
@@ -1066,6 +1072,8 @@ Routing (k : Certifying) : {
 --     theory) on a model its census names that passes the theory's defining laws: the theory's entries
 --     about it, at the fingerprint the failure recorded, list conjuncts, each served at the cutoff, none
 --     failed and none in disagreement; with no such entry nothing shows the model is one of the theory.
+--     [bite A4] Here the conjuncts are those the model's entries list: a listing short of the law's
+--     makes a model pass more easily, and that errs toward a veto, never toward serving.
 routeSpec : {
   obligations : Certifying -> (String -> String) -> Routed -> List Entry -> Maybe (List Obligation),
   meets : Certifying -> Obligation -> Entry -> Bool,
@@ -1073,14 +1081,11 @@ routeSpec : {
   inSubject : Certifying -> (String -> String) -> Routed -> List Entry -> Entry -> Bool,
   refutedAsConsequence : Certifying -> Routed -> List Entry -> Bool } := {
   obligations := fn (k : Certifying) (headOf : String -> String) (d : Routed) (es : List Entry) {
-    once := fn (xs : List String) { fold String (List String) (fn (a b : List String) { a <> filter List String (fn (y : String) { not (member List String y a) }) b }) nil (fn (c : String) { [c] }) xs }
-    listed := fn (l : String) (h : Hash) { once (concat String (map Entry (List String) (fn (e : Entry) { e.conjuncts }) (filter List Entry (fn (e : Entry) { e.law == l and e.cone == h }) es))) }
     asObligations := fn (dm : ConeDemand) (cs : List String) { map String Obligation (fn (c : String) { { demand := dm, conjunct := just c } }) cs }
-    ownConjuncts := listed d.demand.law d.demand.cone
-    if not d.byModel and not (isEmpty String ownConjuncts) then just (asObligations d.demand ownConjuncts)
+    if not d.byModel and not (isEmpty String d.conjuncts) then just (asObligations d.demand d.conjuncts)
     else if not d.byModel and any List Entry (fn (e : Entry) { k.serves d.demand e }) es then just [{ demand := d.demand, conjunct := nothing }]
     else (match d.theory { nothing -> nothing ; just t ->
-      (match filter List String (fn (c : String) { member List String (headOf c) t.heads }) (listed t.demand.law t.demand.cone) { nil -> nothing ;
+      (match filter List String (fn (c : String) { member List String (headOf c) t.heads }) t.conjuncts { nil -> nothing ;
         cons c cs -> just (asObligations t.demand (cons c cs)) }) }) },
   meets := fn (k : Certifying) (o : Obligation) (e : Entry) {
     k.serves o.demand e and (match o.conjunct { nothing -> true ; just c -> e.conjunct == just c }) },
@@ -1090,7 +1095,6 @@ routeSpec : {
     all List String (fn (p : String) { match reachOf p e.reach { nothing -> true ; just r ->
       (match given p { nothing -> true ; just v -> k.contains r v }) } }) d.models },
   inSubject := fn (k : Certifying) (headOf : String -> String) (d : Routed) (es : List Entry) (e : Entry) {
-    once := fn (xs : List String) { fold String (List String) (fn (a b : List String) { a <> filter List String (fn (y : String) { not (member List String y a) }) b }) nil (fn (c : String) { [c] }) xs }
     given := fn (p : String) { nth Value (map (String * Value) Value (fn (pv : String * Value) { match pv { (q, v) -> v } })
       (filter List (String * Value) (fn (pv : String * Value) { match pv { (q, v) -> q == p } }) d.demand.given)) 0 }
     about := all List String (fn (p : String) { match reachOf p e.reach { nothing -> true ; just r ->
@@ -1099,9 +1103,7 @@ routeSpec : {
     own or (match d.theory { nothing -> false ; just t ->
       e.law == t.demand.law and e.cone == t.demand.cone and coversAll k.contains e.reach t.demand.given
         and (match e.conjunct { nothing -> false ; just c -> member List String c
-          (filter List String (fn (x : String) { member List String (headOf x) t.heads })
-            (once (concat String (map Entry (List String) (fn (f : Entry) { f.conjuncts })
-              (filter List Entry (fn (f : Entry) { f.law == t.demand.law and f.cone == t.demand.cone }) es))))) }) }) },
+          (filter List String (fn (x : String) { member List String (headOf x) t.heads }) t.conjuncts) }) }) },
   refutedAsConsequence := fn (k : Certifying) (d : Routed) (es : List Entry) {
     once := fn (xs : List String) { fold String (List String) (fn (a b : List String) { a <> filter List String (fn (y : String) { not (member List String y a) }) b }) nil (fn (c : String) { [c] }) xs }
     printOf := fn (p : String) (b : List DrawnParameter) { match nth String (map DrawnParameter String (fn (x : DrawnParameter) { x.fingerprint })
@@ -1168,3 +1170,94 @@ AConsequenceRefutesEveryModel (k : Certifying) (r : Routing k) (d : Routed) (es 
 Routing (k : Certifying) := AWitnessCoversEveryObligation k & AWitnessIsOneEntryPerObligation k & AnEntryForEveryObligationWitnesses k
   & AVetoNamesItsCause k & AFailureInASubjectVetoes k & ADisagreementInASubjectVetoesFirst k
   & AnEntryAboutAnotherModelVetoesNothing k & AConsequenceRefutesEveryModel k
+
+-- ---------------------------------------------------------------- §7 The evidence of one demand
+--
+-- Draft 7, 2026-10-23, by Claude Opus 5.5, on record/plan/audit-algebras-2026-10-22/prompt-wave-a.md
+-- (bite A4 of execution.md beside it), after the audit of 2026-10-22 (report.md there, 5b1a05e),
+-- 1.3: required conjuncts and alternative evidence are different operations, each with its own empty
+-- case. Before, `orWeakest` and `orStrongest` (§2) took `nothing` as the unit of a fold, and certify.py
+-- also read `nothing` as a conjunct with no grade, the two told apart by the code around them. Here
+-- what the evidence of a demand holds before it is shown as a grade (`Held`) has a constructor for
+-- each: nothing folded yet (`EmptyFold`), an obligation no entry serves (`NoEntry`, named), one refuted
+-- at its hash or in disagreement (`FailedObligation`, named), and one met at a grade (`HeldAt`). The
+-- five operations certify.py reads a demand's evidence with (`all_of`, `alternative`, `restrict`,
+-- `project_grade`, `admit`) are those of `Folding`:
+--   allOf: the evidence of two required obligations (a law's conjuncts, 7.S22; its bindings and its
+--     regions, 5.S8): a failure absorbs, then a missing obligation; two grades combine by the
+--     demand's combination, the weakest by default (5.S8);
+--   alternative: two entries' evidence for one obligation under one binding: the stronger (6.S13); a
+--     failure absorbs (L10.3), an entry that serves nothing adds nothing;
+--   restrict: the evidence read on a smaller domain: outside the entry's reach it holds nothing
+--     (7.S15), in a region with no case it is at most sampled (D-2026-10-16-i);
+--   projectGrade: the grade it shows on test.lth's chain, nothing unless it is met;
+--   admit: whether it meets the grade a demand accepts (6.S15).
+-- [proposed] `allOf` takes the demand's combination of two grades, so the summary is made as the fold
+-- goes and `projectGrade` is the projection alone; the vector of the conjuncts' grades L12.5 allows
+-- is bite B3's. The reference is below and certification_model.lut's `folding`; certify.py's five
+-- functions are its specimen (tests/test_certify.py checks them on these laws' cases).
+Held : U := data {
+  EmptyFold : Held ;
+  NoEntry : String -> Held ;
+  FailedObligation : String -> Held ;
+  HeldAt : Grade -> Held ;
+}
+allOfWith (comb : Grade -> Grade -> Grade) (j k : Held) : Held :=
+  match j {
+    FailedObligation o -> j ;
+    NoEntry o -> (match k { FailedObligation p -> k ; _ -> j }) ;
+    EmptyFold -> k ;
+    HeldAt g -> (match k { HeldAt h -> HeldAt (comb g h) ; EmptyFold -> j ; _ -> k }) }
+alternativeOf (j k : Held) : Held :=
+  match j {
+    FailedObligation o -> j ;
+    EmptyFold -> k ;
+    NoEntry o -> (match k { FailedObligation p -> k ; HeldAt h -> k ; _ -> j }) ;
+    HeldAt g -> (match k { FailedObligation p -> k ; HeldAt h -> HeldAt (stronger g h) ; _ -> j }) }
+outsideTheReach : String := "outside the reach"
+restrictTo (covers : Bool) (n : Nat) (j : Held) : Held :=
+  match j { HeldAt g -> if not covers then NoEntry outsideTheReach else if n == 0 then HeldAt (weakest g Sampled) else j ; _ -> j }
+projectGradeOf (j : Held) : Maybe Grade := match j { HeldAt g -> just g ; _ -> nothing }
+admitAt (a : Grade) (j : Held) : Bool := match projectGradeOf j { just g -> gradeRank a <= gradeRank g ; nothing -> false }
+
+Folding : {
+  allOf : Held -> Held -> Held,
+  alternative : Held -> Held -> Held,
+  restrict : Bool -> Nat -> Held -> Held,
+  projectGrade : Held -> Maybe Grade,
+  admit : Grade -> Held -> Bool,
+}
+-- the empty fold is the unit of both folds
+EmptyFoldIsTheUnit (f : Folding) (j : Held) : Bool :=
+  f.allOf EmptyFold j == j and f.allOf j EmptyFold == j and f.alternative EmptyFold j == j and f.alternative j EmptyFold == j
+-- an obligation with no entry leaves the demand with no grade, whatever the other obligations hold:
+-- it is no unit (the audit's 1.3: absence from the evidence is not absence from the law)
+AMissingObligationLeavesNoGrade (f : Folding) (o : String) (j : Held) : Bool :=
+  f.projectGrade (f.allOf (NoEntry o) j) == nothing and f.projectGrade (f.allOf j (NoEntry o)) == nothing
+-- a refuted obligation absorbs both folds (6.S3, L10.3)
+AFailureAbsorbs (f : Folding) (o : String) (j : Held) : Bool :=
+  f.allOf (FailedObligation o) j == FailedObligation o and f.alternative (FailedObligation o) j == FailedObligation o
+-- alternatives keep the stronger, and an alternative that serves nothing adds nothing
+AnAlternativeIsTheStronger (f : Folding) (o : String) (g h : Grade) : Bool :=
+  f.alternative (HeldAt g) (HeldAt h) == HeldAt (stronger g h) and f.alternative (NoEntry o) (HeldAt g) == HeldAt g
+    and f.alternative (HeldAt g) (NoEntry o) == HeldAt g
+-- the two folds are associative, so the order a store lists its entries in does not matter
+FoldsAreAssociative (f : Folding) (j k l : Held) : Bool :=
+  f.allOf (f.allOf j k) l == f.allOf j (f.allOf k l) and f.alternative (f.alternative j k) l == f.alternative j (f.alternative k l)
+-- requiring both is never more than accepting either (L10.9)
+AllOfIsNoMoreThanAnAlternative (f : Folding) (j k : Held) : Bool :=
+  atMost (f.projectGrade (f.allOf j k)) (f.projectGrade (f.alternative j k))
+-- restriction never raises (L10.9); outside the reach it holds nothing, and in a region with no case
+-- at most sampled
+RestrictNeverRaises (f : Folding) (c : Bool) (n : Nat) (j : Held) : Bool :=
+  atMost (f.projectGrade (f.restrict c n j)) (f.projectGrade j)
+OutsideTheReachHoldsNothing (f : Folding) (n : Nat) (g : Grade) : Bool :=
+  f.projectGrade (f.restrict false n (HeldAt g)) == nothing
+AnEmptyRegionIsAtMostSampled (f : Folding) (j : Held) : Bool :=
+  atMost (f.projectGrade (f.restrict true 0 j)) (just Sampled)
+-- admission is the demand's cutoff read on the projection (6.S15)
+AdmitIsTheCutoff (f : Folding) (a : Grade) (j : Held) : Bool :=
+  f.admit a j == (match f.projectGrade j { just g -> gradeRank a <= gradeRank g ; nothing -> false })
+Folding (f : Folding) := EmptyFoldIsTheUnit f & AMissingObligationLeavesNoGrade f & AFailureAbsorbs f & AnAlternativeIsTheStronger f
+  & FoldsAreAssociative f & AllOfIsNoMoreThanAnAlternative f & RestrictNeverRaises f & OutsideTheReachHoldsNothing f
+  & AnEmptyRegionIsAtMostSampled f & AdmitIsTheCutoff f

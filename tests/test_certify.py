@@ -1657,3 +1657,95 @@ def test_a_failure_on_a_model_of_the_theory_refuses_every_model():
     # the theory's pass was of another version of N (another fingerprint): nothing shows N is a model
     other = dict(n_is_t, binding=[{"parameter": "m", "generator": "x", "fingerprint": "fN2"}])
     assert certify.refuse([on_n, other, _law_entry("M")], cone) == []
+
+
+# ---------------------------------------------------------------------- wave A, bite A4 (audit 1.3, 5b1a05e)
+
+def test_a_store_listing_two_of_three_conjuncts_serves_nothing():
+    """Bite A4: the obligations are the law's conjuncts as its definition states them, carried by the
+    demand (`conjuncts`), the entries only evidence. Entries that list two conjuncts of three serve
+    the law neither directly nor through its theory, and its certificate has no grade; without the
+    law's conjuncts the reader falls back on the listing (run.py does not give them yet)."""
+    p, q = _theory_entry("P M"), _theory_entry("Q M")
+    whole = dict(_by_model("T")["conjunction"], law="T")
+    del whole["heads"]
+    assert certify.witness(dict(whole, conjuncts=["P M", "Q M"]), [p, q]) == [p, q]
+    assert certify.witness(dict(whole, conjuncts=["P M", "Q M", "R M"]), [p, q]) is None
+    assert certify.witness(whole, [p, q]) == [p, q]  # the fallback: the listing
+    # through the theory: `P` stands for two conjuncts of `T` headed by `P`, one listed
+    by = _by_model("P")
+    by["conjunction"]["conjuncts"] = ["P M", "Q M", "P (M M)"]
+    assert certify.witness(by, [p, q]) is None
+    by["conjunction"]["conjuncts"] = ["P M", "Q M"]
+    assert certify.witness(by, [p, q]) == [p]
+    # the certificate and the standing read the law's conjuncts too
+    assert certify.certificate_grade([p, q], "T", "hT") == "Cases"
+    assert certify.certificate_grade([p, q], "T", "hT", conjuncts=["P M", "Q M", "R M"]) is None
+    assert certify.standing([p, q], "T", "hT", ["P M", "Q M", "R M"]) == "no entry for its conjunct R M"
+
+
+def test_the_cones_give_a_law_s_conjuncts_as_the_tester_names_them(tmp_path):
+    """Bite A4: `Cones.conjuncts`, what a run's demand is to carry, names each conjunct as the entries
+    the tester writes do."""
+    for name, text in [("ops.lth", CONJ_THEORY), ("ops.lut", CONJ_MODELS), ("ops.test.lut", CONJ_TEST)]:
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    outcomes = tester.run_tests(tmp_path / "ops.test.lut", store=False)
+    runner, specs, loaded = tester.prepare(tmp_path / "ops.test.lut")
+    cones = certify.Cones(runner)
+    split = [o for o in outcomes if o.parts]
+    assert split
+    for o in split:
+        assert cones.conjuncts(tester._as_called(loaded, o.spec.law)) == o.parts[0].entry["conjuncts"]
+
+
+HELDS = [certify.EMPTY_FOLD, certify.NoEntry("a"), certify.NoEntry("b"), certify.FailedObligation("a"),
+         certify.FailedObligation("b")] + [certify.HeldAt(g) for g in certify.GRADE_RANK]
+
+
+def _at_most(m, n):
+    return m is None or n is not None and certify.GRADE_RANK[m] <= certify.GRADE_RANK[n]
+
+
+def test_the_five_operations_keep_the_laws_of_folding():
+    """Bite A4: certify.py's `all_of`, `alternative`, `restrict`, `project_grade` and `admit` against the
+    laws of certification.lth's `Folding` (§7), on the cases certification_fold.test.lut lists; that
+    file certifies the reference and its controls refute three broken models."""
+    c, P = certify, certify.project_grade
+    for j in HELDS:
+        assert c.all_of(c.EMPTY_FOLD, j) == j == c.all_of(j, c.EMPTY_FOLD)
+        assert c.alternative(c.EMPTY_FOLD, j) == j == c.alternative(j, c.EMPTY_FOLD)
+        assert _at_most(P(c.restrict(j, True, 0)), "Sampled")
+        for o in "ab":
+            assert P(c.all_of(c.NoEntry(o), j)) is None and P(c.all_of(j, c.NoEntry(o))) is None
+            assert c.all_of(c.FailedObligation(o), j) == c.FailedObligation(o) == c.alternative(c.FailedObligation(o), j)
+        for n in (0, 1, 7):
+            for covers in (True, False):
+                assert _at_most(P(c.restrict(j, covers, n)), P(j))
+        for g in c.GRADE_RANK:
+            assert c.admit(g, j) == (P(j) is not None and c.GRADE_RANK[g] <= c.GRADE_RANK[P(j)])
+        for k in HELDS:
+            assert _at_most(P(c.all_of(j, k)), P(c.alternative(j, k)))
+            for m in HELDS:
+                assert c.all_of(c.all_of(j, k), m) == c.all_of(j, c.all_of(k, m))
+                assert c.alternative(c.alternative(j, k), m) == c.alternative(j, c.alternative(k, m))
+    for g in c.GRADE_RANK:
+        assert P(c.restrict(c.HeldAt(g), False, 1)) is None
+        for h in c.GRADE_RANK:
+            assert c.alternative(c.HeldAt(g), c.HeldAt(h)) == c.HeldAt(c._or_strongest(g, h))
+        assert c.alternative(c.NoEntry("a"), c.HeldAt(g)) == c.HeldAt(g) == c.alternative(c.HeldAt(g), c.NoEntry("a"))
+    laws = tester.run_tests(ROOT / "tests" / "tester" / "certification_fold.test.lut", store=False)
+    assert all(o.verdict in ("Confirmed", "Supported") for o in laws) and len(laws) == 10, [tester.line(o) for o in laws]
+    controls = tester.run_tests(ROOT / "tests" / "tester" / "certification_fold_controls.test.lut", store=False)
+    assert [o.verdict for o in controls] == ["Refuted"] * 3, [tester.line(o) for o in controls]
+
+
+def test_the_route_s_obligations_come_from_the_law_and_its_control_is_refuted():
+    """Bite A4: `Routing` on certification_model.lut with the obligations the demand carries; the
+    control that reads them from the entries' listing (certify.py's reading before) is refuted at the
+    store that lists two of `T`'s three conjuncts."""
+    laws = tester.run_tests(ROOT / "tests" / "tester" / "certification_route.test.lut", store=False)
+    assert all(o.verdict in ("Confirmed", "Supported") for o in laws), [tester.line(o) for o in laws]
+    controls = tester.run_tests(ROOT / "tests" / "tester" / "certification_route_controls.test.lut", store=False)
+    assert all(o.verdict == "Refuted" for o in controls), [tester.line(o) for o in controls]
+    listing = controls[-1]
+    assert "witness := fromListing" in tester.line(listing) and '"R M"' in tester.line(listing)

@@ -23,7 +23,8 @@ certifyingModels : List Certifying := [certifying]
 -- and `Q M` (a model `M`) and `P N`, `Q N` (a model `N`, a version `fN`); the laws `P` (a conjunct's law,
 -- at `hP`), `Q` and `L` (a law stated for every model of `T`, at `hL`). The demands: `P` and `Q` with no
 -- model parameter (`byModel`, served only through the theory's conjuncts), `T` itself (a conjunction
--- demanded whole), `P` as a direct demand (its own entry or the theory's), `L` on `M` and on `N` with and
+-- demanded whole, and [bite A4] once with a third conjunct `R M` no entry lists, so that no store
+-- serves it), `P` as a direct demand (its own entry or the theory's), `L` on `M` and on `N` with and
 -- without its theory. The stores: a theory's two conjuncts, one, a law's own pass, a failure on another
 -- model, the same with `N` passing the theory (the exception), failing it, or passing another version of
 -- it, a failure and a disagreement on `M`, a conjunct that fails and one that is in disagreement, a
@@ -51,15 +52,16 @@ routeStores : List (List Entry) := [nil, [tpM, tqM], [tpM], [pM], [lM], [lNFails
   [lNFails, tpNFails, tpN, tqN, lM], [lNFails, tpN2, lM], [lMFails, lM], [lMDisagrees, lM], [tpMFails, tpM, tqM],
   [tpMDisagrees, tpM, tqM], [tpN, tqN, tpM, tqM], [pM, tpMFails, tpM, tqM], [lNFails, tpN, tqN, tpM, tqM, lM]]
 mDemand (l : String) (h : Hash) (m : String) : ConeDemand := { law := l, cone := h, given := [("m", Printed m)], accepts := Sampled }
-theoryOn (m : String) (heads : List String) : Theory := { demand := mDemand "T" "hT" m, heads := heads }
+theoryOn (m : String) (heads : List String) : Theory := { demand := mDemand "T" "hT" m, heads := heads, conjuncts := ["P " <> m, "Q " <> m] }
 routeds : List Routed := [
-  { demand := { law := "P", cone := "hP", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := just (theoryOn "M" ["P"]) },
-  { demand := { law := "Q", cone := "hQ", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := just (theoryOn "M" ["Q"]) },
-  { demand := mDemand "T" "hT" "M", byModel := false, models := ["m"], theory := nothing },
-  { demand := mDemand "P" "hP" "M", byModel := false, models := ["m"], theory := just (theoryOn "M" ["P"]) },
-  { demand := mDemand "L" "hL" "M", byModel := false, models := ["m"], theory := just (theoryOn "M" ["L"]) },
-  { demand := mDemand "L" "hL" "M", byModel := false, models := ["m"], theory := nothing },
-  { demand := mDemand "L" "hL" "N", byModel := false, models := ["m"], theory := just (theoryOn "N" ["L"]) } ]
+  { demand := { law := "P", cone := "hP", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := just (theoryOn "M" ["P"]), conjuncts := nil },
+  { demand := { law := "Q", cone := "hQ", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := just (theoryOn "M" ["Q"]), conjuncts := nil },
+  { demand := mDemand "T" "hT" "M", byModel := false, models := ["m"], theory := nothing, conjuncts := ["P M", "Q M"] },
+  { demand := mDemand "T" "hT" "M", byModel := false, models := ["m"], theory := nothing, conjuncts := ["P M", "Q M", "R M"] },
+  { demand := mDemand "P" "hP" "M", byModel := false, models := ["m"], theory := just (theoryOn "M" ["P"]), conjuncts := nil },
+  { demand := mDemand "L" "hL" "M", byModel := false, models := ["m"], theory := just (theoryOn "M" ["L"]), conjuncts := nil },
+  { demand := mDemand "L" "hL" "M", byModel := false, models := ["m"], theory := nothing, conjuncts := nil },
+  { demand := mDemand "L" "hL" "N", byModel := false, models := ["m"], theory := just (theoryOn "N" ["L"]), conjuncts := nil } ]
 routings : List (Routing certifying) := [routing]
 routeBindings : List Binding := [onGenerator "k" "certifyingModels", onGenerator "r" "routings", onGenerator "d" "routeds", onGenerator "es" "routeStores"]
 test "AWitnessCoversEveryObligation" ExhaustiveMode (seed <- 20261022) (whereBindings <- routeBindings)

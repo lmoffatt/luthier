@@ -80,7 +80,7 @@ import platform
 import subprocess
 import sys
 import sysconfig
-from dataclasses import fields, is_dataclass, replace
+from dataclasses import dataclass, fields, is_dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -283,6 +283,7 @@ class Cones:
 
     def __init__(self, program):
         program = getattr(program, "program", program)
+        self.program = tuple(program)
         self.acts = {}
         for act in program:
             if isinstance(act, (t.Define, t.Declare)):
@@ -384,6 +385,14 @@ class Cones:
 
     def hosts(self, name):
         return self.cone(name)["hosts"]
+
+    def conjuncts(self, law):
+        """[wave A, bite A4; audit 1.3] The conjuncts of `law` as its definition states them, each as the
+        tester names it in an entry (`Symmetric Int r`, tester.py's `conjuncts_of`); [] when the law is
+        no conjunction. What a demand carries as its obligations (`obligations`), so that the stored
+        entries are evidence for an obligation and never what decides there is one."""
+        from .tester import conjuncts_of
+        return [c.shown for c in conjuncts_of(self, law)]
 
 
 def _datas(term):
@@ -788,7 +797,10 @@ def stale(current, entry):
 
 
 def _or_weakest(m, n):
-    """certification.lth's `orWeakest`: the weaker of two grades, `None` (no grade) the unit."""
+    """certification.lth's `orWeakest`: the weaker of two grades, `None` the unit of a fold of grades
+    (tester.py's `_conjunction_outcome` folds from it). [wave A, bite A4] `None` means only that here:
+    certify's folds over obligations, bindings and regions read `Held`, where the empty fold, an
+    obligation with no entry and a refuted one are three constructors (`all_of`, `alternative`)."""
     if m is None:
         return n
     if n is None:
@@ -797,7 +809,7 @@ def _or_weakest(m, n):
 
 
 def _or_strongest(m, n):
-    """certification.lth's `orStrongest`: the stronger of two grades, `None` the unit."""
+    """certification.lth's `orStrongest`: the stronger of two grades, `None` the unit (as `_or_weakest`)."""
     if m is None:
         return n
     if n is None:
@@ -810,6 +822,94 @@ def _or_strongest(m, n):
 # `regioning`). [proposed] The two the theory states, `orWeakest` and `orStrongest`.
 COMBINATIONS = {"weakest": _or_weakest, "strongest": _or_strongest}
 COMBINATION = "weakest"
+
+
+# [wave A, bite A4; audit 1.3 (5b1a05e); certification.lth's `Held` and `Folding`] What the evidence of
+# one demand holds before it is projected to a grade, with a constructor for each empty case: the unit
+# of a fold (`EmptyFold`), an obligation no entry serves (`NoEntry`), an obligation refuted or in
+# disagreement (`FailedObligation`), and an obligation met at a grade (`HeldAt`). Before, `None` was
+# both the unit of `_or_weakest` and a conjunct with no grade, told apart by the code around them.
+class EmptyFold:
+    """Nothing folded yet: the unit of `all_of` and `alternative`."""
+    def __repr__(self):
+        return "EmptyFold"
+
+
+EMPTY_FOLD = EmptyFold()
+
+
+@dataclass(frozen=True)
+class NoEntry:
+    """The obligation named has no entry that serves it."""
+    obligation: str
+
+
+@dataclass(frozen=True)
+class FailedObligation:
+    """The obligation named is refuted at its hash (a failure, or a disagreement, D-2026-10-15-f)."""
+    obligation: str
+
+
+@dataclass(frozen=True)
+class HeldAt:
+    """The obligation is met at the grade."""
+    grade: str
+
+
+def all_of(j, k, combine=COMBINATION):
+    """certification.lth's `allOf`: the evidence of two required obligations (the conjuncts of a law,
+    7.S22; its bindings and regions, 5.S8). A failure absorbs, then an obligation with no entry; the
+    grades of two met obligations combine by the demand's combination, the weakest by default (5.S8)."""
+    for absorbing in (FailedObligation, NoEntry):
+        if isinstance(j, absorbing):
+            return j
+        if isinstance(k, absorbing):
+            return k
+    if j is EMPTY_FOLD:
+        return k
+    if k is EMPTY_FOLD:
+        return j
+    return HeldAt(COMBINATIONS[combine](j.grade, k.grade))
+
+
+def alternative(j, k):
+    """certification.lth's `alternative`: two entries' evidence for one obligation under one binding
+    (6.S13: a better grade comes from a new check): the stronger; a failure absorbs (L10.3: one
+    counterexample refutes), and an entry that does not serve adds nothing."""
+    if isinstance(j, FailedObligation):
+        return j
+    if isinstance(k, FailedObligation):
+        return k
+    if j is EMPTY_FOLD or isinstance(j, NoEntry) and isinstance(k, HeldAt):
+        return k
+    if k is EMPTY_FOLD or isinstance(k, NoEntry):
+        return j
+    return HeldAt(_or_strongest(j.grade, k.grade))
+
+
+def restrict(j, covers=True, cases=None):
+    """certification.lth's `restrict`: the evidence read on a smaller domain. Outside the entry's reach
+    (`covers` false) it says nothing (`NoEntry`, 7.S15); in a region where it has no case it is at most
+    sampled (D-2026-10-16-i); otherwise unchanged."""
+    if not isinstance(j, HeldAt):
+        return j
+    if not covers:
+        return NoEntry("outside the reach")
+    if cases == 0:
+        return HeldAt(_or_weakest(j.grade, "Sampled"))
+    return j
+
+
+def project_grade(j):
+    """certification.lth's `projectGrade`: the grade a judgment shows (test.lth's chain), None when it
+    holds none (no entry, a failure, or nothing folded)."""
+    return j.grade if isinstance(j, HeldAt) else None
+
+
+def admit(accepts, j):
+    """certification.lth's `admit`: whether the judgment meets the cutoff the demand accepts (6.S15)."""
+    g = project_grade(j)
+    return g is not None and GRADE_RANK[accepts] <= GRADE_RANK[g]
 
 
 def grades(region):
@@ -857,80 +957,85 @@ def binding_evidence(entries, law, current, binding):
     return counts
 
 
-def _capped(g):
-    """certification.lth's `capped`: at most sampled."""
-    return None if g is None else _or_weakest(g, "Sampled")
-
-
 def regioned(entries, law, current, binding, base, combine=COMBINATION):
     """certification.lth's `overRegions`: the binding's grade `base` combined over the law's regions,
     each the binding's grade where it has cases under the binding and at most sampled where it has
-    none (`regionGrade`); with no region, `base`. With the empty regions that capped it."""
-    comb = COMBINATIONS[combine]
+    none (`regionGrade`; `restrict` to the region, bite A4); with no region, `base`. With the empty
+    regions that capped it."""
     rs = law_regions([e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current])
     if not rs:  # `NoRegionsLeaveTheGrade`, and no stretch is read (a demand's entries may be built in part)
         return base, []
     counts = binding_evidence(entries, law, current, binding)
-    g, empty = base, []
+    held, empty = HeldAt(base), []
     for r in reversed(rs):
-        if counts.get(_key(r), 0):
-            g = comb(base, g)
-        else:
-            g = comb(_capped(base), g)
+        n = counts.get(_key(r), 0)
+        held = all_of(restrict(HeldAt(base), cases=n), held, combine)
+        if not n:
             empty.insert(0, r["name"])
-    return g, empty
+    return project_grade(held), empty
 
 
-def certificate_grade(entries, law, current, combine=COMBINATION):
+def certificate_grade(entries, law, current, combine=COMBINATION, conjuncts=None):
     """certification_model's `grade` read over the regions (certification.lth's `regionedGrade`,
     D-2026-10-16-i): over the law's entries at the current hash, none when one failed or none passed
     (or a disagreement stands); under one binding the strongest pass, combined over the law's regions
     (`regioned`), and across bindings with the same combination, the demand's (5.S8), the weakest by
     default. A law whose entries recorded no regions keeps the grade of the fold before regions."""
-    return certificate_grade_and_empty(entries, law, current, combine)[0]
+    return certificate_grade_and_empty(entries, law, current, combine, conjuncts)[0]
 
 
-def certificate_grade_and_empty(entries, law, current, combine=COMBINATION):
+def certificate_grade_and_empty(entries, law, current, combine=COMBINATION, conjuncts=None):
     """`certificate_grade` with the empty regions of each binding whose grade they lowered. A law
     whose body is a conjunction of laws has an entry per conjunct (tester.py's `_run_conjunction`,
     D-2026-10-18-f): its grade is the demand's combination (5.S8) of its conjuncts' grades, each read
-    as a law's over its own entries, and none while a conjunct its entries list has none."""
+    as a law's over its own entries, and none while a conjunct has none. [bite A4] The conjuncts are
+    the law's (`conjuncts`) when given (`certificate_held`)."""
+    held, lowered = certificate_held(entries, law, current, combine, conjuncts)
+    return project_grade(held), lowered if isinstance(held, HeldAt) else []
+
+
+def certificate_held(entries, law, current, combine=COMBINATION, conjuncts=None):
+    """[wave A, bite A4] `certificate_grade_and_empty` before its projection (`Held`): `allOf` over the
+    law's conjuncts, each read as a law's over its own entries. The conjuncts are `conjuncts`, the
+    law's as its definition states them (`Cones.conjuncts`), when the caller gives them; else, until
+    every caller does, those its entries at the hash list [proposed: the fallback, which cannot see a
+    conjunct no entry lists]."""
     counts = [e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current]
-    conjuncts = list(dict.fromkeys(c for e in counts for c in e.get("conjuncts") or ()))
+    if conjuncts is None:
+        conjuncts = list(dict.fromkeys(c for e in counts for c in e.get("conjuncts") or ()))
     if not conjuncts:
-        return _grade_and_empty(entries, law, current, combine)
-    comb, grade, lowered = COMBINATIONS[combine], None, []
+        return _held_and_empty(counts, law, current, combine, law)
+    held, lowered = EMPTY_FOLD, []
     for c in conjuncts:
-        g, empty = _grade_and_empty([e for e in counts if e.get("conjunct") == c], law, current, combine)
-        if g is None:
-            return None, []
-        grade = comb(g, grade)
+        h, empty = _held_and_empty([e for e in counts if e.get("conjunct") == c], law, current, combine, c)
+        held = all_of(held, h, combine)
         lowered += [n for n in empty if n not in lowered]
-    return grade, lowered
+    return held, lowered
 
 
-def _grade_and_empty(entries, law, current, combine=COMBINATION):
-    """`certificate_grade_and_empty` over the entries of one law or one conjunct."""
+def _held_and_empty(entries, law, current, combine=COMBINATION, obligation=None):
+    """`certificate_held` over the entries of one law or one conjunct (the obligation named): a failure
+    or a disagreement refutes it; under one binding the `alternative` of its passes; across bindings,
+    each read over the law's regions (`regioned`), `allOf` with the demand's combination."""
+    obligation = obligation or law
     counts = [e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current]
-    if any(isinstance(e["outcome"], dict) and "Failed" in e["outcome"] for e in counts) or disputes(counts):
-        return None, []
+    if any(_failed(e) for e in counts) or disputes(counts):
+        return FailedObligation(obligation), []
     best, bindings = {}, {}
     for e in counts:
         if passed(e) and e["grade"] is not None:
             b = json.dumps(e["binding"], sort_keys=True)
-            g = e["grade"]
             bindings.setdefault(b, e["binding"])
-            if b not in best or GRADE_RANK[g] > GRADE_RANK[best[b]]:
-                best[b] = g
+            best[b] = alternative(best.get(b, EMPTY_FOLD), HeldAt(e["grade"]))
     if not best:
-        return None, []
-    comb, grade, lowered = COMBINATIONS[combine], None, []
-    for b, g in best.items():
-        h, empty = regioned(entries, law, current, bindings[b], g, combine)
-        if GRADE_RANK[h] < GRADE_RANK[g]:
+        return NoEntry(obligation), []
+    held, lowered = EMPTY_FOLD, []
+    for b, j in best.items():
+        h, empty = regioned(entries, law, current, bindings[b], j.grade, combine)
+        if GRADE_RANK[h] < GRADE_RANK[j.grade]:
             lowered += [n for n in empty if n not in lowered]
-        grade = comb(h, grade)
-    return grade, lowered
+        held = all_of(HeldAt(h), held, combine)
+    return held, lowered
 
 
 def state(entries, law, current):
@@ -1090,8 +1195,9 @@ def show_outcome(outcome):
     return f"failed at {why}" if kind == "Failed" else f"not run: {why}"
 
 
-def standing(entries, law, current):
-    """One law's standing as `check -v` and `certify` print it."""
+def standing(entries, law, current, conjuncts=None):
+    """One law's standing as `check -v` and `certify` print it; `conjuncts` the law's when the caller
+    has them (`certificate_held`, bite A4)."""
     kind, what = state(entries, law, current)
     if kind == "uncertified":
         return "uncertified"
@@ -1100,7 +1206,7 @@ def standing(entries, law, current):
     dispute = dispute_of(entries, law, lambda e: e["cone"] == current)
     if dispute is not None:
         return show_dispute(*dispute)
-    g, lowered = certificate_grade_and_empty(entries, law, current)
+    g, lowered = certificate_grade_and_empty(entries, law, current, conjuncts=conjuncts)
     if g is not None:
         # a statistical law's pass carries its rates and what it spent (7.S17), the latest's
         tested = next((_tested(e) for e in _laws_own(entries) if e["law"] == law and e["cone"] == current
@@ -1114,6 +1220,10 @@ def standing(entries, law, current):
                    and isinstance(e["outcome"], dict) and "Failed" in e["outcome"]), None)
     if failed is not None:
         return "refuted at " + (f"{failed['conjunct']}: " if "conjunct" in failed else "") + failed["outcome"]["Failed"]
+    held, _ = certificate_held(entries, law, current, conjuncts=conjuncts)
+    if isinstance(held, NoEntry) and held.obligation != law:
+        # [bite A4] a conjunct of the law with no entry: the law's other entries may have passed
+        return f"no entry for its conjunct {held.obligation}"
     return show_outcome(what)
 
 
@@ -1268,47 +1378,61 @@ def witness(demand, entries):
     is a conjunction of laws (D-2026-10-18-f), each conjunct its entries at the demand's hash list,
     a conjunct's entry never serving the conjunction alone; for a law with no entry of its own that
     serves, or with no model parameter (`byModel`), the conjuncts of its theory's law it stands for
-    (`_obligations`), each served at the theory law's hash for the model the run gives."""
-    if demand.get("byModel"):
-        # a law of the model's theory that takes no model parameter (`doubles: Commutative`): an
-        # entry of the law itself is about whatever model its line bound, so only the theory's
-        # entries about the run's model serve it (the coordinator, 2026-10-22, on report-bite-12a.md)
-        return _conjunct_witness(demand["conjunction"], entries) if "conjunction" in demand else None
-    at_hash = [e for e in _laws_own(entries) if e["law"] == demand["law"] and at(demand, e)]
-    conjuncts = list(dict.fromkeys(c for e in at_hash for c in e.get("conjuncts") or ()))
-    if conjuncts:
-        return _each(demand, entries, conjuncts)
-    found = next((e for e in entries if serves_over(demand, e, entries)), None)
-    if found is not None:
-        return [found]
-    return _conjunct_witness(demand["conjunction"], entries) if "conjunction" in demand else None
-
-
-def _each(demand, entries, conjuncts):
-    """One entry serving each conjunct (its own conjunct's entries read over its regions), or None."""
+    (`_obligations`), each served at the theory law's hash for the model the run gives. [wave A,
+    bite A4] The obligations are `obligations`', the law's conjuncts as the demand carries them."""
     found = []
-    for c in conjuncts:
-        mine = [f for f in entries if f.get("conjunct") == c]
-        e = next((e for e in mine if serves_over(demand, e, mine)), None)
+    for d, c in obligations(demand, entries) or [(None, None)]:
+        if d is None:
+            return None
+        mine = entries if c is None else [f for f in entries if f.get("conjunct") == c]
+        e = next((e for e in mine if serves_over(d, e, mine)), None)
         if e is None:
             return None
         found.append(e)
     return found
 
 
+def _listed(demand, entries):
+    """The conjuncts the law's entries at the demand's hash list, each once in the order listed."""
+    at_hash = [e for e in _laws_own(entries) if e["law"] == demand["law"] and at(demand, e)]
+    return list(dict.fromkeys(c for e in at_hash for c in e.get("conjuncts") or ()))
+
+
+def obligations(demand, entries):
+    """certification.lth's `routeSpec.obligations` (7.S22, bite 13c): what a demand resolves to, a list
+    of (the demand an entry must serve, the conjunct it must carry or None for the law itself), or None
+    when no route is open to it. The law's own conjuncts when it is a conjunction; else the law itself
+    when an entry serves it (not for `byModel`: a law of the model's theory that takes no model
+    parameter, whose own entries are about whatever model their line bound, the coordinator,
+    2026-10-22, on report-bite-12a.md); else the conjuncts of its theory's law it stands for
+    (`_obligations`).
+    [wave A, bite A4; audit 1.3 (5b1a05e)] The conjuncts are the law's: `demand["conjuncts"]`, as its
+    definition states them (`Cones.conjuncts`), so a store whose entries list two conjuncts of three
+    serves nothing. [proposed] A demand that carries none (run.py does not give them yet) falls back
+    on the conjuncts its entries at the hash list (`_listed`), which cannot see a conjunct no entry
+    lists."""
+    if not demand.get("byModel"):
+        own = demand.get("conjuncts")
+        if own is None:
+            own = _listed(demand, entries)
+        if own:
+            return [(demand, c) for c in own]
+        if any(serves_over(demand, e, entries) for e in entries):
+            return [(demand, None)]
+    m = demand.get("conjunction")
+    mine = _obligations(m, entries) if m is not None else []
+    return [(m, c) for c in mine] or None
+
+
 def _obligations(conjunction, entries):
     """[proposed, core bite 12a] The conjuncts of the theory's law a law demanded by its own name
-    stands for (`doubles: Neutral`): those the tester records under the theory's law at its hash
-    (D-2026-10-18-f) whose text is headed by one of `conjunction["heads"]`."""
-    at_hash = [e for e in _laws_own(entries) if e["law"] == conjunction["law"] and at(conjunction, e)]
-    texts = dict.fromkeys(c for e in at_hash for c in e.get("conjuncts") or ())
+    stands for (`doubles: Neutral`): those of the theory's law (D-2026-10-18-f) whose text is headed by
+    one of `conjunction["heads"]`. [bite A4] The theory law's conjuncts are `conjunction["conjuncts"]`
+    when the demand carries them, else those its entries at the hash list (`_listed`)."""
+    texts = conjunction.get("conjuncts")
+    if texts is None:
+        texts = _listed(conjunction, entries)
     return [c for c in texts if _text_head(c) in conjunction["heads"]]
-
-
-def _conjunct_witness(conjunction, entries):
-    """`witness` through the theory's conjuncts (`_obligations`); None when no conjunct is headed so."""
-    mine = _obligations(conjunction, entries)
-    return _each(conjunction, entries, mine) if mine else None
 
 
 def _about(entry, demand):
@@ -1335,7 +1459,7 @@ def _models_of(entry, parameter):
 def _passes_theory(conjunction, model, fingerprint, entries):
     """[D-2026-10-22-d] Whether `model` passes the theory's defining laws: its theory law's entries at
     their hash about that model, at the fingerprint the failure recorded, list conjuncts, each served
-    at the demand's cutoff (`_each`), none failed and none in disagreement. False when the tester
+    at the demand's cutoff (`witness`), none failed and none in disagreement. False when the tester
     recorded no such entry: then nothing shows the model is one of the theory."""
     (p, _), = conjunction["given"]
     prints = set(fingerprint.split(",")) if fingerprint else set()
@@ -1349,7 +1473,7 @@ def _passes_theory(conjunction, model, fingerprint, entries):
     conjuncts = list(dict.fromkeys(c for e in mine for c in e.get("conjuncts") or ()))
     if not conjuncts or any(_failed(e) for e in mine) or disputes(mine):
         return False
-    return _each(probe, mine, conjuncts) is not None
+    return witness(dict(probe, conjuncts=conjuncts), mine) is not None
 
 
 def veto(demand, entries):
@@ -1518,10 +1642,14 @@ def certify_file(path, seed=None, deep=False, fuel=None, store=True):
                          if e is not None])
     except Exception as exc:  # the file's failure is reported with the file, the others go on
         return {"path": str(path), "error": f"{type(exc).__name__}: {exc}"}
-    laws = {}
+    laws, conjuncts = {}, {}
     for o in outcomes:
         if not o.spec.control:
             laws.setdefault(o.spec.law, o.cone)
+            # [bite A4] a conjunction's conjuncts as the tester split the law (`conjuncts_of`), not
+            # as its entries list them
+            if o.parts and o.spec.law not in conjuncts:
+                conjuncts[o.spec.law] = [p.conjunct for p in o.parts]
     # each control line with its own entry's outcome (the run's, or the store's when known)
     controls = [(o.spec.law, ", ".join(d["generator"] for d in o.entry["binding"]), show_outcome(o.entry["outcome"]))
                 for o in outcomes if o.spec.control and o.entry is not None]
@@ -1530,12 +1658,13 @@ def certify_file(path, seed=None, deep=False, fuel=None, store=True):
     stated = read_stores({o.law_store for o in outcomes if o.law_store is not None} - {o.store for o in outcomes}) \
         if store else []
     return {"path": str(path),
-            "laws": [(law, cone, standing(entries, law, cone)) for law, cone in laws.items()],
+            "laws": [(law, cone, standing(entries, law, cone, conjuncts.get(law))) for law, cone in laws.items()],
             "controls": controls,
             "control entries": [e for e in entries + stated if is_control(e)],
             "ran": sum(1 for o in outcomes if o.known is None),
             "known": sum(1 for o in outcomes if o.known is not None),
-            "graded": all(certificate_grade(entries, law, cone) is not None for law, cone in laws.items())}
+            "graded": all(certificate_grade(entries, law, cone, conjuncts=conjuncts.get(law)) is not None
+                          for law, cone in laws.items())}
 
 
 def certify(paths, jobs=1, seed=None, deep=False, fuel=None, out=print, store=True):
