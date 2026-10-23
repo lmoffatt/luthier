@@ -19,12 +19,17 @@ import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed
 import "certification.lth" Value Number Printed
-import "demand.lth" Demand
+import "demand.lth" Demand RunRecord recorded
 import "demand_model.lut" theDemand
 import "plan.lth" Planning Dataflow Plan Schedule Strategy CallByNeed ForwardOnDemand reaches names firstDemand
   NamesAreUnique Acyclic StepIsLocal Confluent PlanIsTheLiveCone PlanLinearizes StrategiesAgree TheDefaultsAgree
-  ForwardIsByLevels ByNeedIsFirstDemand PlanIsConfluent KeyReadsOnlyTheCone
-import "plan_model.lut" planning example eqNat byNeed forward plan
+  ForwardIsByLevels ByNeedIsFirstDemand PlanIsConfluent KeyReadsOnlyTheCone PureConeIsDeterminate MemoKey DemandKey Keying
+  DigestSeparatesTheDemand DigestSeparatesTheCone DigestSeparatesTheMode DigestSeparatesTheSeed DigestSeparatesThePlan
+  DigestSeparatesTheCertificates PlanDigestSeparatesTheSchedule LookupComparesTheFullKey ActionConeIsNeverServed KeyIsOfTheRecord
+  ForwardOnDemand CallByNeed
+import "generators.lth" Seed
+import "certification.lth" Hash
+import "plan_model.lut" planning keying planDigest strategyName example eqNat byNeed forward plan
 
 types : List U := [Nat]
 eqs : List (Nat -> Nat -> Bool) := [eqNat]
@@ -129,3 +134,54 @@ test "PlanIsConfluent" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind
   bind "p" "planners", bind "d" "hiddens", bind "e" "entryF", bind "cs" "choices"]) (control <- true)
 test "KeyReadsOnlyTheCone" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "eq" "eqs",
   bind "p" "wholeGraphs", bind "d" "exampleOnly", bind "dm" "demands", bind "n" "holes", bind "v" "values"]) (control <- true)
+
+-- §4 the digest and the lookup, broken (2026-10-23, Claude Sonnet 5.5, audit 3.4, A7), over the keys
+-- and records of plan_laws.test.lut. A digest that is one constant name collides on every pair of
+-- keys, so the laws that say the digest separates what differs are refuted; a lookup that trusts the
+-- digest alone serves a key that is not the one asked, on the collision; a lookup that ignores
+-- whether the cone is pure serves a cone with an action; a run's key that is a constant is not
+-- the digest of `keyOf` of its record; a plan digest that leaves the schedule out does not see it.
+chosenOnly (p : Plan Nat) : Hash :=
+  planDigest { strategy := strategyName p.strategy, entry := p.entry, live := p.live, schedule := nil }
+colliding : Keying Nat := { key := fn k { "h" }, planHash := keying.planHash, runKey := keying.runKey, serves := keying.serves }
+byDigestAlone : Keying Nat := { key := fn k { "h" }, planHash := keying.planHash, runKey := keying.runKey,
+  serves := fn pure stored asked { pure and "h" == "h" } }
+ignoresPurity : Keying Nat := { key := keying.key, planHash := keying.planHash, runKey := keying.runKey,
+  serves := fn pure stored asked { stored == asked } }
+constantRunKey : Keying Nat := { key := keying.key, planHash := keying.planHash, runKey := fn r s p cs { "h" }, serves := keying.serves }
+blindToSchedule : Keying Nat := { key := keying.key, planHash := chosenOnly, runKey := keying.runKey, serves := keying.serves }
+collidings : List (Keying Nat) := [colliding]
+byDigests : List (Keying Nat) := [byDigestAlone]
+ignorers : List (Keying Nat) := [ignoresPurity]
+constants : List (Keying Nat) := [constantRunKey]
+blinds : List (Keying Nat) := [blindToSchedule]
+key1 : MemoKey := { demand := { decoration := nothing, values := nil }, cone := "sha256:c1", mode := "plain", seed := 1,
+  plan := "sha256:p1", certificates := ["sha256:e1"] }
+key2 : MemoKey := { demand := { decoration := nothing, values := [("a", Number 1.0)] }, cone := "sha256:c2", mode := "checked", seed := 2,
+  plan := "sha256:p2", certificates := nil }
+keys : List MemoKey := [key1, key2]
+demandKeys : List DemandKey := [{ decoration := nothing, values := nil }, { decoration := nothing, values := [("a", Number 1.0)] }]
+cones : List Hash := ["sha256:c1", "sha256:c2"]
+modes : List String := ["plain", "checked"]
+seeds : List Seed := [1, 2, 3]
+planHashes : List Hash := ["sha256:p1", "sha256:p2"]
+certLists : List (List Hash) := [nil, ["sha256:e1"]]
+somePlans : List (Plan Nat) := [{ strategy := ForwardOnDemand, entry := "d", live := ["a", "b", "c", "d"], schedule := ["a", "b", "c", "d"] }]
+orders : List Schedule := [nil, ["a", "c", "b", "d"]]
+records : List RunRecord := [recorded (theDemand (entry <- "d") (sets <- [("a", Number 1.0)])) "sha256:c1"]
+strategies : List Strategy := [ForwardOnDemand, CallByNeed]
+envLists : List (List (String -> Nat)) := [envs]
+onKeys (g : String) (extra : List Binding) : List Binding := [bind "A" "types", bind "h" g] <> extra
+test "DigestSeparatesTheDemand" ExhaustiveMode (seed <- 20261015) (whereBindings <- onKeys "collidings" [bind "k" "keys", bind "dk" "demandKeys"]) (control <- true)
+test "DigestSeparatesTheCone" ExhaustiveMode (seed <- 20261015) (whereBindings <- onKeys "collidings" [bind "k" "keys", bind "c" "cones"]) (control <- true)
+test "DigestSeparatesTheMode" ExhaustiveMode (seed <- 20261015) (whereBindings <- onKeys "collidings" [bind "k" "keys", bind "m" "modes"]) (control <- true)
+test "DigestSeparatesTheSeed" ExhaustiveMode (seed <- 20261015) (whereBindings <- onKeys "collidings" [bind "k" "keys", bind "s" "seeds"]) (control <- true)
+test "DigestSeparatesThePlan" ExhaustiveMode (seed <- 20261015) (whereBindings <- onKeys "collidings" [bind "k" "keys", bind "p" "planHashes"]) (control <- true)
+test "DigestSeparatesTheCertificates" ExhaustiveMode (seed <- 20261015) (whereBindings <- onKeys "collidings" [bind "k" "keys", bind "hs" "certLists"]) (control <- true)
+test "PlanDigestSeparatesTheSchedule" ExhaustiveMode (seed <- 20261015) (whereBindings <- onKeys "blinds" [bind "p" "somePlans", bind "s" "orders"]) (control <- true)
+test "LookupComparesTheFullKey" ExhaustiveMode (seed <- 20261015) (whereBindings <- onKeys "byDigests" [bind "stored" "keys", bind "asked" "keys"]) (control <- true)
+test "ActionConeIsNeverServed" ExhaustiveMode (seed <- 20261015) (whereBindings <- onKeys "ignorers" [bind "stored" "keys", bind "asked" "keys"]) (control <- true)
+test "KeyIsOfTheRecord" ExhaustiveMode (seed <- 20261015) (whereBindings <- onKeys "constants" [bind "r" "records", bind "s" "seeds", bind "p" "somePlans", bind "cs" "certLists"]) (control <- true)
+-- §5 a planner whose forward plan drops its first name breaks determinacy of a cone whose steps are local
+test "PureConeIsDeterminate" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "eq" "eqs", bind "p" "forwardDropsFirsts",
+  bind "d" "exampleOnly", bind "e" "entryD", bind "envs" "envLists", bind "s1" "strategies", bind "s2" "strategies"]) (control <- true)

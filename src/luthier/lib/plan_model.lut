@@ -17,8 +17,11 @@
 -- duplicates of plan.lth's `readsOf` and `keep` are gone; and the schedule that computes `d`
 -- before what it reads is refused.
 
+import "demand.lth" RunRecord Decoration
+import "certification.lth" Value Number Printed Hash
+import "generators.lth" Seed
 import "plan.lth" Planning Plan Dataflow Node Schedule Strategy ForwardOnDemand CallByNeed reaches
-  subset keep readsOf firstDemand LinearizesOn EquivalentOn Confluent NamesAreUnique Acyclic
+  subset keep readsOf firstDemand LinearizesOn EquivalentOn Confluent NamesAreUnique Acyclic Keying MemoKey
 
 -- call by need: the order of first demand (plan.lth `firstDemand`, a depth-first visit from the
 -- entry in the order the reads are listed, each name after what it reads and once)
@@ -69,3 +72,34 @@ schedulesAgree : Bool := Confluent Nat eqNat example needPlan.live needPlan.sche
 readersFirstRefused : Bool := not (LinearizesOn Nat eqNat example needPlan.live ["d", "b", "c", "a"])
 -- [core bite 13b] the four facts about the example, gathered so that this file claims them (4.S14)
 ExampleFacts := exampleIsADag & bothLinearize & schedulesAgree & readersFirstRefused
+
+-- [2026-10-23, Claude Sonnet 5.5, audit 3.4, A7] A model of `Keying` (plan.lth §4): the digest is the
+-- host's (run.py's `memo_digest`, sha256 of the canonical JSON of the value; `record_digest` is
+-- `keyOf` then the digest), and the lookup compares the full key and only for a pure cone. The
+-- bridge reads no `data` value (a `Value`, a `Strategy`), so each value crosses flattened: a value
+-- as its tag, number and text, a strategy as its name. It hashes another serialization than run.py's
+-- own `key_hash`, which tests/test_result_store.py holds to the same laws on real runs.
+FlatValue = { tag : String, number : Float64, text : String }
+flatValue (v : Value) : FlatValue :=
+  match v { Number x -> { tag := "Number", number := x, text := "" } ; Printed s -> { tag := "Printed", number := 0.0, text := s } }
+flatValues (vs : List (String * Value)) : List (String * FlatValue) :=
+  map (String * Value) (String * FlatValue) (fn (nv : String * Value) { match nv { (n, v) -> (n, flatValue v) } }) vs
+FlatKey = { demand : { decoration : Maybe Decoration, values : List (String * FlatValue) }, cone : Hash, mode : String, seed : Seed,
+            plan : Hash, certificates : List Hash }
+flatKey (k : MemoKey) : FlatKey :=
+  { demand := { decoration := k.demand.decoration, values := flatValues k.demand.values }, cone := k.cone, mode := k.mode,
+    seed := k.seed, plan := k.plan, certificates := k.certificates }
+FlatPlan = { strategy : String, entry : String, live : List String, schedule : List String }
+strategyName (st : Strategy) : String := match st { ForwardOnDemand -> "ForwardOnDemand" ; CallByNeed -> "CallByNeed" }
+flatPlan (p : Plan Nat) : FlatPlan := { strategy := strategyName p.strategy, entry := p.entry, live := p.live, schedule := p.schedule }
+FlatRecord = { decoration : Maybe Decoration, parameters : List (String * FlatValue), checked : Bool, cone : Hash }
+flatRecord (r : RunRecord) : FlatRecord :=
+  { decoration := r.decoration, parameters := flatValues r.parameters, checked := r.checked, cone := r.cone }
+keyDigest : FlatKey -> Hash := extern "python:luthier.run.memo_digest"
+planDigest : FlatPlan -> Hash := extern "python:luthier.run.memo_digest"
+recordDigest : FlatRecord -> Seed -> FlatPlan -> List Hash -> Hash := extern "python:luthier.run.record_digest"
+keying : Keying Nat := {
+  key := fn k { keyDigest (flatKey k) },
+  planHash := fn p { planDigest (flatPlan p) },
+  runKey := fn r s p cs { recordDigest (flatRecord r) s (flatPlan p) cs },
+  serves := fn pure stored asked { pure and stored == asked } }

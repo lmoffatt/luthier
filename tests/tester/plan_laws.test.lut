@@ -6,20 +6,24 @@
 -- report.md), so the dataflows are a census: plan_model.lut's `example` (five names, the entry `d`
 -- reaches four); `uneven`, where the order of first demand from `d` is not by levels (`c` reads
 -- nothing and is demanded after `b`); and `leafy`, whose `p` reads a name no node defines (a leaf
--- that keeps `init`, plan.lth §1). `Keying` (§4) has no line: no model of it exists (8.S10, the
--- result store), see the report. Seed 20261015 (the censuses are listed; the seed only names the
+-- that keeps `init`, plan.lth §1). `Keying` (§4) has lines since 2026-10-23 (audit 3.4,
+-- A7), on plan_model.lut's `keying`, a model over the host's digest of flattened values. Seed 20261015 (the censuses are listed; the seed only names the
 -- run).
 
 import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed
 import "certification.lth" Value Number Printed
-import "demand.lth" Demand
+import "demand.lth" Demand RunRecord recorded
 import "demand_model.lut" theDemand
 import "plan.lth" Planning Dataflow Schedule reaches NamesAreUnique Acyclic StepIsLocal Confluent PlanIsTheLiveCone
   PlanLinearizes StrategiesAgree TheDefaultsAgree ForwardIsByLevels ByNeedIsFirstDemand PlanIsConfluent
-  KeyReadsOnlyTheCone
-import "plan_model.lut" planning example eqNat
+  KeyReadsOnlyTheCone PureConeIsDeterminate MemoKey DemandKey Plan Keying DigestSeparatesTheDemand DigestSeparatesTheCone
+  DigestSeparatesTheMode DigestSeparatesTheSeed DigestSeparatesThePlan DigestSeparatesTheCertificates
+  PlanDigestSeparatesTheSchedule LookupComparesTheFullKey ActionConeIsNeverServed KeyIsOfTheRecord Strategy ForwardOnDemand CallByNeed
+import "generators.lth" Seed
+import "certification.lth" Hash
+import "plan_model.lut" planning keying example eqNat
 
 types : List U := [Nat]
 eqs : List (Nat -> Nat -> Bool) := [eqNat]
@@ -48,6 +52,7 @@ everySeven (m : String) : Nat := 7
 aThree (m : String) : Nat := if m == "a" then 3 else 10
 byName (m : String) : Nat := if m == "b" then 4 else if m == "c" then 9 else if m == "q" then 6 else 1
 envs : List (String -> Nat) := [everySeven, aThree, byName]
+envLists : List (List (String -> Nat)) := [envs]
 -- the live set of `d` in example and uneven, and four orders of its names, three of them
 -- linearizations of one or both
 lives : List (List String) := [["a", "b", "c", "d"]]
@@ -89,3 +94,40 @@ test "PlanIsConfluent" ExhaustiveMode (seed <- 20261015) (whereBindings <- onCon
 -- §4 the demand's key: a hole the entry does not reach leaves it as it was (restated 2026-10-17 so
 -- that the planner enters it; `KeyReadsTheType` removed, plan.lth §4 says why)
 test "KeyReadsOnlyTheCone" ExhaustiveMode (seed <- 20261015) (whereBindings <- onKey)
+
+-- §4 the key and its digest (2026-10-23, Claude Sonnet 5.5, audit 3.4, A7): keys, and for each
+-- input of a key another value of it, listed. The record is demand.lth's `recorded` on demands that
+-- set two holes, one of them off the plan's live names.
+key1 : MemoKey := { demand := { decoration := nothing, values := nil }, cone := "sha256:c1", mode := "plain", seed := 1,
+  plan := "sha256:p1", certificates := ["sha256:e1"] }
+key2 : MemoKey := { demand := { decoration := nothing, values := [("a", Number 1.0)] }, cone := "sha256:c2", mode := "checked", seed := 2,
+  plan := "sha256:p2", certificates := nil }
+keys : List MemoKey := [key1, key2]
+demandKeys : List DemandKey := [{ decoration := nothing, values := nil }, { decoration := nothing, values := [("a", Number 1.0)] },
+  { decoration := nothing, values := [("a", Number 2.0)] }]
+cones : List Hash := ["sha256:c1", "sha256:c2"]
+modes : List String := ["plain", "checked"]
+seeds : List Seed := [1, 2, 3]
+planHashes : List Hash := ["sha256:p1", "sha256:p2"]
+certLists : List (List Hash) := [nil, ["sha256:e1"], ["sha256:e1", "sha256:e2"]]
+somePlans : List (Plan Nat) := [{ strategy := ForwardOnDemand, entry := "d", live := ["a", "b", "c", "d"], schedule := ["a", "b", "c", "d"] },
+  { strategy := CallByNeed, entry := "d", live := ["a", "b", "c", "d"], schedule := ["a", "b", "c", "d"] }]
+orders : List Schedule := [nil, ["a", "b", "c", "d"], ["a", "c", "b", "d"]]
+records : List RunRecord := [recorded (theDemand (entry <- "d") (sets <- [("a", Number 1.0), ("z", Printed "x")])) "sha256:c1",
+  recorded (theDemand (entry <- "d") (checked <- true)) "sha256:c2"]
+pures : List Bool := [true, false]
+keyings : List (Keying Nat) := [keying]
+strategies : List Strategy := [ForwardOnDemand, CallByNeed]
+test "DigestSeparatesTheDemand" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "h" "keyings", bind "k" "keys", bind "dk" "demandKeys"])
+test "DigestSeparatesTheCone" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "h" "keyings", bind "k" "keys", bind "c" "cones"])
+test "DigestSeparatesTheMode" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "h" "keyings", bind "k" "keys", bind "m" "modes"])
+test "DigestSeparatesTheSeed" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "h" "keyings", bind "k" "keys", bind "s" "seeds"])
+test "DigestSeparatesThePlan" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "h" "keyings", bind "k" "keys", bind "p" "planHashes"])
+test "DigestSeparatesTheCertificates" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "h" "keyings", bind "k" "keys", bind "hs" "certLists"])
+test "PlanDigestSeparatesTheSchedule" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "h" "keyings", bind "p" "somePlans", bind "s" "orders"])
+test "LookupComparesTheFullKey" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "h" "keyings", bind "stored" "keys", bind "asked" "keys"])
+test "ActionConeIsNeverServed" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "h" "keyings", bind "stored" "keys", bind "asked" "keys"])
+test "KeyIsOfTheRecord" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "h" "keyings", bind "r" "records", bind "s" "seeds", bind "p" "somePlans", bind "cs" "certLists"])
+-- §5 determinacy of a pure cone under any two strategies, on the dataflows above and the environments listed
+test "PureConeIsDeterminate" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "eq" "eqs", bind "p" "planners",
+  bind "d" "dataflows", bind "e" "entries", bind "envs" "envLists", bind "s1" "strategies", bind "s2" "strategies"])

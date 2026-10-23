@@ -3208,6 +3208,30 @@ def key_hash(key):
     return certify._sha(json.dumps(key, sort_keys=True, ensure_ascii=False, separators=(",", ":")))
 
 
+# [2026-10-23, audit 3.4, A7] The externs of plan_model.lut's `keying`, a model of plan.lth's `Keying`
+# over Luthier's own values: a key, a plan and a record cross the bridge flattened (plan_model.lut's
+# `flatKey`, `flatPlan`, `flatRecord`: the bridge reads no `data` value) and arrive as dicts. The
+# digest is sha256 of their canonical JSON, so that the laws of the digest and of the lookup are
+# tested on listed keys (tests/tester/plan_laws.test.lut). The specimen run.py itself computes is
+# `key_hash`, validated by tests/test_result_store.py; these hash another serialization of the same
+# fields and say nothing of its bytes.
+def memo_digest(x):
+    """sha256 of a flattened key or plan's canonical JSON."""
+    from . import certify
+    return certify._sha(json.dumps(x, sort_keys=True, ensure_ascii=False, separators=(",", ":"), default=repr))
+
+
+def record_digest(record, seed, plan, certificates):
+    """plan.lth's `keyOf` followed by the digest: the key of a flattened record, a seed, a flattened
+    plan as chosen (its schedule left out) and the certificates', hashed."""
+    live = list(plan["live"])
+    key = {"demand": {"decoration": record["decoration"],
+                      "values": [nv for nv in record["parameters"] if nv[0] in live]},
+           "cone": record["cone"], "mode": "checked" if record["checked"] else "plain", "seed": seed,
+           "plan": memo_digest({**plan, "schedule": []}), "certificates": list(certificates)}
+    return memo_digest(key)
+
+
 def results_path(path):
     """`x.results.json` beside `x.run.lut` (L10.12: in the store of the file that makes the claim;
     `base_name`, 12.R2)."""
