@@ -1,0 +1,24 @@
+-- tests/tester/vacuity.test.lut: a law whose premise never holds and an empty experiment are not run
+-- (wave A, bite A3, record/plan/audit-algebras-2026-10-22/execution.md; D-2026-10-16-m, 7.S12). The
+-- control of the bite, `x < 0 -> x > 0` over `Nat`, is vacuous by `then` and by `if ... else true`,
+-- and through a law that applies it; a premise that holds sometimes leaves the law run, its count in
+-- the entry; a sample of no case is an empty experiment; an empty type enumerated whole keeps its
+-- pass (`EmptyIsInitial`'s exception, bite 13c item 5).
+-- Written 2026-10-23 by Claude Opus 5.5 on record/plan/audit-algebras-2026-10-22/prompt-wave-a.md.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+
+NeverNegative (x : Nat) : Bool := x < 0 -> x > 0
+NeverNegativeIf (x : Nat) : Bool := if x < 0 then x > 0 else true
+NeverNegativeApplied (x : Nat) : Bool := NeverNegative x
+SometimesNegative (x : Int) : Bool := x < 0 -> x < 1
+ZeroIsNeutral (x : Int) : Bool := x + 0 == x
+NothingIsFalse (x : Empty) : Bool := false
+
+test "NeverNegative" (SampledMode linear)
+test "NeverNegativeIf" (SampledMode linear)
+test "NeverNegativeApplied" (SampledMode linear)
+test "SometimesNegative" (SampledMode linear)
+test "ZeroIsNeutral" (SampledMode linear) (cases <- 0)
+test "NothingIsFalse" ExhaustiveMode

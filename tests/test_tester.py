@@ -457,3 +457,45 @@ def test_a_structure_whose_laws_fix_its_carrier_runs_at_that_carrier(tmp_path):
     [o] = tester.run_tests(top)
     line = tester.line(o)
     assert "not run" not in line and "conjunction of 2" in line, line
+
+
+VACUITY = ROOT / "tests" / "tester" / "vacuity.test.lut"
+
+
+def test_a_law_whose_premise_never_holds_is_vacuous_and_not_run(capsys):
+    """Wave A, bite A3 (D-2026-10-16-m): `x < 0 -> x > 0` over `Nat`, by `then`, by `if ... else true`
+    and through a law that applies it, is laws.lth's `Vacuous n`, never a pass; a premise that held
+    in some cases leaves the law run, with the count in its entry."""
+    outcomes = tester.run_tests(VACUITY)
+    by_law = {o.spec.law: o for o in outcomes}
+    for law in ("NeverNegative", "NeverNegativeIf", "NeverNegativeApplied"):
+        o = by_law[law]
+        assert isinstance(o.evidence, tester.Vacuous) and o.evidence.evaluated == 100
+        assert o.grade is None and not tester.passes(o)
+        assert o.entry["evidence"] == {"Vacuous": 100}
+        assert o.entry["outcome"] == {"NotRunFor": tester.vacuity_reason(100)} and o.entry["grade"] is None
+        assert "not run: vacuous" in tester.line(o)
+    some = by_law["SometimesNegative"]
+    assert some.grade == "Sampled" and 0 < some.held < some.evaluated == 100
+    assert some.entry["evidence"]["Points"]["held"] == some.held
+    assert "held" not in by_law["NothingIsFalse"].entry["evidence"]["Points"]  # states no premise
+
+
+def test_an_empty_experiment_is_not_run_but_an_empty_type_enumerated_whole(capsys):
+    """Bite A3 (7.S12): `cases <- 0` is an empty experiment, not run with its reason; `x : Empty` under
+    ExhaustiveMode keeps its pass (`EmptyIsInitial`'s exception, bite 13c item 5)."""
+    by_law = {o.spec.law: o for o in tester.run_tests(VACUITY)}
+    empty = by_law["ZeroIsNeutral"]
+    assert isinstance(empty.evidence, tester.NotRun) and "an empty experiment" in empty.evidence.reason
+    assert empty.entry["outcome"] == {"NotRunFor": empty.evidence.reason} and empty.grade is None
+    whole = by_law["NothingIsFalse"]
+    assert (whole.verdict, whole.grade, whole.evaluated) == ("Confirmed", "ExhaustiveGrade", 0)
+    code, _ = lines_of(capsys, VACUITY)
+    assert code == 1  # the vacuous and the empty lines are not graded
+
+
+def test_premises_are_read_from_then_from_if_else_true_and_through_an_applied_law():
+    runner, specs, loaded = tester.prepare(VACUITY)
+    count = {s.law: len(tester.premises_of(runner, tester._as_called(loaded, s.law))) for s in specs}
+    assert count == {"NeverNegative": 1, "NeverNegativeIf": 1, "NeverNegativeApplied": 1,
+                     "SometimesNegative": 1, "ZeroIsNeutral": 0, "NothingIsFalse": 0}

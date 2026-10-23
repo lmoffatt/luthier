@@ -220,6 +220,13 @@ class Tested:
                 "spent": self.spent, "initial": self.initial, "budget": self.budget}
 
 
+@dataclass
+class Vacuous:
+    """laws.lth's `Vacuous n` (wave A, bite A3; D-2026-10-16-m): `evaluated` cases evaluated, in none
+    of which every premise the law states by `then` or by `if p then q else true` held."""
+    evaluated: int
+
+
 # laws.lth's `StatisticalByTest`: what the sequential test's verdict settles
 SETTLED_BY_TEST = {"Holds": "Supported", "Fails": "Refuted", "Unresolved": "Unsettled"}
 
@@ -246,6 +253,7 @@ class Outcome:
     conjunct: str | None = None  # the conjunct this outcome is of, or the one a conjunction's refutation names
     parts: list | None = None    # a conjunction's line: the outcomes of its conjuncts (D-2026-10-18-f)
     law_store: object = None     # the file that states the line's law (`law_file`), whose store holds its controls
+    held: int | None = None      # the cases in which every premise held, when the law states one (`premises_of`)
 
 
 # ---------------------------------------------------------------------- loading
@@ -319,7 +327,10 @@ def load_program(path, fuel, extra=()):
         regioning += (cases_of,)
     else:
         regioning = ()
-    roots = (core_data(loaded) + tuple(d.name for d in specs) + named
+    # [bite A3] `p -> q` of Bools elaborates to core's `implies`, which no name of the source writes, so
+    # the slice dropped it and such a law gave `implies ...`, no Bool
+    implication = tuple(n for n in [loaded.name(loaded.core, "implies")] if n) if loaded.core is not None else ()
+    roots = (core_data(loaded) + implication + tuple(d.name for d in specs) + named
              + tuple(loaded.name(top, n) or n for n in extra) + grading + regioning)
     kept = runtime_slice(loaded.acts + specs, specs[0].name if specs else "main", roots, theory_laws=True)
     loaded.demand(kept)
@@ -1116,6 +1127,137 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
                    labels=labels)
 
 
+# ---------------------------------------------------------------------- vacuity and the empty experiment
+
+# [wave A, bite A3; record/plan/audit-algebras-2026-10-22/execution.md; the audit of 2026-10-22,
+# section 12 "Vacuity, empty evidence and uncovered regions" (report.md, 5b1a05e)] A premise stated as a
+# subtype (`c : Chain A r`) is met by every case drawn, and the regions count it (`Classifier`). One
+# stated in the law's body is not: `p -> q` (`implies`, L12.7: `then` is material) or `if p then q else
+# true`, at the top of the body, under its lets (`{ r := ... ; if r.converged then ... else true }`), or
+# in the body of a law it applies, unfolded. Such a law held at every case where `p` was false, so with
+# `p` never true it passed with no evidence. `judged` counts the cases where every premise held; none
+# is laws.lth's `Vacuous n`, not run with the count as its reason (D-2026-10-16-m), never a pass. A run
+# that evaluated no case and raised none is an empty experiment, not run with its reason (7.S12;
+# test.lth's `CountsCases`: an empty sample is no evidence), except when an exhaustive run enumerated
+# an empty type whole: there the law holds of every value there is (`EmptyIsInitial`, `x : Empty`;
+# bite 13c item 5, record/plan/core-2026-10-17/report-bite-13c.md), the one exception. An empty census
+# is refused before (`census`). `judged` runs after `run_spec` and outside `_drawing_code`: it changes
+# no draw, so no identity.
+
+# [proposed] How deep `premises_of` unfolds the laws a body applies before it stops looking.
+UNFOLD = 8
+
+
+def _premise_split(term):
+    """(premise, rest) when `term` is `implies p q` or `match p { true -> q ; false -> true }` with `q`
+    not the literal `false` (`not p` is that match, and states no premise); else None."""
+    head, args = _spine(term)
+    if isinstance(head, t.Var) and _base(head) == "implies" and len(args) == 2:
+        return args[0], args[1]
+    if isinstance(term, t.Match) and len(term.arms) == 2:
+        arms = {}
+        for pattern, body in term.arms:
+            if not (isinstance(pattern, t.PCon) and not pattern.patterns):
+                return None
+            arms[pattern.name.partition("@")[0]] = body
+        yes, no = arms.get("true"), arms.get("false")
+        if (yes is not None and isinstance(no, t.Var) and _base(no) == "true"
+                and not (isinstance(yes, t.Var) and _base(yes) == "false")):
+            return term.value, yes
+    return None
+
+
+def premises_of(runner, law):
+    """The premises the law (as the program calls it) states in its body, in order, as a function of
+    its parameters each (`t.Lam`s over them); [] when it states none."""
+    defined = {}
+    for a in runner.program:
+        if isinstance(a, t.Define):
+            defined.setdefault(a.name, a)
+    d = defined.get(law)
+    if d is None:
+        return []
+    binders, body = [], d.body
+    while isinstance(body, t.Lam):
+        binders.append((body.name, body.type))
+        body = body.body
+    out, depth, lets = [], 0, []
+    while True:
+        split = _premise_split(body)
+        if split is not None:
+            premise = split[0]
+            for name, ty, value in reversed(lets):  # a premise under `{ r := ... ; ... }` keeps its lets
+                premise = t.Let(name, ty, value, premise)
+            out.append(premise)
+            body = split[1]
+            continue
+        if isinstance(body, t.Let):
+            lets.append((body.name, body.type, body.value))
+            body = body.body
+            continue
+        head, args = _spine(body)
+        unfolded = defined.get(head.name) if isinstance(head, t.Var) and args and depth < UNFOLD else None
+        if unfolded is None:
+            break
+        inner = unfolded.body
+        for arg in args:
+            if not isinstance(inner, t.Lam):
+                inner = None
+                break
+            inner = kernel.substitute(inner.name, arg, inner.body)
+        if inner is None or isinstance(inner, t.Lam):
+            break
+        body, depth = inner, depth + 1
+    wrapped = []
+    for p in out:
+        for name, ty in reversed(binders):
+            p = t.Lam(name, ty, p)
+        wrapped.append(p)
+    return wrapped
+
+
+def _premises_held(runner, premises, case, fuel):
+    """Whether every premise holds at the case, read in order (a later one only when the earlier held);
+    a premise whose reduction raises or gives no Bool did not hold."""
+    for p in premises:
+        runner.fuel = fuel
+        try:
+            if runner.whnf(Runner.apply(p, list(case))) != TRUE:
+                return False
+        except _RAISES:
+            return False
+    return True
+
+
+def judged(runner, loaded, spec, outcome, fuel):
+    """`run_spec`'s outcome judged for vacuity and for an empty experiment (above): laws.lth's
+    `Vacuous n` when no evaluated case held the law's premises, `NotRun` when no case was evaluated
+    and none raised (but an empty type enumerated whole), else the outcome with the count of the cases
+    that held its premises, when it states any (`held`)."""
+    if not isinstance(outcome.evidence, Points):
+        return outcome
+    if not outcome.evidence.cases:
+        if outcome.raised:
+            return outcome
+        if spec.sampled:
+            return _not_run(spec, f"an empty experiment: {spec.cases} cases asked, none drawn (7.S12)",
+                            outcome.parameters)
+        return outcome  # an empty type enumerated whole (`EmptyIsInitial`)
+    premises = premises_of(runner, _as_called(loaded, spec.law))
+    if not premises:
+        return outcome
+    held = sum(1 for case, _ in outcome.evidence.cases if _premises_held(runner, premises, case, fuel))
+    if held or outcome.verdict == "Refuted":
+        return replace(outcome, held=held)
+    return replace(outcome, evidence=Vacuous(outcome.evaluated), verdict="Unsettled", grade=None, held=0,
+                   regions=None, labels=None)
+
+
+def vacuity_reason(evaluated):
+    """The reason a vacuous run is not run (D-2026-10-16-m: its premise count)."""
+    return f"vacuous: no premise held in the {evaluated} cases evaluated (D-2026-10-16-m)"
+
+
 # ---------------------------------------------------------------------- the regions (certification.lth §2)
 
 # [proposed] The types of the cutoffs a law takes, the demand's (D-2026-10-14-c; D-2026-10-16-k item
@@ -1791,6 +1933,8 @@ def _tail(outcome):
             replace(outcome, out_of_fuel=None))
     if isinstance(outcome.evidence, NotRun):
         return f"not run: {outcome.evidence.reason}"
+    if isinstance(outcome.evidence, Vacuous):
+        return f"not run: {vacuity_reason(outcome.evidence.evaluated)}"
     if isinstance(outcome.evidence, Tested):
         return _tested_tail(outcome)
     if outcome.spec.control and outcome.verdict == "Refuted":
@@ -1839,7 +1983,8 @@ def _entry_tail(entry):
         return f"refuted at {o['Failed']}"
     if "Unresolved" in o:
         return certify.show_outcome(o)
-    return f"not run: {o['NotRunFor']}" if "NotRun" in entry["evidence"] else o["NotRunFor"]
+    shown = "NotRun" in entry["evidence"] or "Vacuous" in entry["evidence"]
+    return f"not run: {o['NotRunFor']}" if shown else o["NotRunFor"]
 
 
 def line(outcome):
@@ -1947,6 +2092,8 @@ def _run_line(runner, loaded, spec, entry, given, home, stores, deep, store, run
         if "Tested" in evidence:
             verdict = SETTLED_BY_TEST[evidence["Tested"]["verdict"]]
             evaluated = evidence["Tested"]["spent"]
+        if "Vacuous" in evidence:
+            verdict, evaluated = "Unsettled", evidence["Vacuous"]
         reused = Outcome(spec, evidence, verdict, found["grade"], evaluated, None, cone=entry["cone"],
                          entry=found, known=found["date"], store=home)
         if certify.disputed_at(entries, key):
@@ -1954,7 +2101,7 @@ def _run_line(runner, loaded, spec, entry, given, home, stores, deep, store, run
         return reused
     # a statistical stretch continues the test of the law under its binding (D-2026-10-16-g)
     start = (lambda c, p, entry=entry, entries=entries: certify.continuation(entries, entry, c, p)) if store else None
-    outcome = run_spec(runner, spec, given, loaded, start) if run is None else run(start)
+    outcome = judged(runner, loaded, spec, run_spec(runner, spec, given, loaded, start), given) if run is None else run(start)
     settle(entry, outcome)
     outcome.cone, outcome.entry, outcome.store = entry["cone"], entry, home
     fuel_spent = certify.out_of_fuel(entry)
@@ -2000,7 +2147,7 @@ def _run_conjunction(runner, loaded, spec, parts, cones, given, home, stores, de
     def run(start):
         done = []
         for s, c in zip(specs, parts):
-            o = run_spec(runner, s, given, loaded)
+            o = judged(runner, loaded, s, run_spec(runner, s, given, loaded), given)
             o.conjunct = c.shown
             done.append(o)
             if o.verdict == "Refuted":
@@ -2386,8 +2533,14 @@ def settle(entry, outcome):
         return entry
     if isinstance(outcome.evidence, Tested):
         return _settle_tested(entry, outcome)
+    if isinstance(outcome.evidence, Vacuous):  # laws.lth's `Vacuous n`, not run (D-2026-10-16-m), a control too
+        entry["evidence"] = {"Vacuous": outcome.evidence.evaluated}
+        entry["outcome"] = {"NotRunFor": vacuity_reason(outcome.evidence.evaluated)}
+        return entry
     entry["evidence"] = {"Points": {"evaluated": outcome.evaluated, "raised": len(outcome.raised),
                                     "coverage": _show(outcome.evidence.coverage), "verdict": outcome.verdict}}
+    if outcome.held is not None:  # the cases in which the premises the law states held (bite A3)
+        entry["evidence"]["Points"]["held"] = outcome.held
     # 7.S9: the entry records its regions and its labels (certification.lth's `RegionEvidence`)
     if outcome.regions is not None:
         entry["regions"] = outcome.regions
