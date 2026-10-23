@@ -661,24 +661,15 @@ def formed_errors(e):
     return errors
 
 
-def latest_in_front(entries):
-    """certification.lth's `latestInFront` over the entries' ISO 8601 dates in UTC (whose order is the
-    order of their text): no entry older than the one behind it. [wave A, bite A6] Not part of
-    `store_errors`: the tester dates an entry when its line starts and parallel lines write in the
-    order they end, so five stores of the tree break it (record/plan/audit-algebras-2026-10-22/
-    report-wave-a-1.md)."""
-    dates = [e.get("date", "") for e in entries]
-    return all(a >= b for a, b in zip(dates, dates[1:]))
-
-
 def store_errors(entries):
     """What breaks `Store`'s predicate: a grade without a pass or a pass without a grade
     (`gradedAsOutcome`); a grade the pass's evidence does not admit, or a pass over listed cases
     whose reach is more than the cases it evaluated (`heldAsRun`, `admits`, `held_as_listed`; bite
     13c, on the audit of 2026-10-22, 1.8); [bite A6] an entry missing a field its evidence form owes
     (`formed_errors`). Two entries of one identity that disagree are a disagreement the store records
-    (D-2026-10-15-f), read by `disputes`, not an error of the store. [proposed] `latestInFront` stays
-    unchecked here (`latest_in_front`, which says why)."""
+    (D-2026-10-15-f), read by `disputes`, not an error of the store. [wave A] The latest in front is
+    the order written, which `record` builds (`RecordingKeepsTheOrderWritten`), and no date is read:
+    an entry's date is when its run started."""
     errors = []
     for k, e in enumerate(entries):
         missing = [f for f in IDENTITY + ("outcome", "grade") if f not in e]

@@ -1086,7 +1086,8 @@ def test_the_store_law_holds_on_the_reference_and_its_controls_refute_the_broken
     laws = tester.run_tests(ROOT / "tests" / "tester" / "certification_laws.test.lut")
     assert [o.spec.law for o in laws] == ["ANewIdentityGoesInFront", "AnAgreeingReplayAddsNothing",
                                           "ADisagreeingReplayIsKept", "AnAgreeingPairSettles",
-                                          "AnExhaustionIsNeverStored", "ADisagreementRefutes", "ADisagreementIsRefused",
+                                          "AnExhaustionIsNeverStored", "RecordingKeepsTheOrderWritten",
+                                          "ADisagreementRefutes", "ADisagreementIsRefused",
                                           "NoCutoffAcceptsAFailure", "ErasureKeepsTheStep", "IdentityIsTheKey",
                                           "PruningKeepsACurrentFailure", "PruningOnlyDrops", "PruningNeverRaisesAGrade"]
     assert all(o.grade == "ExhaustiveGrade" or o.grade == "Cases" for o in laws), [tester.line(o) for o in laws]
@@ -1096,7 +1097,8 @@ def test_the_store_law_holds_on_the_reference_and_its_controls_refute_the_broken
         ("ADisagreementRefutes", "Refuted"), ("ADisagreementIsRefused", "Refuted"),
         ("ANewIdentityGoesInFront", "Refuted"), ("AnAgreeingReplayAddsNothing", "Refuted"),
         ("AnAgreeingPairSettles", "Refuted"), ("IdentityIsTheKey", "Refuted"), ("PruningKeepsACurrentFailure", "Refuted"),
-        ("PruningNeverRaisesAGrade", "Refuted"), ("PruningOnlyDrops", "Refuted"), ("ErasureKeepsTheStep", "Refuted")]
+        ("PruningNeverRaisesAGrade", "Refuted"), ("PruningOnlyDrops", "Refuted"), ("ErasureKeepsTheStep", "Refuted"),
+        ("RecordingKeepsTheOrderWritten", "Refuted")]
     absorbed, = (o for o in controls if o.spec.law == "ADisagreeingReplayIsKept")
     assert "r = absorbing, e = passOne, es = ((cons failOne) ((cons passOne) nil))" in tester.line(absorbed)
 
@@ -1876,3 +1878,12 @@ import "certification.lth" Entry heldAsRun Members Printed Number Support Interv
     outs = tester.run_tests(tmp_path / "formed.test.lut", store=False)
     assert len(outs) == len(stated)
     assert all(o.verdict in ("Confirmed", "Supported") for o in outs), [tester.line(o) for o in outs]
+
+
+def test_the_latest_in_front_is_the_order_written():
+    """The coordinator's answer of 2026-10-23: the store's order is the order written, and a date is
+    when a run started. An entry dated before the one behind it is no error, and `record` puts a new
+    entry in front of the store as it was."""
+    late, early = entry(seed=1), dict(entry(seed=2), date="2026-10-13T00:00:00+00:00")
+    assert certify.store_errors([early, late]) == []
+    assert certify.record([late], early) == [early, late]

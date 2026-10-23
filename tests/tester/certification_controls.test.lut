@@ -13,7 +13,7 @@ import "generators.lth" Binding
 import "laws.lth" Listed Cited
 import "certification.lth" Certifying Recording Entry Certificate ConeDemand ConeName Refusal Outcome Passed Failed NotRunFor
   fuelSpent outOfFuel known recordEntry failureAt Current agree disputedAt
-  ANewIdentityGoesInFront AnAgreeingReplayAddsNothing AnAgreeingPairSettles ADisagreeingReplayIsKept AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused
+  ANewIdentityGoesInFront AnAgreeingReplayAddsNothing AnAgreeingPairSettles ADisagreeingReplayIsKept AnExhaustionIsNeverStored RecordingKeepsTheOrderWritten ADisagreementRefutes ADisagreementIsRefused
 import "certification_model.lut" certifying hasFailure passes weakestOfBests serves stateOf entryFailed
 import "term.lth" Term Act Program Alpha Substitution Reduction Var Lit Lam App Pi Pair Match Let Define
   IntConst PVar PPair
@@ -60,6 +60,11 @@ keepDispute (e : Entry) (es : List Entry) : List Entry :=
               else recordEntry certifying e es ;
     nothing -> cons e es }
 keepingDispute : Recording certifying := { record := keepDispute }
+-- [wave A] a store whose written order is not the predicate's: a new entry goes behind the others
+writeBehind (e : Entry) (es : List Entry) : List Entry :=
+  if recordEntry certifying e es == es then es else es <> [e]
+writingBehind : Recording certifying := { record := writeBehind }
+behindModels : List (Recording certifying) := [writingBehind]
 droppingModels : List (Recording certifying) := [droppingNew]
 agreeingModels : List (Recording certifying) := [writingAgreeing]
 disputeModels : List (Recording certifying) := [keepingDispute]
@@ -185,3 +190,5 @@ greedyErasures : List (Erasure alpha substitute stepper) := [{ erase := eraseBin
 test "ErasureKeepsTheStep" ExhaustiveMode (seed <- 20261018) (whereBindings <- [bind "a" "alphas",
   bind "sb" "substitutions", bind "m" "steppers", bind "e" "greedyErasures", bind "p" "erasurePrograms",
   bind "t" "erasureTerms"]) (control <- true)
+test "RecordingKeepsTheOrderWritten" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
+  bind "r" "behindModels", bind "e" "entries", bind "es" "stores"]) (control <- true)

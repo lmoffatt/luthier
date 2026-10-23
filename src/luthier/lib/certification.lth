@@ -294,17 +294,14 @@ heldAsRun (es : List Entry) : Bool :=
        admits e.evidence g
          and (not (coverageOf e.evidence == just Listed) or censusOfAtMost (pointCount e.evidence) e.binding e.reach)
          and formedAsItsEvidence e } }) es
--- the order of two dates as the store writes them (ISO 8601 in UTC, whose order is the order of
--- the text), the first not before the second: a hole, since the kernel orders numbers and not
--- `String`; until it is filled, a store's predicate on two entries or more is not evaluated.
--- [wave A, bite A6] Left a hole: the kernel has no order on `String` (11.R1; grammar.lth's
--- `characters` is a hole too), and the predicate as stated is false of five stores of the tree,
--- whose entries the tester dates when a line starts and parallel lines write as they end (certify.py's
--- `latest_in_front`; record/plan/audit-algebras-2026-10-22/report-wave-a-1.md)
-notBefore : String -> String -> Bool
-latestInFront (es : List Entry) : Bool :=
-  all List (Entry * Entry) (fn (ef : Entry * Entry) { match ef { (e, f) -> notBefore e.date f.date } }) (zip Entry Entry es (drop Entry 1 es))
-Store (k : Certifying) : U := { es : List Entry | gradedAsOutcome es and heldAsRun es and latestInFront es }
+-- [wave A, the coordinator's answer of 2026-10-23 to report-wave-a-1.md] The latest in front is
+-- the order written: a store is its history, each entry put in front when it is recorded, and an
+-- entry's `date` is when its run started, which is what it means. Parallel lines write in the order
+-- they end, so the dates of a store need not fall in order, and the predicate reads no date: the
+-- store's order is what `record` builds, the law `RecordingKeepsTheOrderWritten` (§5). The hole
+-- `notBefore` and the predicate over dates that needed it are gone (D-2026-10-15-f's reading of
+-- "latest" is the order written too).
+Store (k : Certifying) : U := { es : List Entry | gradedAsOutcome es and heldAsRun es }
 
 -- A known outcome is not recomputed (7.S13): the latest entry with the identity asked, whatever
 -- its outcome. The tester asks before it runs; `--deep` runs again, and a new seed or `n` is a
@@ -917,8 +914,12 @@ AnAgreeingPairSettles (k : Certifying) (r : Recording k) (e : Entry) (es : List 
 -- a not-run for lack of fuel is never written (D-2026-10-15-g)
 AnExhaustionIsNeverStored (k : Certifying) (r : Recording k) (e : Entry) (es : List Entry) : Bool :=
   not (outOfFuel e.outcome) or r.record e es == es
+-- [wave A] the order written: recording leaves the store as it was or puts the new entry in front of
+-- it, so what is behind the front is the store's history, never reordered (the latest in front)
+RecordingKeepsTheOrderWritten (k : Certifying) (r : Recording k) (e : Entry) (es : List Entry) : Bool :=
+  r.record e es == es or r.record e es == cons e es
 Recording (k : Certifying) := ANewIdentityGoesInFront k & AnAgreeingReplayAddsNothing k & ADisagreeingReplayIsKept k
-  & AnAgreeingPairSettles k & AnExhaustionIsNeverStored k
+  & AnAgreeingPairSettles k & AnExhaustionIsNeverStored k & RecordingKeepsTheOrderWritten k
 
 -- [core bite 13b, on bite 13c's item 1 and the audit's 1.4 A; 6.S8 "up to four", 6.S15, 12.S11] The
 -- law of retention: how a store is bounded at the current hash of its cone. A model is a way of

@@ -15,7 +15,7 @@ import "generators.lth" Binding
 import "laws.lth" Listed Cited
 import "certification.lth" Certifying Recording Pruning IdentityIsTheKey PruningKeepsACurrentFailure PruningOnlyDrops PruningNeverRaisesAGrade Entry Certificate ConeDemand Outcome Passed Failed NotRunFor fuelSpent Hash
   ANewIdentityGoesInFront AnAgreeingReplayAddsNothing ADisagreeingReplayIsKept AnAgreeingPairSettles
-  AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused NoCutoffAcceptsAFailure
+  AnExhaustionIsNeverStored RecordingKeepsTheOrderWritten ADisagreementRefutes ADisagreementIsRefused NoCutoffAcceptsAFailure
 import "test.lth" ExhaustiveGrade Sampled AssumedGrade
 import "certification_model.lut" certifying recording pruning
 import "term.lth" Term Act Program Alpha Substitution Reduction Var Lit Lam App Pi Pair Match Let Define
@@ -59,6 +59,7 @@ test "AnAgreeingReplayAddsNothing" ExhaustiveMode (seed <- 20261016) (whereBindi
 test "ADisagreeingReplayIsKept" ExhaustiveMode (seed <- 20261016) (whereBindings <- recordBindings)
 test "AnAgreeingPairSettles" ExhaustiveMode (seed <- 20261016) (whereBindings <- recordBindings)
 test "AnExhaustionIsNeverStored" ExhaustiveMode (seed <- 20261016) (whereBindings <- recordBindings)
+test "RecordingKeepsTheOrderWritten" ExhaustiveMode (seed <- 20261016) (whereBindings <- recordBindings)
 test "ADisagreementRefutes" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
   bind "c" "certificates", bind "e" "ofTheLaw", bind "o" "outcomes", bind "g" "grades", bind "es" "behindStores"])
 test "ADisagreementIsRefused" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
