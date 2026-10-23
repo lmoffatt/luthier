@@ -1749,3 +1749,35 @@ def test_the_route_s_obligations_come_from_the_law_and_its_control_is_refuted():
     assert all(o.verdict == "Refuted" for o in controls), [tester.line(o) for o in controls]
     listing = controls[-1]
     assert "witness := fromListing" in tester.line(listing) and '"R M"' in tester.line(listing)
+
+
+# ---------------------------------------------------------------------- wave A, bite A5 (audit 1.4 C)
+
+def _stretch(conjunct, seed, n=100, statistical=False):
+    e = {"law": "T", "cone": "hT", "binding": [{"parameter": "x", "generator": "g", "fingerprint": ""}], "seed": seed,
+         "cases": n, "reach": [], "outcome": "Passed", "grade": "Sampled", "conjunct": conjunct, "conjuncts": ["P x", "Q x"],
+         "evidence": {"Points": {"evaluated": n, "raised": 0, "coverage": f"(Drawn {seed})", "verdict": "Supported"}},
+         "date": "2026-10-23T00:00:00+00:00"}
+    if statistical:
+        e["evidence"] = {"Tested": {"verdict": "Holds", "alpha": 0.01, "beta": 0.01, "delta": 0.5, "spent": n,
+                                    "initial": 50, "budget": 400}, "ratio": 0.5}
+    return e
+
+
+def test_two_conjuncts_stretches_never_pool():
+    """Bite A5: the conjunct is part of the pooling key (`union_key`), so the stretches of `P x` and of
+    `Q x` under one binding, at seeds 1 and 2, are two unions of one stretch each; and a statistical
+    stretch of `Q x` does not continue the test of `P x`. With no caller filtering the entries first."""
+    p1, q2 = _stretch("P x", 1), _stretch("Q x", 2)
+    entries = [q2, p1]
+    assert certify.union_key(p1) != certify.union_key(q2)
+    assert certify.pooled(entries, "T", "hT", certify.union_key(p1)) == 100
+    assert list(certify.stretches(entries, "T", "hT", certify.union_key(q2))) == [2]
+    assert certify.pools(entries, "T", "hT") == []
+    p2 = _stretch("P x", 2)
+    assert certify.pools([p2] + entries, "T", "hT") == ["P x: pooled over seeds 1, 2: 200 cases in all"]
+    ps = _stretch("P x", 1, 30, statistical=True)
+    qs = _stretch("Q x", 2, 30, statistical=True)
+    cutoffs = {"alpha": 0.01, "beta": 0.01, "delta": 0.5, "initial": 50, "budget": 400}
+    assert certify.continuation([ps], qs, cutoffs, "c") is None
+    assert certify.continuation([ps], dict(ps, seed=2), cutoffs, "c") == {"ratio": 0.5, "spent": 30, "seeds": [1]}

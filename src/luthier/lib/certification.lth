@@ -369,6 +369,11 @@ underAll (b : List DrawnParameter) (es : List Entry) : List Entry := map Entry E
 -- which its evidence names): stretches run under two budgets are one union. Here `Entry` does not
 -- name that parameter, so `pooledCases` compares bindings whole; stating it waits for the entry to
 -- carry its cutoffs' parameter (a gap of this draft, the specimen ahead of the reference).
+-- [wave A, bite A5, audit 1.4 C (5b1a05e)] The specimen's key carries the conjunct of a conjunction's
+-- entry too (7.S22: two conjuncts are two laws, and their stretches never pool), and certify.py's
+-- `union_key` states the pooling preconditions. `stretchesUnder` here filters by the binding alone:
+-- the conjunct is a second gap of the same kind, kept so that `Pooling`'s certified cones stay as
+-- they are; the laws hold of a law's own entries, where the conjunct is `nothing` for all.
 drawnStretch (e : Entry) : Bool :=
   match e.evidence { Tested v -> true ; Points A pts c -> (match c { Drawn s -> true ; _ -> false }) ; _ -> false }
 stretchKey (e : Entry) : Maybe Seed := if drawnStretch e then just e.seed else nothing

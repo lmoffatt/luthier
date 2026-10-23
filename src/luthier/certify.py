@@ -938,13 +938,15 @@ def law_regions(entries):
     return list(found.values())
 
 
-def binding_evidence(entries, law, current, binding):
+def binding_evidence(entries, law, current, binding, conjunct=None):
     """certification.lth's `casesAt` for one binding: per region, the cases of the passes under it at
-    the current hash, each stretch once (`stretches`: a seed at its largest `n`)."""
+    the current hash, each stretch once (`stretches`: a seed at its largest `n`); of the conjunct
+    named, for a conjunction's entries (bite A5: the conjunct is in the union's key)."""
     counts = {}
     key = binding if isinstance(binding, list) else None
     for e in _laws_own(entries):
-        if e["law"] == law and e["cone"] == current and e["binding"] == binding:
+        if (e["law"] == law and e["cone"] == current and e["binding"] == binding
+                and e.get("conjunct") == conjunct):
             key = union_key(e)
             break
     if key is None:
@@ -957,15 +959,16 @@ def binding_evidence(entries, law, current, binding):
     return counts
 
 
-def regioned(entries, law, current, binding, base, combine=COMBINATION):
+def regioned(entries, law, current, binding, base, combine=COMBINATION, conjunct=None):
     """certification.lth's `overRegions`: the binding's grade `base` combined over the law's regions,
     each the binding's grade where it has cases under the binding and at most sampled where it has
     none (`regionGrade`; `restrict` to the region, bite A4); with no region, `base`. With the empty
-    regions that capped it."""
-    rs = law_regions([e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current])
+    regions that capped it. For a conjunction's entry, the regions and cases of its `conjunct`."""
+    rs = law_regions([e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current
+                      and e.get("conjunct") == conjunct])
     if not rs:  # `NoRegionsLeaveTheGrade`, and no stretch is read (a demand's entries may be built in part)
         return base, []
-    counts = binding_evidence(entries, law, current, binding)
+    counts = binding_evidence(entries, law, current, binding, conjunct)
     held, empty = HeldAt(base), []
     for r in reversed(rs):
         n = counts.get(_key(r), 0)
@@ -1007,18 +1010,20 @@ def certificate_held(entries, law, current, combine=COMBINATION, conjuncts=None)
         return _held_and_empty(counts, law, current, combine, law)
     held, lowered = EMPTY_FOLD, []
     for c in conjuncts:
-        h, empty = _held_and_empty([e for e in counts if e.get("conjunct") == c], law, current, combine, c)
+        h, empty = _held_and_empty(counts, law, current, combine, c, conjunct=c)
         held = all_of(held, h, combine)
         lowered += [n for n in empty if n not in lowered]
     return held, lowered
 
 
-def _held_and_empty(entries, law, current, combine=COMBINATION, obligation=None):
-    """`certificate_held` over the entries of one law or one conjunct (the obligation named): a failure
-    or a disagreement refutes it; under one binding the `alternative` of its passes; across bindings,
-    each read over the law's regions (`regioned`), `allOf` with the demand's combination."""
+def _held_and_empty(entries, law, current, combine=COMBINATION, obligation=None, conjunct=None):
+    """`certificate_held` over the entries of one law or, with `conjunct`, of one of its conjuncts (the
+    obligation named): a failure or a disagreement refutes it; under one binding the `alternative` of
+    its passes; across bindings, each read over the law's regions (`regioned`), `allOf` with the
+    demand's combination. Without `conjunct`, every entry of the law counts (a law's own)."""
     obligation = obligation or law
-    counts = [e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current]
+    counts = [e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current
+              and (conjunct is None or e.get("conjunct") == conjunct)]
     if any(_failed(e) for e in counts) or disputes(counts):
         return FailedObligation(obligation), []
     best, bindings = {}, {}
@@ -1031,7 +1036,7 @@ def _held_and_empty(entries, law, current, combine=COMBINATION, obligation=None)
         return NoEntry(obligation), []
     held, lowered = EMPTY_FOLD, []
     for b, j in best.items():
-        h, empty = regioned(entries, law, current, bindings[b], j.grade, combine)
+        h, empty = regioned(entries, law, current, bindings[b], j.grade, combine, conjunct)
         if GRADE_RANK[h] < GRADE_RANK[j.grade]:
             lowered += [n for n in empty if n not in lowered]
         held = all_of(HeldAt(h), held, combine)
@@ -1097,15 +1102,29 @@ def union_key(entry):
     """The binding a stretch is pooled under: its binding, without the drawing of a statistical
     stretch's cutoffs (the parameter its evidence names), whose budget is the demand's for the whole
     test and not part of the distribution (D-2026-10-16-g, D-2026-10-15-b). [bite 13c] With the budgets
-    that change the distribution (`sampling`), the last element: one union is one distribution."""
+    that change the distribution (`sampling`), the last element: one union is one distribution.
+    [wave A, bite A5; audit 1.4 C (5b1a05e)] And the conjunct of a conjunction's entry (7.S22), before
+    the sampling: two conjuncts are two laws, and their stretches under one binding and seed never
+    pool.
+
+    The pooling preconditions, which `stretches`, `pooled`, `pools` and `continuation` read from this
+    key and from the entries' law and cone, so that no caller filters the entries first: the stretches
+    of one union are of one law, at one hash of its cone, under one binding (its fingerprints
+    included), one sampling identity and one conjunct. A seed is a replay coordinate (7.S1: the seed
+    threaded draw by draw, so a run of n cases is the first n of any larger run of it); that the
+    stretches of several seeds are one sample of their total size is the generator's distribution
+    law of 7.S1 (each seed's stream an independent draw from the one distribution the key names),
+    which the protocol owes and this function does not check."""
     evidence = entry.get("evidence")
     cutoffs = evidence.get("cutoffs") if isinstance(evidence, dict) else None
     return _without(entry, cutoffs)
 
 
 def _without(entry, parameter):
-    """The entry's binding without the drawing of `parameter`, with its `sampling` last."""
+    """The entry's binding without the drawing of `parameter`, with its conjunct (bite A5) and its
+    `sampling` last."""
     key = [d for d in entry["binding"] if not (isinstance(d, dict) and d.get("parameter") == parameter)]
+    key += [{"conjunct": entry["conjunct"]}] if entry.get("conjunct") is not None else []
     return key + ([{"sampling": sampling(entry)}] if sampling(entry) is not None else [])
 
 
@@ -1139,7 +1158,8 @@ def pools(entries, law, current):
             if len(union) > 1:
                 seeds = ", ".join(str(k) for k in sorted(k for k in union if k is not None))
                 unit = "samples" if any(_tested(f) for _, f in union.values()) else "cases"
-                words.append(f"pooled over seeds {seeds}: {sum(n for n, _ in union.values())} {unit} in all")
+                of = f"{e['conjunct']}: " if e.get("conjunct") is not None else ""
+                words.append(f"{of}pooled over seeds {seeds}: {sum(n for n, _ in union.values())} {unit} in all")
     return words
 
 
@@ -1385,7 +1405,7 @@ def witness(demand, entries):
         if d is None:
             return None
         mine = entries if c is None else [f for f in entries if f.get("conjunct") == c]
-        e = next((e for e in mine if serves_over(d, e, mine)), None)
+        e = next((e for e in mine if serves_over(d, e, entries)), None)
         if e is None:
             return None
         found.append(e)
@@ -1531,7 +1551,7 @@ def served_grade(demand, entry, entries=None):
     if not entries or entry_kind(entry) is not None:
         return entry["grade"]
     g, _ = regioned(entries, entry["law"], entry["cone"], entry["binding"], entry["grade"],
-                    demand.get("combine", COMBINATION))
+                    demand.get("combine", COMBINATION), entry.get("conjunct"))
     return _or_weakest(g, entry["grade"])
 
 
@@ -1613,7 +1633,7 @@ def show_refusal(refusal, entries):
         why = ""
         if lowered:  # the regions that held it at sampled (D-2026-10-16-i)
             _, empty = regioned(entries, d["law"], lowered[0]["cone"], lowered[0]["binding"], lowered[0]["grade"],
-                                d.get("combine", COMBINATION))
+                                d.get("combine", COMBINATION), lowered[0].get("conjunct"))
             why = f" (no case in {', '.join(empty)})"
         return f"{head}: passed, {GRADE_WORDS[best]}{why}, below the grade accepted ({GRADE_WORDS[d['accepts']]})"
     shown = ", ".join(f"{p} = {_shown_value(v)}" for p, v in d["given"])
