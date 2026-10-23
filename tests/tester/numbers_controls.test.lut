@@ -9,8 +9,8 @@
 -- size of a million repeat a law already controlled and have no control of their own.
 
 import "test.lth" test ExhaustiveMode SampledMode
-import "generators_model.lut" linear
-import "generators.lth" Binding
+import "generators_model.lut" linear sameOrFloat
+import "generators.lth" Binding byParameter
 import "laws.lth" Listed
 import "numbers_model.lut" doubles integerDivision conversion elementary absDistanceIsAMetricWithinModel
 import "numbers.lth" Tolerance Moderate NonZero Tame Doubles IntegerDivision Conversion Elementary absDistance abs
@@ -517,24 +517,27 @@ erfDoubledProfile : List Binding := [
 
 -- §2 the doubles. `Doubles`, the claim: each broken model refutes a different conjunct, the
 -- conjuncts running in order until one is refuted (7.S22)
+-- [bite A3b] `y` equal to `x` in a quarter of the draws (generators_model.lut's `sameOrFloat`), so that
+-- the conjunct Antisymmetric sees its premise; the other conjuncts with a `y` draw it so too
+sameY : List Binding := [byParameter "y" "sameOrFloat"]
 -- plus is a - b, which is not commutative
-test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- swappedProfile) (control <- true)
+test "Doubles" (SampledMode linear) (seed <- 20261015) (whereBindings <- sameY) (profile <- swappedProfile) (control <- true)
 -- times adds a - b to the product, which is not symmetric
-test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- timesSkewedProfile) (control <- true)
+test "Doubles" (SampledMode linear) (seed <- 20261015) (whereBindings <- sameY) (profile <- timesSkewedProfile) (control <- true)
 -- plus adds one to the sum, so x + 0 is x + 1
-test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- plusOffProfile) (control <- true)
+test "Doubles" (SampledMode linear) (seed <- 20261015) (whereBindings <- sameY) (profile <- plusOffProfile) (control <- true)
 -- times adds one to the product, so x * 0 is 1
-test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- timesOffProfile) (control <- true)
+test "Doubles" (SampledMode linear) (seed <- 20261015) (whereBindings <- sameY) (profile <- timesOffProfile) (control <- true)
 -- times scales by 1.5, so x * 1 is 1.5 x
-test "Doubles" (SampledMode linear) (seed <- 20261021) (profile <- timesScaledProfile) (control <- true)
+test "Doubles" (SampledMode linear) (seed <- 20261021) (whereBindings <- sameY) (profile <- timesScaledProfile) (control <- true)
 -- minus takes twice b, so negating twice multiplies by four
-test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- minusDoubledProfile) (control <- true)
+test "Doubles" (SampledMode linear) (seed <- 20261015) (whereBindings <- sameY) (profile <- minusDoubledProfile) (control <- true)
 -- leq is the strict order, which fails on x and x
-test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- leqStrictProfile) (control <- true)
+test "Doubles" (SampledMode linear) (seed <- 20261015) (whereBindings <- sameY) (profile <- leqStrictProfile) (control <- true)
 -- leq is equality, so two distinct doubles are not comparable
-test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- leqIsEqualProfile) (control <- true)
+test "Doubles" (SampledMode linear) (seed <- 20261015) (whereBindings <- sameY) (profile <- leqIsEqualProfile) (control <- true)
 -- leq is always true, so two distinct doubles are each at most the other
-test "Doubles" (SampledMode linear) (seed <- 20261015) (profile <- leqAlwaysProfile) (control <- true)
+test "Doubles" (SampledMode linear) (seed <- 20261015) (whereBindings <- sameY) (profile <- leqAlwaysProfile) (control <- true)
 -- leq allows a slack of one, which does not compose along the listed chain
 test "Doubles" ExhaustiveMode (whereBindings <- slackChainBinding) (profile <- leqSlackProfile) (control <- true)
 

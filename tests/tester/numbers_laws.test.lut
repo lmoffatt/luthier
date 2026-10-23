@@ -5,8 +5,8 @@
 -- [proposed] a demand's parameter (11.S18) chosen here, not by numbers.lth.
 
 import "test.lth" test ExhaustiveMode SampledMode
-import "generators_model.lut" linear
-import "generators.lth" Binding
+import "generators_model.lut" linear sameOrFloat
+import "generators.lth" Binding byParameter
 import "laws.lth" Listed
 import "numbers_model.lut" doubles integerDivision conversion elementary absDistanceIsAMetricWithinModel
 import "numbers.lth" Tolerance Moderate NonZero Tame Doubles DivideOne MinusSelf DivideSelf MinusIsPlusNegated LessIsStrict
@@ -29,7 +29,10 @@ models : List Binding := [
 -- §2 the doubles. `Doubles` is the claim, a conjunction of the core's properties and the laws of
 -- numbers.lth §2; the tester gives each conjunct its entry (7.S22). The laws of §2 also have lines
 -- of their own, so that each has its control (numbers_controls.test.lut). Bite 8, 2026-10-21.
-test "Doubles" (SampledMode linear) (profile <- models)
+-- [bite A3b] `y` equal to `x` in a quarter of the draws (generators_model.lut's `sameOrFloat`), so that
+-- the conjunct Antisymmetric sees its premise; the other conjuncts with a `y` draw it so too
+sameY : List Binding := [byParameter "y" "sameOrFloat"]
+test "Doubles" (SampledMode linear) (whereBindings <- sameY) (profile <- models)
 test "DivideOne" (SampledMode linear) (profile <- models)
 test "MinusSelf" (SampledMode linear) (profile <- models)
 test "DivideSelf" (SampledMode linear) (profile <- models)
@@ -47,7 +50,7 @@ test "TimesAssociativeWithin" (SampledMode linear) (profile <- models)
 test "TimesDistributiveWithin" (SampledMode linear) (profile <- models)
 test "DivideInvertibleWithin" (SampledMode linear) (profile <- models)
 -- the same at a size of a million
-test "Doubles" (SampledMode linear) (size <- 1000000) (profile <- models)
+test "Doubles" (SampledMode linear) (size <- 1000000) (whereBindings <- sameY) (profile <- models)
 test "DivideSelf" (SampledMode linear) (size <- 1000000) (profile <- models)
 test "PlusMonotone" (SampledMode linear) (size <- 1000000) (profile <- models)
 test "TimesMonotone" (SampledMode linear) (size <- 1000000) (profile <- models)

@@ -243,8 +243,11 @@ dependent (A : U) (B : A -> U) (ga : Gen A) (gb : (x : A) -> Gen (B x)) : Gen ((
 -- one, whatever `g` returns.
 scrambled (s : Seed) : Seed := (1327217884 * s) mod 2147483647
 unitOf (s : Seed) : Float64 := toFloat64 (scrambled s) / 2147483647.0
-equalOr (A : U) (share : Float64) (g : Gen A) (x : A) : Gen A :=
-  fn n s { if unitOf s < share then (x, nextSeed s) else (match g n (scrambled s) { (y, s2) -> (y, nextSeed s) }) }
+-- `mixture A share g h` draws from `g` with probability `share` and otherwise from `h`; `equalOr` is
+-- the mixture whose first part is the constant `x`.
+mixture (A : U) (share : Float64) (g h : Gen A) : Gen A :=
+  fn n s { match (if unitOf s < share then g else h) n (scrambled s) { (y, s2) -> (y, nextSeed s) } }
+equalOr (A : U) (share : Float64) (g : Gen A) (x : A) : Gen A := mixture A share (fn n s { (x, s) }) g
 
 -- ---------------------------------------------------------------- §5 Censuses and bindings
 

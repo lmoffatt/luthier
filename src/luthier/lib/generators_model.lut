@@ -11,7 +11,7 @@
 -- `Random`'s statistical laws, sources broken on purpose (L9.14).
 
 import "generators.lth" Placement LinearPlacement LogPlacement WeightedSupport Filter Resolution Gen power pick resolve filtered Seed
-  Random DrawsAreUniform DrawsAreIndependent nextSeed scrambled unitOf equalOr
+  Random DrawsAreUniform DrawsAreIndependent nextSeed scrambled unitOf equalOr mixture
 import "laws.lth" Law Sequential
 
 -- `linear`: uniform between the bounds, for a quantity whose meaning does not change when shifted
@@ -106,7 +106,10 @@ pickFrom (T : U) (first : T) (rest : List T) : Gen T :=
 -- cone and the line's identity (bite 13c item 2); a line that wants another writes its own family.
 sameOrInt (x : Int) : Gen Int := equalOr Int 0.25 intsWithin x
 sameOrNat (x : Int) : Gen Int := equalOr Int 0.25 natsWithin x
-sameOrFloat (x : Float64) : Gen Float64 := equalOr Float64 0.25 floatsWithin x
+-- the doubles' other part takes a special value in a quarter of its draws (zero, one, the ends that
+-- `Moderate` and `Tame` share; numbers.lth), as the tester's own draws of a number do (7.S4)
+doubleSpecials : Gen Float64 := pickFrom Float64 0.0 [1.0, -1.0, 1.0e100, -1.0e100, 1.0e-100, -1.0e-100]
+sameOrFloat (x : Float64) : Gen Float64 := equalOr Float64 0.25 (mixture Float64 0.25 doubleSpecials floatsWithin) x
 sameOrString (x : String) : Gen String := equalOr String 0.25 (pickFrom String "" ["a", "b", "ab", "ba", "z"]) x
 
 symmetricGives (a : Mat Float64) : Bool := a.m == a.n and approxMat exact a (transposeDef a)
