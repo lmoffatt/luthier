@@ -145,3 +145,19 @@ Should the store's predicate read the order written, with the date kept as the r
 the theory drops `notBefore` and the predicate holds as `record` builds it. Or should the tester
 date an entry when it writes it, after which those five stores pass only once they are
 re-certified?
+
+## Follow-up: the order written
+
+The coordinator answered the question on 2026-10-23 with its first option: the store's predicate
+reads the order written, since an append is the store's history, and an entry's date stays the
+start of its run. In certification.lth I removed `notBefore` and `latestInFront`, so `Store` is
+`gradedAsOutcome es and heldAsRun es`. A comment there says why no date is read. A new law,
+`RecordingKeepsTheOrderWritten` (recording leaves the store as it was or puts the new entry in front
+of it), is part of `Recording`. It has a line in certification_laws.test.lut and a control in
+certification_controls.test.lut, `writingBehind`, a store that writes a new entry behind the others,
+which is refuted. In certify.py I removed `latest_in_front` and updated `store_errors`'s docstring;
+`record` already builds the order. `test_the_latest_in_front_is_the_order_written` checks that an
+entry dated before the one behind it is no error. The five stores need no re-certification for
+this, and the three test files pass (97 passed, 2 skipped). `Recording`'s conjunction gained a conjunct, so its cone moved: one more store entry for the
+coordinator's wave. Pruning drops entries without reordering them, but `PruningOnlyDrops` checks
+membership only; a law on the order it keeps waits for a case that needs it (P8).
