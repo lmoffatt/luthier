@@ -19,6 +19,25 @@ section 3: 9b the `Within` form, 9c ε̂ recorded, 9d the budget law's mode) are
 no execution document; the audit's numerical gaps are theirs, so they appear here as B1, C1 and C2
 with that report as a source [mine: the folding].
 
+## Status, 2026-10-23 evening (coordinator)
+
+Wave A done: A1 (03723fa, b395a05), A8 (ac2c7b8), A2 and A7 (report-wave-a-2.md), A4, A5, A6 and the
+order written (report-wave-a-1.md), A3, A9 (report-wave-a-3.md) and A3b, `q or not p` as a premise
+with generators of related pairs (report-wave-a-3b.md); the run path's conjuncts and `implies` in
+the runtime slice (1e3bd6f). The re-certification wave runs after it. Left by wave A for later
+bites, none blocking B to E:
+- comparisons are not typed (`x == "a"` with `x : Int` passes check): a typing bite, it moves cones;
+- a name capture in elaborate.py's `solve` when a type parameter is named like the pattern's binder
+  (`size` on a `List A` with a parameter `A`), worked around in `pickFrom`;
+- premises seen in only 2 of 100 cases (`IntAntisymmetric`, `IntInjective`, `IntBijective`,
+  `IntPartialOrder`) and 2 of 4 to 6 (the plan digest laws): their lines need related-pair
+  generators too;
+- certification.lth's `Outcome` has no `Vacuous` constructor (the tester writes `NotRunFor` with
+  the count);
+- roots of trust declared in the program go with D-2026-10-16-n's bite of the queue (the
+  coordinator's answer to report-wave-a-2.md);
+- pruning keeps the order but no law says so; added when a case needs it (P8).
+
 ## Wave A. Now, no question of his
 
 ### A1. The record's corrections (Sonnet; record only)
