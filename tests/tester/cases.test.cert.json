@@ -1,7 +1,57 @@
 [
  {
+  "law": "Partial",
+  "cone": "sha256:4edf82754016cc9ead04ac27bb5d930ba6645fd61a8e7e33b61f62495356c9ed",
+  "binding": [
+   {
+    "parameter": "b",
+    "generator": "ExhaustiveMode over Bool",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "b",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 1,
+    "coverage": "Exhaustive",
+    "verdict": "Unsettled"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "unsettled: 1 cases raised, the first at b = false: stuck match"
+  },
+  "date": "2026-10-23T00:25:55+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "regions": []
+ },
+ {
   "law": "RootIsNotNegative",
-  "cone": "sha256:e24e89ca37b677c3b5b356c5968b07bdaa4b8f492f0ce347b49470948ea04cb1",
+  "cone": "sha256:c8329e1b18560aa5088c03f42d4e1aa5a3ef226bc5aaf7c9b04332c792a749a1",
   "binding": [
    {
     "parameter": "x",
@@ -49,8 +99,8 @@
   "outcome": {
    "NotRunFor": "unsettled: 7 cases raised, the first at x = -4.821664994140733: extern python:math.sqrt failed: math domain error"
   },
-  "date": "2026-10-22T08:41:56+00:00",
-  "interpreter": "v0.2",
+  "date": "2026-10-23T00:25:55+00:00",
+  "interpreter": "v0.3",
   "hosts": [
    [
     "python:math.sqrt",
@@ -91,55 +141,5 @@
   "date": "2026-10-21T08:49:29+00:00",
   "interpreter": "v0.2",
   "hosts": []
- },
- {
-  "law": "Partial",
-  "cone": "sha256:4116be0a040d557c4ee030eabbb0fc1a0b355a1fe237d15c6c2ae0e772c1de7e",
-  "binding": [
-   {
-    "parameter": "b",
-    "generator": "ExhaustiveMode over Bool",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "b",
-    "reach": "Support"
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 1,
-    "coverage": "Exhaustive",
-    "verdict": "Unsettled"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "NotRunFor": "unsettled: 1 cases raised, the first at b = false: stuck match"
-  },
-  "date": "2026-10-18T00:49:24+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "regions": []
  }
 ]
