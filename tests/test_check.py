@@ -710,3 +710,59 @@ def test_a_structure_whose_laws_fix_its_carrier_is_accepted_and_resolves_there()
                                 'Other (F : U) : { plus : F -> F -> F }\n'
                                 'Machine (F : U) (m : Other Float64) := m.plus 0.0 0.0 == 0.0')
     assert c.violatesR6(program(bad), 'Machine')
+
+
+# ---------------------------------------------------------------- the kinds of a hole (wave A, bite A9; O9, L2.3)
+
+KINDS = '''Codec : { parse : String -> Maybe Int, render : Int -> String }
+RoundTrip (c : Codec) (n : Int) : Bool := c.parse (c.render n) == just n
+Stable (c : Codec) : Bool
+Codec := RoundTrip & Stable
+width : Int
+scale : Int -> Int
+shout : String -> String := extern "builtins.str.upper"
+Opaque : U
+'''
+
+
+def test_each_hole_is_reported_with_its_kind():
+    """A parameter, an operation, an axiom (a Bool a conjunction claims), a type, an external; a
+    declared name the file defines (`Codec`) is no hole."""
+    holes = {r.name: r.message.split(':')[0] for r in c.report(program(KINDS)) if r.kind == 'hole'}
+    assert holes == {'Stable': 'axiom', 'width': 'parameter', 'scale': 'operation', 'shout': 'external',
+                     'Opaque': 'type'}
+
+
+def test_an_inference_unknown_is_its_own_kind():
+    from luthier import term as t
+    from luthier.elaborate import hole_kind, HOLE_KINDS
+    assert hole_kind(t.Hole('?A1')) == 'unknown' and hole_kind(t.Hole('erased')) is None
+    assert set(HOLE_KINDS) == {'unknown', 'parameter', 'operation', 'axiom', 'type', 'external'}
+
+
+MEASURED = '''Measured (C : U) : { measureOf : C -> Int }
+listInt : Measured (List Int) := { measureOf := fn (xs : List Int) { 0 } }
+MeasuredListInt : Bool := Measured (List Int) listInt
+'''
+
+
+def test_an_unknown_chooses_no_claim():
+    """`nil : List ?A` matched the one claim at `List Int` before bite A9: the unknown was the
+    evidence that the model was the type's. Now the type is asked for; an annotated `nil` and a
+    claim generic in the element still resolve."""
+    failures = c.check(program(MEASURED + 'emptySize : Int := measureOf nil\n'))
+    assert any(f.rule == '4.R13' and f.name == 'emptySize' and '?A1 is not known' in f.message for f in failures)
+    annotated = MEASURED + 'none : List Int := nil\nemptySize : Int := measureOf none\n'
+    assert not any(f.name == 'emptySize' for f in c.check(program(annotated)))
+    generic = ('Measured (C : U) : { measureOf : C -> Int }\n'
+               'listAny (A : U) : Measured (List A) := { measureOf := fn (xs : List A) { 0 } }\n'
+               'MeasuredList (A : U) : Bool := Measured (List A) (listAny A)\n'
+               'emptySize : Int := measureOf nil\n')
+    assert not any(f.name == 'emptySize' for f in c.check(program(generic)))
+
+
+def test_a_mixed_operator_term_is_refused_since_the_core_s_bite_4():
+    """A9's verification (record/plan/core-2026-10-17/decisions.md's finding): `x + "a"` no longer
+    passes `check` (4.R9, the right operand fits the binding's domain)."""
+    failures = c.check(program('f (x : Int) : Int := x + "a"\n'))
+    assert any(f.rule == '4.R9' and f.name == 'f' for f in failures)

@@ -7,7 +7,7 @@ R10 is author judgement, R11 a typing law, S23 is an elaboration law.
 from functools import lru_cache
 from dataclasses import dataclass, fields, is_dataclass
 from . import surface as s, term as t
-from .elaborate import elaborate_program, context_of, walk, walk_type, as_type, infer, parameters, curry, theory_domains, ElaborationError, TypingError, fits as type_fits, refines as type_refines
+from .elaborate import elaborate_program, context_of, walk, walk_type, as_type, infer, parameters, curry, theory_domains, ElaborationError, TypingError, fits as type_fits, refines as type_refines, hole_kinds
 from .kernel import alpha_equal, substitute, reduce, free_names, pattern_names
 from .run import FileScope, EXECUTIVE, KIND_NAME, SUFFIX, executive_import, file_kind
 
@@ -1227,12 +1227,27 @@ def report(program, path=None) -> list[Report]:
     file's `path`), then each name's reports."""
     q = _checked[1] if _checked[0] == tuple(program) else typing_of(program)
     result = [coverage(q)] + redundant_imports(program, path)
+    # [bite A9] each hole of the file with its kind (O9, L2.3; elaborate.hole_kinds)
+    own = {a.name for a in program if isinstance(a, (s.Declare, s.Define))}
+    for n, kind in hole_kinds(q.program, own).items():
+        result.append(Report('hole', n, f'{kind}: {HOLE_MEANINGS[kind]}'))
     for n in dict.fromkeys(a.name for a in program if isinstance(a, (s.Declare, s.Define, s.Alias))):
         for kind, pred, message in [('unclaimed', violatesS14, 'No other definition claims this Bool law.'), ('provisional', provisionalExtern, 'Provisional extern.'), ('loose', looseFunction, 'Top-level function; reported pending local definitions.')]:
             if pred(program, n):
                 if kind == 'provisional': message = f'Provisional extern: {provisional_reasons(program, n)}; run refuses it unless named by --accept assumed:{n}.'
                 result.append(Report(kind, n, message))
     return result
+
+
+# what the demand does with each kind of hole (L2.3; elaborate.py's comment at HOLE_KINDS)
+HOLE_MEANINGS = {
+    'parameter': 'a value the demand asks for (--set)',
+    'operation': 'pending: an error when a demand reaches it, until defined or externed',
+    'axiom': 'a law with grade assumed, reasoned with and never run (L2.2)',
+    'type': 'a type declared, defined by its laws or left abstract',
+    'external': 'the host gives the value (L2.4)',
+    'unknown': 'a type inference left open',
+}
 
 
 def provisional_reasons(p, n):

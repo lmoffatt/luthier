@@ -189,6 +189,92 @@ def has_hole(x):
     return False
 
 
+# ---------------------------------------------------------------------- the kinds of a hole (O9)
+
+# [wave A, bite A9; record/plan/audit-algebras-2026-10-22/execution.md; O9, L2.1 to L2.4; the audit
+# of 2026-10-22, section 12 "O9: holes" (report.md, 5b1a05e)] To the checker a declaration without a
+# body is one thing (L2.3); the demand treats its kinds differently, and the elaborated form tells
+# them apart by what it holds:
+#   unknown     a type inference left open, `Hole('?x')` (`Context.meta`; check.py's pattern
+#               variables, `Hole('type')`): never a value, and never the evidence that a claim or a
+#               binding is the type's (`solve`'s `strict`);
+#   parameter   a value declared at a type, no body: an input the demand asks for (`--set`, 12.S18);
+#   operation   a function declared, no body: pending, an error when a demand reaches it, until a
+#               definition or an extern gives it;
+#   axiom       a Bool or `Law` declared, no body, that a theory's conjunction claims: a law with
+#               grade `assumed`, reasoned with and never run (L2.2);
+#   type        a type or a theory's carrier declared (at `U` or a record, 4.S8): defined by its
+#               laws or left abstract, not a value;
+#   external    a definition whose body is an extern (L2.4): the host gives the value.
+# Dead code, the fifth of L2.1, is the demand's (no demand reaches the name), not the elaborated
+# form's. [proposed] The kind is read from the elaborated act and the program's conjunctions, not
+# stored in `t.Declare`, which is the kernel's (term.py) and whose fields every cone hashes.
+HOLE_KINDS = ('unknown', 'parameter', 'operation', 'axiom', 'type', 'external')
+
+
+def _conjuncts_of(term):
+    """The heads of the leaves of a conjunction `&` (`T := A & B & C`), or of the term alone."""
+    while isinstance(term, t.Lam):
+        term = term.body
+    head, args = head_of(term)
+    if head == t.Var('&') and len(args) >= 2:
+        return _conjuncts_of(args[0]) | _conjuncts_of(args[1])
+    return {head.name} if isinstance(head, t.Var) else set()
+
+
+def claimed_by_conjunctions(program):
+    """The names a definition's conjunction of laws claims (`Codec := RoundTrip & Rejects`)."""
+    out = set()
+    for a in program:
+        if isinstance(a, t.Define):
+            body = a.body
+            while isinstance(body, t.Lam):
+                body = body.body
+            if head_of(body)[0] == t.Var('&'):
+                out |= _conjuncts_of(body)
+    return out
+
+
+def hole_kind(act, axioms=frozenset()):
+    """The kind of a hole (above): of a `t.Hole`, `unknown`; of a declaration with no definition, by
+    its type (`axioms` the names a conjunction claims, `claimed_by_conjunctions`); of a definition,
+    `external` when its body is an extern; None for anything else (a defined name is no hole)."""
+    if isinstance(act, t.Hole):
+        return 'unknown' if is_meta(act) or act.name == 'type' else None
+    if isinstance(act, t.Define):
+        body = act.body
+        while isinstance(body, t.Lam):
+            body = body.body
+        return 'external' if isinstance(head_of(body)[0], t.Extern) else None
+    if not isinstance(act, t.Declare):
+        return None
+    ty, arity = act.type, 0
+    while isinstance(ty, t.Pi):
+        ty, arity = ty.codomain, arity + 1
+    if isinstance(ty, (t.Universe, t.Record)):
+        return 'type'
+    if ty in (t.Var('Bool'), t.Var('Law')) and act.name in axioms:
+        return 'axiom'
+    return 'operation' if arity else 'parameter'
+
+
+def hole_kinds(program, names=None):
+    """{name: kind} of the holes of an elaborated program (`names`, when given, the ones asked): its
+    declarations that no act defines and its externs."""
+    defined = {a.name for a in program if isinstance(a, t.Define)}
+    axioms = claimed_by_conjunctions(program)
+    out = {}
+    for a in program:
+        if not isinstance(a, (t.Declare, t.Define)) or names is not None and a.name not in names:
+            continue
+        if isinstance(a, t.Declare) and a.name in defined:
+            continue
+        kind = hole_kind(a, axioms)
+        if kind is not None:
+            out[a.name] = kind
+    return out
+
+
 def show(v):
     try:
         return show_term(v)
@@ -317,11 +403,17 @@ def _replace_metas(x, metas):
     return x
 
 
-def solve(pattern, actual, vars, sigma, c, fuel=8):
+def solve(pattern, actual, vars, sigma, c, fuel=8, strict=False):
     """Extend `sigma` so that `pattern` under it is `actual`; `vars` the names free in `pattern` to
     solve (its unknowns are solved too). First-order: an application by its head and arguments, a
     function type by domain and codomain, a record by its fields; a definition on either side is
-    unfolded when the shapes differ. False when they cannot agree."""
+    unfolded when the shapes differ. False when they cannot agree.
+
+    `strict` (wave A, bite A9; O9, L2.3; the audit of 2026-10-22, section 12 "O9: holes"): an
+    inference unknown of `actual` agrees only with a variable of `pattern` being solved, never with
+    a type it names. A claim (`claim_matches`, `fill_structure`) or an operator's binding
+    (`operator_binding`) selected by an unknown would make the unknown the evidence that the model
+    is the type's: there the caller asks for the type, as it does when the whole type is unknown."""
     if isinstance(pattern, t.Var) and pattern.name in vars or is_meta(pattern):
         key = pattern.name
         if key in sigma:
@@ -330,37 +422,37 @@ def solve(pattern, actual, vars, sigma, c, fuel=8):
             sigma[key] = actual
         return True
     if isinstance(actual, t.Hole):
-        return True
+        return not strict
     if pattern == actual or alpha_equal(pattern, actual):
         return True
     if type(pattern) is type(actual):
         match pattern, actual:
             case t.App(), t.App():
-                if solve(pattern.function, actual.function, vars, sigma, c, fuel) and solve(pattern.argument, actual.argument, vars, sigma, c, fuel):
+                if solve(pattern.function, actual.function, vars, sigma, c, fuel, strict) and solve(pattern.argument, actual.argument, vars, sigma, c, fuel, strict):
                     return True
             case t.Sigma(), t.Sigma() if pattern.name == '_' and actual.name == '_':
                 pa, pb = sigma_parts(pattern, c), sigma_parts(actual, c)
                 if pa is not None and pb is not None and len(pa) == len(pb):
-                    return all(solve(x, y, vars, sigma, c, fuel) for x, y in zip(pa, pb))
-                return solve(pattern.domain, actual.domain, vars, sigma, c, fuel) and solve(pattern.codomain, actual.codomain, vars, sigma, c, fuel)
+                    return all(solve(x, y, vars, sigma, c, fuel, strict) for x, y in zip(pa, pb))
+                return solve(pattern.domain, actual.domain, vars, sigma, c, fuel, strict) and solve(pattern.codomain, actual.codomain, vars, sigma, c, fuel, strict)
             case (t.Pi() | t.Sigma()), _:
                 other = actual.codomain if actual.name == pattern.name else substitute(actual.name, t.Var(pattern.name), actual.codomain)
-                return solve(pattern.domain, actual.domain, vars, sigma, c, fuel) and solve(pattern.codomain, other, vars, sigma, c, fuel)
+                return solve(pattern.domain, actual.domain, vars, sigma, c, fuel, strict) and solve(pattern.codomain, other, vars, sigma, c, fuel, strict)
             case t.Record(), t.Record():
                 if [n for n, _ in pattern.fields] == [n for n, _ in actual.fields]:
-                    return all(solve(x, y, vars, sigma, c, fuel) for (_, x), (_, y) in zip(pattern.fields, actual.fields))
+                    return all(solve(x, y, vars, sigma, c, fuel, strict) for (_, x), (_, y) in zip(pattern.fields, actual.fields))
             case t.Sum(), t.Sum():
                 if [n for n, _ in pattern.alternatives] == [n for n, _ in actual.alternatives]:
-                    return all(solve(x, y, vars, sigma, c, fuel) for (_, x), (_, y) in zip(pattern.alternatives, actual.alternatives))
+                    return all(solve(x, y, vars, sigma, c, fuel, strict) for (_, x), (_, y) in zip(pattern.alternatives, actual.alternatives))
             case t.Subtype(), t.Subtype():
-                return solve(pattern.type, actual.type, vars, sigma, c, fuel)
+                return solve(pattern.type, actual.type, vars, sigma, c, fuel, strict)
     if fuel:
         u = unfold(actual, c) if not isinstance(actual, t.Subtype) else None
         if u is not None and u != actual:
-            return solve(pattern, u, vars, sigma, c, fuel - 1)
+            return solve(pattern, u, vars, sigma, c, fuel - 1, strict)
         p = unfold(pattern, c)
         if p is not None and p != pattern:
-            return solve(p, actual, vars, sigma, c, fuel - 1)
+            return solve(p, actual, vars, sigma, c, fuel - 1, strict)
     return False
 
 
@@ -1027,7 +1119,7 @@ def claim_matches(S, pattern_of, dty, extra_vars, c):
         pattern = pattern_of(claim)
         for candidate in bases(dty, c):
             sigma = {}
-            if (solve(pattern, candidate, frozenset(claim.binders) | frozenset(extra_vars), sigma, c)
+            if (solve(pattern, candidate, frozenset(claim.binders) | frozenset(extra_vars), sigma, c, strict=True)
                     and not sibling_subtype(pattern, sigma, dty, c)):
                 found.append((claim, sigma)); break
     # A subtype's own model takes precedence over a model inherited from its base.
@@ -1126,8 +1218,11 @@ def resolve_field(fname, structure, arguments, c, expected=None):
     if not matches:
         claimed = '; '.join(f'{S} at ' + ', '.join(show(a) for a in claim.args) + f' ({claim.name})'
                             for S in candidates for claim in c.claims.get(S, ())) or 'none'
+        # [bite A9] an unknown in the type selects no claim (`solve`'s `strict`): the type is asked for
+        unknown = sorted(_metas(found_type)) if found_type is not None else []
+        asked = f'; {", ".join(unknown)} is not known, so no claim is chosen by it: annotate it' if unknown else ''
         raise TypingError(f'{where}: no model of {" or ".join(candidates)} at {show(found_type) if found_type is not None else "the type of its argument"}'
-                          f'{"; " + "; ".join(unresolved) if unresolved else ""}; the models claimed: {claimed}', '4.R13')
+                          f'{"; " + "; ".join(unresolved) if unresolved else ""}; the models claimed: {claimed}{asked}', '4.R13')
     structures = list(dict.fromkeys(m[0] for m in matches))
     if len(structures) > 1 and len(structures) == len(matches):
         # A ring includes its semiring operations. If the claims literally name the same
@@ -1237,7 +1332,7 @@ def fill_structure(slot_type, c, where):
     found = []
     for claim in c.claims.get(S, ()):
         sigma = {}
-        if all(solve(p, a, frozenset(claim.binders), sigma, c) for p, a in zip(claim.args, args)):
+        if all(solve(p, a, frozenset(claim.binders), sigma, c, strict=True) for p, a in zip(claim.args, args)):
             found.append((claim, sigma))
     if not found:
         claimed = ', '.join(f'{S} ' + ' '.join(show(a) for a in cl.args) + f' ({cl.name})' for cl in c.claims.get(S, ())) or 'none'
@@ -1440,7 +1535,7 @@ def operator_binding(op, ty, c):
         found = []
         for b in c.bindings.get(op, ()):
             sigma = {}
-            if solve(b.domain, candidate, frozenset(b.vars), sigma, c) and not sibling_subtype(b.domain, sigma, ty, c):
+            if solve(b.domain, candidate, frozenset(b.vars), sigma, c, strict=True) and not sibling_subtype(b.domain, sigma, ty, c):
                 found.append((b, sigma))
         if found:
             exact = [x for x in found if not x[0].vars]
