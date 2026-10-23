@@ -1152,21 +1152,45 @@ def _is_false(term):
     return isinstance(term, t.Var) and _base(term) == "false"
 
 
+def _disjuncts(term):
+    """The disjuncts of a chain of `or`, in order, with the head `or` as the program calls it."""
+    head, args = _spine(term)
+    if isinstance(head, t.Var) and _base(head) == "or" and len(args) == 2:
+        left, h = _disjuncts(args[0])
+        right, _ = _disjuncts(args[1])
+        return left + right, head
+    return [term], None
+
+
+def _negated(term):
+    """`p` when `term` is `not p`, else None."""
+    head, args = _spine(term)
+    return args[0] if isinstance(head, t.Var) and _base(head) == "not" and len(args) == 1 else None
+
+
 def _premise_split(term):
-    """(premise, rest) when `term` is `implies p q`, `match p { true -> q ; false -> true }`, or `q or
-    not p` (`not p or q`), with `q` not the literal `false` (`not p` is that match, and states no
-    premise); else None. [bite A3b, the coordinator's answer of 2026-10-23 to report-wave-a-3.md's
-    question] `q or not p` is material `p -> q`, the form of the core's antisymmetry and injectivity
-    (`o.eq x y or not (r x y and r y x)`): its premise is the side under `not`, the right one when both
-    are."""
+    """(premise, rest) when `term` is `implies p q`, `match p { true -> q ; false -> true }`, or a
+    disjunction with exactly one negated disjunct, `q or not p` (`not p or q`), with `q` not the
+    literal `false` (`not p` is that match, and states no premise); else None. [bite A3b, the
+    coordinator's answer of 2026-10-23 to report-wave-a-3.md's question] `q or not p` is material `p ->
+    q`, the form of the core's antisymmetry and injectivity (`o.eq x y or not (r x y and r y x)`).
+    [proposed] With two negated disjuncts or more the reading is the author's and not the form's:
+    `not (wellFormed p) or ... or not (image (retitle p s) == image p)` (plot.lth's
+    `ImageSeesTheTitle`) has its conclusion under a `not` too, so nothing is read there."""
     head, args = _spine(term)
     if isinstance(head, t.Var) and _base(head) == "implies" and len(args) == 2:
         return args[0], args[1]
-    if isinstance(head, t.Var) and _base(head) == "or" and len(args) == 2:
-        for k in (1, 0):
-            inner, negated = _spine(args[k])
-            if isinstance(inner, t.Var) and _base(inner) == "not" and len(negated) == 1 and not _is_false(args[1 - k]):
-                return negated[0], args[1 - k]
+    parts, connective = _disjuncts(term)
+    if connective is not None:
+        negated = [(k, _negated(d)) for k, d in enumerate(parts) if _negated(d) is not None]
+        if len(negated) == 1:
+            k, premise = negated[0]
+            others = parts[:k] + parts[k + 1:]
+            rest = others[0]
+            for d in others[1:]:
+                rest = Runner.apply(connective, [rest, d])
+            if not _is_false(rest):
+                return premise, rest
     if isinstance(term, t.Match) and len(term.arms) == 2:
         arms = {}
         for pattern, body in term.arms:

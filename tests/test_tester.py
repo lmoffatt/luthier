@@ -479,7 +479,7 @@ def test_a_law_whose_premise_never_holds_is_vacuous_and_not_run(capsys):
     assert some.grade == "Sampled" and 0 < some.held < some.evaluated == 100
     assert some.entry["evidence"]["Points"]["held"] == some.held
     assert "held" not in by_law["NothingIsFalse"].entry["evidence"]["Points"]  # states no premise
-    assert by_law["NotNegative"].grade == "Sampled"  # `not p` states no premise
+    assert by_law["NotNegative"].grade == by_law["TwoNegations"].grade == "Sampled"  # they state no premise
 
 
 def test_an_empty_experiment_is_not_run_but_an_empty_type_enumerated_whole(capsys):
@@ -499,4 +499,4 @@ def test_premises_are_read_from_then_from_if_else_true_and_through_an_applied_la
     runner, specs, loaded = tester.prepare(VACUITY)
     count = {s.law: len(tester.premises_of(runner, tester._as_called(loaded, s.law))) for s in specs}
     assert count == {"NeverNegative": 1, "NeverNegativeIf": 1, "NeverNegativeApplied": 1, "NeverNegativeOr": 1,
-                     "NotNegative": 0, "SometimesNegative": 1, "ZeroIsNeutral": 0, "NothingIsFalse": 0}
+                     "NotNegative": 0, "TwoNegations": 0, "SometimesNegative": 1, "ZeroIsNeutral": 0, "NothingIsFalse": 0}
