@@ -1132,9 +1132,9 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
 # [wave A, bite A3; record/plan/audit-algebras-2026-10-22/execution.md; the audit of 2026-10-22,
 # section 12 "Vacuity, empty evidence and uncovered regions" (report.md, 5b1a05e)] A premise stated as a
 # subtype (`c : Chain A r`) is met by every case drawn, and the regions count it (`Classifier`). One
-# stated in the law's body is not: `p -> q` (`implies`, L12.7: `then` is material) or `if p then q else
-# true`, at the top of the body, under its lets (`{ r := ... ; if r.converged then ... else true }`), or
-# in the body of a law it applies, unfolded. Such a law held at every case where `p` was false, so with
+# stated in the law's body is not: `p -> q` (`implies`, L12.7: `then` is material), `if p then q else
+# true` or `q or not p` (bite A3b), at the top of the body, under its lets (`{ r := ... ; if
+# r.converged then ... else true }`), or in the body of a law it applies, unfolded. Such a law held at every case where `p` was false, so with
 # `p` never true it passed with no evidence. `judged` counts the cases where every premise held; none
 # is laws.lth's `Vacuous n`, not run with the count as its reason (D-2026-10-16-m), never a pass. A run
 # that evaluated no case and raised none is an empty experiment, not run with its reason (7.S12;
@@ -1148,12 +1148,25 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
 UNFOLD = 8
 
 
+def _is_false(term):
+    return isinstance(term, t.Var) and _base(term) == "false"
+
+
 def _premise_split(term):
-    """(premise, rest) when `term` is `implies p q` or `match p { true -> q ; false -> true }` with `q`
-    not the literal `false` (`not p` is that match, and states no premise); else None."""
+    """(premise, rest) when `term` is `implies p q`, `match p { true -> q ; false -> true }`, or `q or
+    not p` (`not p or q`), with `q` not the literal `false` (`not p` is that match, and states no
+    premise); else None. [bite A3b, the coordinator's answer of 2026-10-23 to report-wave-a-3.md's
+    question] `q or not p` is material `p -> q`, the form of the core's antisymmetry and injectivity
+    (`o.eq x y or not (r x y and r y x)`): its premise is the side under `not`, the right one when both
+    are."""
     head, args = _spine(term)
     if isinstance(head, t.Var) and _base(head) == "implies" and len(args) == 2:
         return args[0], args[1]
+    if isinstance(head, t.Var) and _base(head) == "or" and len(args) == 2:
+        for k in (1, 0):
+            inner, negated = _spine(args[k])
+            if isinstance(inner, t.Var) and _base(inner) == "not" and len(negated) == 1 and not _is_false(args[1 - k]):
+                return negated[0], args[1 - k]
     if isinstance(term, t.Match) and len(term.arms) == 2:
         arms = {}
         for pattern, body in term.arms:
@@ -1161,8 +1174,7 @@ def _premise_split(term):
                 return None
             arms[pattern.name.partition("@")[0]] = body
         yes, no = arms.get("true"), arms.get("false")
-        if (yes is not None and isinstance(no, t.Var) and _base(no) == "true"
-                and not (isinstance(yes, t.Var) and _base(yes) == "false")):
+        if yes is not None and isinstance(no, t.Var) and _base(no) == "true" and not _is_false(yes):
             return term.value, yes
     return None
 
