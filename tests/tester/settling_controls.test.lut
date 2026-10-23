@@ -9,11 +9,13 @@
 -- and four combinations (the first argument, one that is not associative, the strongest, and one
 -- that confirms two supported parts). The censuses are settling_laws.test.lut's.
 -- Written 2026-10-22 by Claude Sonnet 5.5 on record/plan/core-2026-10-17/prompt-bite-13b.md.
+-- A vacuous run that supports (`vacuousSupports`) added 2026-10-23 by Claude Opus 5.5, wave A bite A3
+-- (record/plan/audit-algebras-2026-10-22/prompt-wave-a.md; laws.lth's `VacuousIsUnsettled`).
 
 import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed Settling Law Evidence Verdict Case Forall Exists Conjunction Either Not Then Statistical Evaluated At Points
-  EvidencePair Side Cited Assumed NotRun Tested Coverage Exhaustive Bounded Drawn Confirmed Refuted Supported Unsettled Cites
+  EvidencePair Side Cited Assumed NotRun Tested Vacuous Coverage Exhaustive Bounded Drawn Confirmed Refuted Supported Unsettled Cites
   Assumes StatisticalVerdict Rates Holds Fails Unresolved byPValue StatisticalLaw Sequential isRefuted isConfirmed isSupported
 import "laws_model.lut" settling settle combineVerdicts
 
@@ -30,7 +32,7 @@ evidences : List Evidence := [Evaluated true, Evaluated false, At Int 0 (Evaluat
   Points Int [(0, Evaluated true), (1, Evaluated true)] Exhaustive, Points Int [(0, Evaluated true), (1, Evaluated true)] (Drawn 3),
   Points Int [(0, Evaluated true), (1, Evaluated false)] Exhaustive, EvidencePair (Evaluated true) (Evaluated false),
   EvidencePair (Evaluated false) (Evaluated false), Side true (Evaluated true), Side false (Evaluated false),
-  Cited "c", Assumed, NotRun "r"]
+  Cited "c", Assumed, NotRun "r", Vacuous 3]
 verdicts : List Verdict := [Confirmed, Refuted, Supported, Unsettled, Cites "c", Assumes]
 cutoffs : List Sequential := [{ alpha := 0.05, beta := 0.05, delta := 0.5, initial := 1, budget := 10 }]
 pvalueLaws : List (StatisticalLaw Int) := [byPValue Int (fn n { 0.5 })]
@@ -39,6 +41,7 @@ scalarTypes : List U := [Int]
 nats : List U := [Nat]
 aRate : Rates := { alpha := 0.05, beta := 0.05, delta := 0.5, spent := 1 }
 treated : List StatisticalVerdict := [Holds aRate, Fails aRate, Unresolved aRate]
+counts : List Nat := [0, 3]
 
 -- the broken models: the good one's settling with one shape of law or evidence read wrongly
 with (f : Law -> Evidence -> Maybe Verdict) (c : Verdict -> Verdict -> Verdict) : Settling :=
@@ -69,6 +72,7 @@ thenIsAnd (l : Law) (e : Evidence) : Maybe Verdict :=
 citationConfirms (l : Law) (e : Evidence) : Maybe Verdict := match e { Cited r -> just Confirmed ; _ -> nothing }
 assumptionConfirms (l : Law) (e : Evidence) : Maybe Verdict := match e { Assumed -> just Confirmed ; _ -> nothing }
 notRunRefutes (l : Law) (e : Evidence) : Maybe Verdict := match e { NotRun r -> just Refuted ; _ -> nothing }
+vacuousSupports (l : Law) (e : Evidence) : Maybe Verdict := match e { Vacuous n -> just Supported ; _ -> nothing }
 testConfirms (l : Law) (e : Evidence) : Maybe Verdict :=
   match l { Statistical S T sl draw c -> (match e { Tested v -> (match v { Holds r -> just Confirmed ; _ -> nothing }) ; _ -> nothing }) ; _ -> nothing }
 
@@ -96,6 +100,7 @@ bThen : List Settling := [with thenIsAnd good]
 bCited : List Settling := [with citationConfirms good]
 bAssumed : List Settling := [with assumptionConfirms good]
 bNotRun : List Settling := [with notRunRefutes good]
+bVacuous : List Settling := [with vacuousSupports good]
 bTest : List Settling := [with testConfirms good]
 bFirst : List Settling := [with noFlaw firstArgument]
 bThird : List Settling := [with noFlaw thirdOfThree]
@@ -108,7 +113,7 @@ profile (m : String) : List Binding := [bind "m" m, ofType "Bool" "bools",
   bind "r" "strings", bind "A" "types", bind "a" "ints", ofType "Law" "laws", bind "body" "quantified",
   ofType "Evidence" "evidences", bind "pts" "points", ofType "Coverage" "coverages", ofType "Verdict" "verdicts",
   bind "S" "scalarTypes", bind "T" "nats", bind "l" "pvalueLaws", bind "draw" "draws",
-  ofType "Sequential" "cutoffs", ofType "StatisticalVerdict" "treated"]
+  ofType "Sequential" "cutoffs", ofType "StatisticalVerdict" "treated", bind "n" "counts"]
 
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bCase") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bForallAt") (control <- true)
@@ -123,6 +128,7 @@ test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bTh
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bCited") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bAssumed") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bNotRun") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bVacuous") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bTest") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bFirst") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bThird") (control <- true)

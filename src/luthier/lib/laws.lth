@@ -114,8 +114,21 @@ Covering := CoveragesAreOrdered
 -- of an `exists`, a counterexample to a `forall`); points of the type with their evidence and how
 -- much they cover; a pair for `and`; one side for `or`; a citation or an assumption, which models
 -- any law whole; a run that gave no case, with its reason (a budget spent, a generator that could
--- not draw; 7.S12), which settles nothing; and, for a statistical law, the verdict of its
--- sequential test with the rates it carries (§4, 7.S17).
+-- not draw; 7.S12), which settles nothing; for a statistical law, the verdict of its
+-- sequential test with the rates it carries (§4, 7.S17); and a run whose evaluated cases all left a
+-- premise false, with how many it evaluated, which settles nothing either.
+--
+-- [wave A, bite A3, on the audit of 2026-10-22, section 12 "Vacuity, empty evidence and uncovered
+-- regions" (record/plan/audit-algebras-2026-10-22/report.md, 5b1a05e)] `Vacuous n`: D-2026-10-16-m
+-- (a law all of whose cases are vacuous is not run, its premise count the reason; L9.14: nothing
+-- can refute an empty run). A premise stated as a subtype is met by every case drawn; one stated
+-- as `then` (`p -> q`, L12.7's material reading) or as `if p then q else true` is not, and such a
+-- law passed with an antecedent never true. The tester counts the cases in which every premise
+-- held; none, of the `n` evaluated, is this evidence. An empty experiment (a sample of no case,
+-- 7.S12, test.lth's `CountsCases`) is `NotRun` with its reason, as the comment above says of a run
+-- that gave no case. [proposed] Its own constructor, not a reason of `NotRun`, so that the logical
+-- truth (the law held materially at every case) and the evidence (none) are told apart by their
+-- form (the audit's proposal).
 Evidence : U := data {
   Evaluated : Bool -> Evidence ;
   At : (A : U) -> A -> Evidence -> Evidence ;
@@ -126,6 +139,7 @@ Evidence : U := data {
   Assumed : Evidence ;
   NotRun : String -> Evidence ;
   Tested : StatisticalVerdict -> Evidence ;
+  Vacuous : Nat -> Evidence ;
 }
 
 -- What evidence settles: confirmed, refuted, supported (by a census or a sample, never confirmed),
@@ -215,6 +229,8 @@ CitedWhole (m : Settling) (p : Law) (r : String) : Bool := m.settles p (Cited r)
 AssumedWhole (m : Settling) (p : Law) : Bool := m.settles p Assumed == Assumes
 -- a run that did not run settles nothing
 NotRunIsUnsettled (m : Settling) (p : Law) (r : String) : Bool := m.settles p (NotRun r) == Unsettled
+-- [bite A3] nor does a run in which no premise held (D-2026-10-16-m), whatever it evaluated
+VacuousIsUnsettled (m : Settling) (p : Law) (n : Nat) : Bool := m.settles p (Vacuous n) == Unsettled
 -- a statistical law is settled by the verdict of its sequential test (§4): holding supports it (a
 -- sample never confirms, 7.S10), failing refutes it, and an unresolved test settles nothing
 StatisticalByTest (m : Settling) (S T : U) (l : StatisticalLaw S) (draw : Nat -> T -> S * T) (c : Sequential) (v : StatisticalVerdict) : Bool :=
@@ -234,7 +250,7 @@ CombineNeverConfirmsMore (m : Settling) (u v : Verdict) : Bool :=
 
 Settling (m : Settling) := CaseIsEvaluated m & ForallAtOnePoint m & ForallOnPoints m & ExistsAtOnePoint m & ExistsOnPoints m
   & ConjunctionByPair m & EitherBySide m & EitherRefutedByBoth m & NotFlips m & ThenIsMaterial m & CitedWhole m
-  & AssumedWhole m & NotRunIsUnsettled m & StatisticalByTest m & Commutative Verdict Verdict (structural Verdict) m.combine
+  & AssumedWhole m & NotRunIsUnsettled m & VacuousIsUnsettled m & StatisticalByTest m & Commutative Verdict Verdict (structural Verdict) m.combine
   & Associative Verdict (structural Verdict) m.combine & CombineAbsorbs m & CombineNeverConfirmsMore m
 
 -- ---------------------------------------------------------------- §4 Statistical laws

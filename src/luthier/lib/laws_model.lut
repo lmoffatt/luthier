@@ -9,9 +9,12 @@
 -- `At A a e` carries a value of the quantified type of a `forall`; the model reads it as the
 -- law's argument, which the kernel does not check against `A` (a model of laws.lth is host
 -- territory, the evidence is built by the certifier from the law's own type).
+--
+-- `Vacuous n` settles nothing, as `NotRun` (laws.lth's `VacuousIsUnsettled`; wave A, bite A3, by
+-- Claude Opus 5.5 on record/plan/audit-algebras-2026-10-22/prompt-wave-a.md, 2026-10-23).
 
 import "laws.lth" Settling Law Evidence Verdict Case Forall Exists Conjunction Either Not Then Statistical
-  Evaluated At Points EvidencePair Side Cited Assumed NotRun Tested Coverage Exhaustive StatisticalVerdict
+  Evaluated At Points EvidencePair Side Cited Assumed NotRun Tested Vacuous Coverage Exhaustive StatisticalVerdict
   Confirmed Refuted Supported Unsettled Cites Assumes Holds Fails Unresolved
   isRefuted isConfirmed isSupported isConfirmedOrSupported reversedVerdict existsVerdict
 
@@ -32,6 +35,7 @@ settle (l : Law) (e : Evidence) : Verdict := match e {
   Cited r -> Cites r ;
   Assumed -> Assumes ;
   NotRun r -> Unsettled ;
+  Vacuous n -> Unsettled ;
   _ -> match l {
     Case c -> match e { Evaluated b -> (if b == c then (if c then Confirmed else Refuted) else Unsettled) ; _ -> Unsettled } ;
     Forall A p -> match e {

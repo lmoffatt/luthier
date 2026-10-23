@@ -2,11 +2,13 @@
 -- The sixteen laws, among them the two of the combination (`Commutative` and `Associative` at
 -- `Verdict`), run on listed censuses: laws of each form, evidence of each shape, and the verdicts.
 -- Written 2026-10-22 by Claude Sonnet 5.5 on record/plan/core-2026-10-17/prompt-bite-13b.md.
+-- `VacuousIsUnsettled` and `Vacuous 3` among the evidences added 2026-10-23 by Claude Opus 5.5, wave A
+-- bite A3 (record/plan/audit-algebras-2026-10-22/prompt-wave-a.md).
 
 import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed Settling Law Evidence Verdict Case Forall Exists Conjunction Either Not Then Statistical Evaluated At Points
-  EvidencePair Side Cited Assumed NotRun Tested Coverage Exhaustive Bounded Drawn Confirmed Refuted Supported Unsettled Cites
+  EvidencePair Side Cited Assumed NotRun Tested Vacuous Coverage Exhaustive Bounded Drawn Confirmed Refuted Supported Unsettled Cites
   Assumes StatisticalVerdict Rates Holds Fails Unresolved byPValue StatisticalLaw Sequential
 import "laws_model.lut" settling
 
@@ -24,7 +26,7 @@ evidences : List Evidence := [Evaluated true, Evaluated false, At Int 0 (Evaluat
   Points Int [(0, Evaluated true), (1, Evaluated true)] Exhaustive, Points Int [(0, Evaluated true), (1, Evaluated true)] (Drawn 3),
   Points Int [(0, Evaluated true), (1, Evaluated false)] Exhaustive, EvidencePair (Evaluated true) (Evaluated false),
   EvidencePair (Evaluated false) (Evaluated false), Side true (Evaluated true), Side false (Evaluated false),
-  Cited "c", Assumed, NotRun "r"]
+  Cited "c", Assumed, NotRun "r", Vacuous 3]
 verdicts : List Verdict := [Confirmed, Refuted, Supported, Unsettled, Cites "c", Assumes]
 cutoffs : List Sequential := [{ alpha := 0.05, beta := 0.05, delta := 0.5, initial := 1, budget := 10 }]
 pvalueLaws : List (StatisticalLaw Int) := [byPValue Int (fn n { 0.5 })]
@@ -33,6 +35,7 @@ scalarTypes : List U := [Int]
 nats : List U := [Nat]
 aRate : Rates := { alpha := 0.05, beta := 0.05, delta := 0.5, spent := 1 }
 treated : List StatisticalVerdict := [Holds aRate, Fails aRate, Unresolved aRate]
+counts : List Nat := [0, 3]
 
 bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
 ofType (t g : String) : Binding := { parameter := nothing, type := just t, generator := g, coverage := Listed }
@@ -41,4 +44,4 @@ test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "m" "s
   bind "r" "strings", bind "A" "types", bind "a" "ints", ofType "Law" "laws", bind "body" "quantified",
   ofType "Evidence" "evidences", bind "pts" "points", ofType "Coverage" "coverages", ofType "Verdict" "verdicts",
   bind "S" "scalarTypes", bind "T" "nats", bind "l" "pvalueLaws", bind "draw" "draws",
-  ofType "Sequential" "cutoffs", ofType "StatisticalVerdict" "treated"])
+  ofType "Sequential" "cutoffs", ofType "StatisticalVerdict" "treated", bind "n" "counts"])
