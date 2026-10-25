@@ -2,7 +2,8 @@
 -- 2026-10-21 by Claude Opus 5.5). Will a cable of a given length join the microphone and the
 -- speaker, both placed at marks along the tape? The three numbers are run parameters, holes that
 -- `run --set` fills (12.S18); `luthier run` refuses to start unless every name in the cone of
--- `main` is certified (12.S17).
+-- `main` is certified (12.S17). `--set` fills only a String, Int, Float64 or Bool hole, so the two
+-- marks come in as Int and are read as Mark below.
 --
 --   luthier run docs/concepts/tape.run.lut --set microphone=1200 --set speaker=3450 --set cable=2.5
 
@@ -10,12 +11,15 @@ import "world_model.lut" HostConsole host : HostConsole
 import "tape.lth" Mark
 import "tape.lut" markIsAMetricModel : Metric
 
-microphone : Mark
-speaker : Mark
+microphone : Int
+speaker : Int
 -- the cable's length in metres
 cable : Float64
+
+mic : Mark := microphone
+spk : Mark := speaker
 
 -- `d` is the one name of a metric (Metric in lib/core/structures/equality.lth); it resolves to the
 -- model the type Mark names, markIsAMetricModel, by the type of its first argument (D-2026-10-18-b)
 main (w : W) : W * Unit :=
-  host.print w (if d microphone speaker <= 1000.0 * cable then "the cable reaches" else "the cable is short")
+  host.print w (if d mic spk <= 1000.0 * cable then "the cable reaches" else "the cable is short")
