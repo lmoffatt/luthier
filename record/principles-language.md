@@ -1816,8 +1816,12 @@ blocks; the done and implemented items are in the record's drafts table.
   his (D-2026-10-14-c): the cutoff parameters the Boolean laws take, demanded and never constants,
   are where the cost enters when the algebra exists, a cutoff being a cost's threshold (L12.3);
   a law with a quantifier of no finite Boolean form (`SupIsLeast`) stays a `Law`, stated and not
-  tested (D-2026-10-16-b). Blocks L8.7,
-  L3.3, L12, L13.3, L13.4, L5.4, L6.6, L6.8, L10.3, L10.8.
+  tested (D-2026-10-16-b). Two parts of it are settled by D-2026-10-25-a (the algebra audit,
+  record/plan/audit-algebras-2026-10-22/decisions.md): the evidence base, (ε̂, δ) under the
+  capped sum, with its composition a parameter (L10.3, L10.8, L6.15), and the carrier of a
+  numerical law, the affine bound transformer (L13.3, L13.4); what O1 still holds is the cost
+  types' implementation, the uncertainty base and the extension to Bayes. Blocks L8.7,
+  L3.3, L12, L5.4, L6.6, L6.8, L10.3, L10.8.
 - **O2** (language) The type with its equality as the base case of every theory (a setoid; a
   metric space where the equality is a cost), the kernel's structural `==` its model for the
   decidable types (spec 4.R8), the equality of functions extensional and derived from it (L3), the
@@ -1875,8 +1879,8 @@ blocks; the done and implemented items are in the record's drafts table.
   represent a derivation as a point of an intensional exponential, quotiented by the demand.
   His answer on how the quotient is computed (D-2026-10-25-a, question 5 of the algebra audit,
   record/plan/audit-algebras-2026-10-22/decisions.md): never as a canonical form, except at the
-  Boolean level, where a decidable carrier has one; the equality of consequence is a certified
-  relation between two realizations, a law over derivations that a demand asks for (L5.23), and
+  Boolean level, where a decidable carrier has one; two realizations are equal in consequence
+  when a certified relation says so, a law over derivations that a demand asks for (L5.23), and
   the result key is the identity of the realization, since one derivation may have many keys
   and the metric level has no class, only the ball (L6.5). The derivation is then the
   realization graph, its projections are laws, and the 2-cells of the exponential are the
@@ -1888,15 +1892,15 @@ blocks; the done and implemented items are in the record's drafts table.
 
 ## His marks pending
 
-- L10.7 and L10.8, the composition of identities as paths (his note of 2026-10-12 put in
-  words, with D-2026-10-12-q).
+- L10.7, the composition of identities as paths (his note of 2026-10-12 put in words, with
+  D-2026-10-12-q); L10.8, its sampled links, settled 2026-10-26 (D-2026-10-25-a, question 1).
 - L12, the names lift, exact and within (his to rename), and clauses 1 and 5.
-- L13.3 and L13.4, the correction on rounding.
 - L5.4, the decorated output as another model.
 - L6.3, the wording of his formula for the efficiency.
 - L11.6, the world as a candidate; L9.7, delegation as citation; L10.7, the wording of the graded
   transport (his correction).
-- L10.1, L10.2, L10.7, L10.8, the certificate entry; L8.3, what `a : A` asserts; L4.11, actions on Luthier's own state;
+- L10.1 and L10.7, the certificate entry (L10.2 and L10.8 settled on D-2026-10-25-a, questions 2
+  and 1); L8.3, what `a : A` asserts; L4.11, actions on Luthier's own state;
   L5.17 and L5.18, the cutoff and the policy constants; L6.5, 6, 7; L12.3, 5; L9.1.
 - The two faces defined in Terms, and the shape of this draft (D-2026-10-12-g, -s).
 - L5.22, L5.23, L10.13, L11.10 and L11.11, the derivation of a value and its crossing of languages
