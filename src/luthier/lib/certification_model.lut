@@ -33,7 +33,7 @@ import "certification.lth" samplingOf Pruning disputes Certifying ConeHashing Er
   Uncertified Provisional Disagrees DrawnParameter stronger reachOf coversAll latestOf latestAt failureAt
   disputeAt Recording recordEntry Pooling pooledCases Regioning regionedGrade orWeakest Deriving lawRegions
   Routing Routed Theory Veto Members Folding allOfWith alternativeOf restrictTo projectGradeOf admitAt
-  SampledBound
+  SampledBound StrengthProjection gradeOfStrength
 import "numbers_model.lut" elementary
 import "test.lth" Grade gradeRank weakest
 import "term_model.lut" alpha canonical substitute stepper
@@ -240,3 +240,9 @@ erasure : Erasure alpha substitute stepper := { erase := eraseBinders }
 ruleOfThree : SampledBound := { log := elementary.log,
   bound := fn n delta { if n == 0 or delta <= 0.0 then 1.0 else smaller 1.0 ((0.0 - elementary.log delta) / toFloat64 n) } }
 RuleOfThreeIsSound (model : SampledBound <- ruleOfThree) : Bool := SampledBound model
+
+-- [wave B, bite B3, 2026-10-26, Claude Opus 5.5; L10.2] The grade as the projection of a
+-- certificate's (domain, cost), the theory's own `gradeOfStrength`; certify.py's `derived_grade` is
+-- its specimen.
+projection : StrengthProjection := { project := gradeOfStrength }
+GradeIsAProjection (model : StrengthProjection <- projection) : Bool := StrengthProjection model

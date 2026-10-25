@@ -242,18 +242,75 @@ disputeAt (ident : Entry -> Identity) (l : String) (h : Hash) (es : List Entry) 
   nth (Entry * Entry) (disputes ident nil (entriesAt l h es)) 0
 gradedAsOutcome (es : List Entry) : Bool :=
   all List Entry (fn (e : Entry) { (e.outcome == Passed) == not (e.grade == nothing) }) es
--- the grades a pass's evidence admits: test.lth's `grade` of a confirming or a supporting verdict
--- over the evidence's coverage (the entry does not hold the verdict), proved for a citation (6.R1),
--- assumed for an assumption (6.S10), none for a run that did not run
-admits (ev : Evidence) (g : Grade) : Bool := match ev {
-  Cited r -> g == Proved ;
-  Assumed -> g == AssumedGrade ;
-  NotRun r -> false ;
-  -- [proposed] a statistical pass: `StatisticalByTest` (laws.lth §4) settles `Holds` as supported,
-  -- over a drawn coverage, which test.lth grades `Sampled`; its rates stay in the evidence, the
-  -- price of that grade (D-2026-10-15-b), so a passed entry carries alpha, beta, delta and spent
-  Tested v -> (match v { Holds r -> g == Sampled ; _ -> false }) ;
-  _ -> grade Confirmed (coverageOf ev) == just g or grade Supported (coverageOf ev) == just g }
+-- [wave B, bite B3, 2026-10-26, Claude Opus 5.5; L10.2, L10.5, 6.S7, D-2026-10-25-a question 2; the
+-- audit's 1.2 and 1.3] A certificate's strength is the pair of its domain and its evidence cost,
+-- ordered by inclusion and by cost (L10.5), and the five grades are a projection of the pair for
+-- the reader (L10.2). The domain: the cases listed (exact there, nothing outside), a bounded box
+-- the domain names, a finite type enumerated whole, what a citation states under its hypotheses
+-- (L9.7), the distribution sampled, or what is asserted. The cost on that domain: none (proved,
+-- exhaustive, cases), the statistical pair (ε̂, δ) computed at the demand's δ (`SampledBound`,
+-- bite B1), or the price a demand sets on assumptions, with no default (6.S10). So `Cases` and
+-- `Sampled` are incomparable: three listed inputs say nothing at a fourth, where a sample says ε̂.
+-- `strengthOf` reads the pair off a pass's evidence; `gradeOfStrength` is the projection;
+-- `derivedGrade` the two composed, and `admits` holds of exactly that grade: an entry's grade is
+-- derived, not chosen (a reader check over every store, tests/test_certify.py, finds them equal).
+-- Before this bite `admits` accepted the grade of a confirming or of a supporting verdict over the
+-- coverage, two grades for a drawn or an exhaustive coverage; the tester writes one, and the
+-- derivation keeps it (a drawn sample is sampled, an enumeration exhaustive). [proposed] A pass
+-- whose evidence has no coverage (`Evaluated`, a connective's) is exact on the case it lists.
+-- Serving does not read the pair yet: the chain is the Boolean slice's admission until the cost
+-- types come (L10.5, D-2026-10-16-k; §3's `admit`), and B4 then serves a `Cases` entry only at an
+-- input it lists.
+Domain : U := data {
+  ListedDomain : Domain ;
+  BoxDomain : Nat -> Domain ;
+  WholeDomain : Domain ;
+  UnderHypotheses : String -> Domain ;
+  DistributionDomain : Domain ;
+  AssertedDomain : Domain ;
+}
+EvidenceCost : U := data {
+  ExactCost : EvidenceCost ;
+  StatisticalCost : EvidenceCost ;
+  PricedCost : EvidenceCost ;
+}
+Strength = { domain : Domain, cost : EvidenceCost }
+coverageDomain (c : Coverage) : Domain :=
+  match c { Exhaustive -> WholeDomain ; Bounded n -> BoxDomain n ; Listed -> ListedDomain ; Drawn s -> DistributionDomain }
+-- [proposed] a statistical pass: `StatisticalByTest` (laws.lth §4) settles `Holds` over a drawn
+-- coverage; its rates stay in the evidence, the price of its grade (D-2026-10-15-b), so a passed
+-- entry carries alpha, beta, delta and spent
+strengthOf (ev : Evidence) : Maybe Strength := match ev {
+  Cited r -> just { domain := UnderHypotheses r, cost := ExactCost } ;
+  Assumed -> just { domain := AssertedDomain, cost := PricedCost } ;
+  NotRun r -> nothing ;
+  Tested v -> (match v { Holds r -> just { domain := DistributionDomain, cost := StatisticalCost } ; _ -> nothing }) ;
+  _ -> (match coverageOf ev {
+          nothing -> just { domain := ListedDomain, cost := ExactCost } ;
+          just c -> (match c { Drawn s -> just { domain := DistributionDomain, cost := StatisticalCost } ;
+                               _ -> just { domain := coverageDomain c, cost := ExactCost } }) }) }
+gradeOfStrength (s : Strength) : Grade :=
+  match s.cost {
+    PricedCost -> AssumedGrade ;
+    StatisticalCost -> Sampled ;
+    ExactCost -> (match s.domain { UnderHypotheses r -> Proved ; WholeDomain -> ExhaustiveGrade ; BoxDomain n -> ExhaustiveGrade ;
+                                   _ -> Cases }) }
+derivedGrade (ev : Evidence) : Maybe Grade := match strengthOf ev { nothing -> nothing ; just s -> just (gradeOfStrength s) }
+-- the grade a pass's evidence admits: the derived one, none for a run that did not run
+admits (ev : Evidence) (g : Grade) : Bool := derivedGrade ev == just g
+-- L10.2's table as a law of the projection: each of the five names is the projection of the pairs
+-- it names, exact on a citation's hypotheses proved, exact on a type or a box exhaustive, exact on
+-- listed cases cases, statistical on a distribution sampled, priced assumed. certification_model.lut's
+-- `projection` (`gradeOfStrength`) is its model; certify.py's `derived_grade` its specimen.
+StrengthProjection : { project : Strength -> Grade }
+ProjectsTheFiveGrades (s : StrengthProjection) (n : Nat) (r : String) : Bool :=
+  s.project { domain := UnderHypotheses r, cost := ExactCost } == Proved
+  and s.project { domain := WholeDomain, cost := ExactCost } == ExhaustiveGrade
+  and s.project { domain := BoxDomain n, cost := ExactCost } == ExhaustiveGrade
+  and s.project { domain := ListedDomain, cost := ExactCost } == Cases
+  and s.project { domain := DistributionDomain, cost := StatisticalCost } == Sampled
+  and s.project { domain := AssertedDomain, cost := PricedCost } == AssumedGrade
+StrengthProjection (s : StrengthProjection) := ProjectsTheFiveGrades s
 -- [core bite 13b, on bite 13c's item 5 and certify.py's `held_as_listed`] Two readings the census
 -- needed to hold of what the tester writes, taken [proposed]: a parameter enumerated whole, bound by
 -- `ExhaustiveMode` (the binding's generator text begins so: a hole, as strings are opaque to the
