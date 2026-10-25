@@ -252,7 +252,8 @@ with their versions, the two bridges with the error each added, the certificates
 on and the roots of trust, and a demand carries as much of it as it asks for. Of such a value one
 can then ask what it means, how it was obtained, what it assumed, and which laws justify using it,
 as far as the demand asks and the evidence certifies. Composing derivations across hosts comes
-with the planner, after the evidence it needs (L11.11).
+with the planner, which is built after certification since it substitutes only along certified
+identities (L11.11).
 
 ## The small core
 
