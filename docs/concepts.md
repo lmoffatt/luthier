@@ -528,10 +528,11 @@ parameter of type `Doubles` to numbers_model.lut's `doubles` (spec 7.R1, 7.R4: a
 infinite domain, or a value of a theory, is drawn from a census of models). The marks are drawn as
 integers in $[-50000, 50000]$ and filtered into `Mark` (spec 7.S3, 7.S6). The tester splits `Tape`
 into its four conjuncts and gives each its entry (spec 7.S22). `luthier certify
-docs/concepts/tape.test.lut` printed, on 2026-10-21:
+docs/concepts/tape.test.lut` printed, on 2026-10-26, after `MetresWithin` took the `Within` form
+(the `MarkIsAMetric` lines were known from 2026-10-23):
 
 ```
-docs/concepts/tape.test.lut: 2 laws, 3 controls, 5 lines ran, 0 known
+docs/concepts/tape.test.lut: 2 laws, 3 controls, 3 lines ran, 2 known
   Tape: sampled; controlled (refuted on its control at ReadingAdds t: t = hooked, p = { a := 36254, b := 41964, c := 44418 })
   MarkIsAMetric: sampled; controlled (refuted on its control at MetricZeroOnEqual Mark (structural Mark) model: model = hookedMetric, p = { x := 0, y := 0 })
 ```
@@ -550,10 +551,20 @@ $$p \le \hat\varepsilon(n, \delta), \qquad \hat\varepsilon(n, 0.05) \approx \min
 
 the rule of three (Hanley and Lippman-Hand 1983; spec 7.S11). For the 200 cases of each conjunct
 of `Tape`, $\hat\varepsilon = 0.015$: at 95% confidence, fewer than 1.5% of the drawn distribution's
-cases fail. The first instance of the conversion of that bound to an evidence cost is
-$-\log(1 - \hat\varepsilon(n, \delta))$ nats, with δ the demand's parameter (L10.3 [settled];
-spec 7.S11 [building: suspended by D-2026-10-14-c, first everything Boolean]). Today an entry
-records the grade `Sampled` and its counts, not $\hat\varepsilon$.
+cases fail.
+
+What a sampled certificate carries is that pair, $(\hat\varepsilon, \delta)$: the bound on the
+failure fraction and the risk that the bound is wrong. Luciano settled it as the evidence base
+(D-2026-10-25-a, question 1: "the evidence base is the pair (ε̂, δ) under the capped sum") [settled];
+section 10 says how two such pairs compose. L10.3 (the conversion from statistics to an evidence
+cost is a function with a declared shape; its first instance is $-\log(1 - \hat\varepsilon(n,
+\delta))$ nats) [settled] stands as a map out of that base, a cost in nats that adds correctly only
+when the failures it sums are independent (D-2026-10-25-a; B2, a9f8f8a, claims it as
+`NatsConversion`, a monotone map of the orders). Nothing about ε̂ needs storing: an entry keeps
+its $n$ per region, and δ is the demand's, so ε̂ is computed when the entry serves, at the
+demand's δ (the audit execution's bite B1) [building: today an entry records the grade `Sampled`
+and its counts, and nothing computes ε̂; spec 7.S11 is suspended by D-2026-10-14-c, first
+everything Boolean].
 
 Two refinements keep this honest.
 
@@ -583,6 +594,58 @@ values (L10.2 [proposed]; D-2026-10-12-r; spec 6.S7) [building]. The five names 
 reader; the planner reads the costs. When a law is a conjunction, how the grades of its parts
 combine is the demand's choice, the weakest by default (spec 5.S8) [settled].
 
+So the grades are not a chain. Today test.lth orders them `Assumed < Sampled < Cases < Exhaustive <
+Proved`, and a demand admits an entry whose grade is at least the weakest it accepts; that chain is
+the Boolean slice's stand-in for the evidence cost (D-2026-10-16-k). Luciano settled what replaces
+it when the cost types come: a certificate's strength is the pair (domain, cost), ordered by
+inclusion and by cost, `Cases` and `Sampled` incomparable, and a `Cases` certificate serves a run
+only at an input it lists (D-2026-10-25-a, question 2) [settled; building: bites B3 and B4]. Three
+listed marks say nothing of a fourth, where 200 sampled ones say ε̂; under the chain, three listed
+points would certify a run at a fourth. The tape's entries are sampled, and a run on real marks is
+served by sampled, proved or exhaustive evidence, since its inputs are rarely the ones listed.
+
+### 6.6 A sample in which the premise never held
+
+A law with a premise is material: `p -> q` holds wherever `p` fails (L12.7 (`then` is material,
+`not (p and not q)`)) [settled]. A sample in which `p` never held therefore passes whatever `q`
+says, and its pass is evidence of nothing. The rule was decided early: a law all of whose cases are
+vacuous is not run, the count of its premises the reason (D-2026-10-16-m; spec 7.S12) [settled],
+and wave A of the algebra audit built it (bite A3, 7e06717). The tester reads the premises a law
+states, `p -> q` and `if p then q else true`, counts the cases where every premise held (`held`, in
+the entry), and a run where none held gets the evidence `Vacuous n` of laws.lth: not run, never
+graded, never served. A run that evaluated no case at all is an empty experiment, not run either;
+the one exception is an exhaustive run over an empty type, which passes, since there is nothing to
+check [settled as implemented; building: certification.lth's `Outcome` has no `Vacuous` yet, so
+the entry writes "not run" with the count as its reason].
+
+The tape's metric was such a case. The core states indiscernibility as a disjunction,
+
+```
+MetricIndiscernible (A : U) (o : Object A) (m : Metric A o) (x y : A) : Bool := o.eq x y or not (m.d x y == 0.0)
+```
+
+which is the premise $d(x, y) = 0$ with the conclusion $x = y$. Since bite A3b a disjunction with
+exactly one negated disjunct is read as stating that premise (740ee0e, 96c11d0, on the
+coordinator's answer to report-wave-a-3.md) [settled as implemented]. Read so, the line of draft 0
+was vacuous: two marks drawn uniformly from 50001 are equal with probability $1/50001$, so in 200
+cases the premise almost surely never held, and the conjunct passed every time without one case
+that tested it. The reading came with a generator for it: `sameOrNat` draws `y` equal to `x` in a
+quarter of the cases (generators.lth's `equalOr`, 6c4cccf), and the line binds it,
+
+```
+onMetric : List Binding := [
+  { parameter := just "model", type := nothing, generator := "markIsAMetricModel", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "equalMarks", coverage := Listed }, byParameter "y" "sameOrNat" ]
+test "MarkIsAMetric" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onMetric)
+```
+
+so that the entry of `MetricIndiscernible` now records `"held": 49` of 200 cases (cd0ce47; the
+store re-certified at f8d1ccd). The premise of a law is one of the regions of 6.4 seen from the
+other side: a premise that holds on a null set of the distribution is a region the sample never
+visits, and only a generator that gives it mass, or a list, covers it (L9.16) [proposed]. What the
+tester does not claim: a region with no case caps the grade at `Sampled` as a label, and is no
+statistical bound on that region (report-wave-a-3.md, from the audit's section 12).
+
 ## 7. Why a law needs a control
 
 A passing test shows that the law held on the cases drawn. It shows nothing about the law unless
@@ -605,7 +668,7 @@ The example's controls, from `tape.test.lut`:
 hooked : Tape := { reading := fn a b { tape.reading a b + 1.0 } }
 test "Tape" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onHooked) (control <- true)
 
-noRoom : Doubles := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
+noRoom : Doubles Float64 := { plus := doubles.plus, minus := doubles.minus, times := doubles.times,
   divide := doubles.divide, less := doubles.less, leq := doubles.leq, greater := doubles.greater, geq := doubles.geq,
   unequal := doubles.unequal, epsilon := 0.0 }
 test "MetresWithin" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onNoRoom) (control <- true)
@@ -616,17 +679,41 @@ mistake a person makes with a real tape. `ReadingAdds` refutes it at the triple 
 ($a = 36254$, $b = 41964$, $c = 44418$: $8165 \ne 5711 + 2455 = 8166$), and `MetricZeroOnEqual`
 refutes its metric at $x = y = 0$. `noRoom` is the doubles with no room for rounding, which makes
 the bound of `MetresWithin` zero; the rounding of the division by a thousand refutes it at
-$a = 26150$, $b = 14398$. Each control line is the law's line with `(control <- true)` and a broken
+$a = 26150$, $b = 14398$, where the computed distance is $1.8 \times 10^{-15}$ m from the exact one
+against a bound of 0. Each control line is the law's line with `(control <- true)` and a broken
 model in the profile; the tester records a refutation as a control's entry, never as the law's
 failure, and `check -v` then reports each law "controlled".
 
 The last control shows that the bound does work: without it the law fails, so the law is not
-satisfied by the doubles for free. It doesn't show that the bound is tight. For that the library
-puts a control just below the bound: D-2026-10-17-f first wrote the doubles' associativity within
-$\gamma_2(|x| + |y| + |z|)$, the correction to it showed the bound needs the factor 3, and a
-control with a third of `epsilon`, which brings $3\gamma_2$ just below $\gamma_2$, is refuted at a
-listed case (numbers.lth §2; `tests/tester/numbers_controls.test.lut`). The example has no such
-control [mine: a gap in the example, left since its bound has room by design].
+satisfied by the doubles for free. It doesn't show that the bound is tight. Two things do. The
+certificate of a numerical law now records the worst ratio of distance to bound it saw (section
+9.3): 0.41 for `MetresWithin`, so on the cases drawn the bound has room by a factor of about 2.4.
+And the library puts a control just below the bound: D-2026-10-17-f first wrote the doubles'
+associativity within $\gamma_2(|x| + |y| + |z|)$, the correction to it showed the bound needs the
+factor 3, and a control with a third of `epsilon`, which brings $3\gamma_2$ just below
+$\gamma_2$, is refuted at a listed case (numbers.lth §2; `tests/tester/numbers_controls.test.lut`);
+bite C1 did the same for the dot product, whose stability bound cut to a third is refuted (`doublesThird`,
+4a9c485). The example has no such control [mine: a gap in the example, left since its bound has
+room by design].
+
+### 7.1 The unit of control is the conjunct
+
+L9.14 was written before a conjunction was split into its conjuncts, each with its own entry
+(D-2026-10-18-f; spec 7.S22). A control line runs the conjuncts in order and stops at the first one
+it refutes, writing one control entry for the law (spec 7.S22) [settled as implemented]. So a
+broken monoid refuted at `Associative` leaves `Neutral` with no wrong model, and the law still reads
+"controlled" (the audit's 1.7). Luciano settled that the unit of control is the conjunct: a theory
+is done when each conjunct has a refuted model, and `check -v` lists the conjuncts with none
+(D-2026-10-25-a, question 4: "Yes") [settled; building: bite D1].
+
+The example shows what this will report [mine: the reading of its entries]. `hooked` is refuted at
+`ReadingAdds`, and it could not have been refuted at `ReadingSymmetric`, since a tape one millimetre
+long at every reading is still symmetric; `noRoom` refutes `MetresWithin`; `hookedMetric` is
+refuted at `MetricZeroOnEqual`, and against it `MetricIndiscernible` is vacuous (its premise, a zero
+distance, never holds for a tape that reads at least one millimetre; report-wave-a-3b.md). Of the
+four conjuncts of `Tape` and the five of `MarkIsAMetric`, three have a refuted model in the
+evidence. Both laws read "controlled" today; under D1 six conjuncts will be listed as having none,
+and the example will need a broken model for each, a skewed tape for `ReadingSymmetric` among them.
 
 ## 8. The certificate and its cone
 
