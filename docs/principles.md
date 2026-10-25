@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 5f99ebce75e3, commit b395a05) by `scripts/project_principles.py` (project_principles v2) on 2026-10-23; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 19b4f0e91155, commit 8a3cdb6) by `scripts/project_principles.py` (project_principles v2) on 2026-10-26; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -330,14 +330,19 @@ object is consumed or stable: kept; with G1 for what is derived (the former L6).
   §7: the operations with their results and costs) taken up to his equality of consequence, under
   which two traces are equal when no observation the theories name tells them apart, so `(a + b) *
   1.0` and `a + b` have one derivation where no law separates them (GPT's example); it is not the
-  trace itself, and it is not a certificate (L10.13). What clause 6 identifies a result by is the
-  identity of its derivation, and the derivation is that key read as a value: the record already keeps
-  it, and this clause names what it keeps. (His reading, D-2026-10-22-c) The derivation is the
-  realization, f applied to a, read as a value, a point of an intensional exponential (O13), and not a
-  fourth object beside the three of clause 10. The word is his choice over "history" ("derivation
-  suena a que podemos simplificar la historia a lo invariante"; in proof theory a derivation is
-  identified up to normalization, the coordinator's note); "derivative", the differential of clause 4,
-  is a different word, and neither is ever shortened to "deriv". [proposed]
+  trace itself, and it is not a certificate (L10.13). (D-2026-10-25-a) What clause 6 identifies a
+  result by is the identity of the realization, and the key is no quotient: the equality of
+  consequence is a certified relation between two realizations, a law over derivations computed when a
+  demand asks for it (clause 23), with a canonical form at the Boolean level only, since `(a + b) *
+  1.0` and `a + b` have different keys and one derivation, and at the metric level closeness is not
+  transitive (L6.5), so there is no class, only the ball; the derivation is the realization graph, its
+  projections are laws, and the planner's certified identities are the 2-cells between realizations.
+  (His reading, D-2026-10-22-c) The derivation is the realization, f applied to a, read as a value, a
+  point of an intensional exponential (O13), and not a fourth object beside the three of clause 10.
+  The word is his choice over "history" ("derivation suena a que podemos simplificar la historia a lo
+  invariante"; in proof theory a derivation is identified up to normalization, the coordinator's
+  note); "derivative", the differential of clause 4, is a different word, and neither is ever
+  shortened to "deriv". [proposed]
 - L5.23 (GPT's rule, on his idea) A value carries no more of its derivation than the demand asks:
   the demand selects the projection of the derivation that is materialized and carried, as it selects
   the cone (clause 13) and the decoration (clause 4), so a `Float64` stays a `Float64` until a demand
@@ -353,7 +358,8 @@ References: spec 3; D-2026-10-11-c, D-2026-10-11-i, D-2026-10-12-h, D-2026-10-12
 Rests on: O1 (the error decoration), O3 (the world as a value), O5, O8, O12, O13 (the derivation's
 representation and quotient).
 Status: settled; clause 4 proposed on his note on Terms; clauses 17 and 18 proposed; clauses 22 and
-23 proposed, his idea of 2026-10-22 (D-2026-10-22-b).
+23 proposed, his idea of 2026-10-22 (D-2026-10-22-b), the quotient of clause 22 settled as a
+certified relation (D-2026-10-25-a) while the wording waits for his mark.
 
 **L6. One function, many specimens, chosen by maximizing the performance the demander chooses, along
 certified identities.**
@@ -418,7 +424,14 @@ clause).
   the base of the levels of equivalence (L3.5): error over [0, ∞] with +, uncertainty over
   distribution functions with a t-norm, evidence over [0, 1] with + or max, resources with + in
   sequence and max in parallel; and a function propagates them when it is non-expansive or Lipschitz
-  (clause 8) (D-2026-10-18-i). [proposed]
+  (clause 8) (D-2026-10-18-i). (D-2026-10-25-a) For the evidence the base is the pair of the failure
+  bound and its risk, (ε̂, δ), both parts composed by the capped sum, with the orientation Lawvere
+  gives every base, the unit on top and the empty join at the bottom, which for the error is ([0, ∞],
+  +, ≥) (the correction of 2026-10-21 to D-2026-10-18-i); the sum in nats, L10.3's conversion, is a
+  map out of it. (The coordinator's correction of 2026-10-23 to D-2026-10-18-i, from the audit of the
+  algebras) The resources are a typed vector, work, span and peak memory, and no one semiring: work
+  adds in sequence and in parallel, span adds in sequence and takes the max in parallel, peak memory
+  takes the max in sequence and adds in parallel (Blumofe and Leiserson's work and span). [proposed]
 Example: γ_n needs n·u < 1, false for float32 over an hour at 48 kHz, so the cited bound is void
 there (clause 9).
 References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q, D-2026-10-12-u; W5; P5.
@@ -588,7 +601,11 @@ its type).
   law that no broken specimen can fail (a no-op host passing `Host`, a zero score passing
   `IsGradient`, `phi - 1` passing `StepRule`, in that review) describes nothing, and is a finding
   against the theory that green runs never show; a theory is done when each of its laws has its
-  refuted model in the evidence (D-2026-10-15-a). [settled]
+  refuted model in the evidence (D-2026-10-15-a). (D-2026-10-25-a) The unit of control is the
+  conjunct, the law that has the entry (spec 7.S22, D-2026-10-18-f): a control runs every conjunct of
+  a conjunction and does not stop at the first it refutes, since a broken monoid refuted at
+  `Associative` leaves `Neutral` uncontrolled; the theory is done when every conjunct has a refuted
+  model, and `check -v` lists the conjuncts still uncontrolled. [settled]
 - L9.15 (His words) A statistical law's verdict is ternary: it holds, it fails, or it is unresolved
   with what was sampled; the certifier resolves the grey zone sequentially (Wald's sequential
   probability ratio test), sampling more between two thresholds set by the error rates alpha and beta
@@ -647,12 +664,19 @@ cost) and G0, the demand (what the demand requires of the evidence is its own).
   default, so that a demand that names none refuses assumed values (D-2026-10-11-n, D-2026-10-12-t).
   When the formula is a cited guarantee with its hypotheses, the certificate is proved by delegation
   (L9.7), not assumed. The five names stay in the certificate for the reader; the planner reads the
-  costs. [proposed]
+  costs. (D-2026-10-25-a) So cases and sampled are incomparable: three listed inputs say nothing at a
+  fourth, where a sample says ε̂; proved, exhaustive and cases are one kind, exact on a stated domain
+  and differing in the domain and in the hypotheses; and a run on real data, whose inputs are rarely
+  listed, is served by sampled, proved or exhaustive evidence. [settled]
 - L10.3 The conversion from statistics to an evidence cost is a function with a declared shape, the
   sample's statistics and the demand's level in, a cost out, filled per theory (D-2026-10-12-r); the
   first instance is −log(1 − ε̂(n, δ)) in nats, with ε̂ the bound on the fraction of the distribution
   where the law's bound fails, from n samples at confidence 1 − δ, and δ the demand's parameter.
-  [settled]
+  (D-2026-10-25-a) The base of evidence is the pair (ε̂, δ) itself, under the capped sum min(1, a + b)
+  and in Lawvere's orientation ≥, a smaller pair knowing more; the conversion to nats is a map out of
+  that base and not the base, and the sum of nats, which multiplies the success bounds, is sound only
+  under a declared premise that the failures are independent. Nothing in an entry changes: ε̂ is
+  computed when the entry is served, at the demand's δ. [settled]
 - L10.4 A certificate is identified by a hash over its dependency cone (code, cases, seed, the
   distribution and level sampled); it is a frozen snapshot, and a later check does not change it but
   issues a new one that supersedes it, both kept, the latest in front (P3), so progress is the chain
@@ -662,7 +686,13 @@ cost) and G0, the demand (what the demand requires of the evidence is its own).
   demand only if the cached cone meets it, checked at the hit and not only when the certificate was
   issued. In the Boolean slice the clause is suspended (D-2026-10-14-c, D-2026-10-16-b) until the cost
   types: the tolerance is a law parameter and so part of the binding, matched exactly
-  (certification.lth's comment at the cost cutoff of 6.S15). [settled]
+  (certification.lth's comment at the cost cutoff of 6.S15). (D-2026-10-25-a) When the cost types
+  come, a certificate's strength is the pair of its domain and its cost, ordered by inclusion and by
+  cost, and a demand is met by a certificate whose domain covers its input and whose cost is within
+  its cutoff: a `Cases` entry serves a run only at an input it lists, as L6.9 says of links, and the
+  five grades are a projection of the pair for the reader. Until then the chain Assumed < Sampled <
+  Cases < Exhaustive < Proved is the Boolean slice's admission (D-2026-10-16-k), and a run served
+  today by a `Cases` entry at an unlisted input is listed before the change refuses it. [settled]
 - L10.6 Certification is the default: demanding a value demands every certificate in its dependency
   cone, paid once through the memo, with no opt-out at the start (D-2026-10-12-y: a cone with an
   uncertified or provisional name is refused); an exception, if a real case asks for one, is O3 and
@@ -679,7 +709,14 @@ cost) and G0, the demand (what the demand requires of the evidence is its own).
   distributions; links sampled over the same distribution compose by the union bound, the failure
   fractions summed, which is the probabilistic bound the planner waited for (D-2026-10-12-q). The
   composition algebra belongs to the theory's cost type, the sum its first instance; whether a demand
-  accepts a sampled path is its evidence cutoff, a parameter (P11). [proposed]
+  accepts a sampled path is its evidence cutoff, a parameter (P11). (D-2026-10-25-a) The union bound
+  is this clause's first instance because it assumes nothing of the links: two links at ε̂ = 0.1
+  compose to 0.2 by it and to 0.19 by the product that independence would allow. The composition is a
+  parameter of the demand, the capped sum its default, and (his words) "Luthier should provide the
+  mechanisms for definining any reasonable choice, as long as we do not get into an infinite loop":
+  reasonable means that composing never knows more than either part, and the mechanism is the core's
+  `EvidenceComposition`, a theory whose tensor is the one field that varies, the product under the
+  independence premise its second model (bite B2, a9f8f8a). [settled]
 - L10.9 No operation on certificates raises a grade, lowers an evidence cost or widens a domain
   without new evidence. [settled]
 - L10.10 Only a certifier builds a certificate: the constructor of `Certificate` is in no interface
@@ -717,7 +754,9 @@ D-2026-10-22-a, D-2026-10-22-b; P3, P11.
 Rests on: O1 (the conversion and the algebra), O3 (the opt-out's syntax), O13 (the derivation).
 Status: proposed in draft 11; clauses 3 and 9 settled on his marks (D-2026-10-12-w); clauses 4 to 6
 settled, moved from L5 and L11; clause 2 reworded on D-2026-10-12-t; clause 7 carries his correction
-of draft 7 in grades; clause 10 settled (D-2026-10-13-c, -e); clause 13 proposed (D-2026-10-22-b).
+of draft 7 in grades; clause 10 settled (D-2026-10-13-c, -e); clause 13 proposed (D-2026-10-22-b);
+clause 8 settled (D-2026-10-25-a, question 1); clause 2 settled (D-2026-10-25-a, question 2, on what
+it says of the grade; its paragraph on assumed certificates is D-2026-10-12-t's).
 
 **L11. Luthier orchestrates other languages: an extern is a specimen certified by its laws, and what
 does not follow Luthier's way lives in a world.**
@@ -845,10 +884,19 @@ is the demand's (G0, the demand).
 - L13.3 Rounding does not expand distances by at most a constant: two reals astride a rounding
   boundary land one ulp apart at any distance, so no multiplicative constant exists; rounding is
   non-expansive up to an additive defect of about ε|x|, and for subtraction and division the
-  sensitivity is per input, the condition number (`11` §7). [mark pending]
+  sensitivity is per input, the condition number (`11` §7). (D-2026-10-25-a) The carrier of a
+  numerical law is the affine bound transformer (L, η, D, r): the output's error is at most L·δ_in + η
+  on the domain D and below the radius r, L the sensitivity of the function and η the algorithm's own
+  error (L9.18); the defect lives in the maps of the error level, outside the tensor of its quantale
+  (L6.15). [settled]
 - L13.4 The functor reading stands with "non-expansive plus an additive term", and the cost algebra
   needs both parts: a multiplicative one where a Lipschitz constant exists and an additive one where
-  rounding enters (`11` §5). [mark pending]
+  rounding enters (`11` §5). (D-2026-10-25-a) Two transformers compose along a cone as (L₂L₁, L₂η₁ +
+  η₂, D₁ ∩ f₁⁻¹(D₂), min(r₁, (r₂ − η₁)/L₁)), and over several inputs by the sum, ε ≤ Σᵢ Lᵢ δᵢ + η, the
+  max where a law names it (Fuzz's product; the first-order bound of Higham's and LAPACK's theorems);
+  so L6.8's pull-back is δ = (ε − η)/L, a demand's ε below η is infeasible (clause 5), an unknown L
+  permits no substitution, and how the backward allocation is split among inputs is under-determined,
+  the demand's weight deciding (L6.2). [settled]
 - L13.5 A cutoff is read against the realization's defect at the point where it is met: a demand's
   tolerance below what rounding resolves there (ε times the magnitudes compared, times the condition
   number where one enters) asks for evidence the computation cannot give, and the law's comparison
@@ -857,7 +905,8 @@ is the demand's (G0, the demand).
   1e-12 bought nothing at 1e-6 (D-2026-10-16-b). [proposed]
 References: `11`.
 Rests on: O1 (the two parts of the algebra).
-Status: settled in its statement; clauses 3 and 4 are the correction proposed, his mark pending.
+Status: settled in its statement; clauses 3 and 4, the correction on rounding, settled as the affine
+bound transformer and its composition (D-2026-10-25-a, question 3); clause 5 proposed.
 
 ## What is open
 
@@ -887,8 +936,12 @@ blocks; the done and implemented items are in the record's drafts table.
   his (D-2026-10-14-c): the cutoff parameters the Boolean laws take, demanded and never constants,
   are where the cost enters when the algebra exists, a cutoff being a cost's threshold (L12.3);
   a law with a quantifier of no finite Boolean form (`SupIsLeast`) stays a `Law`, stated and not
-  tested (D-2026-10-16-b). Blocks L8.7,
-  L3.3, L12, L13.3, L13.4, L5.4, L6.6, L6.8, L10.3, L10.8.
+  tested (D-2026-10-16-b). Two parts of it are settled by D-2026-10-25-a (the algebra audit,
+  record/plan/audit-algebras-2026-10-22/decisions.md): the evidence base, (ε̂, δ) under the
+  capped sum, with its composition a parameter (L10.3, L10.8, L6.15), and the carrier of a
+  numerical law, the affine bound transformer (L13.3, L13.4); what O1 still holds is the cost
+  types' implementation, the uncertainty base and the extension to Bayes. Blocks L8.7,
+  L3.3, L12, L5.4, L6.6, L6.8, L10.3, L10.8.
 - **O2** (language) The type with its equality as the base case of every theory (a setoid; a
   metric space where the equality is a cost), the kernel's structural `==` its model for the
   decidable types (spec 4.R8), the equality of functions extensional and derived from it (L3), the
@@ -944,19 +997,30 @@ blocks; the done and implemented items are in the record's drafts table.
   intensional: programs as arrows, the planner's certified identities as 2-cells, the derivation
   carried a class modulo the demand's equality of consequence (L5.22). So the question is how to
   represent a derivation as a point of an intensional exponential, quotiented by the demand.
+  His answer on how the quotient is computed (D-2026-10-25-a, question 5 of the algebra audit,
+  record/plan/audit-algebras-2026-10-22/decisions.md): never as a canonical form, except at the
+  Boolean level, where a decidable carrier has one; two realizations are equal in consequence
+  when a certified relation says so, a law over derivations that a demand asks for (L5.23), and
+  the result key is the identity of the realization, since one derivation may have many keys
+  and the metric level has no class, only the ball (L6.5). The derivation is then the graph of
+  the realization, with laws as its projections, and the 2-cells of the exponential are the
+  planner's certified identities, so composition across hosts comes with the planner
+  (D-2026-10-13-ad); the relation as a law over derivations is bite E1 of the audit's execution,
+  after the planner. What stays open is the representation: the decoration, the indexed type or
+  the reference by hash, and what a bridge declares (L11.10).
   Blocks L5.22, L5.23, L10.13, L11.10, L11.11.
 
 ## His marks pending
 
-- L10.7 and L10.8, the composition of identities as paths (his note of 2026-10-12 put in
-  words, with D-2026-10-12-q).
+- L10.7, the composition of identities as paths (his note of 2026-10-12 put in words, with
+  D-2026-10-12-q); L10.8, its sampled links, settled 2026-10-26 (D-2026-10-25-a, question 1).
 - L12, the names lift, exact and within (his to rename), and clauses 1 and 5.
-- L13.3 and L13.4, the correction on rounding.
 - L5.4, the decorated output as another model.
 - L6.3, the wording of his formula for the efficiency.
 - L11.6, the world as a candidate; L9.7, delegation as citation; L10.7, the wording of the graded
   transport (his correction).
-- L10.1, L10.2, L10.7, L10.8, the certificate entry; L8.3, what `a : A` asserts; L4.11, actions on Luthier's own state;
+- L10.1 and L10.7, the certificate entry (L10.2 and L10.8 settled on D-2026-10-25-a, questions 2
+  and 1); L8.3, what `a : A` asserts; L4.11, actions on Luthier's own state;
   L5.17 and L5.18, the cutoff and the policy constants; L6.5, 6, 7; L12.3, 5; L9.1.
 - The two faces defined in Terms, and the shape of this draft (D-2026-10-12-g, -s).
 - L5.22, L5.23, L10.13, L11.10 and L11.11, the derivation of a value and its crossing of languages
