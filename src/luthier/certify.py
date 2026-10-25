@@ -1204,6 +1204,21 @@ def stretches(entries, law, current, key):
     return found
 
 
+def pooled_worst(entries, law, current, key):
+    """[wave C, bite C1; the three-levels report 2.5 (2f9c42b)] The worst ratio of distance to bound
+    over the union of a numerical law's stretches under the key (laws.lth's `worseRatio` folded: the
+    largest, an unbounded one, None, worst); 0.0 when no stretch measured (a law of no metric level).
+    Pooling keeps the sum of n (`pooled`) and the largest worst."""
+    worst = 0.0
+    for _, e in stretches(entries, law, current, key).values():
+        m = e.get("measured")
+        if m and m.get("measured"):
+            if m.get("worst") is None:
+                return None
+            worst = max(worst, m["worst"])
+    return worst
+
+
 def pooled(entries, law, current, key):
     """certification.lth's `pooledCases`, the specimen of `Pooling`: the size of the union of the
     law's stretches under the key (`union_key`), a replay counted once."""
@@ -1424,16 +1439,43 @@ def at(demand, entry):
                if covers_all(entry["reach"], [(p, given[p])]))
 
 
+# [wave C, bite C1] The demand's cap on a numerical law's worst ratio of distance to bound (demand.lth's
+# `bound`, `run --bound`), its declared default: one, the ratio at which the law passes (D-2026-10-18-j),
+# so that by default every passed entry serves, as before.
+BOUND = 1.0
+
+
+def within_cap(cap, worst):
+    """laws.lth §5: a worst ratio serves a cap when it is a number at most the cap; an unbounded one
+    (None) never does."""
+    return worst is not None and worst <= cap
+
+
+def entry_bound(entry):
+    """certification.lth's `entryBound` at the metric level (bite C1): a numerical law's worst ratio,
+    None when unbounded; 0.0 for an entry that measured nothing (a law of no metric level, or a run
+    whose cases all fell outside the law's range), which no cap refuses."""
+    m = entry.get("measured")
+    if not m or not m.get("measured"):
+        return 0.0
+    return m.get("worst")
+
+
 def serves(demand, entry):
     """certification_model's `serves`: the law's entry at the current hash, passed, at or above the
     grade the demand accepts, its reach covering what the run gives. [proposed] And of the demand's
     kind: a first action's demand (`FIRST_ACTION`) only by an entry a first action wrote, any other
     demand only by an entry of no kind (a control's has its own, and never passes). The entry's own
-    grade; `serves_over` reads it over the law's regions."""
+    grade; `serves_over` reads it over the law's regions. [bite C1] And, for a numerical law, its worst
+    ratio within the demand's cap (`bound`, BOUND by default): a demand may ask a bound tighter than
+    the theory's by a factor, and an entry that passed at a worse ratio does not serve it. The two-entry
+    rule stands (6.S8, D-2026-10-16-h): an entry failed at its line's bound serves nothing, whatever it
+    measured."""
     return (entry["law"] == demand["law"] and entry_kind(entry) == demand.get("kind") and at(demand, entry)
             and passed(entry)
             and entry["grade"] is not None and GRADE_RANK[demand["accepts"]] <= GRADE_RANK[entry["grade"]]
-            and covers_all(entry["reach"], demand["given"]))
+            and covers_all(entry["reach"], demand["given"])
+            and within_cap(demand.get("bound", BOUND), entry_bound(entry)))
 
 
 def serves_over(demand, entry, entries):
@@ -1443,6 +1485,9 @@ def serves_over(demand, entry, entries):
     reference's signature."""
     if not serves(demand, entry):
         return False
+    if entry.get("measured") and not within_cap(demand.get("bound", BOUND),
+                                                pooled_worst(entries, entry["law"], entry["cone"], union_key(entry))):
+        return False  # the union keeps the largest worst (bite C1)
     grade = served_grade(demand, entry, entries)
     return grade is not None and GRADE_RANK[demand["accepts"]] <= GRADE_RANK[grade]
 

@@ -254,6 +254,7 @@ class Outcome:
     parts: list | None = None    # a conjunction's line: the outcomes of its conjuncts (D-2026-10-18-f)
     law_store: object = None     # the file that states the line's law (`law_file`), whose store holds its controls
     held: int | None = None      # the cases in which every premise held, when the law states one (`premises_of`)
+    measured: dict | None = None  # a numerical law's worst ratio, overall and per region (`measured_record`, bite C1)
 
 
 # ---------------------------------------------------------------------- loading
@@ -863,13 +864,151 @@ def census(runner, binding, ty, name):
 
 
 def evaluate(runner, law, case, fuel):
+    """The law's verdict at the case. A numerical law (laws.lth §5, bite C1) gives a `Law` at each
+    case: `Within A d bound a b`, held when `d a b <= bound`, the case with its distance and bound
+    appended to the runner's `MEASURES` list when `run_measured` set one; or `Case b` outside its
+    range, held as `b`, with nothing measured. [proposed] The measures pass by the runner and not by an
+    argument so that `run_spec`, part of the drawing code whose source is every sampled entry's
+    fingerprint (`drawing_revision`), keeps its text: a numerical law changes no draw."""
+    measured = getattr(runner, MEASURES, None)
     runner.fuel = fuel
     r = runner.whnf(Runner.apply(t.Var(law), list(case)))
-    if r == TRUE:
+    while True:
+        if r == TRUE:
+            return True
+        if r == FALSE:
+            return False
+        head, args = _spine(r)
+        if isinstance(head, t.Var) and _base(head) == "Case" and len(args) == 1:
+            r = runner.whnf(args[0])
+            continue
+        if isinstance(head, t.Var) and _base(head) == "Within" and len(args) == 5:
+            _, d, bound, a, b = args
+            distance = _float_value(runner, Runner.apply(d, [a, b]))
+            w = _float_value(runner, bound)
+            if measured is not None:
+                measured.append((case, distance, w))
+            return distance <= w
+        raise RunError(f"the law gave {_show(r)}, not a Bool")
+
+
+def _float_value(runner, term):
+    v = runner.value(term)
+    if not (isinstance(v, t.Lit) and isinstance(v.constant.value, (int, float))):
+        raise RunError(f"a numerical law's distance or bound gave {_show(v)}, not a Float64")
+    return float(v.constant.value)
+
+
+def ratio_of(distance, bound):
+    """laws.lth's `ratioOf`: zero for a distance of zero whatever the bound, None (unbounded) for a
+    positive distance at a bound of zero or below, else the quotient."""
+    if distance == 0.0:
+        return 0.0
+    if bound <= 0.0:
+        return None
+    return distance / bound
+
+
+def worse_ratio(r, s):
+    """laws.lth's `worseRatio`: the larger, an unbounded one (None) worst."""
+    if r is None or s is None:
+        return None
+    return r if r >= s else s
+
+
+MEASURES = "within_measures"  # the runner's attribute `evaluate` appends a numerical law's measures to
+
+
+def run_measured(runner, spec, fuel, loaded=None, start=None):
+    """`run_spec`, and for a numerical law (laws.lth §5) its measures: the worst ratio overall and per
+    region (`measured_record`) in the outcome's `measured`."""
+    law = _as_called(loaded, spec.law)
+    if not is_within(runner, law):
+        return run_spec(runner, spec, fuel, loaded, start)
+    setattr(runner, MEASURES, [])
+    try:
+        outcome = run_spec(runner, spec, fuel, loaded, start)
+        measures = getattr(runner, MEASURES)
+    finally:
+        delattr(runner, MEASURES)
+    if not isinstance(outcome.evidence, Points):
+        return outcome
+    points = outcome.evidence.cases
+    members = _case_regions(runner, loaded, spec, law, fuel, [c for c, _ in points]) if outcome.regions else None
+    return replace(outcome, measured=measured_record(measures, points, members, outcome.regions))
+
+
+def _case_regions(runner, loaded, spec, law, fuel, cases):
+    """The regions each case is counted in, as `run_spec` classifies them (its `Classifier`, with the
+    parameters bound to a census fixed and those bound to one value single); None when the
+    classification raises."""
+    params = parameters(runner, law) or []
+    names = tuple(n for n, _ in params)
+    carried = fixed_carrier(runner, law, params)
+    fixed, single = [], []
+    try:
+        for k, (name, ty) in enumerate(params):
+            if name in carried:
+                fixed.append(k)
+                single.append(k)
+                continue
+            b = resolve_binding(spec, name, _head_name(ty))
+            if b is None:
+                continue
+            called = _as_called(loaded, b.generator)
+            if generator_of(runner, called, names[:k]) is not None:
+                continue
+            fixed.append(k)
+            if len(census(runner, b, ty, called)) == 1:
+                single.append(k)
+        values = Values(runner, random.Random(spec.seed), spec.size, spec.budgets, fuel, spec.seed)
+        members = []
+        Classifier(runner, loaded, values, params, fixed=fixed, single=single).classify(cases, members)
+        return members
+    except (NoGenerator, *_RAISES):
+        return None
+
+
+def is_within(runner, law):
+    """Whether the law is a numerical law (laws.lth §5): its result is a `Law` and its body, as
+    written, applies `Within`; it runs case by case as a `Bool` law does, each case measured."""
+    definition = next((a for a in runner.program if isinstance(a, t.Define) and a.name == law), None)
+    return (definition is not None and _law_typed(definition.type)
+            and _applies(runner, definition.body, "Within", set()))
+
+
+def _applies(runner, term, name, seen, depth=0):
+    """Whether `term` mentions the constructor `name`, through the definitions it applies up to UNFOLD
+    deep (a conjunct is the law it applies)."""
+    if _mentions_base(term, name):
         return True
-    if r == FALSE:
+    if depth >= UNFOLD:
         return False
-    raise RunError(f"the law gave {_show(r)}, not a Bool")
+    for free in kernel.free_names(term):
+        if free in seen:
+            continue
+        seen.add(free)
+        d = next((a for a in runner.program if isinstance(a, t.Define) and a.name == free), None)
+        if d is not None and _law_typed(d.type) and _applies(runner, d.body, name, seen, depth + 1):
+            return True
+    return False
+
+
+def _mentions_base(term, name):
+    """`_mentions` of a name however a clash qualified it (`Within@...`)."""
+    if isinstance(term, t.Var):
+        return term.name.partition("@")[0] == name
+    if isinstance(term, tuple):
+        return any(_mentions_base(x, name) for x in term)
+    if is_dataclass(term) and not isinstance(term, type):
+        return any(_mentions_base(getattr(term, f.name), name) for f in fields(term))
+    return False
+
+
+def _law_typed(ty):
+    while isinstance(ty, t.Pi):
+        ty = ty.codomain
+    return _head_name(ty) == "Law"
 
 
 # ---------------------------------------------------------------------- a conjunction of laws (D-2026-10-18-f)
@@ -1013,10 +1152,27 @@ def conjunction_parts(program, law):
 def conjunct_definitions(program, laws):
     """The definitions the conjuncts of the laws among `laws` run as (`L%conjunct<k>`)."""
     out = []
+    defined = {}
+    for a in program:
+        if isinstance(a, t.Define):
+            defined.setdefault(a.name, a)
     for law in dict.fromkeys(laws):
-        for k, (ty, value, _) in enumerate(conjunction_parts(program, law) or ()):
-            out.append(t.Define(f"{law}{_CONJUNCT}{k}", ty, value))
+        for k, (ty, value, part) in enumerate(conjunction_parts(program, law) or ()):
+            out.append(t.Define(f"{law}{_CONJUNCT}{k}", _numerical(defined, part, ty), value))
     return tuple(out)
+
+
+def _numerical(defined, part, ty):
+    """[bite C1] A conjunct that is a numerical law (laws.lth §5) keeps its result type, `Law`, so that
+    the tester measures it: the `Bool` at the end of `ty` becomes `Law` when the law the conjunct
+    applies gives a `Law` and applies `Within`; any other conjunct's type is `ty` as it was."""
+    head, _ = _spine(part)
+    d = defined.get(head.name) if isinstance(head, t.Var) else None
+    if d is None or not _law_typed(d.type) or not _mentions_base(d.body, "Within"):
+        return ty
+    if isinstance(ty, t.Pi):
+        return t.Pi(ty.name, ty.domain, _numerical(defined, part, ty.codomain))
+    return t.Var("Law")
 
 
 def _shown_conjunct(part):
@@ -1148,6 +1304,52 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
 UNFOLD = 8
 
 
+def measured_record(measures, points, members, regions):
+    """A numerical law's evidence as the entry keeps it (laws.lth §5, D-2026-10-18-j): the cases
+    measured, the worst ratio of distance to bound with the distance and bound it came from (`worst`
+    None when a positive distance met a zero bound, `ratioOf`'s `nothing`), and the worst per region
+    (the regions' order, D-2026-10-16-i), each region's worst over the measured cases it counted.
+    The verdict is the comparison at each case; the ratio records how tight the bound was."""
+    worst, at = 0.0, None
+    for _, distance, bound in measures:
+        r = ratio_of(distance, bound)
+        if at is None or (worst is not None and (r is None or r > worst)):
+            worst, at = r, (distance, bound)
+    out = {"measured": len(measures), "worst": worst if measures else None,
+           "distance": at[0] if at else None, "bound": at[1] if at else None}
+    if members is not None and regions is not None and len(members) == len(points):
+        by_case = {id(case): k for k, (case, _) in enumerate(points)}
+        per = {}
+        for case, distance, bound in measures:
+            for key in members[by_case[id(case)]]:
+                r = ratio_of(distance, bound)
+                per[key] = worse_ratio(per[key], r) if key in per else r
+        out["regions"] = [{"region": g["region"], "worst": per[(g["region"]["source"], g["region"]["name"])]}
+                          for g in regions if (g["region"]["source"], g["region"]["name"]) in per]
+    return out
+
+
+# ---------------------------------------------------------------------- vacuity and the empty experiment
+
+# [wave A, bite A3; record/plan/audit-algebras-2026-10-22/execution.md; the audit of 2026-10-22,
+# section 12 "Vacuity, empty evidence and uncovered regions" (report.md, 5b1a05e)] A premise stated as a
+# subtype (`c : Chain A r`) is met by every case drawn, and the regions count it (`Classifier`). One
+# stated in the law's body is not: `p -> q` (`implies`, L12.7: `then` is material), `if p then q else
+# true` or `q or not p` (bite A3b), at the top of the body, under its lets (`{ r := ... ; if
+# r.converged then ... else true }`), or in the body of a law it applies, unfolded. Such a law held at every case where `p` was false, so with
+# `p` never true it passed with no evidence. `judged` counts the cases where every premise held; none
+# is laws.lth's `Vacuous n`, not run with the count as its reason (D-2026-10-16-m), never a pass. A run
+# that evaluated no case and raised none is an empty experiment, not run with its reason (7.S12;
+# test.lth's `CountsCases`: an empty sample is no evidence), except when an exhaustive run enumerated
+# an empty type whole: there the law holds of every value there is (`EmptyIsInitial`, `x : Empty`;
+# bite 13c item 5, record/plan/core-2026-10-17/report-bite-13c.md), the one exception. An empty census
+# is refused before (`census`). `judged` runs after `run_spec` and outside `_drawing_code`: it changes
+# no draw, so no identity.
+
+# [proposed] How deep `premises_of` unfolds the laws a body applies before it stops looking.
+UNFOLD = 8
+
+
 def _is_false(term):
     return isinstance(term, t.Var) and _base(term) == "false"
 
@@ -1198,9 +1400,18 @@ def _premise_split(term):
                 return None
             arms[pattern.name.partition("@")[0]] = body
         yes, no = arms.get("true"), arms.get("false")
-        if yes is not None and isinstance(no, t.Var) and _base(no) == "true" and not _is_false(yes):
+        if yes is not None and _holds_trivially(no) and not _is_false(yes):
             return term.value, yes
     return None
+
+
+def _holds_trivially(term):
+    """`true`, or the law that is the case `true` (`Case true`, a numerical law outside its range,
+    laws.lth §5)."""
+    if isinstance(term, t.Var) and _base(term) == "true":
+        return True
+    head, args = _spine(term)
+    return isinstance(head, t.Var) and _base(head) == "Case" and len(args) == 1 and _holds_trivially(args[0])
 
 
 def premises_of(runner, law):
@@ -1604,9 +1815,11 @@ class Classifier:
         return True  # an exact premise: the premise held (7.S14)
 
     # ---------------------------------------------------------- classify
-    def classify(self, cases):
+    def classify(self, cases, members=None):
         """The grading regions with their cases, in order (the type's, then each cutoff's sides,
-        then each premise's boundary), and the labels with theirs: ([(source, name, n)], [(name, n)])."""
+        then each premise's boundary), and the labels with theirs: ([(source, name, n)], [(name, n)]).
+        `members`, a list, receives for each case the set of regions it is counted in, (source, name)
+        (bite C1: a numerical law's worst ratio per region)."""
         counts, labels = {}, {}
         order, label_order = [], []
         def add(key, into, order_, n=1):
@@ -1653,6 +1866,7 @@ class Classifier:
                 add(("FromLaw", f"{self.params[k][0]} boundary"), counts, order, 0)
         inside = {name: False for name in witnesses}  # a witness inside its parameter's type at some case
         for case in cases:
+            counted = set()
             met = set()
             for k, found in instances.items():
                 for inst in found:
@@ -1663,6 +1877,7 @@ class Classifier:
             for name in met:
                 if ("FromType", name) in counts:
                     counts[("FromType", name)] += 1
+                    counted.add(("FromType", name))
             for k, found in label_instances.items():
                 for inst in found:
                     try:
@@ -1677,12 +1892,16 @@ class Classifier:
             for name in found_sides:
                 if ("FromLaw", name) in counts:
                     counts[("FromLaw", name)] += 1
+                    counted.add(("FromLaw", name))
             for k, stated_by in premises:
                 try:
                     if self.at_boundary(k, stated_by, case):
                         counts[("FromLaw", f"{self.params[k][0]} boundary")] += 1
+                        counted.add(("FromLaw", f"{self.params[k][0]} boundary"))
                 except _RAISES:
                     pass
+            if members is not None:
+                members.append(counted)
             for name, ws in witnesses.items():
                 if inside[name] or counts[("FromType", name)]:
                     continue
@@ -1720,7 +1939,8 @@ def is_statistical(runner, law):
     ty = definition.type
     while isinstance(ty, t.Pi):
         ty = ty.codomain
-    return _head_name(ty) == "Law"
+    # [bite C1] a numerical law (laws.lth §5, `Within`) is a `Law` too, but runs case by case
+    return _head_name(ty) == "Law" and not _applies(runner, definition.body, "Within", set())
 
 
 _RAISES = (RunError, RecursionError, ValueError, KeyError, TypeError)
@@ -1974,16 +2194,24 @@ def _tail(outcome):
     if isinstance(outcome.evidence, Tested):
         return _tested_tail(outcome)
     if outcome.spec.control and outcome.verdict == "Refuted":
-        return f"refuted at {_case_text(outcome)}: the control passed"
+        return f"refuted at {_case_text(outcome)}{ratio_text(outcome.measured)}: the control passed"
     if outcome.spec.control and outcome.grade is not None:
         return f"{_CONTROL_FAILED} ({_GRADE_WORDS.get(outcome.grade, outcome.grade)})"
     if outcome.verdict == "Refuted":
-        return f"refuted at {_case_text(outcome)}"
+        return f"refuted at {_case_text(outcome)}{ratio_text(outcome.measured)}"
     if outcome.verdict == "Unsettled":
         case, message = outcome.raised[0]
         return (f"unsettled: {len(outcome.raised)} cases raised, the first at "
                 f"{show_case(outcome.parameters, case)}: {message}")
-    return _GRADE_WORDS.get(outcome.grade, outcome.grade)
+    return _GRADE_WORDS.get(outcome.grade, outcome.grade) + ratio_text(outcome.measured)
+
+
+def ratio_text(measured):
+    """A numerical law's worst ratio of distance to bound, as a line shows it (bite C1)."""
+    if not measured or not measured.get("measured"):
+        return ""
+    worst = measured["worst"]
+    return ", worst ratio " + ("unbounded" if worst is None else f"{worst:.6g}")
 
 
 def _tested_tail(outcome):
@@ -2007,7 +2235,7 @@ def _entry_tail(entry):
         tested = (entry.get("evidence") or {}).get("Tested")
         grade = _GRADE_WORDS.get(entry["grade"], entry["grade"])
         if not tested:
-            return grade
+            return grade + ratio_text(entry.get("measured"))
         start = entry["evidence"].get("from")
         more = f", {certify.continued_text(start, tested['spent'])}" if start else ""
         return f"supported, {grade}: held at {certify.tested_text(tested)}{more}"
@@ -2137,7 +2365,7 @@ def _run_line(runner, loaded, spec, entry, given, home, stores, deep, store, run
         return reused
     # a statistical stretch continues the test of the law under its binding (D-2026-10-16-g)
     start = (lambda c, p, entry=entry, entries=entries: certify.continuation(entries, entry, c, p)) if store else None
-    outcome = judged(runner, loaded, spec, run_spec(runner, spec, given, loaded, start), given) if run is None else run(start)
+    outcome = judged(runner, loaded, spec, run_measured(runner, spec, given, loaded, start), given) if run is None else run(start)
     settle(entry, outcome)
     outcome.cone, outcome.entry, outcome.store = entry["cone"], entry, home
     fuel_spent = certify.out_of_fuel(entry)
@@ -2183,7 +2411,7 @@ def _run_conjunction(runner, loaded, spec, parts, cones, given, home, stores, de
     def run(start):
         done = []
         for s, c in zip(specs, parts):
-            o = judged(runner, loaded, s, run_spec(runner, s, given, loaded), given)
+            o = judged(runner, loaded, s, run_measured(runner, s, given, loaded), given)
             o.conjunct = c.shown
             done.append(o)
             if o.verdict == "Refuted":
@@ -2577,6 +2805,8 @@ def settle(entry, outcome):
                                     "coverage": _show(outcome.evidence.coverage), "verdict": outcome.verdict}}
     if outcome.held is not None:  # the cases in which the premises the law states held (bite A3)
         entry["evidence"]["Points"]["held"] = outcome.held
+    if outcome.measured is not None:  # laws.lth's `Measured`, its worst ratio (bite C1, D-2026-10-18-j)
+        entry["measured"] = outcome.measured
     # 7.S9: the entry records its regions and its labels (certification.lth's `RegionEvidence`)
     if outcome.regions is not None:
         entry["regions"] = outcome.regions
