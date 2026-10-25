@@ -3,9 +3,12 @@
 -- bare conjunctions: D-2026-10-18-f, spec 7.S22. References: Birkhoff, Lattice Theory
 -- (1967), chapters I and II; Huntington (1904), Sets of independent postulates for the algebra
 -- of logic. These are theories (planes 1 and 2, D-2026-10-18-c); models live in core.lut.
-import "core/structures/equality.lth" Object
+-- The bases of evidence and error as dioids (the section after `Quantale`): bite B2 of
+-- record/plan/audit-algebras-2026-10-22/execution.md, D-2026-10-25-a, Claude Fable 5.1, 2026-10-25.
+import "core/structures/equality.lth" Object ProbabilityLevel Extended finiteDistance infiniteDistance smaller
 import "core/properties/operations.lth" Associative Commutative Neutral Invertible Distributive
   Absorbing Distinct Idempotent Absorptive Complemented
+import "core/properties/functions.lth" Monotone Pointwise2
 
 Semigroup (A : U) (o : Object A) : { combine : A -> A -> A }
 Semigroup (A : U) (o : Object A) (m : Semigroup A o) := Associative A o m.combine
@@ -57,7 +60,18 @@ TheBooleans (b : TheBooleans) := BooleanAlgebra Bool (structural Bool) b.algebra
 -- resources, + in sequence and max in parallel. These name intended models, not claims:
 -- an actual quantale must specify its order orientation, saturation and empty join. In
 -- particular ordinary + and <= on nonnegative numbers do not preserve the empty join;
--- Lawvere uses the opposite order. No model of these four bases is asserted here.
+-- Lawvere uses the opposite order. No model of these four bases is asserted as a quantale;
+-- evidence and error are claimed as dioids below, the finitary part (D-2026-10-25-a).
+-- [proposed, B2 of record/plan/audit-algebras-2026-10-22/execution.md] Two orders meet at a
+-- base and share no `leq` (the audit's 4.1). The categorical order is Lawvere's: x leq y when y
+-- knows at least as much, a smaller error or a smaller failure bound, so the unit (0, exactness)
+-- is the top, the empty join (∞, or the pair (1, 1)) the bottom, and the tensor preserves it,
+-- a + ∞ = ∞. The numerical order is admission's: a demand's cutoff is met when the entry's
+-- value is at most it (certification.lth §3 `serves`; the cutoff of 6.S15 in the cost type `C`
+-- of 6.S4), which reads the categorical order backwards: the entry stands at or above the
+-- cutoff. A certificate refines upward in the categorical order (L10.9: never without new
+-- evidence) and a demand strengthens upward too, asking a smaller number. The dioids below write
+-- the categorical order as their join, so no `leq` of the numbers is reused across the two.
 Quantale (Q : U) (o : Object Q) : {
   neutral : Q, combine : Q -> Q -> Q, leq : Q -> Q -> Bool,
   supremum : (I : U) -> (I -> Q) -> Q }
@@ -71,6 +85,79 @@ TensorPreservesJoins (Q : U) (o : Object Q) (q : Quantale Q o) (I : U) (f : I ->
 Quantale (Q : U) (o : Object Q) (q : Quantale Q o) :=
   CommutativeMonoid Q o { neutral := q.neutral, combine := q.combine }
   & PartialOrder Q o q.leq & JoinUpper Q o q & JoinLeast Q o q & TensorPreservesJoins Q o q
+
+-- ---------------------------------------------------------------- the bases as dioids (D-2026-10-25-a)
+-- [proposed, B2] A quantale is a complete dioid: an idempotent semiring whose join is the
+-- supremum of every family. The complete joins are no computable field (a `supremum` over an
+-- arbitrary `I : U` has nothing to apply `f` to) and no finite test sees them, so the bases are
+-- claimed as dioids (Gondran and Minoux, Graphs, Dioids and Semirings, 2008, chapter 1): a
+-- commutative monoid (combine, neutral), an idempotent commutative monoid (join, bottom), combine
+-- distributing over join and absorbing bottom, the two units distinct. The order is the join's,
+-- x leq y when join x y = y; `Quantale` above stays the ideal each base models.
+Dioid (Q : U) (o : Object Q) : { bottom neutral : Q, join combine : Q -> Q -> Q }
+Dioid (Q : U) (o : Object Q) (d : Dioid Q o) :=
+  Semiring Q o { zero := d.bottom, one := d.neutral, plus := d.join, times := d.combine }
+  & Idempotent Q o d.join & Commutative Q Q o d.combine
+-- Lawvere's bases have the unit on top (an integral quantale): a composition never knows more
+-- than either part, combine x y leq x, written with the join.
+Integral (Q : U) (o : Object Q) (d : Dioid Q o) (x y : Q) : Bool := o.eq (d.join (d.combine x y) x) x
+
+-- The evidence base (D-2026-10-25-a, question 1; the audit's 4.2). What a sampled certificate
+-- knows of a law is the pair (ε̂, δ): `failure`, the bound on the fraction of the distribution
+-- where the law fails, and `risk`, the probability that the bound itself is wrong (the δ of
+-- L10.3; not sequential testing's `delta`, the alternative's separation, which the audit keeps
+-- apart). The join is the stronger of two, the smaller in each part; the bottom knows nothing,
+-- (1, 1); the neutral is certainty, (0, 0). The tensor, how the evidence of two links composes
+-- along a path, is a parameter (P11; D-2026-10-25-a: any reasonable choice a theory or a demand
+-- names, none that can loop, so a total function): a composition is reasonable when it gives a
+-- dioid with the unit on top, since the union of two failure events is at least as likely as
+-- either. Two instances are claimed in core.lut: the capped sum, `AssumptionFreeComposition`,
+-- the default; the product, `IndependentComposition`, under its axiom.
+EvidenceBound = { failure : ProbabilityLevel, risk : ProbabilityLevel }
+EvidenceComposition : { tensor : EvidenceBound -> EvidenceBound -> EvidenceBound }
+evidenceDioid (c : EvidenceComposition) : Dioid EvidenceBound (structural EvidenceBound) :=
+  { bottom := { failure := 1.0, risk := 1.0 }, neutral := { failure := 0.0, risk := 0.0 },
+    join := fn x y { { failure := smaller x.failure y.failure, risk := smaller x.risk y.risk } }, combine := c.tensor }
+EvidenceComposition (c : EvidenceComposition) :=
+  Dioid EvidenceBound (structural EvidenceBound) (evidenceDioid c) & Integral EvidenceBound (structural EvidenceBound) (evidenceDioid c)
+-- Boole's inequality: with nothing assumed of how two links fail, the probability that either
+-- fails is at most the sum, so a composition that assumes nothing is at least the capped sum
+-- min(1, a + b) in each part (L10.8's union bound, its first instance). The capped sum is the
+-- least such composition, and the default.
+AtLeastTheUnionBound (c : EvidenceComposition) (x y : EvidenceBound) : Bool :=
+  smaller 1.0 (x.failure + y.failure) <= (c.tensor x y).failure and smaller 1.0 (x.risk + y.risk) <= (c.tensor x y).risk
+AssumptionFreeComposition (c : EvidenceComposition) := EvidenceComposition c & AtLeastTheUnionBound c
+-- The product, a + b − ab (the two successes multiplied: the sum in nats of D-2026-10-12-q), is
+-- below the union bound (0.19 against 0.2 at a = b = 0.1) and holds only when the two failures
+-- are independent events: a hypothesis about the links composed, which no test of the algebra
+-- sees, stated as an axiom (11.R3) that a demand accepts by name (run.py's `axioms`, L5.18) as it
+-- accepts `ObserverIsFaithful`, never served by a sample.
+FailuresIndependent (c : EvidenceComposition) : Bool :=
+  axiom "the failures of the two links whose evidence this composition combines are independent events"
+IndependentComposition (c : EvidenceComposition) := EvidenceComposition c & FailuresIndependent c
+
+-- The error base ([0, ∞], +, ≥) of the correction to D-2026-10-18-i, Lawvere's, over `Extended`
+-- (equality.lth): its tensor the extended sum, its join the smaller distance, its bottom the
+-- infinite one, its unit 0; `extendedObject`, `extendedPlus` and `extendedSmaller` are core.lut's
+-- (the kernel's `==` does not reduce on injections, so the equality is written by cases).
+ErrorBase : { dioid : Dioid Extended extendedObject }
+ErrorBase (b : ErrorBase) :=
+  Dioid Extended extendedObject b.dioid & Integral Extended extendedObject b.dioid
+  & Pointwise2 Extended Extended Extended extendedObject b.dioid.combine extendedPlus
+  & Pointwise2 Extended Extended Extended extendedObject b.dioid.join extendedSmaller
+
+-- L10.3's conversion to nats, −log(1 − ε̂), is a map out of the evidence base into the error
+-- base, not a tensor: it carries the product composition to the sum, −log((1 − a)(1 − b)) =
+-- −log(1 − a) − log(1 − b), so it is a map of dioids for the product tensor only, not for the
+-- capped sum (the audit's 4.2). What is claimed of a conversion is that it is a map of the
+-- orders (`extendedLeq`, core.lut's numerical order of `Extended`) carrying certainty to 0 and
+-- no evidence to ∞. The model is core.lut's, with `log` a parameter, since the core has no
+-- elementary functions (numbers.lth's `Elementary`).
+NatsConversion : { nats : ProbabilityLevel -> Extended }
+NatsOfCertainty (n : NatsConversion) : Bool := extendedObject.eq (n.nats 0.0) (finiteDistance 0.0)
+NatsOfNothing (n : NatsConversion) : Bool := extendedObject.eq (n.nats 1.0) (infiniteDistance unit)
+NatsConversion (n : NatsConversion) :=
+  Monotone ProbabilityLevel Extended (fn x y { x <= y }) extendedLeq n.nats & NatsOfCertainty n & NatsOfNothing n
 
 -- The Boolean implication primitive's truth table (classical Boolean algebra).
 MaterialImplication (candidate : Bool -> Bool -> Bool) (p q : Bool) : Bool := candidate p q == (not p or q)

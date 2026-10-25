@@ -1,0 +1,55 @@
+-- tests/tester/bases_controls.test.lut: the controls of bases_laws.test.lut (bite B2 of
+-- record/plan/audit-algebras-2026-10-22/execution.md, D-2026-10-25-a). Each line runs a claim of
+-- core.lut on a model broken on purpose, `(control <- true)`, and is expected to be refuted
+-- (L9.14; 7.S19). The wrong models are this program's own: an equality that relates nothing; the
+-- product dioid on [0, ∞] (min, ∞, ×, 1), a dioid whose unit is not the top, which refutes
+-- `Integral` alone; the join taken the wrong way round (the larger distance with bottom ∞), which
+-- refutes the join's neutral law; the product composition as a model of the assumption-free
+-- claim, refuted at a = b = 0.1 where 0.19 is below the union bound 0.2 (the audit's 4.2); a
+-- projection as a composition, refuted at the unit; and a log that falls, which turns the nats
+-- conversion around. 2026-10-25, Claude Fable 5.1, on prompt-wave-bc.md.
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "core/structures/equality.lth" finiteDistance infiniteDistance
+
+on (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+
+-- ---------------------------------------------------------------- the wrong models
+errors : List Extended := [ finiteDistance 0.0, finiteDistance 0.5, finiteDistance 1.0, finiteDistance 2.0, infiniteDistance unit ]
+nothingEqual : Object Extended := { eq := fn a b { false } }
+extendedTimes (a b : Extended) : Extended :=
+  match a { infiniteDistance u -> infiniteDistance unit ; finiteDistance x ->
+  (match b { infiniteDistance v -> infiniteDistance unit ; finiteDistance y -> finiteDistance (x * y) }) }
+extendedLarger (a b : Extended) : Extended :=
+  match a { infiniteDistance u -> a ; finiteDistance x ->
+  (match b { infiniteDistance v -> b ; finiteDistance y -> finiteDistance (larger x y) }) }
+-- a dioid (the laws of `Dioid` hold on the listed errors) whose unit 1 is not the top 0
+productDioid : Dioid Extended extendedObject :=
+  { bottom := infiniteDistance unit, neutral := finiteDistance 1.0, join := extendedSmaller, combine := extendedTimes }
+productBase : ErrorBase := { dioid := productDioid }
+-- the join read in the numerical order, against the base's: max with ∞ as its neutral fails
+largerDioid : Dioid Extended extendedObject :=
+  { bottom := infiniteDistance unit, neutral := finiteDistance 0.0, join := extendedLarger, combine := extendedPlus }
+largerBase : ErrorBase := { dioid := largerDioid }
+
+tenths : List EvidenceBound := [ { failure := 0.1, risk := 0.1 } ]
+dyadic : List EvidenceBound := [ { failure := 0.0, risk := 0.0 }, { failure := 0.25, risk := 0.5 }, { failure := 1.0, risk := 1.0 } ]
+badProduct : EvidenceComposition := productComposition
+firstComposition : EvidenceComposition := { tensor := fn x y { x } }
+
+levelPairs : List (Related ProbabilityLevel (fn x y { x <= y })) := [ { x := 0.0, y := 0.5 } ]
+fallingLog : Float64 -> Float64 := fn x { 0.0 - x }
+
+-- ---------------------------------------------------------------- the lines
+test "ExtendedIsAnObject" ExhaustiveMode (seed <- 20261025)
+  (profile <- [on "model" "nothingEqual", on "x" "errors", on "p" "errors", on "c" "errors"]) (control <- true)
+test "ErrorIsABase" ExhaustiveMode (seed <- 20261025)
+  (profile <- [on "model" "productBase", on "x" "errors", on "y" "errors", on "z" "errors"]) (control <- true)
+test "ErrorIsABase" ExhaustiveMode (seed <- 20261025)
+  (profile <- [on "model" "largerBase", on "x" "errors", on "y" "errors", on "z" "errors"]) (control <- true)
+test "CappedSumIsAssumptionFree" ExhaustiveMode (seed <- 20261025)
+  (profile <- [on "model" "badProduct", on "x" "tenths", on "y" "tenths", on "z" "tenths"]) (control <- true)
+test "ProductIsAComposition" ExhaustiveMode (seed <- 20261025)
+  (profile <- [on "model" "firstComposition", on "x" "dyadic", on "y" "dyadic", on "z" "dyadic"]) (control <- true)
+test "NatsIsAConversion" ExhaustiveMode (seed <- 20261025) (profile <- [on "log" "fallingLog", on "p" "levelPairs"]) (control <- true)

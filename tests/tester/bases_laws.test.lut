@@ -1,0 +1,44 @@
+-- tests/tester/bases_laws.test.lut: the bases of evidence and error claimed in core.lut (bite B2 of
+-- record/plan/audit-algebras-2026-10-22/execution.md, D-2026-10-25-a), on listed cases; the laws
+-- are algebraic.lth's `Dioid`, `Integral`, `AtLeastTheUnionBound` and `NatsMonotone`. The evidence
+-- cases are dyadic (multiples of 1/8), so that every sum and product is exact in Float64 and the
+-- laws hold on the nose; at arbitrary doubles the capped sum is associative to an ulp only, which
+-- is a `...Within` law (operations.lth) and not claimed here. The error cases include the infinite
+-- distance. Their controls are bases_controls.test.lut. The entries land in core/core.cert.json,
+-- the store of the file that makes the claim. 2026-10-25, Claude Fable 5.1, on prompt-wave-bc.md.
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers_model.lut" elementary
+import "core/structures/equality.lth" finiteDistance infiniteDistance
+
+on (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+
+-- ---------------------------------------------------------------- the error base over Extended
+errors : List Extended := [ finiteDistance 0.0, finiteDistance 0.5, finiteDistance 1.0, finiteDistance 2.0, infiniteDistance unit ]
+errorPairs : List (Related Extended extendedObject.eq) := [ { x := finiteDistance 0.0, y := finiteDistance 0.0 },
+  { x := finiteDistance 2.0, y := finiteDistance 2.0 }, { x := infiniteDistance unit, y := infiniteDistance unit } ]
+errorChains : List (Chain Extended extendedObject.eq) := [ { x := finiteDistance 0.5, y := finiteDistance 0.5, z := finiteDistance 0.5 },
+  { x := infiniteDistance unit, y := infiniteDistance unit, z := infiniteDistance unit } ]
+goodExtendedObject : Object Extended := extendedObject
+goodErrorBase : ErrorBase := errorBase
+test "ExtendedIsAnObject" ExhaustiveMode (seed <- 20261025)
+  (profile <- [on "model" "goodExtendedObject", on "x" "errors", on "p" "errorPairs", on "c" "errorChains"])
+test "ErrorIsABase" ExhaustiveMode (seed <- 20261025)
+  (profile <- [on "model" "goodErrorBase", on "x" "errors", on "y" "errors", on "z" "errors"])
+
+-- ---------------------------------------------------------------- the evidence base
+dyadic : List EvidenceBound := [ { failure := 0.0, risk := 0.0 }, { failure := 0.25, risk := 0.5 }, { failure := 0.5, risk := 0.25 },
+  { failure := 0.75, risk := 0.125 }, { failure := 1.0, risk := 0.0 }, { failure := 1.0, risk := 1.0 } ]
+goodCappedSum : EvidenceComposition := cappedSumComposition
+goodProduct : EvidenceComposition := productComposition
+test "CappedSumIsAssumptionFree" ExhaustiveMode (seed <- 20261025)
+  (profile <- [on "model" "goodCappedSum", on "x" "dyadic", on "y" "dyadic", on "z" "dyadic"])
+test "ProductIsAComposition" ExhaustiveMode (seed <- 20261025)
+  (profile <- [on "model" "goodProduct", on "x" "dyadic", on "y" "dyadic", on "z" "dyadic"])
+
+-- ---------------------------------------------------------------- the nats conversion
+levelPairs : List (Related ProbabilityLevel (fn x y { x <= y })) := [ { x := 0.0, y := 0.0 }, { x := 0.0, y := 0.25 },
+  { x := 0.25, y := 0.5 }, { x := 0.5, y := 0.9 }, { x := 0.9, y := 1.0 }, { x := 1.0, y := 1.0 } ]
+hostLog : Float64 -> Float64 := elementary.log
+test "NatsIsAConversion" ExhaustiveMode (seed <- 20261025) (profile <- [on "log" "hostLog", on "p" "levelPairs"])

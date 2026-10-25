@@ -33,8 +33,10 @@ import "core/lists.lut" combineList foldList mapKernelList lengthList atList lis
 import "core/structures/universal.lth" Terminal Initial Coproduct Lists
   Exponential Product NamedProduct NamedCoproduct Selected one two
 import "core/structures/algebraic.lth" TheBooleans Monoid Semiring CommutativeRing BooleanAlgebra
+  Dioid EvidenceBound EvidenceComposition AssumptionFreeComposition ErrorBase NatsConversion
 import "core/structures/order.lth" OrderedSemiring Order
-import "core/structures/equality.lth" Concrete Structural Object Metric
+import "core/structures/equality.lth" Concrete Structural Object Metric Extended finiteDistance infiniteDistance
+  ProbabilityLevel smaller
 
 -- ---------------------------------------------------------------- the core's data (3.S7, 3.R3)
 
@@ -211,6 +213,44 @@ structural (A : Concrete) : Object A := { eq := fn x y { x == y } }
 asObject (A : Concrete) (s : Structural A) : Object A := { eq := s.eq }
 floatAbs (x : Float64) : Float64 := if x < 0.0 then 0.0 - x else x
 MetricTolerance (A : U) (d : A -> A -> Float64) (epsilon : NonNegativeFloat) : A -> A -> Bool := fn x y { d x y <= epsilon }
+
+-- The bases of error and evidence, models of algebraic.lth's dioids (D-2026-10-25-a; bite B2 of
+-- record/plan/audit-algebras-2026-10-22/execution.md). Their claims are gathered in `CoreBases`
+-- and certified by tests/tester/bases_laws.test.lut, their controls in bases_controls.test.lut.
+-- `Extended` is equality.lth's [0, ∞]; its equality is written by cases, since the kernel's `==`
+-- does not reduce on injections; the infinite distance absorbs the sum and is the largest.
+extendedObject : Object Extended := { eq := fn a b {
+  match a { infiniteDistance u -> (match b { infiniteDistance v -> true ; finiteDistance y -> false }) ;
+            finiteDistance x -> (match b { infiniteDistance v -> false ; finiteDistance y -> x == y }) } } }
+extendedLeq (a b : Extended) : Bool :=
+  match b { infiniteDistance u -> true ; finiteDistance y -> (match a { infiniteDistance v -> false ; finiteDistance x -> x <= y }) }
+extendedPlus (a b : Extended) : Extended :=
+  match a { infiniteDistance u -> infiniteDistance unit ; finiteDistance x ->
+  (match b { infiniteDistance v -> infiniteDistance unit ; finiteDistance y -> finiteDistance (x + y) }) }
+extendedSmaller (a b : Extended) : Extended :=
+  match a { infiniteDistance u -> b ; finiteDistance x ->
+  (match b { infiniteDistance v -> a ; finiteDistance y -> finiteDistance (smaller x y) }) }
+ExtendedIsAnObject (model : Object Extended <- extendedObject) : Bool := Object Extended model
+-- the error base ([0, ∞], +, ≥): the join the smaller distance, the bottom ∞, the unit 0
+errorDioid : Dioid Extended extendedObject :=
+  { bottom := infiniteDistance unit, neutral := finiteDistance 0.0, join := extendedSmaller, combine := extendedPlus }
+errorBase : ErrorBase := { dioid := errorDioid }
+ErrorIsABase (model : ErrorBase <- errorBase) : Bool := ErrorBase model
+-- the evidence base's two compositions: the capped sum min(1, a + b) in each part, the default a
+-- theory or a demand that names none gets (L10.8's union bound); the product a + b − ab, certified
+-- here as a composition, its hypothesis the axiom of `IndependentComposition`, which a demand
+-- accepts by name and no sample settles
+cappedSumComposition : EvidenceComposition :=
+  { tensor := fn x y { { failure := smaller 1.0 (x.failure + y.failure), risk := smaller 1.0 (x.risk + y.risk) } } }
+CappedSumIsAssumptionFree (model : EvidenceComposition <- cappedSumComposition) : Bool := AssumptionFreeComposition model
+productComposition : EvidenceComposition :=
+  { tensor := fn x y { { failure := x.failure + y.failure - x.failure * y.failure, risk := x.risk + y.risk - x.risk * y.risk } } }
+ProductIsAComposition (model : EvidenceComposition <- productComposition) : Bool := EvidenceComposition model
+-- the nats conversion −log(1 − ε̂) (L10.3), ε̂ = 1 to ∞; `log` is the test's (numbers_model.lut's
+-- `elementary`), since the core has none
+NatsIsAConversion (log : Float64 -> Float64) : Bool :=
+  NatsConversion { nats := fn e { if e < 1.0 then finiteDistance (0.0 - log (1.0 - e)) else infiniteDistance unit } }
+CoreBases := ExtendedIsAnObject & ErrorIsABase & CappedSumIsAssumptionFree & ProductIsAComposition & NatsIsAConversion
 
 intIsAnObjectModel  : Object Int := structural Int
 IntIsAnObject  (model : Object Int <- structural Int) : Bool := Object Int model
