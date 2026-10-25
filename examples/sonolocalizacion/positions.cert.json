@@ -15,6 +15,242 @@
    },
    {
     "parameter": "from",
+    "generator": "rowMajors (Listed)",
+    "fingerprint": "sha256:bc121624aab5cb2a303ad770051c198e3615f7e77618f781ebf5fca324040238"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf ((* 3) n))",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "n",
+    "reach": {
+     "Interval": [
+      1.0,
+      11.0
+     ]
+    }
+   },
+   {
+    "parameter": "to",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (m : { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) { (flatten m) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "from",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (p : { n : Nat, f : (_ : (Fin n)) -> Float64 }) { ((((mat Float64) 3) ((/ (p).n) 3)) fn (a : (Fin 3)) { fn (k : (Fin ((/ (p).n) 3))) { ((p).f ((+ ((* a) ((/ (p).n) 3))) k)) } }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "n = 3, to = fn (m : { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) { (flatten m) }, from = fn (p : { n : Nat, f : (_ : (Fin n)) -> Float64 }) { ((((mat Float64) 3) ((/ (p).n) 3)) fn (a : (Fin 3)) { fn (k : (Fin ((/ (p).n) 3))) { ((p).f ((+ ((* a) ((/ (p).n) 3))) k)) } }) }, x = { n := 9, f := extern \"host:2261\" }"
+  },
+  "date": "2026-10-25T22:52:06+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Inverse (VecOf ((* 3) n)) ((MatOf 3) n) (vecObject Float64) from to",
+  "conjuncts": [
+   "Inverse ((MatOf 3) n) (VecOf ((* 3) n)) (matObject Float64) to from",
+   "Inverse (VecOf ((* 3) n)) ((MatOf 3) n) (vecObject Float64) from to"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "n boundary"
+    },
+    "n": 22
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "LayoutIsAnIsomorphism",
+  "cone": "sha256:57c20dc77c2512478713014af7c6078f28353b30ead447ba53bd928efbeee459",
+  "binding": [
+   {
+    "parameter": "n",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Dim",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "to",
+    "generator": "flattens (Listed)",
+    "fingerprint": "sha256:6a38f6eb7e54154fe33a8e1b60e49f2019dce4c8578e853a006ddf62308da028"
+   },
+   {
+    "parameter": "from",
+    "generator": "rowMajors (Listed)",
+    "fingerprint": "sha256:bc121624aab5cb2a303ad770051c198e3615f7e77618f781ebf5fca324040238"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((MatOf 3) n)",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "n",
+    "reach": {
+     "Interval": [
+      1.0,
+      11.0
+     ]
+    }
+   },
+   {
+    "parameter": "to",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (m : { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) { (flatten m) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "from",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (p : { n : Nat, f : (_ : (Fin n)) -> Float64 }) { ((((mat Float64) 3) ((/ (p).n) 3)) fn (a : (Fin 3)) { fn (k : (Fin ((/ (p).n) 3))) { ((p).f ((+ ((* a) ((/ (p).n) 3))) k)) } }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "n = 3, to = fn (m : { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) { (flatten m) }, from = fn (p : { n : Nat, f : (_ : (Fin n)) -> Float64 }) { ((((mat Float64) 3) ((/ (p).n) 3)) fn (a : (Fin 3)) { fn (k : (Fin ((/ (p).n) 3))) { ((p).f ((+ ((* a) ((/ (p).n) 3))) k)) } }) }, x = { m := 3, n := 3, f := extern \"host:1\" }"
+  },
+  "date": "2026-10-25T22:52:06+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Inverse ((MatOf 3) n) (VecOf ((* 3) n)) (matObject Float64) to from",
+  "conjuncts": [
+   "Inverse ((MatOf 3) n) (VecOf ((* 3) n)) (matObject Float64) to from",
+   "Inverse (VecOf ((* 3) n)) ((MatOf 3) n) (vecObject Float64) from to"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "zero"
+    },
+    "n": 3
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "rank deficient"
+    },
+    "n": 10
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "n boundary"
+    },
+    "n": 15
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "LayoutIsAnIsomorphism",
+  "cone": "sha256:57c20dc77c2512478713014af7c6078f28353b30ead447ba53bd928efbeee459",
+  "binding": [
+   {
+    "parameter": "n",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Dim",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "to",
+    "generator": "flattens (Listed)",
+    "fingerprint": "sha256:6a38f6eb7e54154fe33a8e1b60e49f2019dce4c8578e853a006ddf62308da028"
+   },
+   {
+    "parameter": "from",
     "generator": "unflattens (Listed)",
     "fingerprint": "sha256:80f8c1122d82ffce1cd1a4668bda0da215558e5577e7a5ece9743c43ce696e65"
    },

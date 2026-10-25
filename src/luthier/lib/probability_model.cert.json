@@ -21,6 +21,184 @@
    {
     "parameter": "model",
     "generator": "pushModel (Listed)",
+    "fingerprint": "sha256:0faff9fe487f0f3cd1b538725b63c28241011489b3d2582efc8bd932f60437bb"
+   },
+   {
+    "parameter": "g",
+    "generator": "pushSamplers (Listed)",
+    "fingerprint": "sha256:e3f329cb47f91bdda4d46a6cc5d064a108f2fbbde027a744cfe15d6da10eae51"
+   },
+   {
+    "parameter": "n",
+    "generator": "pushSizes (Listed)",
+    "fingerprint": "sha256:a13511e97c670bc208f8b04ea5cac8e96d2b5d9514a0b643340dfd343ca8c584"
+   },
+   {
+    "parameter": "s",
+    "generator": "pushSeeds (Listed)",
+    "fingerprint": "sha256:a5f2960404e63e42f3728217ee5359d024277bd2bd267928b568e5ffc6e94496"
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "pushedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "pushedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "negated"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "pushModel"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (n : Nat) { fn (s : Seed) { (((+ n) s), (nextSeed s)) } }"
+      },
+      {
+       "Printed": "fn (n : Nat) { fn (s : Seed) { (((- n) 3), s) } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      },
+      {
+       "Number": 1.0
+      },
+      {
+       "Number": 7.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      },
+      {
+       "Number": 12345.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 12,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = pushedType, B = pushedType, f = negated, model = pushModel, g = fn (n : Nat) { fn (s : Seed) { (((+ n) s), (nextSeed s)) } }, n = 0, s = 12345"
+  },
+  "date": "2026-10-25T22:51:28+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "PushedDraw A B f model",
+  "conjuncts": [
+   "PushedDraw A B f model"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "n boundary"
+    },
+    "n": 8
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "s boundary"
+    },
+    "n": 6
+   }
+  ]
+ },
+ {
+  "law": "PushingDraws",
+  "cone": "sha256:20e7fd4a01814710f7eb8cc8e9f051c0cc0035c5609bab7aed10708a25f72a0c",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "pushedType (Listed)",
+    "fingerprint": "sha256:5657e01066a182cff57d566de4a359cc1f895190ed537d225f0634b2204c682c"
+   },
+   {
+    "parameter": "B",
+    "generator": "pushedType (Listed)",
+    "fingerprint": "sha256:5657e01066a182cff57d566de4a359cc1f895190ed537d225f0634b2204c682c"
+   },
+   {
+    "parameter": "f",
+    "generator": "negated (Listed)",
+    "fingerprint": "sha256:6f8d1ce5a6b390203e37490f96524248d986a924684d820b0ae518bf4b3aaaaf"
+   },
+   {
+    "parameter": "model",
+    "generator": "pushModel (Listed)",
     "fingerprint": "sha256:617ab0b6e44e8a218eaf2b1d818ade1ee39bd8c5f4069cb5bc12b43f351e1010"
    },
    {

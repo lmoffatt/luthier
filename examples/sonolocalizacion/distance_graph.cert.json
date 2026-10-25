@@ -11,6 +11,726 @@
    {
     "parameter": "join",
     "generator": "secondJoins (Listed)",
+    "fingerprint": "sha256:b099b9321db030f4e04d0011e9ca730907d6ba28c4750f316e3c7a1491656082"
+   },
+   {
+    "parameter": "x",
+    "generator": "ExhaustiveMode over (Fin ((g).measurements).nRows)",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((iOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (jOf h)) (nodeIndex h))) { (v).x } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 22,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-25T22:52:23+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+  "conjuncts": [
+   "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+   "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+   "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "JoinOnSecondEnd",
+  "cone": "sha256:bd20bf33a26b12d6b88adb9d1829a9b8440892b4cb65a4a60a4a75391afd87ff",
+  "binding": [
+   {
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:2ba2f46e643d29872ae7a7d4ea37b25c6d86d2df92da96212352c992501d20c7"
+   },
+   {
+    "parameter": "join",
+    "generator": "secondJoins (Listed)",
+    "fingerprint": "sha256:b099b9321db030f4e04d0011e9ca730907d6ba28c4750f316e3c7a1491656082"
+   },
+   {
+    "parameter": "v",
+    "generator": "ExhaustiveMode over ((((((agreeing (Fin ((g).measurements).nRows)) (Fin ((g).nodes).nRows)) Int) (structural Int)) (jOf g)) (nodeIndex g))",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((iOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (jOf h)) (nodeIndex h))) { (v).x } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "v",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 22,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "g = graphA, join = fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((iOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (jOf h)) (nodeIndex h))) { (v).x } } }, v = { x := 0, y := 2 }"
+  },
+  "date": "2026-10-25T22:52:23+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+  "conjuncts": [
+   "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+   "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+   "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "v boundary"
+    },
+    "n": 22
+   }
+  ]
+ },
+ {
+  "law": "JoinOnSecondEnd",
+  "cone": "sha256:bd20bf33a26b12d6b88adb9d1829a9b8440892b4cb65a4a60a4a75391afd87ff",
+  "binding": [
+   {
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:2ba2f46e643d29872ae7a7d4ea37b25c6d86d2df92da96212352c992501d20c7"
+   },
+   {
+    "parameter": "join",
+    "generator": "secondJoins (Listed)",
+    "fingerprint": "sha256:b099b9321db030f4e04d0011e9ca730907d6ba28c4750f316e3c7a1491656082"
+   },
+   {
+    "parameter": "x",
+    "generator": "ExhaustiveMode over (Fin ((g).measurements).nRows)",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((iOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (jOf h)) (nodeIndex h))) { (v).x } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 22,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "g = graphA, join = fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((iOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (jOf h)) (nodeIndex h))) { (v).x } } }, x = 0"
+  },
+  "date": "2026-10-25T22:52:23+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+  "conjuncts": [
+   "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+   "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)",
+   "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (jOf g) (nodeIndex g) (join g)"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "JoinOnFirstEnd",
+  "cone": "sha256:a87e2865a9e241ea283806ff4180920038375092bed6082f9e2daf6bddb58b2e",
+  "binding": [
+   {
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:2ba2f46e643d29872ae7a7d4ea37b25c6d86d2df92da96212352c992501d20c7"
+   },
+   {
+    "parameter": "join",
+    "generator": "firstJoins (Listed)",
+    "fingerprint": "sha256:57613055b05babcb270a8ab2d0e8ab552e7779e1923e8a51008fee0d67606a5f"
+   },
+   {
+    "parameter": "x",
+    "generator": "ExhaustiveMode over (Fin ((g).measurements).nRows)",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((jOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (iOf h)) (nodeIndex h))) { (v).x } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 22,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-25T22:52:18+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+  "conjuncts": [
+   "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+   "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+   "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "JoinOnFirstEnd",
+  "cone": "sha256:a87e2865a9e241ea283806ff4180920038375092bed6082f9e2daf6bddb58b2e",
+  "binding": [
+   {
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:2ba2f46e643d29872ae7a7d4ea37b25c6d86d2df92da96212352c992501d20c7"
+   },
+   {
+    "parameter": "join",
+    "generator": "firstJoins (Listed)",
+    "fingerprint": "sha256:57613055b05babcb270a8ab2d0e8ab552e7779e1923e8a51008fee0d67606a5f"
+   },
+   {
+    "parameter": "v",
+    "generator": "ExhaustiveMode over ((((((agreeing (Fin ((g).measurements).nRows)) (Fin ((g).nodes).nRows)) Int) (structural Int)) (iOf g)) (nodeIndex g))",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((jOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (iOf h)) (nodeIndex h))) { (v).x } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "v",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 22,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "g = graphA, join = fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((jOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (iOf h)) (nodeIndex h))) { (v).x } } }, v = { x := 0, y := 1 }"
+  },
+  "date": "2026-10-25T22:52:18+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+  "conjuncts": [
+   "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+   "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+   "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "v boundary"
+    },
+    "n": 22
+   }
+  ]
+ },
+ {
+  "law": "JoinOnFirstEnd",
+  "cone": "sha256:a87e2865a9e241ea283806ff4180920038375092bed6082f9e2daf6bddb58b2e",
+  "binding": [
+   {
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:2ba2f46e643d29872ae7a7d4ea37b25c6d86d2df92da96212352c992501d20c7"
+   },
+   {
+    "parameter": "join",
+    "generator": "firstJoins (Listed)",
+    "fingerprint": "sha256:57613055b05babcb270a8ab2d0e8ab552e7779e1923e8a51008fee0d67606a5f"
+   },
+   {
+    "parameter": "x",
+    "generator": "ExhaustiveMode over (Fin ((g).measurements).nRows)",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "join",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((jOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (iOf h)) (nodeIndex h))) { (v).x } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 22,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "g = graphA, join = fn (h : ValidDistanceGraph) { { first := fn (k : (Fin ((h).measurements).nRows)) { k }, second := fn (k : (Fin ((h).measurements).nRows)) { ((jOf h) k) }, pair := fn (v : ((((((agreeing (Fin ((h).measurements).nRows)) (Fin ((h).nodes).nRows)) Int) (structural Int)) (iOf h)) (nodeIndex h))) { (v).x } } }, x = 0"
+  },
+  "date": "2026-10-25T22:52:18+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "conjunct": "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+  "conjuncts": [
+   "PullbackCommutes (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+   "PullbackProjects (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)",
+   "PullbackUnique (Fin ((g).measurements).nRows) (Fin ((g).nodes).nRows) Int (Fin ((g).measurements).nRows) (structural (Fin ((g).measurements).nRows)) (structural (Fin ((g).nodes).nRows)) (structural Int) (structural (Fin ((g).measurements).nRows)) (iOf g) (nodeIndex g) (join g)"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "JoinOnSecondEnd",
+  "cone": "sha256:bd20bf33a26b12d6b88adb9d1829a9b8440892b4cb65a4a60a4a75391afd87ff",
+  "binding": [
+   {
+    "parameter": "g",
+    "generator": "validGraphs (Listed)",
+    "fingerprint": "sha256:2ba2f46e643d29872ae7a7d4ea37b25c6d86d2df92da96212352c992501d20c7"
+   },
+   {
+    "parameter": "join",
+    "generator": "secondJoins (Listed)",
     "fingerprint": "sha256:ac12d0cefd9482ae6465fd849911da06fa399ebe725207979f4cddb7e2e0cf07"
    },
    {

@@ -1,5 +1,1469 @@
 [
  {
+  "law": "HammingListIsAMetric",
+  "cone": "sha256:e0679df399802478618c0e6159650a73c290567f0357e399f4fab7a119182f11",
+  "binding": [
+   {
+    "parameter": "n",
+    "generator": "hammingSize (Listed)",
+    "fingerprint": "sha256:9f116d0c94f49bcd2ded13b0db5f2523cc873911eccb92faafd81ff91dd10438"
+   },
+   {
+    "parameter": "model",
+    "generator": "badHamming (Listed)",
+    "fingerprint": "sha256:93746653041aeaecb9a5c5bed57b34d236c32aed006abcd66fee10b21f61c852"
+   },
+   {
+    "parameter": "x",
+    "generator": "boolVectors (Listed)",
+    "fingerprint": "sha256:9ba03c056dae1c9f90f3daf1d68f2b29e48e2d9cb2c8f4513e56713fdba80855"
+   },
+   {
+    "parameter": "y",
+    "generator": "boolVectors (Listed)",
+    "fingerprint": "sha256:9ba03c056dae1c9f90f3daf1d68f2b29e48e2d9cb2c8f4513e56713fdba80855"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badHamming"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons false) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons false) ((cons true) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons true) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons false) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons false) ((cons true) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons true) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-25T22:50:32+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MetricNonNegative (BoolListOf n) (model).d",
+  "conjuncts": [
+   "MetricZeroOnEqual (BoolListOf n) (structural (BoolListOf n)) model",
+   "MetricIndiscernible (BoolListOf n) (structural (BoolListOf n)) model",
+   "Commutative (BoolListOf n) Float64 (structural Float64) (model).d",
+   "Triangular (BoolListOf n) (model).d",
+   "MetricNonNegative (BoolListOf n) (model).d"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 16
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 16
+   }
+  ]
+ },
+ {
+  "law": "HammingListIsAMetric",
+  "cone": "sha256:e0679df399802478618c0e6159650a73c290567f0357e399f4fab7a119182f11",
+  "binding": [
+   {
+    "parameter": "n",
+    "generator": "hammingSize (Listed)",
+    "fingerprint": "sha256:9f116d0c94f49bcd2ded13b0db5f2523cc873911eccb92faafd81ff91dd10438"
+   },
+   {
+    "parameter": "model",
+    "generator": "badHamming (Listed)",
+    "fingerprint": "sha256:93746653041aeaecb9a5c5bed57b34d236c32aed006abcd66fee10b21f61c852"
+   },
+   {
+    "parameter": "x",
+    "generator": "boolVectors (Listed)",
+    "fingerprint": "sha256:9ba03c056dae1c9f90f3daf1d68f2b29e48e2d9cb2c8f4513e56713fdba80855"
+   },
+   {
+    "parameter": "y",
+    "generator": "boolVectors (Listed)",
+    "fingerprint": "sha256:9ba03c056dae1c9f90f3daf1d68f2b29e48e2d9cb2c8f4513e56713fdba80855"
+   },
+   {
+    "parameter": "z",
+    "generator": "boolVectors (Listed)",
+    "fingerprint": "sha256:9ba03c056dae1c9f90f3daf1d68f2b29e48e2d9cb2c8f4513e56713fdba80855"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badHamming"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons false) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons false) ((cons true) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons true) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons false) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons false) ((cons true) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons true) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons false) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons false) ((cons true) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons true) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 64,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-25T22:50:32+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Triangular (BoolListOf n) (model).d",
+  "conjuncts": [
+   "MetricZeroOnEqual (BoolListOf n) (structural (BoolListOf n)) model",
+   "MetricIndiscernible (BoolListOf n) (structural (BoolListOf n)) model",
+   "Commutative (BoolListOf n) Float64 (structural Float64) (model).d",
+   "Triangular (BoolListOf n) (model).d",
+   "MetricNonNegative (BoolListOf n) (model).d"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 64
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 64
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "z boundary"
+    },
+    "n": 64
+   }
+  ]
+ },
+ {
+  "law": "HammingListIsAMetric",
+  "cone": "sha256:e0679df399802478618c0e6159650a73c290567f0357e399f4fab7a119182f11",
+  "binding": [
+   {
+    "parameter": "n",
+    "generator": "hammingSize (Listed)",
+    "fingerprint": "sha256:9f116d0c94f49bcd2ded13b0db5f2523cc873911eccb92faafd81ff91dd10438"
+   },
+   {
+    "parameter": "model",
+    "generator": "badHamming (Listed)",
+    "fingerprint": "sha256:93746653041aeaecb9a5c5bed57b34d236c32aed006abcd66fee10b21f61c852"
+   },
+   {
+    "parameter": "x",
+    "generator": "boolVectors (Listed)",
+    "fingerprint": "sha256:9ba03c056dae1c9f90f3daf1d68f2b29e48e2d9cb2c8f4513e56713fdba80855"
+   },
+   {
+    "parameter": "y",
+    "generator": "boolVectors (Listed)",
+    "fingerprint": "sha256:9ba03c056dae1c9f90f3daf1d68f2b29e48e2d9cb2c8f4513e56713fdba80855"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badHamming"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons false) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons false) ((cons true) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons true) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons false) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons false) ((cons true) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons true) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-25T22:50:32+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Commutative (BoolListOf n) Float64 (structural Float64) (model).d",
+  "conjuncts": [
+   "MetricZeroOnEqual (BoolListOf n) (structural (BoolListOf n)) model",
+   "MetricIndiscernible (BoolListOf n) (structural (BoolListOf n)) model",
+   "Commutative (BoolListOf n) Float64 (structural Float64) (model).d",
+   "Triangular (BoolListOf n) (model).d",
+   "MetricNonNegative (BoolListOf n) (model).d"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 16
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 16
+   }
+  ]
+ },
+ {
+  "law": "HammingListIsAMetric",
+  "cone": "sha256:e0679df399802478618c0e6159650a73c290567f0357e399f4fab7a119182f11",
+  "binding": [
+   {
+    "parameter": "n",
+    "generator": "hammingSize (Listed)",
+    "fingerprint": "sha256:9f116d0c94f49bcd2ded13b0db5f2523cc873911eccb92faafd81ff91dd10438"
+   },
+   {
+    "parameter": "model",
+    "generator": "badHamming (Listed)",
+    "fingerprint": "sha256:93746653041aeaecb9a5c5bed57b34d236c32aed006abcd66fee10b21f61c852"
+   },
+   {
+    "parameter": "x",
+    "generator": "boolVectors (Listed)",
+    "fingerprint": "sha256:9ba03c056dae1c9f90f3daf1d68f2b29e48e2d9cb2c8f4513e56713fdba80855"
+   },
+   {
+    "parameter": "y",
+    "generator": "boolVectors (Listed)",
+    "fingerprint": "sha256:9ba03c056dae1c9f90f3daf1d68f2b29e48e2d9cb2c8f4513e56713fdba80855"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badHamming"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons false) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons false) ((cons true) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons true) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons false) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons false) ((cons true) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons false) nil))"
+      },
+      {
+       "Printed": "((cons true) ((cons true) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 16
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "n = hammingSize, model = badHamming, x = ((cons false) ((cons false) nil)), y = ((cons false) ((cons true) nil))"
+  },
+  "date": "2026-10-25T22:50:32+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MetricIndiscernible (BoolListOf n) (structural (BoolListOf n)) model",
+  "conjuncts": [
+   "MetricZeroOnEqual (BoolListOf n) (structural (BoolListOf n)) model",
+   "MetricIndiscernible (BoolListOf n) (structural (BoolListOf n)) model",
+   "Commutative (BoolListOf n) Float64 (structural Float64) (model).d",
+   "Triangular (BoolListOf n) (model).d",
+   "MetricNonNegative (BoolListOf n) (model).d"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 16
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 16
+   }
+  ]
+ },
+ {
+  "law": "HammingListIsAMetric",
+  "cone": "sha256:e0679df399802478618c0e6159650a73c290567f0357e399f4fab7a119182f11",
+  "binding": [
+   {
+    "parameter": "n",
+    "generator": "hammingSize (Listed)",
+    "fingerprint": "sha256:9f116d0c94f49bcd2ded13b0db5f2523cc873911eccb92faafd81ff91dd10438"
+   },
+   {
+    "parameter": "model",
+    "generator": "badHamming (Listed)",
+    "fingerprint": "sha256:93746653041aeaecb9a5c5bed57b34d236c32aed006abcd66fee10b21f61c852"
+   },
+   {
+    "parameter": "p",
+    "generator": "equalVectors (Listed)",
+    "fingerprint": "sha256:43a35e64b168d3e455ca655f653693bd841ab50e9ebc9c883f61bca77fe7e641"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badHamming"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := ((cons false) ((cons false) nil)), y := ((cons false) ((cons false) nil)) }"
+      },
+      {
+       "Printed": "{ x := ((cons false) ((cons true) nil)), y := ((cons false) ((cons true) nil)) }"
+      },
+      {
+       "Printed": "{ x := ((cons true) ((cons false) nil)), y := ((cons true) ((cons false) nil)) }"
+      },
+      {
+       "Printed": "{ x := ((cons true) ((cons true) nil)), y := ((cons true) ((cons true) nil)) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-25T22:50:32+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MetricZeroOnEqual (BoolListOf n) (structural (BoolListOf n)) model",
+  "conjuncts": [
+   "MetricZeroOnEqual (BoolListOf n) (structural (BoolListOf n)) model",
+   "MetricIndiscernible (BoolListOf n) (structural (BoolListOf n)) model",
+   "Commutative (BoolListOf n) Float64 (structural Float64) (model).d",
+   "Triangular (BoolListOf n) (model).d",
+   "MetricNonNegative (BoolListOf n) (model).d"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "p boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "ListIsAMonoid",
+  "cone": "sha256:5eb838fa030a6ced8fcabc5ad7d42693725b19b08ff4d79c71f2625cec0e38c4",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "testedType (Listed)",
+    "fingerprint": "sha256:fa1767e2cdd3cec2c69efe697c5e3037de8188794ce22ca89b12312c01a7a201"
+   },
+   {
+    "parameter": "model",
+    "generator": "badMonoid (Listed)",
+    "fingerprint": "sha256:a157badf1245c857cbc61790be9f5d46aec4d9cf2ce79d8c96b080e78b9b9d69"
+   },
+   {
+    "parameter": "x",
+    "generator": "values (Listed)",
+    "fingerprint": "sha256:bda791f2ddb7311e3839bd547cd0933a4ea0f35a947545586b0dbced3df56901"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "testedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badMonoid"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons 0) nil)"
+      },
+      {
+       "Printed": "((cons 1) nil)"
+      },
+      {
+       "Printed": "((cons 1) ((cons 2) nil))"
+      },
+      {
+       "Printed": "((cons 2) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 1) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 3) ((cons 1) ((cons 2) ((cons 1) nil))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 7,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = testedType, model = badMonoid, x = ((cons 1) ((cons 2) nil))"
+  },
+  "date": "2026-10-25T22:49:54+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Neutral (List A) (structural (List A)) (model).combine (model).neutral",
+  "conjuncts": [
+   "Associative (List A) (structural (List A)) (model).combine",
+   "Neutral (List A) (structural (List A)) (model).combine (model).neutral"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "ListIsAMonoid",
+  "cone": "sha256:5eb838fa030a6ced8fcabc5ad7d42693725b19b08ff4d79c71f2625cec0e38c4",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "testedType (Listed)",
+    "fingerprint": "sha256:fa1767e2cdd3cec2c69efe697c5e3037de8188794ce22ca89b12312c01a7a201"
+   },
+   {
+    "parameter": "model",
+    "generator": "badMonoid (Listed)",
+    "fingerprint": "sha256:a157badf1245c857cbc61790be9f5d46aec4d9cf2ce79d8c96b080e78b9b9d69"
+   },
+   {
+    "parameter": "x",
+    "generator": "values (Listed)",
+    "fingerprint": "sha256:bda791f2ddb7311e3839bd547cd0933a4ea0f35a947545586b0dbced3df56901"
+   },
+   {
+    "parameter": "y",
+    "generator": "values (Listed)",
+    "fingerprint": "sha256:bda791f2ddb7311e3839bd547cd0933a4ea0f35a947545586b0dbced3df56901"
+   },
+   {
+    "parameter": "z",
+    "generator": "values (Listed)",
+    "fingerprint": "sha256:bda791f2ddb7311e3839bd547cd0933a4ea0f35a947545586b0dbced3df56901"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "testedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badMonoid"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons 0) nil)"
+      },
+      {
+       "Printed": "((cons 1) nil)"
+      },
+      {
+       "Printed": "((cons 1) ((cons 2) nil))"
+      },
+      {
+       "Printed": "((cons 2) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 1) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 3) ((cons 1) ((cons 2) ((cons 1) nil))))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons 0) nil)"
+      },
+      {
+       "Printed": "((cons 1) nil)"
+      },
+      {
+       "Printed": "((cons 1) ((cons 2) nil))"
+      },
+      {
+       "Printed": "((cons 2) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 1) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 3) ((cons 1) ((cons 2) ((cons 1) nil))))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons 0) nil)"
+      },
+      {
+       "Printed": "((cons 1) nil)"
+      },
+      {
+       "Printed": "((cons 1) ((cons 2) nil))"
+      },
+      {
+       "Printed": "((cons 2) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 1) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 3) ((cons 1) ((cons 2) ((cons 1) nil))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 343,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = testedType, model = badMonoid, x = nil, y = nil, z = ((cons 1) ((cons 2) nil))"
+  },
+  "date": "2026-10-25T22:49:54+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Associative (List A) (structural (List A)) (model).combine",
+  "conjuncts": [
+   "Associative (List A) (structural (List A)) (model).combine",
+   "Neutral (List A) (structural (List A)) (model).combine (model).neutral"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "ListIsTabulated",
+  "cone": "sha256:eed93e9eebe21d27515281cf5d98e935c7304a93d4e786982b77820c70a4412a",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "testedType (Listed)",
+    "fingerprint": "sha256:fa1767e2cdd3cec2c69efe697c5e3037de8188794ce22ca89b12312c01a7a201"
+   },
+   {
+    "parameter": "model",
+    "generator": "badTabulation (Listed)",
+    "fingerprint": "sha256:637959ae393cddc561b70a986c44df8f3c85a2dc7d0f71c15e9eb5f110b12e71"
+   },
+   {
+    "parameter": "o",
+    "generator": "intEquality (Listed)",
+    "fingerprint": "sha256:aa9d3a7d7957270f2e04d93dc68b61455a5b08d5143bb084536d43c920ad9c0d"
+   },
+   {
+    "parameter": "n",
+    "generator": "sizes (Listed)",
+    "fingerprint": "sha256:1fb7e06ce041b4011177e65356d79ff9edb36ac3e7a106ec30e0c437ed740bf2"
+   },
+   {
+    "parameter": "f",
+    "generator": "plusOne (Listed)",
+    "fingerprint": "sha256:3478eb2a01061c48891728ab470a9a51a045b2cedf6c30e114d94f1a0dba04e6"
+   },
+   {
+    "parameter": "k",
+    "generator": "ExhaustiveMode over (Fin n)",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "testedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badTabulation"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "intEquality"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      },
+      {
+       "Number": 1.0
+      },
+      {
+       "Number": 2.0
+      },
+      {
+       "Number": 3.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "plusOne"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "k",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 0,
+    "raised": 6,
+    "coverage": "Listed",
+    "verdict": "Unsettled"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "unsettled: 6 cases raised, the first at A = testedType, model = badTabulation, o = intEquality, n = 1, f = plusOne, k = 0: stuck match"
+  },
+  "date": "2026-10-25T22:49:54+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "AtBuild (List A) A (listIndexed A) model",
+  "conjuncts": [
+   "SizeBuild (List A) A (listIndexed A) model",
+   "AtBuild (List A) A (listIndexed A) model"
+  ],
+  "kind": "Control"
+ },
+ {
+  "law": "ListIsTabulated",
+  "cone": "sha256:eed93e9eebe21d27515281cf5d98e935c7304a93d4e786982b77820c70a4412a",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "testedType (Listed)",
+    "fingerprint": "sha256:fa1767e2cdd3cec2c69efe697c5e3037de8188794ce22ca89b12312c01a7a201"
+   },
+   {
+    "parameter": "model",
+    "generator": "badTabulation (Listed)",
+    "fingerprint": "sha256:637959ae393cddc561b70a986c44df8f3c85a2dc7d0f71c15e9eb5f110b12e71"
+   },
+   {
+    "parameter": "n",
+    "generator": "sizes (Listed)",
+    "fingerprint": "sha256:1fb7e06ce041b4011177e65356d79ff9edb36ac3e7a106ec30e0c437ed740bf2"
+   },
+   {
+    "parameter": "f",
+    "generator": "plusOne (Listed)",
+    "fingerprint": "sha256:3478eb2a01061c48891728ab470a9a51a045b2cedf6c30e114d94f1a0dba04e6"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "testedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badTabulation"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      },
+      {
+       "Number": 1.0
+      },
+      {
+       "Number": 2.0
+      },
+      {
+       "Number": 3.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "plusOne"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = testedType, model = badTabulation, n = 1, f = plusOne"
+  },
+  "date": "2026-10-25T22:49:54+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "SizeBuild (List A) A (listIndexed A) model",
+  "conjuncts": [
+   "SizeBuild (List A) A (listIndexed A) model",
+   "AtBuild (List A) A (listIndexed A) model"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "n boundary"
+    },
+    "n": 2
+   }
+  ]
+ },
+ {
+  "law": "ListIsFoldable",
+  "cone": "sha256:57ce81de23541e144303d831c58b08b27f865fdcaee85ec2fb4ee6ff24c3ad01",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "badFold (Listed)",
+    "fingerprint": "sha256:5a5cfe1425d10d8bd1e9023f070650f5fa140550f93e8c1b1f51af8a6586c551"
+   },
+   {
+    "parameter": "A",
+    "generator": "testedType (Listed)",
+    "fingerprint": "sha256:fa1767e2cdd3cec2c69efe697c5e3037de8188794ce22ca89b12312c01a7a201"
+   },
+   {
+    "parameter": "M",
+    "generator": "testedType (Listed)",
+    "fingerprint": "sha256:fa1767e2cdd3cec2c69efe697c5e3037de8188794ce22ca89b12312c01a7a201"
+   },
+   {
+    "parameter": "i",
+    "generator": "indexModel (Listed)",
+    "fingerprint": "sha256:7091f45d6391cab0d47f69079c691907a41942bedbcdadc0f7165d9d1382a94d"
+   },
+   {
+    "parameter": "o",
+    "generator": "intEquality (Listed)",
+    "fingerprint": "sha256:aa9d3a7d7957270f2e04d93dc68b61455a5b08d5143bb084536d43c920ad9c0d"
+   },
+   {
+    "parameter": "op",
+    "generator": "subtract (Listed)",
+    "fingerprint": "sha256:ab06515e27af2c65bfd99665aca6d79cb9a7f5322344a556cbaf9fb562b75150"
+   },
+   {
+    "parameter": "e",
+    "generator": "foldNeutral (Listed)",
+    "fingerprint": "sha256:29c6b1ce6fc0a2e24c692626e44da51b5d0780b8e3d64593010471289a563522"
+   },
+   {
+    "parameter": "g",
+    "generator": "plusOne (Listed)",
+    "fingerprint": "sha256:3478eb2a01061c48891728ab470a9a51a045b2cedf6c30e114d94f1a0dba04e6"
+   },
+   {
+    "parameter": "xs",
+    "generator": "values (Listed)",
+    "fingerprint": "sha256:bda791f2ddb7311e3839bd547cd0933a4ea0f35a947545586b0dbced3df56901"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "badFold"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "testedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "M",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "testedType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "i",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "indexModel"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "intEquality"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "op",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "subtract"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Number": 9.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "plusOne"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "xs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons 0) nil)"
+      },
+      {
+       "Printed": "((cons 1) nil)"
+      },
+      {
+       "Printed": "((cons 1) ((cons 2) nil))"
+      },
+      {
+       "Printed": "((cons 2) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 1) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 3) ((cons 1) ((cons 2) ((cons 1) nil))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 7,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "model = badFold, A = testedType, M = testedType, i = indexModel, o = intEquality, op = subtract, e = foldNeutral, g = plusOne, xs = ((cons 0) nil)"
+  },
+  "date": "2026-10-25T22:49:53+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "FoldEntries List model",
+  "conjuncts": [
+   "FoldEntries List model"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
   "law": "FindIsHeadOfFilter",
   "cone": "sha256:c1d5079c2ce2389d134e673fab5a53aa9f8f3021533bdb0f3259719090045ad1",
   "binding": [

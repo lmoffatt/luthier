@@ -5,6 +5,404 @@
   "binding": [
    {
     "parameter": "model",
+    "generator": "neverEqual (Listed)",
+    "fingerprint": "sha256:1a7d07c03bf15edd9a2e3712ff0bb7807d1d207618c1bbfaa450e90f2236fa08"
+   },
+   {
+    "parameter": "c",
+    "generator": "tableChains (Listed)",
+    "fingerprint": "sha256:dab43910dec37e8020c395d579870054dcb48bf5bed4c62b8b481cff2662a68d"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := fn (t : Table) { fn (u : Table) { false } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := oneOfK, y := oneOfK, z := oneOfK }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "the census gives { x := oneOfK, y := oneOfK, z := oneOfK }, a value outside ((Chain Table) ({ eq := fn (t : Table) { fn (u : Table) { false } } }).eq) (7.S1)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "the census gives { x := oneOfK, y := oneOfK, z := oneOfK }, a value outside ((Chain Table) ({ eq := fn (t : Table) { fn (u : Table) { false } } }).eq) (7.S1)"
+  },
+  "date": "2026-10-25T22:52:18+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Transitive Table (model).eq",
+  "conjuncts": [
+   "Reflexive Table (model).eq",
+   "Symmetric Table (model).eq",
+   "Transitive Table (model).eq"
+  ],
+  "kind": "Control"
+ },
+ {
+  "law": "TableIsAnObject",
+  "cone": "sha256:cb046076decac88ff7c7554fe8e2cee151aa1ac5ff8944c3b3a1081f2c51780e",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "neverEqual (Listed)",
+    "fingerprint": "sha256:1a7d07c03bf15edd9a2e3712ff0bb7807d1d207618c1bbfaa450e90f2236fa08"
+   },
+   {
+    "parameter": "p",
+    "generator": "tablePairs (Listed)",
+    "fingerprint": "sha256:1ffae0d444c5935f830a178432dc4750a36f6c1287ab8c1228c8a4fa3aa1dd90"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := fn (t : Table) { fn (u : Table) { false } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := oneOfK, y := oneOfK }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "the census gives { x := oneOfK, y := oneOfK }, a value outside ((Related Table) ({ eq := fn (t : Table) { fn (u : Table) { false } } }).eq) (7.S1)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "the census gives { x := oneOfK, y := oneOfK }, a value outside ((Related Table) ({ eq := fn (t : Table) { fn (u : Table) { false } } }).eq) (7.S1)"
+  },
+  "date": "2026-10-25T22:52:18+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Symmetric Table (model).eq",
+  "conjuncts": [
+   "Reflexive Table (model).eq",
+   "Symmetric Table (model).eq",
+   "Transitive Table (model).eq"
+  ],
+  "kind": "Control"
+ },
+ {
+  "law": "TableIsAnObject",
+  "cone": "sha256:cb046076decac88ff7c7554fe8e2cee151aa1ac5ff8944c3b3a1081f2c51780e",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "neverEqual (Listed)",
+    "fingerprint": "sha256:1a7d07c03bf15edd9a2e3712ff0bb7807d1d207618c1bbfaa450e90f2236fa08"
+   },
+   {
+    "parameter": "x",
+    "generator": "ofOneSchema (Listed)",
+    "fingerprint": "sha256:af24ece01cf1ccf8a34c2edea80bd1da94c4cf0f5d9d8bdc19b4c3c263c22206,sha256:a6b4cf13b2da1320d8e5f27ecaa88340199a3f5f1ac09a9019038da07b06a3b8"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := fn (t : Table) { fn (u : Table) { false } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "oneOfK"
+      },
+      {
+       "Printed": "otherOfK"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "model = { eq := fn (t : Table) { fn (u : Table) { false } } }, x = oneOfK"
+  },
+  "date": "2026-10-25T22:52:18+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Reflexive Table (model).eq",
+  "conjuncts": [
+   "Reflexive Table (model).eq",
+   "Symmetric Table (model).eq",
+   "Transitive Table (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "TableIsIndexed",
+  "cone": "sha256:48c32c188b8bfcf563990bb1b80bbf7e2b812a6c703efcba1f459098a5699059",
+  "binding": [
+   {
+    "parameter": "names",
+    "generator": "schemaNames (Listed)",
+    "fingerprint": "sha256:fb96777cbe657157af6f12174a3db794e407ab4bb0a535bd1cc27aed996c28ec"
+   },
+   {
+    "parameter": "kinds",
+    "generator": "schemaKinds (Listed)",
+    "fingerprint": "sha256:7f9467c71e18775423d22093a641702490b3550f975d34c4c9a9e5a4fbac5d23"
+   },
+   {
+    "parameter": "model",
+    "generator": "noRows (Listed)",
+    "fingerprint": "sha256:93a5bbce5635b954c754b7cc964428d95f4d0e071199ef7e5af7696dab5f6ad6"
+   },
+   {
+    "parameter": "o",
+    "generator": "tableEquality (Listed)",
+    "fingerprint": "sha256:65e545f269a707ce8e5a40372bdd202bba7031120757b49df31a97b66a7dbbbb"
+   },
+   {
+    "parameter": "a",
+    "generator": "rowEquality (Listed)",
+    "fingerprint": "sha256:4b3ca62567cd92adde83cc1d68bf6c3f4cd058c790a973d39c3d16b33d9abaf6"
+   },
+   {
+    "parameter": "c",
+    "generator": "ofOneSchema (Listed)",
+    "fingerprint": "sha256:af24ece01cf1ccf8a34c2edea80bd1da94c4cf0f5d9d8bdc19b4c3c263c22206,sha256:a6b4cf13b2da1320d8e5f27ecaa88340199a3f5f1ac09a9019038da07b06a3b8"
+   },
+   {
+    "parameter": "d",
+    "generator": "ofOneSchema (Listed)",
+    "fingerprint": "sha256:af24ece01cf1ccf8a34c2edea80bd1da94c4cf0f5d9d8bdc19b4c3c263c22206,sha256:a6b4cf13b2da1320d8e5f27ecaa88340199a3f5f1ac09a9019038da07b06a3b8"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "names",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"k\") nil)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "kinds",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"int\") nil)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ size := fn (t : Table) { 0 }, at := fn (t : Table) { fn (r : (Fin (size t))) { fn (c : String) { (((t).cell c) r) } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := sameTable }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "a",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(rowObject ((cons \"k\") nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "oneOfK"
+      },
+      {
+       "Printed": "otherOfK"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "oneOfK"
+      },
+      {
+       "Printed": "otherOfK"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 4
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "names = ((cons \"k\") nil), kinds = ((cons \"int\") nil), model = { size := fn (t : Table) { 0 }, at := fn (t : Table) { fn (r : (Fin (size t))) { fn (c : String) { (((t).cell c) r) } } } }, o = { eq := sameTable }, a = (rowObject ((cons \"k\") nil)), c = oneOfK, d = otherOfK"
+  },
+  "date": "2026-10-25T22:52:18+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Extensional ((TableOf names) kinds) (_ : String) -> (Maybe { int : Int || real : Float64 || text : String }) model",
+  "conjuncts": [
+   "Extensional ((TableOf names) kinds) (_ : String) -> (Maybe { int : Int || real : Float64 || text : String }) model"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "c boundary"
+    },
+    "n": 4
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "d boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "TableIsAnObject",
+  "cone": "sha256:cb046076decac88ff7c7554fe8e2cee151aa1ac5ff8944c3b3a1081f2c51780e",
+  "binding": [
+   {
+    "parameter": "model",
     "generator": "tableEquality (Listed)",
     "fingerprint": "sha256:65e545f269a707ce8e5a40372bdd202bba7031120757b49df31a97b66a7dbbbb"
    },
