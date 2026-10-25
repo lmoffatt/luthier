@@ -1356,7 +1356,11 @@ L10.2  The grade is derived from the domain and the evidence cost: proved and ex
        for assumptions, with no default, so that a demand that names none refuses assumed values
        (D-2026-10-11-n, D-2026-10-12-t). When the formula is a cited guarantee with its hypotheses,
        the certificate is proved by delegation (L9.7), not assumed. The five names stay in the
-       certificate for the reader; the planner reads the costs. [proposed]
+       certificate for the reader; the planner reads the costs. (D-2026-10-25-a) So cases and
+       sampled are incomparable: three listed inputs say nothing at a fourth, where a sample says
+       ε̂; proved, exhaustive and cases are one kind, exact on a stated domain and differing in the
+       domain and in the hypotheses; and a run on real data, whose inputs are rarely listed, is
+       served by sampled, proved or exhaustive evidence. [settled]
 L10.3  The conversion from statistics to an evidence cost is a function with a declared shape, the
        sample's statistics and the demand's level in, a cost out, filled per theory
        (D-2026-10-12-r); the first instance is −log(1 − ε̂(n, δ)) in nats, with ε̂ the bound on the
@@ -1377,6 +1381,13 @@ L10.5  A certificate serves every demand whose cutoff it meets, on the bound and
        certificate was issued. In the Boolean slice the clause is suspended (D-2026-10-14-c,
        D-2026-10-16-b) until the cost types: the tolerance is a law parameter and so part of the
        binding, matched exactly (certification.lth's comment at the cost cutoff of 6.S15).
+       (D-2026-10-25-a) When the cost types come, a certificate's strength is the pair of its
+       domain and its cost, ordered by inclusion and by cost, and a demand is met by a certificate
+       whose domain covers its input and whose cost is within its cutoff: a `Cases` entry serves a
+       run only at an input it lists, as L6.9 says of links, and the five grades are a
+       projection of the pair for the reader. Until then the chain Assumed < Sampled < Cases <
+       Exhaustive < Proved is the Boolean slice's admission (D-2026-10-16-k), and a run served
+       today by a `Cases` entry at an unlisted input is listed before the change refuses it.
        [settled]
 L10.6  Certification is the default: demanding a value demands every certificate in its dependency
        cone, paid once through the memo, with no opt-out at the start (D-2026-10-12-y: a cone with
@@ -1452,7 +1463,9 @@ Source:     the critiques of draft 10 (`record/IA/principles 2026 10 12/`, 1429f
 Status:     proposed in draft 11; clauses 3 and 9 settled on his marks (D-2026-10-12-w); clauses 4
             to 6 settled, moved from L5 and L11; clause 2 reworded on D-2026-10-12-t; clause 7
             carries his correction of draft 7 in grades; clause 10 settled (D-2026-10-13-c, -e);
-            clause 13 proposed (D-2026-10-22-b); clause 8 settled (D-2026-10-25-a, question 1)
+            clause 13 proposed (D-2026-10-22-b); clause 8 settled (D-2026-10-25-a, question 1);
+            clause 2 settled (D-2026-10-25-a, question 2, on what it says of the grade; its paragraph
+            on assumed certificates is D-2026-10-12-t's)
 History:    draft 11, step 4 (2026-10-12): new entry, under G1, after L7. draft 11 (2026-10-12), his
             marks: clause 2 elaborated with the two kinds of assumption (D-2026-10-12-t); clauses 3
             and 9 marked ok (D-2026-10-12-w). draft 11 (2026-10-12): renumbered from L16 of draft 10
@@ -1469,7 +1482,12 @@ History:    draft 11, step 4 (2026-10-12): new entry, under G1, after L7. draft 
             out of the base, the product only under independence; his addition, that the
             composition is a parameter and any choice that cannot loop is definable, with the core's
             `EvidenceComposition` of bite B2 (report-B2.md beside the decisions, a9f8f8a) as the
-            mechanism; clause 8 settled on it, clause 3 already settled.
+            mechanism; clause 8 settled on it, clause 3 already settled. 2026-10-26: clauses 2 and
+            5 gain question 2 of the same audit (D-2026-10-25-a): a certificate's strength is the
+            pair (domain, cost) when the cost types come, Cases and Sampled incomparable, a `Cases`
+            entry serving only at an input it lists, the five names a projection; the chain of
+            test.lth stays the Boolean slice's admission until clause 5 is unsuspended; clause 2
+            settled on it.
 
 L11 Luthier orchestrates other languages: an extern is a specimen certified by its laws, and what
     does not follow Luthier's way lives in a world.
