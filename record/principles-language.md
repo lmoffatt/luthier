@@ -1249,7 +1249,11 @@ L9.14  (His words, on the lesson of the external review of layer 3) A law is evi
        `Host`, a zero score passing `IsGradient`, `phi - 1` passing `StepRule`, in that review)
        describes nothing, and is a finding against the theory that green runs never show; a theory
        is done when each of its laws has its refuted model in the evidence (D-2026-10-15-a).
-       [settled]
+       (D-2026-10-25-a) The unit of control is the conjunct, the law that has the entry (spec 7.S22,
+       D-2026-10-18-f): a control runs every conjunct of a conjunction and does not stop at the
+       first it refutes, since a broken monoid refuted at `Associative` leaves `Neutral`
+       uncontrolled; the theory is done when every conjunct has a refuted model, and `check -v`
+       lists the conjuncts still uncontrolled. [settled]
 L9.15  (His words) A statistical law's verdict is ternary: it holds, it fails, or it is unresolved
        with what was sampled; the certifier resolves the grey zone sequentially (Wald's sequential
        probability ratio test), sampling more between two thresholds set by the error rates alpha
@@ -1337,6 +1341,10 @@ History:    (L5) draft 1 (5769005): stated. draft 3 (c085ba4), on D-2026-10-11-d
             2026-10-18: clause 17 added, proposed (D-2026-10-18-d); a candidate for a principle of
             its own.
             2026-10-20: clause 18 added, proposed (D-2026-10-18-j).
+            2026-10-26: clause 14 gains the unit of control, the conjunct (D-2026-10-25-a, question
+            4 of the algebra audit, his "Yes"): the clause predated D-2026-10-18-f's split of a
+            conjunction into conjuncts with one entry each, and a control that stopped at the
+            first refutation left the rest unread.
 
 L10 A certificate records what is known of a law, its domain, its bound and its evidence; it is
     frozen, it serves every demand it meets, and it transports along identity.
