@@ -1882,8 +1882,8 @@ blocks; the done and implemented items are in the record's drafts table.
   Boolean level, where a decidable carrier has one; two realizations are equal in consequence
   when a certified relation says so, a law over derivations that a demand asks for (L5.23), and
   the result key is the identity of the realization, since one derivation may have many keys
-  and the metric level has no class, only the ball (L6.5). The derivation is then the
-  realization graph, its projections are laws, and the 2-cells of the exponential are the
+  and the metric level has no class, only the ball (L6.5). The derivation is then the graph of
+  the realization, with laws as its projections, and the 2-cells of the exponential are the
   planner's certified identities, so composition across hosts comes with the planner
   (D-2026-10-13-ad); the relation as a law over derivations is bite E1 of the audit's execution,
   after the planner. What stays open is the representation: the decoration, the indexed type or
