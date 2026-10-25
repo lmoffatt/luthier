@@ -3437,3 +3437,26 @@ Author:     the coordinator (one commit undoes it; Luciano told in chat the same
 Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-22)
 Kind:       certify.py (`veto`), run.py; spec 6.S15, 7.S22
 Status:     current
+
+D-2026-10-25-a  The algebra audit's five questions (record/plan/audit-algebras-2026-10-22/decisions.md),
+                answered as recommended. (1) The evidence base is the pair (ε̂, δ) under the capped
+                sum min(1, a + b) in Lawvere's orientation ≥; the sum in nats only under a declared
+                independence premise; and, his addition, Luthier provides the mechanism to define any
+                reasonable choice of composition, the capped sum being the default (P11: every
+                criterion is a parameter), as long as no choice can loop. (2) A certificate's
+                strength is the pair (domain, cost), Cases and Sampled incomparable, a Cases
+                certificate serving only at the inputs it lists, when the cost types come; the chain
+                stays the Boolean slice's admission until then. (3) A numerical law's carrier is
+                (L, η, D, r), composed along a cone as the audit's formula and over several inputs
+                by the sum; L13.3 and L13.4 settle in that form. (4) The unit of control is the
+                conjunct. (5) The derivation's equality of consequence is a certified relation
+                between realizations, computed on demand; the result key is the realization's
+                identity; a canonical form only at the Boolean level.
+Author:     Luciano, on the synthesis (Claude Fable 5.1) of the Codex audit
+Quote:      "OK, agree. But Luthier should provide the mechanisms for definining any reasonable
+            choice, as long as we do not get into an infinite loop." (1); "Ok" (2); "OK" (3);
+            "Yes" (4); "OK" (5)
+Source:     record/plan/audit-algebras-2026-10-22/decisions.md, his annotations (committed verbatim)
+Kind:       waves B to E of record/plan/audit-algebras-2026-10-22/execution.md; principles L10.3,
+            L10.8, L6.15, L13.3, L13.4, L9.14, L5.22, O13
+Status:     current
