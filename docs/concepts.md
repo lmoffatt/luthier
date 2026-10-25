@@ -971,9 +971,11 @@ when the sensitivity is unknown), with `composeAffine`, `pullback`, `transformSu
 empty domain composes to an empty one, the radius, the unknown, the infeasible, the pull-back meets
 its tolerance, the max below the sum), certified on listed transformers with five controls refuted,
 among them a composition that drops $L_2\eta_1$ [settled as implemented]. The dot product is its
-first claim: `DotStable`, $|\mathrm{dot}(x, y) - x\cdot y| \le 3\gamma_n \sum|x_k y_k|$ with
-$\gamma_n = nu/(1 - nu)$, certified at a worst ratio of 0.116, and `DotSensitive`, whose bound is
-`dotTransformer`'s with $L = (1 + \gamma_{2n+8})\lVert y \rVert$ (Cauchy and Schwarz), at a worst ratio
+first claim: for vectors $x, y$ of length $n$, with $\mathrm{dot}$ the computed product and
+$x \cdot y$ the exact one, `DotStable`, $|\mathrm{dot}(x, y) - x\cdot y| \le 3\gamma_n \sum_k|x_k y_k|$
+with $\gamma_n = nu/(1 - nu)$, certified at a worst ratio of 0.116, and `DotSensitive`, whose bound is
+`dotTransformer`'s with $L = (1 + \gamma_{2n+8})\lVert y \rVert$ (Cauchy and Schwarz; $\lVert y \rVert$
+the Euclidean norm, widened by the factor for its computed value), at a worst ratio
 of 1, tight at $n = 1$ where Cauchy and Schwarz is an equality (4a9c485).
 
 ### 9.4 The example
@@ -1055,7 +1057,7 @@ D-2026-10-25-a settled them:
 | error | $[0, \infty]$ | $+$ | $\ge$ |
 | uncertainty | distribution functions of distances | a t-norm, or convolution | pointwise $\ge$ |
 | evidence | pairs $(\hat\varepsilon, \delta)$ in $[0, 1]^2$ | capped sum $\min(1, a + b)$ in each part, by default | $\ge$ |
-| resources | a typed vector (work, span, peak memory) | per component, in sequence and in parallel | not one semiring |
+| resources | a typed vector (work, span, peak memory) | per component, in sequence and in parallel (below); no one semiring | not stated |
 
 Each row moved since D-2026-10-18-i, or is still to be built.
 
@@ -1274,8 +1276,8 @@ procedures, $C^B \times B^A \to C^A$, composes derivations; and the derivation o
 diagram ending in $v$. Since a cartesian closed category's $B^A$ is extensional, and Luthier must tell
 apart algorithms that compute one function with different error, cost and evidence, the exponential
 is intensional: programs as arrows, the planner's certified identities as 2-cells between them
-(8.5). So the derivation is no fourth object: it is the realization, $f$ applied to $a$, read as a
-value, and L5.10's three objects stand (D-2026-10-22-c, answer to question 1).
+(8.5). So the derivation is the realization, $f$ applied to $a$, read as a value, and L5.10's
+three objects stand (D-2026-10-22-c, answer to question 1).
 
 How the quotient is computed was the algebra audit's question (report.md 10.2, 10.3), and Luciano
 settled it (D-2026-10-25-a, question 5: "OK") [settled]. The result key can't be the quotient:
@@ -1355,8 +1357,8 @@ on `W`), and what is certified, the action whose result comes back to the declar
 belief that a value belongs to a type, with its evidence (Terms; D-2026-10-13-d, -e) [settled].
 L5.10 names the three objects of a result in the same spirit: the meaning, which the laws fix; the
 realization, the result under a plan; the evidence, its certificates [settled]. The derivation of a
-value (12.4) adds no fourth: it is the realization read as a value, a point $(f, a)$ of the
-intensional exponential (D-2026-10-22-c). L10.13 [proposed] keeps the records apart in the same
+value (12.4) is the realization read as a value, a point $(f, a)$ of the intensional exponential,
+and so adds no fourth object (D-2026-10-22-c). L10.13 [proposed] keeps the records apart in the same
 way, the certificate of a model, the evidence of one computation and the derivation of its value
 being three records, which refer to each other by hash and which no object carries together.
 
