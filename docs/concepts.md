@@ -365,9 +365,9 @@ and the example follows them:
 - the operation of a semigroup or a monoid, lists and strings among them, is written `<>`, and `+`
   is kept for commutative additive structures (D-2026-10-21-a: one name per concept, concatenation
   not being commutative);
-- the theories of certification gained `Pruning` and `Routing` (sections 8.3 and 8.4), laws.lth gained
-  `Vacuous` (section 6.6) and the `Within` form of a numerical law, the core gained the bound
-  transformer (section 9.2) and the evidence and error bases (section 10).
+- the theories of certification gained `Pruning` and `Routing` (sections 8.3 and 8.4), laws.lth
+  gained `Vacuous` (section 6.6) and the `Within` form of a numerical law (section 9.2), and the
+  core gained the bound transformer (section 9.3) and the evidence and error bases (section 10).
 
 What may still move is what the execution of the algebra audit builds now
 (`record/plan/audit-algebras-2026-10-22/execution.md`, waves B to E): the grade derived from domain
@@ -498,8 +498,8 @@ over an infinite domain, confirmed only by statistics; an `exists` is confirmed 
 ### 6.2 Generators are values
 
 A sampled test needs values to draw, and drawing a value is a function: a generator is a value of
-type `Gen T`, a size and a seed giving a value and the next seed (spec 7.S1) [building: `Seed` in
-place of `Int` is decided]. No type owns a generator, so every test says which generators it used
+type `Gen T = Nat -> Seed -> T * Seed`, a size and a seed giving a value and the next seed (spec
+7.S1; generators.lth) [settled]. No type owns a generator, so every test says which generators it used
 and its certificate records them (spec 7.R1, 7.R2) [settled]. Generators are functors over types:
 when a type is well defined its generator follows its structure, so the generic generators are few
 (exhaustive; sampled with a linear or a logarithmic placement; a census; a single value), and the
@@ -686,8 +686,8 @@ failure, and `check -v` then reports each law "controlled".
 
 The last control shows that the bound does work: without it the law fails, so the law is not
 satisfied by the doubles for free. It doesn't show that the bound is tight. Two things do. The
-certificate of a numerical law now records the worst ratio of distance to bound it saw (section
-9.3): 0.41 for `MetresWithin`, so on the cases drawn the bound has room by a factor of about 2.4.
+certificate of a numerical law now records the worst ratio of distance to bound it saw (sections
+9.2 and 9.4): 0.41 for `MetresWithin`, so on the cases drawn the bound has room by a factor of about 2.4.
 And the library puts a control just below the bound: D-2026-10-17-f first wrote the doubles'
 associativity within $\gamma_2(|x| + |y| + |z|)$, the correction to it showed the bound needs the
 factor 3, and a control with a third of `epsilon`, which brings $3\gamma_2$ just below
@@ -1039,7 +1039,7 @@ cost was four things.
   probabilistic level.
 - The *evidence*, what a certificate knows of a law with a finite budget: a failure fraction at
   most $\hat\varepsilon$ at confidence $1 - \delta$ (section 6.4).
-- The *resources*, the budget (steps, samples, memory, time), scaling with the bound (9.4).
+- The *resources*, the budget (steps, samples, memory, time), scaling with the bound (9.5).
 
 Error and uncertainty are data: decorations of the output, another model of the same theory over
 another carrier, computed in plane 3 (L5.4 [proposed]). A law propagates nothing. It is a Boolean
@@ -1207,8 +1207,11 @@ The demand also carries what the program leaves open. A demand is the gate throu
 change what the program does: it carries its entry, the type demanded, the cutoff on the bound and
 on the evidence, the confidence δ for sampled evidence, the evidence cost of assumptions (no
 default), limits on resources, and the values of the program's holes (spec 8.S1) [building: the
-entry, the cutoff as a grade, the holes, the strategy and the limits run today, recorded whole in
-the run's record]. Every threshold or level is declared, passed and recorded (L5.18 [proposed]);
+entry, the cutoff as a grade, the cap on a numerical law's worst ratio (`bound`, 9.2), the holes,
+the strategy and the limits run today, recorded whole in the run's record]. Since wave A's bite A2
+(02146ad) the policies `run` used to hold as constants are fields of `Demand` with declared
+defaults, recorded in the run's record: the grade at which an axiom is admitted, the project's
+roots of trust, and how the grades of a law's conjuncts combine. Every threshold or level is declared, passed and recorded (L5.18 [proposed]);
 the outermost demand carries its tolerance as a declared default, so even the root is a parameter
 (L5.19) [settled]. The tower of levels a theory generates may be infinite, and a computation walks
 only what its demand reaches (L5.21 [proposed]; D-2026-10-18-c: "La torre se corta en la demanda").
@@ -1219,7 +1222,9 @@ Demanding a value demands every certificate in its dependency cone, paid once th
 with no opt-out at the start (L10.6; D-2026-10-11-n; D-2026-10-12-y) [settled]. `luthier run`
 refuses to start when any name in the cone of the entry is uncertified or provisional, listing each
 with its state (spec 12.S17) [settled]. A certificate serves every demand whose cutoff it meets,
-checked at the hit (L10.5) [settled; in the Boolean slice the cutoff is the weakest grade accepted].
+checked at the hit (L10.5) [settled; in the Boolean slice the cutoff is the weakest grade accepted,
+and for a numerical law the cap on its worst ratio]. A demand is served through its witness, one
+entry per obligation, and refused by the veto of 8.4.
 No cutoff accepts a failure; running past a refuted law is said by naming it,
 `--accept assumed:LAW`, recorded and warned at every run (D-2026-10-16-h; spec 6.S15) [settled].
 
@@ -1230,20 +1235,74 @@ luthier run docs/concepts/tape.run.lut --set microphone=1200 --set speaker=3450 
 ```
 
 the cone of `main` holds, among others, `markIsAMetricModel`, `tape`, `Mark`, the core's `Metric`
-and the world model's `host`; `run` serves each from its store when its entry passed at the current hash and refuses
-otherwise. The holes are filled by `--set`, typed against their declared types (spec 12.S18). This
+and the world model's `host`; `run` serves each from its store when its entries passed at the
+current hash and refuses otherwise. The passes that serve `markIsAMetricModel` are those of
+`MarkIsAMetric` about that model, one per conjunct; the controls that make the law "controlled" are
+about the law (8.4). The holes are filled by `--set`, typed against their declared types (spec 12.S18). This
 document doesn't show the run's output: the rules of this repository leave runs to Luciano
 (`CLAUDE.md`), and the example was checked and certified, not run.
 
-### 12.4 The identity of a result
+### 12.4 The identity of a result, and its derivation
 
 A result is identified by its code, inputs, mode, demanded type and tolerance, the model its type
 names, the seed, the plan that produced it, and the hashes of the certificates in its live cone, so
-a changed host library or platform is a new result (L5.6) [settled]. `run` computes that key before
-evaluating and serves a pure entry, one whose cone holds no `W`, from `x.results.json` without
-evaluating; a cone that acts always executes (spec 8.S8, 12.S18; D-2026-10-15-d) [settled]. The
-meaning of a program, its realization under a plan and its evidence are three objects, never one
-(L5.10) [settled]: section 14 returns to them.
+a changed host library or platform is a new result (L5.6) [settled]. The certificates are the
+demand's witnesses (8.4), the same entries that admitted the run (bite 13c, 97a9527). `run`
+computes that key before evaluating and serves a pure entry, one whose cone holds no `W`, from
+`x.results.json` without evaluating; a cone that acts always executes (spec 8.S8, 12.S18;
+D-2026-10-15-d) [settled]. The meaning of a program, its realization under a plan and its evidence
+are three objects, never one (L5.10) [settled]: section 14 returns to them.
+
+What that key identifies has a name since 2026-10-22. Luciano's idea, in his dialogue with GPT:
+"el tipo tiene un poco la historia del cómputo y que este tipo con la historia del cómputo tendría
+que poder atravesar las fronteras de lenguajes" (`record/IA/gpt-2026-10-22/dialogo.md`; D-2026-10-22-b).
+L5.22 [proposed] calls it the value's *derivation*: the account of how it was obtained, kept to
+what changes what a law or a demand can say of the value, that is, the inputs it descends from, the
+models and specimens that produced it, the bridges it crossed, the certificates its route relied on
+and the roots of trust it rests on. It is the trace of the run taken up to an equality of
+consequence, under which two traces are one when no observation the theories name tells them apart;
+it is neither the trace itself nor a certificate (8.1). The word is Luciano's choice over "history":
+"History suena más pasivo, derivation suena a que podemos simplificar la historia a lo invariante"
+(D-2026-10-22-c); "derivative" stays the word for the differential.
+
+His reading of what a derivation is (D-2026-10-22-c, with the coordinator's elaboration, which he
+accepted) [settled as his reading]: "la derivación yo la veo como un objeto categórico exponencial".
+The exponential $B^A$ is the space of procedures from $A$ to $B$, the specimens of a function, and
+$\mathrm{ev} : B^A \times A \to B$ applies one to an input. A value $v$'s derivation is a point
+$(f, a)$ with $\mathrm{ev}(f, a) = v$, an element of the fibre of $\mathrm{ev}$ over $v$; composing
+procedures, $C^B \times B^A \to C^A$, composes derivations; and the derivation of a whole cone is a
+diagram ending in $v$. Since a cartesian closed category's $B^A$ is extensional, and Luthier must tell
+apart algorithms that compute one function with different error, cost and evidence, the exponential
+is intensional: programs as arrows, the planner's certified identities as 2-cells between them
+(8.5). So the derivation is no fourth object: it is the realization, $f$ applied to $a$, read as a
+value, and L5.10's three objects stand (D-2026-10-22-c, answer to question 1).
+
+How the quotient is computed was the algebra audit's question (report.md 10.2, 10.3), and Luciano
+settled it (D-2026-10-25-a, question 5: "OK") [settled]. The result key can't be the quotient:
+`(a + b) * 1.0` and `a + b` have two keys and, where no law separates them, one derivation; and at
+the metric level closeness is not transitive (3.2), so there is no class to take a canonical form
+of, only the ball. So the equality of consequence is a certified relation between two realizations,
+a law over derivations computed when a demand asks for it; the result key is the identity of the
+realization; and a canonical form exists only at the Boolean level. L5.22's sentence "the key is
+the identity of the derivation" reads "of the realization" [building: the principles' sentences of
+D-2026-10-25-a are being written now].
+
+A value carries no more of its derivation than its demand asks (L5.23 [proposed]): the demand
+selects the projection of the derivation that is carried, as it selects the cone (12.2) and the
+decoration (O5), so a `Float64` stays a `Float64` until a demand asks for the value with its
+derivation; and a requirement on the derivation (no `assumed` dependence, descent from a calibrated
+input) is a law over it, giving a certified subtype a demand may ask for like any type (L8.5), which
+Luciano kept in the clause (D-2026-10-22-c, question 2: "ok"). Today the key of `run` is what
+exists of a derivation (spec 8.S8); its representation and the decoration are open (O13, section
+15), and the realization graph with its projections comes with the planner (the audit execution's
+bite E1) [building].
+
+For the example [mine: the reading]: the answer "the cable reaches" for marks 1200 and 3450 and a
+cable of 2.5 m has as its derivation the reading `tape` applied to the two marks, through
+`markIsAMetricModel`, compared with the cable, the entries of `MarkIsAMetric` about
+`markIsAMetricModel` that served it, and the console as its root of trust. A second tape model
+would give another realization with another key; the two derivations are one for this demand only
+where a certified identity between the two tapes relates them, computed when a demand asks.
 
 ## 13. Specimens and the planner
 
@@ -1278,13 +1337,28 @@ only by an identity certificate with its domain, and be certified on that domain
 (the example of L10: a lookup table equal to the native on a grid is certified on the grid and
 nowhere else).
 
+A specimen borrowed from another language crosses a bridge, and the derivation of 12.4 must cross
+with it. L11.10 [proposed] states the invariant (GPT's, on Luciano's idea): a value crosses a bridge
+without losing what Luthier knows of it, its theory, its evidence and its derivation staying on
+Luthier's side; a bridge declares what it preserves, what it adds (the error and resources of the
+conversion), what it assumes (a root of trust) and what it can no longer certify, and what is lost
+is lost by a declared bridge, never by the crossing. L11.11 [proposed] says what Luthier's part is
+when hosts compute most of a program, in Luciano's image of the "director de orquesta": it states
+the theories, knows which host implementations are their specimens, keeps the evidence, places the
+bridges, composes the derivation across them and answers the demand. The composition across hosts
+comes with the planner (D-2026-10-22-b; D-2026-10-13-ad) [building].
+
 ## 14. Claim, evidence and execution kept apart
 
 Three things make the language: what is said (the definitions, in `U`), what is done (the actions,
 on `W`), and what is certified, the action whose result comes back to the declarative face as the
 belief that a value belongs to a type, with its evidence (Terms; D-2026-10-13-d, -e) [settled].
 L5.10 names the three objects of a result in the same spirit: the meaning, which the laws fix; the
-realization, the result under a plan; the evidence, its certificates [settled].
+realization, the result under a plan; the evidence, its certificates [settled]. The derivation of a
+value (12.4) adds no fourth: it is the realization read as a value, a point $(f, a)$ of the
+intensional exponential (D-2026-10-22-c). L10.13 [proposed] keeps the records apart in the same
+way, the certificate of a model, the evidence of one computation and the derivation of its value
+being three records, which refer to each other by hash and which no object carries together.
 
 The three planes of section 3.3 and the three kinds of file of section 5 line up with these, in
 the table below [mine: the reading; no source states the correspondence].
@@ -1295,6 +1369,7 @@ the table below [mine: the reading; no source states the correspondence].
 | Plane | 1 and 2 state; 3 is the model claimed | about plane 3, measured against 1 and 2 | plane 3, on `W` |
 | File | `.lth` and the `.lut` that claims | the store beside the claiming `.lut` (L10.12, a store beside the claim) | the `.run.lut` and its records |
 | Keyed by | the names and the theory | the law, the cone's hash, the binding | the result's key (L5.6, everything that made it) |
+| Is about | a theory and the models claimed | a pass its model, a control the law (8.4) | one result: its observations and its derivation (L10.13) |
 | Changes when | Luciano or an author rewrites a law | the cone or the binding changes | the demand or anything in the key changes |
 
 Each column can change without the others moving. A run doesn't change a certificate; a new test
@@ -1305,25 +1380,44 @@ cone was served by, each certificate names the law, the domain and the binding i
 each law can be read without running anything.
 
 In the example: `tape.lth` and `tape.lut` are the claim, `tape.cert.json` the evidence, and
-`tape.run.lut` with the `tape.run.json` that a run would write beside it the execution.
+`tape.run.lut` with the `tape.run.json` that a run would write beside it the execution. The run's
+record would list, among the certificates that served it, the entries of `MarkIsAMetric` about
+`markIsAMetricModel`; that list, with the run's key, is today what exists of the answer's
+derivation.
 
 ## 15. What is open
 
 The questions of `docs/principles.md` that the concepts above rest on, each with what it blocks:
 
-- O1, the algebra of costs: the conversion of a sample's statistics to a cost, the composition
-  along a path, the four bases of section 10 as models of one structure. It blocks the cost types,
-  transport (8.4), the planner (13) and the decorated outputs. D-2026-10-18-i proposes its shape;
-  `Cost` is a library, its algebra decided when it is implemented (D-2026-10-12-al).
+- O1, the algebra of costs. D-2026-10-25-a settled three of its parts: the evidence base, the pair
+  $(\hat\varepsilon, \delta)$ under the capped sum by default with any reasonable composition
+  definable (10); a certificate's strength as the pair (domain, cost) (6.5); and the carrier of a
+  numerical law, the bound transformer (9.3). Open: the cost type `C` that certification is written
+  over and its conversions, the uncertainty's composition (bite C3), the resources as a typed vector
+  (bite C2), and the four bases as models of one structure. It blocks the cost types, transport
+  (8.5), the planner (13) and the decorated outputs. `Cost` is a library, its algebra decided when
+  it is implemented (D-2026-10-12-al).
 - O2, the type with its equality as the base of every theory, and how a type names its equality:
   answered in part by `Object` and resolution by type (sections 3 and 4), a second equality on one
   carrier being another type (spec 4.R13) [mine: the reading that these answer O2 in part].
 - O3, the world as a value and an opt-out of certification if a real case asks for one: the token
   is implemented; the stores are not yet places of the world (spec 10.S6, D-2026-10-15-d).
 - O5, the decorated output: the derivative by dual numbers, the error by intervals, as other models
-  of the theory the code was written over (L5.4 [proposed]).
+  of the theory the code was written over (L5.4 [proposed]); the derivation carried by a demand is
+  one more decoration (L5.23).
+- O13, the derivation of a value (12.4): its representation (a decoration, a type indexed by a
+  summary, or a value paired by hash with an immutable graph), which facts two derivations must
+  share to be one for a demand, whether a certified summary may stand for an ancestry discarded,
+  and the form of a bridge's declaration (L11.10). His reading fixes what a derivation is, a point
+  of an intensional exponential (D-2026-10-22-c), and D-2026-10-25-a settled that its quotient is
+  a certified relation computed on demand, never a canonical form, except at the Boolean level. It
+  blocks L5.22, L5.23, L10.13, L11.10 and L11.11, the five clauses of the derivation, all
+  [proposed].
 - The three planes and the three levels of equivalence are in the principles as proposed clauses
   (L3.5 (the core has three planes); L5.21 (the tower of levels is cut by the demand)) and in the
   core's files; the specification has no clause for them yet.
-- The core's rebuild (section 3.5): names may move until bite 13 closes, against the measures of
-  `execution.md` section 0.
+- The execution of the algebra audit (section 3.5): bites B1 (ε̂ at serve time), B3 and B4 (the
+  grade from domain and cost, serving checks the domain), C2 and C3, D1 (a control per conjunct)
+  and, with the planner, E1 to E3 [building]. The sentences that D-2026-10-25-a puts in L5.22,
+  L6.15, L9.14, L10.3, L10.8, L13.3, L13.4 and O13 are being written into the principles; until
+  they land, this text cites the decision.
