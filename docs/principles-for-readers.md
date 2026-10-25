@@ -75,6 +75,15 @@ exhaustive run over every case, chosen cases, a statistical sample, or an assump
 that an implementation still gives the same bits as yesterday is a different thing from checking
 that it satisfies its laws; Luthier keeps the two certificates apart (L9).
 
+In Luciano's words, a law is evidence of nothing until a wrong model refutes it. So every law
+carries, beside its evidence, a negative control: a model broken on purpose, which the law must
+refute. A law that no broken model can fail describes nothing, and a run that passes never shows
+it; the external review of one layer of Luthier found three such laws, among them a gradient law
+that a score of zero passed. A law made of parts joined by "and" is controlled part by part, and
+the control does not stop at the first part it refutes: a broken monoid caught by associativity
+says nothing about whether the law of the neutral element would have caught it. A theory is done
+when every part of every law has a model it refuted (L9).
+
 The certificate is the object everything else leans on. It records what is known of a law: the
 domain the check covered, the bound observed, and the evidence, which is a cost: zero for a
 theorem or an exhaustive run, a finite cost for a sample, computed from its statistics, and for an
