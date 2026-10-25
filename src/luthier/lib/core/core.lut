@@ -246,11 +246,16 @@ CappedSumIsAssumptionFree (model : EvidenceComposition <- cappedSumComposition) 
 productComposition : EvidenceComposition :=
   { tensor := fn x y { { failure := x.failure + y.failure - x.failure * y.failure, risk := x.risk + y.risk - x.risk * y.risk } } }
 ProductIsAComposition (model : EvidenceComposition <- productComposition) : Bool := EvidenceComposition model
+-- [2026-10-26, prompt-b1-b3-d1.md item 4] the product under its hypothesis: the composition's laws
+-- run on listed cases, the axiom `FailuresIndependent` graded assumed with no case (tester.py's
+-- `AssumedAxiom`), so the line's grade is assumed, the weakest of its conjuncts
+ProductIsIndependent (model : EvidenceComposition <- productComposition) : Bool := IndependentComposition model
 -- the nats conversion −log(1 − ε̂) (L10.3), ε̂ = 1 to ∞; `log` is the test's (numbers_model.lut's
 -- `elementary`), since the core has none
 NatsIsAConversion (log : Float64 -> Float64) : Bool :=
   NatsConversion { nats := fn e { if e < 1.0 then finiteDistance (0.0 - log (1.0 - e)) else infiniteDistance unit } }
-CoreBases := ExtendedIsAnObject & ErrorIsABase & CappedSumIsAssumptionFree & ProductIsAComposition & NatsIsAConversion
+CoreBases := ExtendedIsAnObject & ErrorIsABase & CappedSumIsAssumptionFree & ProductIsAComposition & ProductIsIndependent
+  & NatsIsAConversion
 
 intIsAnObjectModel  : Object Int := structural Int
 IntIsAnObject  (model : Object Int <- structural Int) : Bool := Object Int model

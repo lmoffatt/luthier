@@ -113,9 +113,12 @@ wholeCoverage (s : TestSpec) : Coverage :=
 -- assumption, which no run produces (6.R1, 6.S10). [proposed, T3 of summary-BCD.md] Not "points
 -- or not run" only: the evidence follows the law's form (laws.lth §3), so a correct tester gives
 -- `Evaluated` for a case, `Pair` or `Side` for a connective and `Tested` for a statistical law, and
--- the earlier law refuted it on every law that is not a `forall`.
+-- the earlier law refuted it on every law that is not a `forall`. [2026-10-26, prompt-b1-b3-d1.md item
+-- 4, the coordinator's answer to report-B2.md] An assumption is what a run gives a law whose body
+-- is an axiom (11.R3), which it reads and does not run (tester.py's `AssumedAxiom`), as run.py's
+-- `axioms` accepts it; a spec does not say whether its law is an axiom, so the law allows it.
 RunIsPointsOrNotRun (t : Tester) (s : TestSpec) : Bool :=
-  match t.run s { Cited r -> false ; Assumed -> false ; _ -> true }
+  match t.run s { Cited r -> false ; _ -> true }
 -- the coverage of a sampled run is at most the spec's; an exhaustive run's is the spec's, bounded
 -- by the size, or the whole type's, both weakened by the bindings (the coordinator, 2026-10-14:
 -- the law asked `Bounded size` where tester.py and laws.lth's `ForallOnPoints` give `Exhaustive`)

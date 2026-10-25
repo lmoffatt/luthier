@@ -227,6 +227,17 @@ class Vacuous:
     evaluated: int
 
 
+@dataclass
+class AssumedAxiom:
+    """laws.lth's `Assumed` for a law whose body is an axiom (11.R3, `FailuresIndependent`): no case
+    runs, the grade is assumed (test.lth's `grade Assumes`), and the statement is kept in the entry
+    (`"axiom"`). [bite of prompt-b1-b3-d1.md, item 4; report-B2.md's question, answered yes by the
+    coordinator] As run.py's `axioms` accepts such a law at the demand's price for assumptions, so a
+    conjunction with an axiom conjunct (`IndependentComposition`) is a line graded assumed rather than
+    one left unsettled."""
+    statement: str
+
+
 # laws.lth's `StatisticalByTest`: what the sequential test's verdict settles
 SETTLED_BY_TEST = {"Holds": "Supported", "Fails": "Refuted", "Unresolved": "Unsettled"}
 
@@ -967,6 +978,43 @@ def _case_regions(runner, loaded, spec, law, fuel, cases):
         return members
     except (NoGenerator, *_RAISES):
         return None
+
+
+def axiom_of(runner, law):
+    """The statement of the `axiom` the law's body is, through the definitions its body applies (a
+    conjunct `L%conjunct1` applies `FailuresIndependent`, whose body is the axiom), as run.py's
+    `axiom_of` reads the surface; None when it is no axiom."""
+    defined = {}
+    for a in runner.program:
+        if isinstance(a, t.Define):
+            defined.setdefault(a.name, a)
+    name = law
+    for _ in range(UNFOLD):
+        d = defined.get(name)
+        if d is None:
+            return None
+        body = d.body
+        while isinstance(body, t.Lam):
+            body = body.body
+        if type(body) is t.Axiom:
+            return body.text
+        head, args = _spine(body)
+        # the elaborated `axiom "..."` (run.py's `_FREE`): the name applied to its statement
+        if (isinstance(head, t.Var) and head.name.partition("@")[0] == "axiom" and len(args) == 1
+                and isinstance(args[0], t.Lit) and isinstance(args[0].constant, t.StringConst)):
+            return args[0].constant.value
+        if not isinstance(head, t.Var):
+            return None
+        name = head.name
+    return None
+
+
+def assumed(spec, statement):
+    """The outcome of a line on an axiom (`AssumedAxiom`): graded assumed with no case, or, for a
+    control, not run, since no broken model can refute what no case checks."""
+    if spec.control:
+        return _not_run(spec, f"an axiom, assumed and never run, which no broken model refutes: {statement}")
+    return Outcome(spec, AssumedAxiom(statement), "Assumes", "AssumedGrade", 0, None)
 
 
 def is_within(runner, law):
@@ -2193,6 +2241,8 @@ def _tail(outcome):
         return f"not run: {vacuity_reason(outcome.evidence.evaluated)}"
     if isinstance(outcome.evidence, Tested):
         return _tested_tail(outcome)
+    if isinstance(outcome.evidence, AssumedAxiom):
+        return f"assumed, an axiom: {outcome.evidence.statement}"
     if outcome.spec.control and outcome.verdict == "Refuted":
         return f"refuted at {_case_text(outcome)}{ratio_text(outcome.measured)}: the control passed"
     if outcome.spec.control and outcome.grade is not None:
@@ -2358,6 +2408,8 @@ def _run_line(runner, loaded, spec, entry, given, home, stores, deep, store, run
             evaluated = evidence["Tested"]["spent"]
         if "Vacuous" in evidence:
             verdict, evaluated = "Unsettled", evidence["Vacuous"]
+        if "Assumed" in evidence:
+            verdict = "Assumes"
         reused = Outcome(spec, evidence, verdict, found["grade"], evaluated, None, cone=entry["cone"],
                          entry=found, known=found["date"], store=home)
         if certify.disputed_at(entries, key):
@@ -2365,7 +2417,11 @@ def _run_line(runner, loaded, spec, entry, given, home, stores, deep, store, run
         return reused
     # a statistical stretch continues the test of the law under its binding (D-2026-10-16-g)
     start = (lambda c, p, entry=entry, entries=entries: certify.continuation(entries, entry, c, p)) if store else None
-    outcome = judged(runner, loaded, spec, run_measured(runner, spec, given, loaded, start), given) if run is None else run(start)
+    statement = axiom_of(runner, _as_called(loaded, spec.law)) if run is None else None
+    if statement is not None:
+        outcome = assumed(spec, statement)
+    else:
+        outcome = judged(runner, loaded, spec, run_measured(runner, spec, given, loaded, start), given) if run is None else run(start)
     settle(entry, outcome)
     outcome.cone, outcome.entry, outcome.store = entry["cone"], entry, home
     fuel_spent = certify.out_of_fuel(entry)
@@ -2794,6 +2850,10 @@ def settle(entry, outcome):
     if isinstance(outcome.evidence, NotRun):
         entry["evidence"] = {"NotRun": outcome.evidence.reason}
         entry["outcome"] = {"NotRunFor": outcome.evidence.reason}
+        return entry
+    if isinstance(outcome.evidence, AssumedAxiom):  # laws.lth's `Assumed`, its statement kept
+        entry["evidence"] = {"Assumed": outcome.evidence.statement}
+        entry["outcome"], entry["grade"] = "Passed", outcome.grade
         return entry
     if isinstance(outcome.evidence, Tested):
         return _settle_tested(entry, outcome)

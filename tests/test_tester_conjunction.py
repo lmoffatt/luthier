@@ -145,3 +145,36 @@ def test_the_conjuncts_entries_are_stored_and_known_and_grade_the_conjunction(ba
     # a conjunct missing from the entries leaves the conjunction without a grade
     assert certify.certificate_grade(good[1:], "LocalIntEquivalence", first[0].cone) is None
     assert certify.certificate_grade(good[:1], "LocalIntEquivalence", first[0].cone) is None
+
+
+# ---------------------------------------------------------------------- an axiom conjunct (prompt-b1-b3-d1.md, item 4)
+
+AXIOM_CONJUNCT = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+Pick : { f : Bool -> Bool }
+Twice (p : Pick) (b : Bool) : Bool := p.f (p.f b) == b
+Faithful (p : Pick) : Bool := axiom "the pick is faithful to the world"
+Pick (p : Pick) := Twice p & Faithful p
+notPick : Pick := { f := fn b { not b } }
+broken : Pick := { f := fn b { true } }
+models : List Binding := [ { parameter := nothing, type := just "Pick", generator := "notPick", coverage := Listed } ]
+brokens : List Binding := [ { parameter := nothing, type := just "Pick", generator := "broken", coverage := Listed } ]
+test "Pick" ExhaustiveMode (profile <- models)
+test "Pick" ExhaustiveMode (profile <- brokens) (control <- true)
+'''
+
+
+def test_an_axiom_conjunct_is_graded_assumed_with_no_case(tmp_path):
+    """report-B2.md's question, answered yes: as run.py's `axioms` accepts a law whose body is an axiom,
+    the tester grades an axiom conjunct assumed with no case run, so the conjunction is a line graded
+    assumed (the weakest of its conjuncts), not one left unsettled; a control does not run it."""
+    path = tmp_path / "pick.test.lut"
+    path.write_text(AXIOM_CONJUNCT, encoding="utf-8")
+    law, control = tester.run_tests(path, store=False)
+    assert law.grade == "AssumedGrade", tester.line(law)
+    axiom = next(o for o in law.parts if o.conjunct.startswith("Faithful"))
+    assert axiom.evaluated == 0 and axiom.entry["evidence"] == {"Assumed": "the pick is faithful to the world"}
+    assert axiom.entry["grade"] == "AssumedGrade" and certify.store_errors([axiom.entry]) == []
+    assert "assumed, an axiom" in tester.line(law)
+    assert control.verdict == "Refuted"

@@ -36,6 +36,9 @@ test "CappedSumIsAssumptionFree" ExhaustiveMode (seed <- 20261025)
   (profile <- [on "model" "goodCappedSum", on "x" "dyadic", on "y" "dyadic", on "z" "dyadic"])
 test "ProductIsAComposition" ExhaustiveMode (seed <- 20261025)
   (profile <- [on "model" "goodProduct", on "x" "dyadic", on "y" "dyadic", on "z" "dyadic"])
+-- the product under its axiom: graded assumed (prompt-b1-b3-d1.md item 4, 2026-10-26)
+test "ProductIsIndependent" ExhaustiveMode (seed <- 20261025)
+  (profile <- [on "model" "goodProduct", on "x" "dyadic", on "y" "dyadic", on "z" "dyadic"])
 
 -- ---------------------------------------------------------------- the nats conversion
 levelPairs : List (Related ProbabilityLevel (fn x y { x <= y })) := [ { x := 0.0, y := 0.0 }, { x := 0.0, y := 0.25 },
