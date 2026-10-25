@@ -799,9 +799,14 @@ L5.22  (His idea of 2026-10-22; "derivation" is GPT's word for his "historia del
        equality of consequence, under which two traces are equal when no observation the theories
        name tells them apart, so `(a + b) * 1.0` and `a + b` have one derivation where no law
        separates them (GPT's example); it is not the trace itself, and it is not a certificate
-       (L10.13). What clause 6 identifies a result by is the identity of its derivation, and the
-       derivation is that key read as a value: the record already keeps it, and this clause names
-       what it keeps. (His reading, D-2026-10-22-c) The derivation is the realization, f applied to
+       (L10.13). (D-2026-10-25-a) What clause 6 identifies a result by is the identity of the
+       realization, and the key is no quotient: the equality of consequence is a certified relation
+       between two realizations, a law over derivations computed when a demand asks for it (clause
+       23), with a canonical form at the Boolean level only, since `(a + b) * 1.0` and `a + b` have
+       different keys and one derivation, and at the metric level closeness is not transitive
+       (L6.5), so there is no class, only the ball; the derivation is the realization graph, its
+       projections are laws, and the planner's certified identities are the 2-cells between
+       realizations. (His reading, D-2026-10-22-c) The derivation is the realization, f applied to
        a, read as a value, a point of an intensional exponential (O13), and not a fourth object
        beside the three of clause 10. The word is his choice over "history" ("derivation suena a
        que podemos simplificar la historia a lo invariante"; in proof theory a derivation is
@@ -845,7 +850,8 @@ Source:     (L5.22, L5.23) Luciano, 2026-10-22 (record/IA/gpt-2026-10-22/dialogo
             17.28.45.md); the overloads 2026-10-11 (WhatsApp Ptt 2026-10-11 at 09.21.05.md, 00:00 to
             00:29; 09.01.13.md)
 Status:     settled; clause 4 proposed on his note on Terms; clauses 17 and 18 proposed; clauses 22
-            and 23 proposed, his idea of 2026-10-22 (D-2026-10-22-b)
+            and 23 proposed, his idea of 2026-10-22 (D-2026-10-22-b), the quotient of clause 22
+            settled as a certified relation (D-2026-10-25-a) while the wording waits for his mark
 History:    (L19) draft 1 (5769005): stated. draft 2 (cd24137): the iteration step from audio 08.58.
             draft 4 (c7c6396): the identity of a result; what reaches an output carries its cone's
             certificates (D-2026-10-11-n). draft 5 (5b1446c): a test is an action memoized by its
@@ -906,6 +912,13 @@ History:    (L19) draft 1 (5769005): stated. draft 2 (cd24137): the iteration st
             (D-2026-10-22-c): the derivation a point of an intensional exponential, the realization
             read as a value and not a fourth object; the word "derivation" his choice, with the
             clash with "derivative" settled; clause 23's requirement as a law kept, on his "ok".
+            2026-10-26, question 5 of the algebra audit (D-2026-10-25-a, his "OK"): the model's
+            sentence "What clause 6 identifies a result by is the identity of its derivation, and
+            the derivation is that key read as a value: the record already keeps it, and this
+            clause names what it keeps" replaced; the key is the realization's identity, the
+            equality of consequence a certified relation computed on demand, a canonical form only
+            at the Boolean level, since the audit (report.md, 5b1a05e, 10.2 and 10.3) showed the
+            key cannot be the quotient and the metric level has no class.
 
 L6  One function, many specimens, chosen by maximizing the performance the demander chooses, along
     certified identities.
@@ -1860,6 +1873,17 @@ blocks; the done and implemented items are in the record's drafts table.
   intensional: programs as arrows, the planner's certified identities as 2-cells, the derivation
   carried a class modulo the demand's equality of consequence (L5.22). So the question is how to
   represent a derivation as a point of an intensional exponential, quotiented by the demand.
+  His answer on how the quotient is computed (D-2026-10-25-a, question 5 of the algebra audit,
+  record/plan/audit-algebras-2026-10-22/decisions.md): never as a canonical form, except at the
+  Boolean level, where a decidable carrier has one; the equality of consequence is a certified
+  relation between two realizations, a law over derivations that a demand asks for (L5.23), and
+  the result key is the identity of the realization, since one derivation may have many keys
+  and the metric level has no class, only the ball (L6.5). The derivation is then the
+  realization graph, its projections are laws, and the 2-cells of the exponential are the
+  planner's certified identities, so composition across hosts comes with the planner
+  (D-2026-10-13-ad); the relation as a law over derivations is bite E1 of the audit's execution,
+  after the planner. What stays open is the representation: the decoration, the indexed type or
+  the reference by hash, and what a bridge declares (L11.10).
   Blocks L5.22, L5.23, L10.13, L11.10, L11.11.
 
 ## His marks pending
