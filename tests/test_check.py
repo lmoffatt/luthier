@@ -190,6 +190,14 @@ def test_extern_reads_every_type_name_and_accepts_aliases():
     assert not c.violatesR5(program('T : U\nf : Int -> T := extern "f" (provisional <- true)'), 'f')
 
 
+def test_extern_over_imported_definitions_is_accepted():
+    # 4.R5: a type defined in an imported file is defined (plan_model.lut's `keyDigest : FlatKey ->
+    # Hash`, `Hash` certification.lth's alias, `Seed` generators.lth's subtype); a declared one is not
+    path = Path(__file__).resolve().parent.parent / 'src' / 'luthier' / 'lib' / 'plan_model.lut'
+    failures = c.check(program(path.read_text(encoding='utf-8')), str(path))
+    assert not [f for f in failures if f.rule == '4.R5'], failures
+
+
 def test_SameSeparates_record_names_and_order():
     from luthier import term as t
     q = c.Typing(program('x : Int'))

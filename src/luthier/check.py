@@ -392,7 +392,10 @@ def violatesR5(p, n):
     for a in acts(p, n, s.Define):
         if not isinstance(a.body, s.TermBody) or head(a.body.term) != s.Name('extern') or provisional(a.body.term): continue
         ty = type_of_act(p, a)
-        known = core_names() | constructors(p) | {a.name for a in p if isinstance(a, (s.Define, s.Alias))}
+        # [proposed, 2026-10-26] a definition an import brings is defined too (4.R5 "accepted when
+        # T is defined"; plan_model.lut's `Hash` and `Seed`); an imported declaration is not
+        known = core_names() | constructors(p) | {a.name for a in tuple(p) + tuple(getattr(p, 'imported', ()))
+                                                  if isinstance(a, (s.Define, s.Alias))}
         if ty == s.Universe() or names(ty, constructors(p)) - known: return True
     return False
 
