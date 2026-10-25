@@ -34,6 +34,8 @@ conversion a map out of the base; δ composes the same way; no entry changes, si
 when served at the demand's δ (L10.3). Costs: a sentence in L10.3, L10.8 and L6.15; bites B1, B2.
 Recommendation: yes; it is the bound that needs no assumption, the simplest sound one first.
 
+OK, agree. But Luthier should provide the mechanisms for definining any reasonable choice, as long as we do not get into an infinite loop. 
+
 **2. The order of grades: a chain, or domain and cost.** test.lth's chain `Assumed < Sampled < Cases
 < Exhaustive < Proved` is the Boolean slice's stand-in for the evidence cost (D-2026-10-16-k). L10.2
 (the grade is derived from the domain and the evidence cost: cases cost 0 on the cases listed and ∞
@@ -50,6 +52,9 @@ Costs: B3 now (nothing served differently); B4 with the cost types (a run served
 `Cases` entry at an unlisted input is refused; listed before it changes). Recommendation: yes; it
 is what L10.2 says, and the chain lets three listed points certify a run at a fourth.
 
+
+Ok
+
 **3. A numerical law as an affine bound transformer.** D-2026-10-18-j gives its content:
 ε_out ≤ L·δ_in + η, L the sensitivity, η the algorithm's own error, on a domain D and below a
 radius r. The audit (5) asks how it composes and what it does with several inputs; L13.3 and L13.4
@@ -64,6 +69,10 @@ allocation among inputs is under-determined and the demand's weight decides (L6.
 agreement law; C2 after it. Recommendation: yes; it is the first-order bound every theorem of
 Higham and LAPACK states, and the sum is Fuzz's product.
 
+OK
+
+
+
 **4. A control per conjunct.** L9.14 (a law is evidence of nothing until a wrong model refutes it;
 a theory is done when each law has its refuted model) predates D-2026-10-18-f, which split a
 conjunction into conjuncts, each with its own entry (spec 7.S22). A control stops at the first
@@ -73,6 +82,10 @@ theory is done when each conjunct has a refuted model and `check -v` lists uncon
 Implies: a control runs every conjunct; more laws show as uncontrolled; a fault family as the index
 (the audit's proposal) waits for a case (P8). Costs: D1; control lines run past their first
 refutation. Recommendation: yes; the conjunct is the law that has the entry.
+
+Yes
+
+
 
 **5. The derivation's quotient as a relation, never a canonical form.** D-2026-10-22-c reads a
 derivation as a point of an intensional exponential carried modulo the demand's equality of
@@ -86,6 +99,8 @@ Boolean level? Implies: L5.22's "the key is the identity of the derivation" read
 realization"; the derivation is the realization graph and its projections are laws (E1); the
 2-cells are the planner's identities, so composition across hosts comes with it (D-2026-10-13-ad).
 Costs: a sentence in L5.22 and O13; E1 after the planner. Recommendation: yes.
+
+OK
 
 Not yours: the resources base (D-2026-10-18-i's "tropical semiring": work adds in sequence and in
 parallel, span adds in sequence and takes the max in parallel, peak memory the other way round, so
