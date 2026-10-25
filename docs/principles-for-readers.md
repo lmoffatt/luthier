@@ -144,13 +144,31 @@ laws of one theory combine is the theory's own algebra; how a demand reads them 
 parameter; and the one thing that does not compose is the cutoff, which is why it lives in the
 demand and in no law (L12).
 
+In Luciano's words, what was first called cost is four things: the error, a bound carried by a
+value and propagated through the computation; the uncertainty, the value read as a distribution;
+the evidence, what a certificate knows on a finite budget; and the resources a run spends. Error
+and uncertainty are data, carried with a value when a demand asks for them, and a law is a claim
+about them at a bound. Each composes in its own way. Errors add. The evidence of a sample is the
+pair described above, composed by the capped sum. The resources are a vector of work, the total
+number of steps, span, the longest chain of steps that must run one after another, and peak
+memory: work adds in sequence and in parallel, span adds in sequence and takes the maximum in
+parallel, and peak memory takes the maximum in sequence and adds in parallel (L6; proposed, except for the
+evidence, which is settled).
+
 Code is written over ideal objects, real numbers, and realized by concrete ones, 64-bit floats.
 The realization satisfies the ideal laws within a stated tolerance, and the error of each step is
 itself a law rather than a false claim of exactness. Rounding from the reals to the doubles is a
 functor in Lawvere's sense (draft 1, his reading), non-expansive up to an additive defect, so the
 algebra of costs needs both a multiplicative part, where a Lipschitz constant exists, and an
-additive one, where rounding enters (L13). This is the least developed part of Luthier, and its
-author calls it a wish as much as a principle.
+additive one, where rounding enters. That shape is now settled. A numerical law is carried by four
+things: a sensitivity L, the algorithm's own error η, a domain D and a radius r; it says that the
+output's error is at most L times the input's error plus η, for inputs in D with errors below r.
+Two such laws compose along a computation, the sensitivities multiplied and the first error
+carried through the second sensitivity before the second error is added. Read backward from a
+demand that tolerates an error ε in the output, the input may carry an error of (ε − η)/L; a
+tolerance below η cannot be met at any price, and where L is unknown no implementation is
+substituted for another (L13). Beyond this and the evidence of a sample, the algebra of costs is
+the least developed part of Luthier, and its author calls it a wish as much as a principle.
 
 ## The demand decides what runs
 
