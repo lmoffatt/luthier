@@ -420,6 +420,26 @@ sumOfLargest (seen : List (Maybe Seed)) (all ps : List (Maybe Seed * Nat)) : Nat
 -- the size of the union: each key once, at its largest
 pooledCases (c : Certificate) (b : List DrawnParameter) : Nat :=
   sumOfLargest nil (stretchesUnder c.law c.cone b c.entries) (stretchesUnder c.law c.cone b c.entries)
+
+-- [wave B, bite B1, 2026-10-26, Claude Opus 5.5; L10.3, 7.S11, D-2026-10-25-a question 1] What a
+-- sampled pass knows of its law is the pair (ε̂, δ) of the core's evidence base (`EvidenceBound`,
+-- core/structures/algebraic.lth): with n cases drawn and none failed, the fraction of the
+-- distribution where the law fails is at most ε̂(n, δ), except with probability δ. ε̂ is computed
+-- when the entry is read for a demand, from `pooledCases` (per region, from its `RegionEvidence`) at
+-- the demand's δ (demand.lth's `delta`), and stored nowhere: the entry keeps n and δ is the demand's,
+-- so storing ε̂ would bake in a δ (L10.3). A bound on the failure fraction is a parameter of a
+-- theory with its law: it is sound when a law failing on the fraction ε̂ passes n independent draws
+-- with probability at most δ, (1 − ε̂)^n ≤ δ, written with the logarithm the model carries (the
+-- core has none), n log(1 − ε̂) ≤ log δ; a bound of 1 says nothing and is always sound.
+-- certification_model.lut's `ruleOfThree`, min(1, −log δ / n) (the rule of three at δ = 0.05,
+-- 7.S11; 1 for n = 0), is the reference, and certify.py's `epsilon_hat` its specimen.
+-- [proposed] The pairs of a law's conjuncts and of a run's cone compose by the demand's
+-- `composition` (an `EvidenceComposition`, the capped sum by default, L10.8); the holes
+-- `entryEvidence` and `regionBound` above stay holes until the cost type `C` is that base.
+SampledBound : { bound : Nat -> ProbabilityLevel -> ProbabilityLevel, log : Float64 -> Float64 }
+SoundAtNoFailure (s : SampledBound) (n : Nat) (delta : ProbabilityLevel) : Bool :=
+  if s.bound n delta >= 1.0 then true else toFloat64 n * s.log (1.0 - s.bound n delta) <= s.log delta
+SampledBound (s : SampledBound) := SoundAtNoFailure s
 -- one grade at most another, where `nothing` (no grade) is below every grade
 atMost (m n : Maybe Grade) : Bool :=
   match m { nothing -> true ; just g -> (match n { nothing -> false ; just h -> gradeRank g <= gradeRank h }) }

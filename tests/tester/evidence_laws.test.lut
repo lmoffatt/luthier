@@ -1,0 +1,31 @@
+-- tests/tester/evidence_laws.test.lut: the bound on the failure fraction a sample gives
+-- (certification.lth's `SampledBound`, its law `SoundAtNoFailure`), its reference
+-- certification_model.lut's `ruleOfThree`, on listed sizes and confidences, and its control, a
+-- bound too small to be sound.
+-- Written 2026-10-26 by Claude Opus 5.5, bite B1 of record/plan/audit-algebras-2026-10-22/
+-- execution.md (prompt-b1-b3-d1.md): ε̂(n, δ) at the demand's δ (L10.3, 7.S11). The sizes include
+-- none, one below the rule's three, and the tape example's 200; the confidences leave out 0, where
+-- the logarithm the law reads has no value (the model gives 1 there, which says nothing).
+-- The entries land in certification_model.cert.json, the store of the file that makes the claim.
+
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers_model.lut" elementary
+import "certification.lth" SampledBound
+import "certification_model.lut" ruleOfThree
+
+on (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+
+sizes : List Nat := [0, 1, 2, 3, 10, 200, 100000]
+levels : List ProbabilityLevel := [0.01, 0.05, 0.5, 1.0]
+goodBound : SampledBound := ruleOfThree
+test "RuleOfThreeIsSound" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "goodBound", on "n" "sizes", on "delta" "levels"])
+
+-- the control: one over n, the bound a reader might take for "one failure in n", which is sound only
+-- at δ = 1/e and above; at n = 10, δ = 0.05, (1 − 0.1)^10 = 0.35 is far above 0.05
+oneOverN : SampledBound := { log := elementary.log,
+  bound := fn n delta { if n == 0 then 1.0 else smaller 1.0 (1.0 / toFloat64 n) } }
+test "RuleOfThreeIsSound" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "oneOverN", on "n" "sizes", on "delta" "levels"]) (control <- true)
