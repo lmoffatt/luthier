@@ -1,19 +1,20 @@
 # Luthier: the ideas behind it
 
-Draft 7, 2026-10-26, unapproved: brought up to the record at 8a3cdb6 (`record/principles-language.md`)
-on four points: the derivation of a value and its crossing between languages (D-2026-10-22-b,
--c), the answers of the algebra audit (D-2026-10-25-a), and what a pass, a failure and a control
-are evidence about (D-2026-10-22-a, -d). What the record still holds as proposed is marked so here.
-Draft 6 (5076a6d) rewrote the prose against draft 11 of `docs/principles.md` (three organizers,
-thirteen principles, the certificate as an entry of its own), so that no earlier decision survived
-in it by inertia. Luciano's corrections of drafts 1 and 2 are kept where they stood, marked as
-before. Drafts 2 to 5 are in the history: draft 0 (f3fb261) received five corrections from Luciano (afdd7c7); draft 1 (43d7796)
-wrote them into the text, each marked "(draft 1)"; draft 2 applied his decisions of the same day
-(D-2026-10-12-e, -f), marked "(draft 2)"; drafts 3 to 5 only renumbered the citations. Written for
-a reader who programs or does science and wants to know what Luthier is for, without the
-apparatus. The prose is the model's; Luciano's own words, the sources and the history of each idea
-are in `record/principles-language.md`, and every paragraph here names, in parentheses, the entry
-it rests on. The version for the people writing the specification is `docs/principles.md`.
+Draft 7, 2026-10-26, unapproved: brought up to the record at 8a3cdb6
+(`record/principles-language.md`) on four points: the derivation of a value and its crossing
+between languages (D-2026-10-22-b, -c), the answers of the algebra audit (D-2026-10-25-a), and what
+a pass, a failure and a control are evidence about (D-2026-10-22-a, -d). What the record still
+holds as proposed is marked so here. Draft 6 (5076a6d) rewrote the prose against draft 11 of
+`docs/principles.md` (three organizers, thirteen principles, the certificate as an entry of its
+own), so that no earlier decision survived in it by inertia. Luciano's corrections of drafts 1 and
+2 are kept where they stood, marked as before. The earlier drafts are in the history: draft 0
+(f3fb261) received five corrections from Luciano (afdd7c7); draft 1 (43d7796) wrote them into the
+text, each marked "(draft 1)"; draft 2 applied his decisions of the same day (D-2026-10-12-e, -f),
+marked "(draft 2)"; drafts 3 to 5 only renumbered the citations. Written for a reader who programs
+or does science and wants to know what Luthier is for, without the apparatus. The prose is the
+model's; Luciano's own words, the sources and the history of each idea are in
+`record/principles-language.md`, and every paragraph here names, in parentheses, the entry it rests
+on. The version for the people writing the specification is `docs/principles.md`.
 
 ## What Luthier is
 
@@ -122,7 +123,8 @@ from the theory, and the failure counts against every model. A control is about 
 law refutes a broken model holds whatever model it is later checked on, so one control serves
 every model of the theory. What a run observes of one result, the residual on these inputs or the
 error a crossing between languages added, is about that result: it goes into the result's
-derivation and the run's record, and it changes no certificate of the model. So the certificate of
+derivation, the account of how it was obtained (below, under the demand), and into the run's
+record, and it changes no certificate of the model. So the certificate of
 a model, the evidence of one computation and the derivation of its value are three records; a
 derivation names the certificates its route relied on, a certificate names no result, and no
 object carries all three. The interpreter has kept passes, failures and controls apart this way
@@ -152,11 +154,11 @@ value and propagated through the computation; the uncertainty, the value read as
 the evidence, what a certificate knows on a finite budget; and the resources a run spends. Error
 and uncertainty are data, carried with a value when a demand asks for them, and a law is a claim
 about them at a bound. Each composes in its own way. Errors add. The evidence of a sample is the
-pair described above, composed by the capped sum. The resources are a vector of work, the total
-number of steps, span, the longest chain of steps that must run one after another, and peak
-memory: work adds in sequence and in parallel, span adds in sequence and takes the maximum in
-parallel, and peak memory takes the maximum in sequence and adds in parallel (L6; proposed, except for the
-evidence, which is settled).
+pair described above, composed by the capped sum. The resources, as an audit of the algebras
+corrected, are a vector of work, the total number of steps, span, the longest chain of steps that
+must run one after another, and peak memory: work adds in sequence and in parallel, span adds in
+sequence and takes the maximum in parallel, and peak memory takes the maximum in sequence and adds
+in parallel (L6; proposed, except for the evidence, which is settled).
 
 Code is written over ideal objects, real numbers, and realized by concrete ones, 64-bit floats.
 The realization satisfies the ideal laws within a stated tolerance, and the error of each step is
@@ -276,7 +278,7 @@ interpreter does not have yet, so that its laws are Boolean, with their toleranc
 parameters. The derivation of a value waits for Luciano's mark on its wording, and how it is
 represented is open: a decoration the demand asks for, a type indexed by a summary of it, or a
 reference by hash to a graph that never changes; so is the form in which a bridge declares what
-it preserves and what it loses (L5, L11). The syntax by which a demand opts out of certification, and the world as a value so
-that an action is never served from a cache, are designed and not implemented. The author's own
-analysis of the extension from Boolean logic to Lawvere and Bayes is pending, and he has not yet
-said whether it is a third eureka or a rule of good use (G2).
+it preserves and what it loses (L5, L11). The syntax by which a demand opts out of certification,
+and the world as a value so that an action is never served from a cache, are designed and not
+implemented. The author's own analysis of the extension from Boolean logic to Lawvere and Bayes is
+pending, and he has not yet said whether it is a third eureka or a rule of good use (G2).
