@@ -123,13 +123,32 @@ certificate, the cutoff it accepts on the bound and on the evidence, and the tra
 willing to make between precision and resources. From those Luthier plans backward from the
 demand over the names it needs, then runs forward over that live subgraph, each node once and
 whole. What the demanded value does not need is not produced, which is how Luthier avoids carrying
-the whole history of a computation in its types. A result is identified by everything that made
+the whole history of a computation in its types. The history is still there for a demand that
+wants it: a value has a derivation, and a demand may ask for the value with its derivation as it
+asks for the value with its error (L5.23). A result is identified by everything that made
 it: the code, the inputs, the demanded type and tolerance, the seed, the plan, and the
 certificates in its cone, so a changed library is a new result. Three objects, never one: the
 meaning of a program, which its laws fix; a realization, the result under a plan; and the
 evidence, its certificates. Every threshold, budget and statistical level is a parameter passed
 with the demand, never a constant hidden in the code; the kernel's own zero and infinity are not
 policies (L5).
+
+What follows in this paragraph is proposed, on Luciano's idea of 2026-10-22, and waits for his
+mark on the wording. The derivation of a value is the account of how it was obtained, kept to what
+changes what a law or a demand can say of it: the inputs it descends from, the models and
+specimens that produced it, the bridges it crossed between languages, the certificates its route
+relied on, and the roots of trust it rests on, the parts nothing checks, such as the file system
+or the floating-point hardware. It is the trace of the run read only as far as the theories can
+observe, so `(a + b) * 1.0` and `a + b` have one derivation wherever no law tells them apart. In
+his reading the derivation is the realization itself, a function applied to its input, taken as a
+value, so the three objects stay three. Whether two realizations are equal in consequence is a
+certified relation between them, computed when a demand asks for it, and a result keeps the
+identity of its own realization as its key (L5.22). A value carries no more of its derivation than
+its demand asks for: a 64-bit float stays a 64-bit float until a demand wants the value with its
+derivation, one more decoration beside the error, the derivative and the certificate. A
+requirement on the derivation, say that nothing in it was assumed, is a law over it, so the values
+that meet it form a certified subtype a demand can name like any other type (L5.23). The word is
+his; it has nothing to do with the derivative, the differential a demand may also ask for.
 
 A program is therefore a graph of definitions, not a sequence of steps. The order of statements
 in the file does not matter; dependencies give the only order there is, and inside a block the
