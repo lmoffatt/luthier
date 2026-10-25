@@ -54,10 +54,16 @@ NumberModels := DoublesHaveTheOperations & AbsDistanceIsAMetricWithin
 conversion : Conversion := { convert := toFloat64 }
 
 -- the elementary functions: leaves of the environment, declared over the doubles they receive
--- (11.S2), routes to Python's `math`, certified against numbers.lth §5 like any extern
+-- (11.S2), routes to Python's `math`, certified against numbers.lth §5 like any extern. Their
+-- accuracy, `ulps`, is one unit in the last place [proposed, wave C bite C1, 2026-10-25]: measured
+-- at most 0.502 for `exp` and 0.500 for `log`, `erf` and `sqrt` on this host's library (Debian
+-- GLIBC 2.43, record/plan/audit-algebras-2026-10-22/c1-ulps.py, seed 1); one is the bound glibc's
+-- manual table of known maximum errors is to be cited for, and the laws' certificates show how much
+-- of it the host uses (the worst ratio).
 elementary : Elementary := {
   sqrt := extern "python:math.sqrt",
   exp := extern "python:math.exp",
   log := extern "python:math.log",
   erf := extern "python:math.erf",
+  ulps := 1.0,
 }

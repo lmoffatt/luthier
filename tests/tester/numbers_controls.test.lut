@@ -465,49 +465,49 @@ convertNegatedProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "convertNegated", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-sqrtHalf : Elementary := { sqrt := fn x { x / 2.0 }, exp := elementary.exp, log := elementary.log, erf := elementary.erf }
+sqrtHalf : Elementary := { sqrt := fn x { x / 2.0 }, exp := elementary.exp, log := elementary.log, erf := elementary.erf, ulps := elementary.ulps }
 sqrtHalfProfile : List Binding := [
   { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
   { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "sqrtHalf", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-sqrtNegated : Elementary := { sqrt := fn x { 0.0 - x }, exp := elementary.exp, log := elementary.log, erf := elementary.erf }
+sqrtNegated : Elementary := { sqrt := fn x { 0.0 - x }, exp := elementary.exp, log := elementary.log, erf := elementary.erf, ulps := elementary.ulps }
 sqrtNegatedProfile : List Binding := [
   { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
   { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "sqrtNegated", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-expScaled : Elementary := { sqrt := elementary.sqrt, exp := fn x { 1.0001 * elementary.exp x }, log := elementary.log, erf := elementary.erf }
+expScaled : Elementary := { sqrt := elementary.sqrt, exp := fn x { 1.0001 * elementary.exp x }, log := elementary.log, erf := elementary.erf, ulps := elementary.ulps }
 expScaledProfile : List Binding := [
   { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
   { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "expScaled", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-expNegated : Elementary := { sqrt := elementary.sqrt, exp := fn x { 0.0 - elementary.exp x }, log := elementary.log, erf := elementary.erf }
+expNegated : Elementary := { sqrt := elementary.sqrt, exp := fn x { 0.0 - elementary.exp x }, log := elementary.log, erf := elementary.erf, ulps := elementary.ulps }
 expNegatedProfile : List Binding := [
   { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
   { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "expNegated", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-logShifted : Elementary := { sqrt := elementary.sqrt, exp := elementary.exp, log := fn x { elementary.log x + 1.0e-4 }, erf := elementary.erf }
+logShifted : Elementary := { sqrt := elementary.sqrt, exp := elementary.exp, log := fn x { elementary.log x + 1.0e-4 }, erf := elementary.erf, ulps := elementary.ulps }
 logShiftedProfile : List Binding := [
   { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
   { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "logShifted", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-erfShifted : Elementary := { sqrt := elementary.sqrt, exp := elementary.exp, log := elementary.log, erf := fn x { elementary.erf x + 1.0e-4 } }
+erfShifted : Elementary := { sqrt := elementary.sqrt, exp := elementary.exp, log := elementary.log, erf := fn x { elementary.erf x + 1.0e-4 }, ulps := elementary.ulps }
 erfShiftedProfile : List Binding := [
   { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
   { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "erfShifted", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
-erfDoubled : Elementary := { sqrt := elementary.sqrt, exp := elementary.exp, log := elementary.log, erf := fn x { 2.0 * elementary.erf x } }
+erfDoubled : Elementary := { sqrt := elementary.sqrt, exp := elementary.exp, log := elementary.log, erf := fn x { 2.0 * elementary.erf x }, ulps := elementary.ulps }
 erfDoubledProfile : List Binding := [
   { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
   { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },

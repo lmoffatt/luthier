@@ -42,6 +42,8 @@
 --   §5 The elementary functions `sqrt`, `exp`, `log`, `erf`: exact cases, bounds,
 --      the identities within a tolerance (11.S2, 11.S18).                                done
 
+import "laws.lth" Law Within
+
 -- ---------------------------------------------------------------- §1 Magnitude and tolerance
 
 -- the magnitude: `x` or `-x`, whichever is not negative; exact, negation being exact
@@ -194,9 +196,16 @@ Conversion := ConvertZeroAndOne & ConvertAddsExactly & ConvertSucceeds & Convert
 -- host's mathematical library (numbers_model.lut `elementary`, routes to Python's `math`). The
 -- square root is correctly rounded by IEEE 754, so its laws are exact; `exp`, `log` and `erf`
 -- are computed to within a few units in the last place by the host's library and no exact law
--- of them beyond their special values and bounds holds; their identities take the demand's
--- tolerance (11.S18). The domains keep the results finite (11.S7).
-Elementary : { sqrt exp log erf : Float64 -> Float64 }
+-- of them beyond their special values and bounds holds. The domains keep the results finite
+-- (11.S7).
+-- [wave C, bite C1, 2026-10-25, Claude Opus 5.5; D-2026-10-18-j] The identities no longer take the
+-- demand's tolerance: each is a `Within` law (laws.lth §5) whose bound follows from the accuracy
+-- the model declares, `ulps`, the most units in the last place by which `exp`, `log` and `erf` miss
+-- the exact value (a unit in the last place of `y` is at most `epsilon |y|` for a normal `y`), and
+-- from the rounding of each operation the identity applies (`u = epsilon / 2`). A property of the
+-- model, so a field of it and not a parameter a line could loosen (P11 keeps it a value, not a
+-- constant of the law).
+Elementary : { sqrt exp log erf : Float64 -> Float64, ulps : Float64 }
 -- where `exp` is finite and `exp (x + y)` too
 ExpDomain : U := { x : Float64 | -300.0 <= x and x <= 300.0 }
 
@@ -215,14 +224,41 @@ SqrtOfSquare (e : Elementary) (x : Moderate) : Bool := e.sqrt (x * x) == abs x
 ExpPositive (e : Elementary) (x : ExpDomain) : Bool := 0.0 < e.exp x
 ErfOdd (e : Elementary) (x : Moderate) : Bool := e.erf (0.0 - x) == 0.0 - e.erf x
 ErfBounded (e : Elementary) (x : Moderate) : Bool := -1.0 <= e.erf x and e.erf x <= 1.0
--- the identities, within the demand's tolerance (11.S18)
-SqrtSquares (e : Elementary) (tol : Tolerance) (x : NonNegative) : Bool := within tol (e.sqrt x * e.sqrt x) x
-ExpOfLog (e : Elementary) (tol : Tolerance) (x : Positive) : Bool := within tol (e.exp (e.log x)) x
-LogOfExp (e : Elementary) (tol : Tolerance) (x : ExpDomain) : Bool := within tol (e.log (e.exp x)) x
-ExpAdds (e : Elementary) (tol : Tolerance) (x y : ExpDomain) : Bool :=
-  within tol (e.exp (x + y)) (e.exp x * e.exp y)
-LogMultiplies (e : Elementary) (tol : Tolerance) (x y : Positive) : Bool :=
-  within tol (e.log (x * y)) (e.log x + e.log y)
+-- The identities, each within the bound error analysis gives it (D-2026-10-18-j), `k` the model's
+-- `ulps`, `y` the logarithm or the exponent involved. Each first-order bound is widened by
+-- `elementaryRoom`: the second-order terms (`exp` of an argument off by `Delta` is off by a factor
+-- `e^|Delta| <= 1 + 2 |Delta|` while `|Delta| <= 1`, and `|Delta| <= k epsilon |y|`) and the bound's
+-- own roundings (at most eight operations, a factor `1 + u` each, within `1 + 4 epsilon`).
+-- - the root of a square: `sqrt` rounds once (IEEE 754) and the product once, so `s s` is within
+--   `(1 + u)^3 - 1 <= gamma 3` of `x` relative to `x`, and the difference of two doubles within a
+--   factor two of each other is exact (Sterbenz);
+-- - `exp (log x)`: the logarithm off by `k epsilon |log x|`, carried by `exp` as a relative error,
+--   plus `exp`'s own `k epsilon`: within `k epsilon (1 + |log x|) x`;
+-- - `log (exp x)`: `exp`'s relative `k epsilon` is an absolute `k epsilon` after the logarithm, plus
+--   the logarithm's `k epsilon |x|`: within `k epsilon (1 + |x|)`;
+-- - `exp (x + y)` against `exp x exp y`: the sum's rounding `u |x + y|` carried as a relative error
+--   and `exp`'s `k epsilon` on one side, two of `exp`'s and the product's `u` on the other: within
+--   `(u (1 + |x + y|) + 3 k epsilon) exp (x + y)`;
+-- - `log (x y)` against `log x + log y`: the product's `u`, the logarithm's `k epsilon |log (x y)|`
+--   on one side, two logarithms and the sum's `u |log x + log y|` on the other: within
+--   `u + (2 k epsilon + u) (|log x| + |log y|)`.
+elementaryRoom (e : Elementary) (d : Doubles Float64) (y : Float64) : Float64 :=
+  1.0 + 2.0 * e.ulps * d.epsilon * (1.0 + abs y) + 4.0 * d.epsilon
+SqrtSquares (e : Elementary) (d : Doubles Float64) (x : NonNegative) : Law :=
+  { u := d.epsilon / 2.0
+    Within Float64 absDistance (3.0 * u / (1.0 - 3.0 * u) * x * elementaryRoom e d 0.0) (e.sqrt x * e.sqrt x) x }
+ExpOfLog (e : Elementary) (d : Doubles Float64) (x : Positive) : Law :=
+  Within Float64 absDistance (e.ulps * d.epsilon * (1.0 + abs (e.log x)) * x * elementaryRoom e d (e.log x)) (e.exp (e.log x)) x
+LogOfExp (e : Elementary) (d : Doubles Float64) (x : ExpDomain) : Law :=
+  Within Float64 absDistance (e.ulps * d.epsilon * (1.0 + abs x) * elementaryRoom e d x) (e.log (e.exp x)) x
+ExpAdds (e : Elementary) (d : Doubles Float64) (x y : ExpDomain) : Law :=
+  { u := d.epsilon / 2.0
+    Within Float64 absDistance ((u * (1.0 + abs (x + y)) + 3.0 * e.ulps * d.epsilon) * e.exp (x + y) * elementaryRoom e d (x + y))
+      (e.exp (x + y)) (e.exp x * e.exp y) }
+LogMultiplies (e : Elementary) (d : Doubles Float64) (x y : Positive) : Law :=
+  { u := d.epsilon / 2.0
+    Within Float64 absDistance ((u + (2.0 * e.ulps * d.epsilon + u) * (abs (e.log x) + abs (e.log y))) * elementaryRoom e d (e.log x + e.log y))
+      (e.log (x * y)) (e.log x + e.log y) }
 
 Elementary := SqrtOfSquares & ExpOfZero & LogOfOne & ErfOfZero & SqrtMonotone & SqrtOfSquare & ExpPositive
   & ErfOdd & ErfBounded & SqrtSquares & ExpOfLog & LogOfExp & ExpAdds & LogMultiplies
