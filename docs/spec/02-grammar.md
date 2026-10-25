@@ -429,7 +429,7 @@ blocks. The items of a block are `x := t` (once), `x <- t` (bind or rebind) and 
 result bound, `w1 <- print w0 "x"`. [decided D-2026-10-13-ag] The left of `<-` is a pattern against
 what the right gives, an action's `W * A` included: `(w1, s) <- readFile w0 "f"`; a bare name is
 allowed when `A` is `Unit`, `w1 <- print w0 "x"`, and binds the token, dropping the unit, as sugar
-the elaboration realizes (`translation.lth`). Actions keep the one shape `W -> ... -> W * A`. Translation: each item becomes a definition with a fresh name
+the elaboration realizes (`translation.lth`). [decided D-2026-10-17-h] [implemented] A refutable pattern on `<-` (a literal, a label or a constructor with siblings: `(w, just x) <- ...`) is refused by the checker, through the elaborator, with a message naming the explicit `match` as the verbose form (L5.20), until a real case asks otherwise. Actions keep the one shape `W -> ... -> W * A`. Translation: each item becomes a definition with a fresh name
 (spec 2.S12), so after it the block is a sub-DAG with one output, dependencies give the only
 order, and items that do not refer to each other commute (L4, L9). Three kinds of block and no
 other: the body of a definition or lambda; a block named `main` in a file, the script; the

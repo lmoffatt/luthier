@@ -174,7 +174,7 @@ decision-assistant fork, now luthier-8c), in this order after j2a:
   `ForallOnPoints` following (item 17); per-law cutoffs a typed field of `Demand` (item 20); the most
   specific binding wins (G6); a law quantified over `U` a static error, `Settling`'s laws on concrete
   instances (L5); 3.R1 and 3.R2 reworded (D-2026-10-17-a).
-- D-2026-10-17-h: the checker refuses a refutable pattern on `<-` (item 27); the agents' [proposed]
+- D-2026-10-17-h: the checker refuses a refutable pattern on `<-` (item 27, done: elaborate.py `refutable`, spec 2.S17); the agents' [proposed]
   readings ratified in bulk for their meaning, their markers removed (item 28), except: a theory file
   importing a model by name (L2.6); the fit's items 5 and 9 (D-2026-10-16-b); demand/plan items 5,
   7, 9, 10; all of plot.lth (waits for G1 to G5); 4.S13's borrowed [decided D-2026-10-12-z] becomes
