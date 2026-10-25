@@ -235,6 +235,25 @@ way, say a foreign algorithm taken as is, can still run, inside a named world, i
 carrying the cost of an assumption, and nothing from it enters the planner's graph nor a certified
 theory until a law is certified for it (L11).
 
+What follows is proposed, on Luciano's idea of 2026-10-22. A value crosses from one language to
+another without losing what Luthier knows of it. A crossing changes the representation, the host
+or the place where the value is computed; its theory, its evidence and its derivation stay on
+Luthier's side and go through with it, so whoever receives the value needs to read only its type
+and the evidence that comes with it, never the language that produced it. A bridge between two
+languages declares what it preserves, what it adds (the error and the resources of the
+conversion), what it takes on trust, and what it can no longer certify, and what is lost is lost
+by a declared bridge, never by the crossing itself (L11.10). That is what orchestrating means, in
+his image of a conductor. The hosts compute, and may compute most of a program. Luthier states the
+theories, knows which implementations in the hosts are their specimens, keeps the evidence, places
+the bridges, composes the derivation across them, and answers a demand with a result that meets
+the theory, the evidence and the tolerance asked for. Take raw measurements calibrated in Python,
+fitted in Julia and solved by LAPACK: the estimate's derivation names the three implementations
+with their versions, the two bridges with the error each added, the certificates each step relied
+on and the roots of trust, and a demand carries as much of it as it asks for. Of such a value one
+can then ask what it means, how it was obtained, what it assumed, and which laws justify using it,
+as far as the demand asks and the evidence certifies. Composing derivations across hosts comes
+with the planner, after the evidence it needs (L11.11).
+
 ## The small core
 
 The core is a handful of primitives, small enough that a program can be run with pencil and paper
