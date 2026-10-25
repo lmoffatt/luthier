@@ -6,6 +6,7 @@
 -- conjunction of its laws (guide section 8); a within-bound law with its range, as numbers.lth's.
 
 import "numbers.lth" Doubles absDistance
+import "laws.lth" Law Within
 
 -- A mark on a fifty-metre tape, in millimetres from its zero. The bounds are the instrument's, part
 -- of the type (7.S4), and keep every reading an integer below 2^53, so exact as a double (11.S5).
@@ -30,12 +31,13 @@ ReadingSteps (t : Tape) (a : Step) : Bool := t.reading a (a + 1) == 1.0
 -- unit roundoff (Higham 2002, section 2.2, the standard model). The bound below, epsilon (|A| + |B| +
 -- |A - B|) with epsilon = 2 u the doubles' own (numbers.lth's `Doubles`), covers it with room. Its
 -- range of validity is the type of its variables (D-2026-10-18-j): marks of the tape, where no
--- operation leaves the normal range.
+-- operation leaves the normal range. It is a numerical law in laws.lth's `Within` form (bite C1): the
+-- distance between the computed and the exact reading at most the bound, so the certificate records
+-- the worst ratio of distance to bound seen.
 metres (k : Mark) : Float64 := toFloat64 k / 1000.0
-MetresWithin (t : Tape) (d : Doubles Float64) (a b : Mark) : Bool := {
-  computed := absDistance (metres a) (metres b)
-  exact := t.reading a b / 1000.0
-  absDistance computed exact <= d.epsilon * (metres a + metres b + exact) }
+MetresWithin (t : Tape) (d : Doubles Float64) (a b : Mark) : Law :=
+  Within Float64 absDistance (d.epsilon * (metres a + metres b + t.reading a b / 1000.0))
+    (absDistance (metres a) (metres b)) (t.reading a b / 1000.0)
 
 -- the theory: the three exact laws, which determine the reading, and the reading in metres within
 -- its bound

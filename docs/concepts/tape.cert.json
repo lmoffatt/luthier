@@ -1,7 +1,7 @@
 [
  {
   "law": "MetresWithin",
-  "cone": "sha256:824c8ede6aa172fe2935f7f2fb0888b4040afab7ea8019608cd5bde0d15c1697",
+  "cone": "sha256:9e04551516a732a42796d0b6e9939c50a27e20c7e732a1c5493ae8473dbea8d1",
   "binding": [
    {
     "parameter": "t",
@@ -93,10 +93,561 @@
   "outcome": {
    "ControlRefuted": "t = tape, d = noRoom, a = 26150, b = 14398"
   },
-  "date": "2026-10-23T10:15:09+00:00",
+  "date": "2026-10-25T20:11:12+00:00",
   "interpreter": "v0.3",
   "hosts": [],
   "kind": "Control",
+  "measured": {
+   "measured": 200,
+   "worst": null,
+   "distance": 1.7763568394002505e-15,
+   "bound": 0.0,
+   "regions": [
+    {
+     "region": {
+      "source": "FromLaw",
+      "name": "a boundary"
+     },
+     "worst": null
+    },
+    {
+     "region": {
+      "source": "FromLaw",
+      "name": "b boundary"
+     },
+     "worst": null
+    }
+   ]
+  },
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "a boundary"
+    },
+    "n": 13
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 12
+   }
+  ]
+ },
+ {
+  "law": "Tape",
+  "cone": "sha256:0bdfde3ed8322431830a3a4efe138ac226d10793965239f1ce00e5624b09a52f",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "hooked (Listed)",
+    "fingerprint": "sha256:8fe107030466889c3ffa12cb40b13a5fdfafc585cf6cc609298aa31aa582f6f5"
+   },
+   {
+    "parameter": "a",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "b",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over InOrder",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "a",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Step",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "hooked"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "a",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   },
+   {
+    "parameter": "a",
+    "reach": {
+     "Interval": [
+      0.0,
+      49999.0
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 400,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "ReadingAdds t: t = hooked, p = { a := 36254, b := 41964, c := 44418 }"
+  },
+  "date": "2026-10-25T20:11:10+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "p boundary"
+    },
+    "n": 200
+   }
+  ]
+ },
+ {
+  "law": "Tape",
+  "cone": "sha256:0bdfde3ed8322431830a3a4efe138ac226d10793965239f1ce00e5624b09a52f",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "tape (Listed)",
+    "fingerprint": "sha256:48ffd9852dc9b13e9ea5cc812edcda3a9ad30a8d2dfe12f92681cd64ecf42db2"
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "a",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "b",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "tape"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "a",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-25T20:11:07+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MetresWithin t",
+  "conjuncts": [
+   "ReadingSymmetric t",
+   "ReadingAdds t",
+   "ReadingSteps t",
+   "MetresWithin t"
+  ],
+  "measured": {
+   "measured": 200,
+   "worst": 0.41493775933609955,
+   "distance": 7.105427357601002e-15,
+   "bound": 1.7124079931818415e-14,
+   "regions": [
+    {
+     "region": {
+      "source": "FromLaw",
+      "name": "a boundary"
+     },
+     "worst": 0.41493775933609955
+    },
+    {
+     "region": {
+      "source": "FromLaw",
+      "name": "b boundary"
+     },
+     "worst": 0.3877753811104918
+    }
+   ]
+  },
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "a boundary"
+    },
+    "n": 13
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 12
+   }
+  ]
+ },
+ {
+  "law": "Tape",
+  "cone": "sha256:0bdfde3ed8322431830a3a4efe138ac226d10793965239f1ce00e5624b09a52f",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "tape (Listed)",
+    "fingerprint": "sha256:48ffd9852dc9b13e9ea5cc812edcda3a9ad30a8d2dfe12f92681cd64ecf42db2"
+   },
+   {
+    "parameter": "a",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Step",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "tape"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "a",
+    "reach": {
+     "Interval": [
+      0.0,
+      49999.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-25T20:11:07+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ReadingSteps t",
+  "conjuncts": [
+   "ReadingSymmetric t",
+   "ReadingAdds t",
+   "ReadingSteps t",
+   "MetresWithin t"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "a boundary"
+    },
+    "n": 12
+   }
+  ]
+ },
+ {
+  "law": "Tape",
+  "cone": "sha256:0bdfde3ed8322431830a3a4efe138ac226d10793965239f1ce00e5624b09a52f",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "tape (Listed)",
+    "fingerprint": "sha256:48ffd9852dc9b13e9ea5cc812edcda3a9ad30a8d2dfe12f92681cd64ecf42db2"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over InOrder",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "tape"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-25T20:11:07+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ReadingAdds t",
+  "conjuncts": [
+   "ReadingSymmetric t",
+   "ReadingAdds t",
+   "ReadingSteps t",
+   "MetresWithin t"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "p boundary"
+    },
+    "n": 200
+   }
+  ]
+ },
+ {
+  "law": "Tape",
+  "cone": "sha256:0bdfde3ed8322431830a3a4efe138ac226d10793965239f1ce00e5624b09a52f",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "tape (Listed)",
+    "fingerprint": "sha256:48ffd9852dc9b13e9ea5cc812edcda3a9ad30a8d2dfe12f92681cd64ecf42db2"
+   },
+   {
+    "parameter": "a",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "b",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "tape"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "a",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-25T20:11:06+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ReadingSymmetric t",
+  "conjuncts": [
+   "ReadingSymmetric t",
+   "ReadingAdds t",
+   "ReadingSteps t",
+   "MetresWithin t"
+  ],
   "regions": [
    {
     "region": {
@@ -220,133 +771,6 @@
    "ControlRefuted": "MetricZeroOnEqual Mark (structural Mark) model: model = hookedMetric, p = { x := 0, y := 0 }"
   },
   "date": "2026-10-23T10:15:09+00:00",
-  "interpreter": "v0.3",
-  "hosts": [],
-  "kind": "Control",
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "p boundary"
-    },
-    "n": 200
-   }
-  ]
- },
- {
-  "law": "Tape",
-  "cone": "sha256:4a3451bd6ff467e198f5326f2f64ed2b15ebc2a7c328626de444b43d7694f1df",
-  "binding": [
-   {
-    "parameter": "t",
-    "generator": "hooked (Listed)",
-    "fingerprint": "sha256:8fe107030466889c3ffa12cb40b13a5fdfafc585cf6cc609298aa31aa582f6f5"
-   },
-   {
-    "parameter": "a",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
-    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
-   },
-   {
-    "parameter": "b",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
-    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
-   },
-   {
-    "parameter": "p",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over InOrder",
-    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
-   },
-   {
-    "parameter": "a",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Step",
-    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
-   },
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
-   }
-  ],
-  "seed": 20261021,
-  "cases": 200,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "t",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "hooked"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "a",
-    "reach": {
-     "Interval": [
-      0.0,
-      50000.0
-     ]
-    }
-   },
-   {
-    "parameter": "b",
-    "reach": {
-     "Interval": [
-      0.0,
-      50000.0
-     ]
-    }
-   },
-   {
-    "parameter": "a",
-    "reach": {
-     "Interval": [
-      0.0,
-      49999.0
-     ]
-    }
-   },
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 400,
-    "raised": 0,
-    "coverage": "(Drawn 20261021)",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "ReadingAdds t: t = hooked, p = { a := 36254, b := 41964, c := 44418 }"
-  },
-  "date": "2026-10-23T10:15:07+00:00",
   "interpreter": "v0.3",
   "hosts": [],
   "kind": "Control",
@@ -854,386 +1278,6 @@
      "name": "p boundary"
     },
     "n": 200
-   }
-  ]
- },
- {
-  "law": "Tape",
-  "cone": "sha256:4a3451bd6ff467e198f5326f2f64ed2b15ebc2a7c328626de444b43d7694f1df",
-  "binding": [
-   {
-    "parameter": "t",
-    "generator": "tape (Listed)",
-    "fingerprint": "sha256:48ffd9852dc9b13e9ea5cc812edcda3a9ad30a8d2dfe12f92681cd64ecf42db2"
-   },
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
-   },
-   {
-    "parameter": "a",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
-    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
-   },
-   {
-    "parameter": "b",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
-    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
-   }
-  ],
-  "seed": 20261021,
-  "cases": 200,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "t",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "tape"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "a",
-    "reach": {
-     "Interval": [
-      0.0,
-      50000.0
-     ]
-    }
-   },
-   {
-    "parameter": "b",
-    "reach": {
-     "Interval": [
-      0.0,
-      50000.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 200,
-    "raised": 0,
-    "coverage": "(Drawn 20261021)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-23T10:15:02+00:00",
-  "interpreter": "v0.3",
-  "hosts": [],
-  "conjunct": "MetresWithin t",
-  "conjuncts": [
-   "ReadingSymmetric t",
-   "ReadingAdds t",
-   "ReadingSteps t",
-   "MetresWithin t"
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "a boundary"
-    },
-    "n": 13
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "b boundary"
-    },
-    "n": 12
-   }
-  ]
- },
- {
-  "law": "Tape",
-  "cone": "sha256:4a3451bd6ff467e198f5326f2f64ed2b15ebc2a7c328626de444b43d7694f1df",
-  "binding": [
-   {
-    "parameter": "t",
-    "generator": "tape (Listed)",
-    "fingerprint": "sha256:48ffd9852dc9b13e9ea5cc812edcda3a9ad30a8d2dfe12f92681cd64ecf42db2"
-   },
-   {
-    "parameter": "a",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Step",
-    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
-   }
-  ],
-  "seed": 20261021,
-  "cases": 200,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "t",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "tape"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "a",
-    "reach": {
-     "Interval": [
-      0.0,
-      49999.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 200,
-    "raised": 0,
-    "coverage": "(Drawn 20261021)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-23T10:15:02+00:00",
-  "interpreter": "v0.3",
-  "hosts": [],
-  "conjunct": "ReadingSteps t",
-  "conjuncts": [
-   "ReadingSymmetric t",
-   "ReadingAdds t",
-   "ReadingSteps t",
-   "MetresWithin t"
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "a boundary"
-    },
-    "n": 12
-   }
-  ]
- },
- {
-  "law": "Tape",
-  "cone": "sha256:4a3451bd6ff467e198f5326f2f64ed2b15ebc2a7c328626de444b43d7694f1df",
-  "binding": [
-   {
-    "parameter": "t",
-    "generator": "tape (Listed)",
-    "fingerprint": "sha256:48ffd9852dc9b13e9ea5cc812edcda3a9ad30a8d2dfe12f92681cd64ecf42db2"
-   },
-   {
-    "parameter": "p",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over InOrder",
-    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
-   }
-  ],
-  "seed": 20261021,
-  "cases": 200,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "t",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "tape"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 200,
-    "raised": 0,
-    "coverage": "(Drawn 20261021)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-23T10:15:02+00:00",
-  "interpreter": "v0.3",
-  "hosts": [],
-  "conjunct": "ReadingAdds t",
-  "conjuncts": [
-   "ReadingSymmetric t",
-   "ReadingAdds t",
-   "ReadingSteps t",
-   "MetresWithin t"
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "p boundary"
-    },
-    "n": 200
-   }
-  ]
- },
- {
-  "law": "Tape",
-  "cone": "sha256:4a3451bd6ff467e198f5326f2f64ed2b15ebc2a7c328626de444b43d7694f1df",
-  "binding": [
-   {
-    "parameter": "t",
-    "generator": "tape (Listed)",
-    "fingerprint": "sha256:48ffd9852dc9b13e9ea5cc812edcda3a9ad30a8d2dfe12f92681cd64ecf42db2"
-   },
-   {
-    "parameter": "a",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
-    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
-   },
-   {
-    "parameter": "b",
-    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
-    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
-   }
-  ],
-  "seed": 20261021,
-  "cases": 200,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "t",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "tape"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "a",
-    "reach": {
-     "Interval": [
-      0.0,
-      50000.0
-     ]
-    }
-   },
-   {
-    "parameter": "b",
-    "reach": {
-     "Interval": [
-      0.0,
-      50000.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 200,
-    "raised": 0,
-    "coverage": "(Drawn 20261021)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-23T10:15:01+00:00",
-  "interpreter": "v0.3",
-  "hosts": [],
-  "conjunct": "ReadingSymmetric t",
-  "conjuncts": [
-   "ReadingSymmetric t",
-   "ReadingAdds t",
-   "ReadingSteps t",
-   "MetresWithin t"
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "a boundary"
-    },
-    "n": 13
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "b boundary"
-    },
-    "n": 12
    }
   ]
  },
