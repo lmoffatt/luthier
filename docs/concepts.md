@@ -365,7 +365,7 @@ and the example follows them:
 - the operation of a semigroup or a monoid, lists and strings among them, is written `<>`, and `+`
   is kept for commutative additive structures (D-2026-10-21-a: one name per concept, concatenation
   not being commutative);
-- the theories of certification gained `Routing` and `Pruning` (section 8.4), laws.lth gained
+- the theories of certification gained `Pruning` and `Routing` (sections 8.3 and 8.4), laws.lth gained
   `Vacuous` (section 6.6) and the `Within` form of a numerical law, the core gained the bound
   transformer (section 9.2) and the evidence and error bases (section 10).
 
@@ -722,22 +722,39 @@ and the example will need a broken model for each, a skewed tape for `ReadingSym
 A certificate records what is known of a law: the law it records as checked, the domain the check
 covered (a subtype, the cases listed, or the distribution sampled), the bound observed, and the
 evidence, its grade and for a sample its statistics converted to an evidence cost (L10.1
-[proposed]; spec 6.S6). Today, by the Boolean interim, an entry of the store holds the law's name,
-its outcome, the mode and count it ran with, the generators and their fingerprints, the seed, the
-cases evaluated, the budgets, the reach of each parameter, the regions, the grade, the interpreter's
-revision and the hash of the cone; the bound and the evidence cost are not recorded (spec 6.S6,
-[implemented] part) [building]. One entry of `docs/concepts/tape.cert.json`, its binding and budgets
-left out:
+[proposed]; spec 6.S6). Today, by the Boolean interim, an entry of the store holds the law's name
+and conjunct, its outcome, the mode and count it ran with, the generators and their fingerprints,
+the seed, the cases evaluated, the budgets, the reach of each parameter, the regions, the grade,
+the interpreter's revision and the hash of the cone; where the law states a premise, the cases in
+which it held (6.6); and for a numerical law, the worst ratio of distance to bound, overall and per
+region (bite C1, 95dda71). The evidence cost is not recorded (spec 6.S6, [implemented] part)
+[building]. The entry of `MetresWithin` as a conjunct of `Tape` in `docs/concepts/tape.cert.json`,
+its binding, budgets and reach left out and its numbers shortened:
 
 ```
-{ "law": "Tape", "conjunct": "ReadingAdds t",
-  "cone": "sha256:2727dcc0bbc98f05a72820bcc138fd90a8431b6a4f67be1964fb689febdf5c30",
+{ "law": "Tape", "conjunct": "MetresWithin t",
+  "cone": "sha256:0bdfde3ed8322431830a3a4efe138ac226d10793965239f1ce00e5624b09a52f",
   "seed": 20261021, "cases": 200,
   "evidence": { "Points": { "evaluated": 200, "raised": 0, "coverage": "(Drawn 20261021)",
                             "verdict": "Supported" } },
-  "grade": "Sampled", "outcome": "Passed", "interpreter": "v0.2",
-  "regions": [ { "region": { "source": "FromLaw", "name": "p boundary" }, "n": 200 } ] }
+  "grade": "Sampled", "outcome": "Passed", "interpreter": "v0.3",
+  "measured": { "measured": 200, "worst": 0.4149, "distance": 7.105e-15, "bound": 1.712e-14,
+    "regions": [ { "region": { "source": "FromLaw", "name": "a boundary" }, "worst": 0.4149 },
+                 { "region": { "source": "FromLaw", "name": "b boundary" }, "worst": 0.3878 } ] },
+  "regions": [ { "region": { "source": "FromLaw", "name": "a boundary" }, "n": 13 },
+               { "region": { "source": "FromLaw", "name": "b boundary" }, "n": 12 } ] }
 ```
+
+A certificate is about a law. What one run observes of one result is a different thing, and so is
+the account of how that result was obtained, its derivation (section 12.4). L10.13 keeps the three
+apart (a certificate is evidence about a law; a derivation is the account of one value; the two
+refer to each other and neither absorbs the other) [proposed]: a derivation names the certificates
+its route relied on, by hash; a certificate names no result, since it is keyed by its cone and
+binding and not by the runs it served, so no cycle runs between them; and what a run observes of
+one result, the residual on these inputs or the error a crossing added, belongs to that result's
+derivation and the run's record, and changes no certificate of the model. The certificate of a
+model, the evidence of one computation and the derivation of its value are three records, and no
+object carries the three.
 
 ### 8.2 Why a certificate is keyed by a cone
 
@@ -745,8 +762,12 @@ The *dependency cone* of a definition is the definition and everything it refers
 A certificate is identified by a hash over that cone in canonical form (bound variables renamed,
 module prefixes removed, the type annotations of binders erased), together with the host code
 behind each extern it calls and the interpreter, and with the binding that drew its cases (L10.4;
-spec 6.S8, 7.S9, 3.S34; D-2026-10-15-e) [settled]. In formula, for a law $\ell$ at a name $n$ under a
-binding $g$ (the generator that drew each parameter),
+spec 6.S8, 7.S9, 3.S34; D-2026-10-15-e) [settled]. The binding includes the budgets that change what
+is drawn: the masses of special values, the bound above which a covering array chooses the cases,
+the classifier's bounds, and the like; a budget that only cuts a run short, the fuel or the tries
+of a filter, stays out (bite 13c, aea4c26; spec 7.S8 [proposed]). Two runs of one seed under
+another mass of special values are two samples, never a replay. In formula, for a law $\ell$ at a
+name $n$ under a binding $g$ (the generator that drew each parameter, with those budgets),
 
 $$\mathrm{id}(\ell, n, g) = \bigl(\ell,\; H(\mathrm{canon}(\mathrm{cone}(n)) \,\|\, \mathrm{hosts} \,\|\, \mathrm{interpreter}),\; g\bigr),$$
 
@@ -776,7 +797,10 @@ supersedes it, both kept and the latest in front, so progress is the chain of ce
 P3 (keep the original evidence and its corrections; put the best reading in front)) [settled]. An
 exact replay that agrees writes nothing; one that disagrees is kept beside the old and refuses the
 law until the disagreement is resolved, since something outside the identity changed the result
-(D-2026-10-15-f; spec 6.S8) [settled].
+(D-2026-10-15-f; spec 6.S8) [settled]. A store is bounded, a few entries kept per identity, and the
+bound never drops a current failure or a current refuted control: four passes after a failure
+would otherwise erase it and give the law its grade back (bite 13c item 1, 820f0e3; the law
+`Pruning` of certification.lth) [settled as implemented].
 
 No operation on certificates raises a grade, lowers an evidence cost or widens a domain without new
 evidence (L10.9) [settled], and the language enforces it: only a certifier builds a certificate,
@@ -787,19 +811,61 @@ say (`U`), to act (`W`) and to certify, and a certifier is the one action whose 
 the declarative face as a trusted value (D-2026-10-13-d); what it changes is the belief that a value
 belongs to a type (D-2026-10-13-e) [settled].
 
-### 8.4 Transport along identity
+### 8.4 What a pass, a failure and a control serve
+
+An entry is evidence about what it ran on, and it serves only that. Three decisions say what each
+kind of entry is about.
+
+- A pass of a law on a model is evidence about that model only: a run on model N is never served by
+  the entries about another model M of the same theory. What M's pass says about the theory still
+  holds: M passing T's laws shows that T has a model (D-2026-10-22-a; Luciano: "sirve para la teoria
+  pero no para el modelo no?") [settled].
+- A failure, like a pass, is evidence about its model: a law's failure on N refuses runs on N and
+  not runs on M. One exception: a failure on N of a law stated for every model of a theory, where N
+  passes that theory's defining laws, shows that the law does not follow from the theory, and
+  refuses every model's run on that law, the refusal saying why (D-2026-10-22-d, the coordinator's
+  extension of -a; spec 6.S15) [settled as implemented, 59da028].
+- A control is about the law. That the law refutes a wrong model shows the law discriminates, a
+  property of the law that transfers to every model of T; so a run on N needs N's passes and not
+  N's own controls (D-2026-10-22-a) [settled]. A control's entry goes to the store of the file that
+  states the law, whatever library models its line binds beside the broken one (spec 7.S19).
+
+L10.13 reads the same cut one level down (section 8.1): a run's observation is about its result.
+In the example, the passes of `Tape` are about `tape` and serve runs on `tape` only; the refutation
+of `hooked` is about `Tape`'s laws, and would serve a second tape model as well.
+
+Serving has one rule whatever the route by which a demand reaches its entries (bite 13c, 97a9527;
+certification.lth's `Routing`, 4f24573). A demand resolves to its obligations: the law, each of its
+conjuncts, or the conjuncts of its theory that it stands for. It is served by one entry per
+obligation, its *witness*, and that set is what the run's record lists and what the result's key
+hashes (section 12.4), so that what admitted the run and what identifies its result are the same
+entries. A failure or a disagreement among the entries of any subject the demand resolves to,
+read through the same route, refuses it, the *veto* (spec 7.S22, 6.S15) [proposed in the spec;
+implemented]. Before bite 13c a run on three conjuncts recorded the entry of one of them, and a
+demand routed through its theory skipped the vetoes; the audit of 2026-10-22 found both
+(record/plan/audit-algebras-2026-10-22/report.md, 1.5).
+
+### 8.5 Transport along identity
 
 If B is certified on inputs X with bound b and evidence cost e, and the identity of A and B is
 certified on inputs Y with distance d and evidence cost e′, then A is certified on $X \cap Y$ with
 bound $b + d$, evidence cost $e + e'$, at the weaker of the two grades, and on nothing else; a path
 of identities composes link by link (L10.7 [proposed]; spec 6.S11, 6.S12 [building: suspended by
 D-2026-10-14-c]). Two links sampled over the same distribution compose by the union bound, their
-failure fractions summed (L10.8 [proposed]; D-2026-10-12-q). Where the identity is Boolean, `==`
+failure fractions summed (L10.8 [proposed]; D-2026-10-12-q), which D-2026-10-25-a makes the default
+of a composition a demand may replace (section 10) [settled]. Where the identity is Boolean, `==`
 structural, the certificate transports exactly (L9.9) [settled]. This is what will let the planner
 substitute one specimen for another (section 13) and what lets a renaming of a record's fields
 carry certificates at no cost (L3.4 (two types that differ only in the names of their fields are
 equivalent by a certified renaming, along which certificates transport) [proposed];
 D-2026-10-17-a).
+
+The identities along which certificates transport are also how derivations relate (section 12.4).
+In Luciano's reading of a derivation as a point of an exponential, the specimens of a function are
+the points of $B^A$, and the planner's certified identities between specimens are the 2-cells
+between them, the arrows between arrows (D-2026-10-22-c, the coordinator's elaboration, accepted).
+Transport is what a certificate does along a 2-cell; substitution is what the planner does along
+one [mine: the reading].
 
 ## 9. Numbers and within-bound laws
 
