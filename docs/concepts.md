@@ -2,13 +2,17 @@
 
 <!-- PDF: pandoc docs/concepts.md -o docs/concepts.pdf --pdf-engine=xelatex --toc --toc-depth=2 -H docs/concepts/pdf-header.tex -V documentclass=article -V papersize=a4 -V geometry:margin=2.4cm -V fontsize=10pt -V mainfont="DejaVu Serif" -V sansfont="DejaVu Sans" -V monofont="DejaVu Sans Mono" -V monofontoptions="Scale=0.85" -V mathfont="DejaVu Math TeX Gyre" -V linkcolor=blue -V urlcolor=blue --shift-heading-level-by=-1 -->
 
-Draft 0, 2026-10-21, written by Claude Opus 5.5 on the brief
-`record/plan/core-2026-10-17/prompt-concepts-doc.md`, for Luciano to annotate. Inputs: the
-repository at 01db6eb (`docs/principles.md` as projected from `record/principles-language.md`,
-`docs/spec/`, `docs/guide/00-fundamental-elements.md`, `record/decisions.md`,
-`record/plan/core-2026-10-17/execution.md` sections 0 to 4, and the library), and the example of
-`docs/concepts/` at e396fa1, which `luthier check` accepts and `luthier certify` certified on
-2026-10-21 (seed 20261021). The PDF is built by the command in the comment at the top of this file.
+Draft 1, 2026-10-26, by Claude Opus 5.5 on the brief
+`record/plan/after-core-2026-10-23/prompt-concepts-update.md` (31fde67), for Luciano to annotate.
+Draft 0 (632aa27, 2026-10-21, on `record/plan/core-2026-10-17/prompt-concepts-doc.md`) was written
+while the core was being rebuilt; draft 1 brings it to the closed core (tag v0.3), the routing of
+certification (bite 13c), the derivation of a value (D-2026-10-22-b, -c), the algebra audit with
+Luciano's answers (D-2026-10-25-a) and what waves A to C of its execution built. Inputs: the
+repository at 31fde67 (`docs/principles.md`, `docs/spec/`, `record/decisions.md` to D-2026-10-25-a,
+`record/plan/core-2026-10-17/`, `record/plan/audit-algebras-2026-10-22/`,
+`record/plan/principles/derivation-2026-10-22-decisions.md`, and the library), and the example of
+`docs/concepts/` at 6c6b3d5, which `luthier check` accepts and `luthier certify` certified on
+2026-10-26 (seed 20261021). The PDF is built by the command in the comment at the top of this file.
 
 This is written for a scientist who likes mathematics and writes some code, new to Luthier, who
 wants to know what its pieces are and why each one follows from the ones before it. It is neither
@@ -24,7 +28,8 @@ number (spec 12.S22), and a theory or model by its file. Four marks say how firm
 - [settled] marks a clause Luciano has marked, or a rule the interpreter implements;
 - [proposed] marks a clause awaiting his mark (the principles mark these themselves);
 - [building] marks what is decided and not yet built, or built in part, or suspended by a later
-  decision; the core of the library is being rebuilt now (section 3.5 says what may still move);
+  decision; the core closed at v0.3, and the execution of the algebra audit is building on it now
+  (section 3.5 says what may still move);
 - [mine] marks a reading or a proposal of this document, in no source.
 
 An unmarked paragraph explains and adds nothing that its citations don't say.
@@ -66,8 +71,8 @@ and speakers on a floor (`examples/sonolocalizacion/A/graph`). Its four files ar
 | `tape.test.lut` | test program | the demand that certifies the model, with three controls |
 | `tape.run.lut` | run | a demand on the world: will a cable reach? |
 
-The library's own claims of the same forms are core.lut's `IntIsAMetric` and numbers.lth's
-within-bound laws; they are spread over a dozen files and a long history, so the example restates
+The library's own claims of the same forms are core.lut's `IntIsAMetric` and the numerical laws
+of numbers.lth and arrays.lth, written in laws.lth's `Within` form; they are spread over a dozen files and a long history, so the example restates
 their forms at the size of one page [mine: the choice of an example built for this document over
 one taken whole from the library].
 
@@ -80,19 +85,23 @@ one before it leaves a question that only it answers.
 3. A structure said once is used by one name per concept, resolved by the type (section 4).
 4. Theories, models and demands live in three kinds of file, so that the checker reads only
    statements and only a demand executes (section 5).
-5. A law over an infinite domain can't be run whole; a certifier produces evidence of a grade
-   (section 6).
+5. A law over an infinite domain can't be run whole; a certifier produces evidence of a grade, and
+   a sample in which the law's premise never held is no evidence (section 6).
 6. Evidence that could not have failed is no evidence: every law carries a control (section 7).
 7. The evidence is recorded in a certificate keyed by the hash of the cone it depends on, so that
-   it is valid exactly as long as nothing it read has changed (section 8).
-8. Numbers are realized by doubles, whose laws hold within bounds a theory states (section 9), and
-   the quantities that measure "how far" form one algebra (section 10).
+   it is valid exactly as long as nothing it read has changed; each entry serves only what it is
+   about (section 8).
+8. Numbers are realized by doubles, whose laws hold within bounds a theory states, composed as
+   bound transformers (section 9), and the quantities that measure "how far" form one algebra
+   with a base for each (section 10).
 9. A program acts on the world only through actions, threaded by a token used once (section 11).
-10. A demand from outside decides what runs, and refuses to run what isn't certified; one day a
-    planner will choose among certified equivalents (sections 12 and 13).
+10. A demand from outside decides what runs, and refuses to run what isn't certified; the result
+    it gets has a derivation, the account of how it was obtained; one day a planner will choose
+    among certified equivalents (sections 12 and 13).
 
 Section 14 then shows how the three parts of the result, the claim, its evidence and its
-execution, stay apart, and section 15 lists what is still open.
+execution, stay apart, and where the derivation of a value sits among them; section 15 lists what
+is still open.
 
 ## 2. A type is a theory, and its values are its models
 
@@ -136,6 +145,7 @@ sense (D-2026-10-12-e: an isolated function has sense only in a context) [settle
 
 ```
 import "numbers.lth" Doubles absDistance
+import "laws.lth" Law Within
 
 -- A mark on a fifty-metre tape, in millimetres from its zero. The bounds are the instrument's, part
 -- of the type (7.S4), and keep every reading an integer below 2^53, so exact as a double (11.S5).
@@ -151,10 +161,9 @@ Step : U := { k : Mark | k < 50000 }
 ReadingSteps (t : Tape) (a : Step) : Bool := t.reading a (a + 1) == 1.0
 
 metres (k : Mark) : Float64 := toFloat64 k / 1000.0
-MetresWithin (t : Tape) (d : Doubles) (a b : Mark) : Bool := {
-  computed := absDistance (metres a) (metres b)
-  exact := t.reading a b / 1000.0
-  absDistance computed exact <= d.epsilon * (metres a + metres b + exact) }
+MetresWithin (t : Tape) (d : Doubles Float64) (a b : Mark) : Law :=
+  Within Float64 absDistance (d.epsilon * (metres a + metres b + t.reading a b / 1000.0))
+    (absDistance (metres a) (metres b)) (t.reading a b / 1000.0)
 
 Tape (t : Tape) := ReadingSymmetric t & ReadingAdds t & ReadingSteps t & MetresWithin t
 ```
@@ -175,7 +184,8 @@ Read in order:
   applied laws means each conjunct quantified over the variables it leaves missing (spec 7.S22,
   D-2026-10-18-f) [settled].
 
-`MetresWithin` is a law of another kind, about the doubles; section 9 reads it. The three exact
+`MetresWithin` is a law of another kind, about the doubles: its type is `Law`, a numerical law
+whose evidence is a measured distance against a bound, and section 9 reads it. The three exact
 laws say what a tape reading is without saying how to compute it.
 
 ### 2.3 Why the laws must characterize
@@ -333,7 +343,10 @@ said once, generic over the operation and its equality, each type claiming it; t
 restated per type or per file is a defect of the library, and it is measured (L7.6 [proposed];
 D-2026-10-18-a). The measures are the core's end, in `execution.md` section 0: no name defined at
 the top level of two files, no list helper reinvented per type, no Boolean law left unclaimed, the
-`loose` notices only where real, the suite green [building].
+`loose` notices only where real, the suite green. At the close (execution.md, Status of 2026-10-22
+night) the homonyms were 0 (two accepted with their reasons), each of the 45 list helpers left kept
+a comment saying why, the 7 unclaimed names were none of them a law, and the `loose` count was
+known to over-report [settled: the core closed and was tagged v0.3].
 
 ### 3.5 The core as a prelude, and what may still move
 
@@ -342,22 +355,25 @@ names are visible in every file without an import (D-2026-10-18-b; spec 12.S4, 1
 A file that defines a name the core defines is refused, naming the core file. Arrays, tables,
 probability and the rest are imported by name until analysed; some may become core.
 
-The rebuild of the core is in progress [building]. On 2026-10-21 bites 1 to 8 of
-`record/plan/core-2026-10-17/execution.md` had landed, bites 9 and 10 (the machinery and Luthier's
-self-description) were committing, bite 11 (arrays and tables) was running beside this document,
-and bites 12 (probability, belief, optimization, plot, the examples) and 13 (closing) were to
-come. What may still move:
+The rebuild of the core closed on 2026-10-22 with its thirteen bites, and Luciano tagged it v0.3
+(`record/plan/core-2026-10-17/execution.md`, Status) [settled]. Since draft 0 these names moved,
+and the example follows them:
 
-- the names of claims and of their models (`IntIsAMetric`, `intIsAMetricModel`) and the gathering
-  of claims (`CoreData`, `NumberModels`, and so this example's `TapeModels`);
-- `Doubles`, which bite 12 makes `Doubles (F : U)` claimed at `Float64`, so that `plus` and `times`
-  resolve at the doubles (execution.md, status of 2026-10-21);
-- the container structures of `structures/containers.lth` and the list library, which bites 7 to
-  11 are still migrating to;
-- the claim form with a defaulted model, which no decision fixes and which the core uses today.
+- `Doubles` is `Doubles (F : U)`, a structure whose laws fix its carrier, claimed at `Float64` by
+  `DoublesHaveTheOperations`, so that `plus` and `times` resolve at the doubles (spec 4.R6, the
+  coordinator's (a) on bite 12b's question); the example's `Doubles` is now `Doubles Float64`;
+- the operation of a semigroup or a monoid, lists and strings among them, is written `<>`, and `+`
+  is kept for commutative additive structures (D-2026-10-21-a: one name per concept, concatenation
+  not being commutative);
+- the theories of certification gained `Routing` and `Pruning` (section 8.4), laws.lth gained
+  `Vacuous` (section 6.6) and the `Within` form of a numerical law, the core gained the bound
+  transformer (section 9.2) and the evidence and error bases (section 10).
 
-The concepts in this document don't depend on those names; the example's lines may need renaming
-when the bites land.
+What may still move is what the execution of the algebra audit builds now
+(`record/plan/audit-algebras-2026-10-22/execution.md`, waves B to E): the grade derived from domain
+and cost, ε̂ computed when an entry serves, a control for every conjunct, the budget law, and with
+the planner the realization graph [building]. The claim form with a defaulted model, which the core
+and this example use, is still fixed by no decision.
 
 ## 4. Names resolve by type
 
@@ -407,12 +423,15 @@ silent fallback would leave a stuck term for a run to find.
 from `tape.lut`; so `d` resolves to the tape's reading. Typed with an argument of type `String`,
 `check` refuses it with rule 4.R13, listing the models of `Metric` claimed.
 
-One finding while writing the example [mine]: without the import of `markIsAMetricModel`, `check`
-still accepts `d microphone speaker`, and the elaborator resolves `d` to core.lut's `IntIsAMetric`,
-which is claimed on `MetricInteger`, another subtype of `Int`. The resolution went through `Mark`'s
-base to a claim on a sibling subtype. Here the two readings agree, since `Mark` lies inside
-`MetricInteger`; in general a claim on one subtype of a base says nothing about another, so this
-may be a hole in "through a subtype to its base".
+Draft 0 reported a finding here: without the import of `markIsAMetricModel`, `check` accepted `d
+microphone speaker`, resolving `d` through `Mark`'s base `Int` to core.lut's `IntIsAMetric`, a claim
+on `MetricInteger`, a sibling subtype of `Int`. Bite 12a closed it: a claim at a subtype never
+serves a sibling subtype (18cba7e), nor does an operator binding (6cb3999), so a claim on one
+subtype of a base says nothing about another (spec 4.R13) [settled]. Re-checked on 2026-10-26:
+without the import, `check` refuses the line with "no model of Metric ... at Mark", listing the
+three models claimed elsewhere. In the same direction, an argument whose type is still an
+inference unknown no longer chooses a claim; the type is asked for (wave A's bite A9, 6bc0772)
+[settled as implemented].
 
 ## 5. Three kinds of file
 
