@@ -2025,3 +2025,76 @@ def test_a_run_records_its_cone_s_grades_beside_the_weakest(tmp_path, capsys):
     certification = json.loads((tmp_path / "ops.run.json").read_text(encoding="utf-8"))[-1]["certification"]
     assert certification["grades"] and {g["grade"] for g in certification["grades"]} == {"cases"}
     assert certification["grade"] == "cases"
+
+
+# ---------------------------------------------------------------------- bite D1: a control per conjunct
+
+def _conjunct_control(conjunct, outcome, seed=0, law="L"):
+    return dict(control(outcome, law=law, seed=seed), conjunct=conjunct, conjuncts=["A", "N"])
+
+
+def test_a_conjunct_is_controlled_by_its_own_refutation_its_law_s_or_none():
+    """L9.14 (D-2026-10-25-a, question 4): a broken monoid refuted at `A` leaves `N` uncontrolled; a
+    conjunct that held on the broken model fails no control; a control line of the conjunct's own law
+    counts; an axiom has no control to run; the rate of detection is refuted seeds over seeds run."""
+    a = _conjunct_control("A", {"ControlRefuted": "A: x = 1"})
+    n = _conjunct_control("N", {"ControlConfirmed": "sampled"})
+    line = control({"ControlRefuted": "A: x = 1"})
+    controls = [a, n, line]
+    assert certify.control_status(controls, "L", "sha256:1").startswith("controlled")
+    assert certify.uncontrolled_conjuncts(controls, "L", "sha256:1", ["A", "N"]) == [("N", "held on every broken model")]
+    # N's own law has a refuted control at its cone
+    own = control({"ControlRefuted": "y = 2"}, law="Neutral", cone="sha256:n")
+    assert certify.uncontrolled_conjuncts(controls + [own], "L", "sha256:1", ["A", "N"],
+                                          {"N": ("Neutral", "sha256:n")}) == []
+    assert certify.uncontrolled_conjuncts(controls + [own], "L", "sha256:1", ["A", "N"],
+                                          {"N": ("Neutral", "sha256:other")}) != []
+    # an entry written before D1 names the conjunct it refuted
+    assert certify.uncontrolled_conjuncts([line], "L", "sha256:1", ["A", "N"]) == [("N", "no control ran it")]
+    # an axiom conjunct
+    axiom = dict(entry(), conjunct="N", conjuncts=["A", "N"], grade="AssumedGrade", evidence={"Assumed": "why"})
+    assert certify.conjunct_control(controls, "L", "sha256:1", "N", own=[axiom])[0] == "axiom"
+    # the rate over seeds
+    again = _conjunct_control("A", {"ControlConfirmed": "sampled"}, seed=5)
+    of = certify.conjunct_controls(controls + [again], "L", "sha256:1", ["A", "N"])
+    assert of[0] == ("A", "controlled", "refuted at 1 of 2 seeds")
+    text = certify.uncontrolled_text(None, of)
+    assert text.startswith("; 1 of 2 conjuncts controlled (detected at fewer seeds: A refuted at 1 of 2 seeds)")
+    assert "uncontrolled (L9.14): N (held on every broken model)" in text
+
+
+CONJ_BROKEN = CONJ_TEST.replace('generator := "ops"', 'generator := "brokenOps"').replace(
+    'test "Ops" ExhaustiveMode (profile <- onOps)', 'test "Ops" ExhaustiveMode (profile <- onOps) (control <- true)')
+
+
+def test_a_control_runs_every_conjunct_and_writes_an_entry_for_each(tmp_path):
+    """Bite D1: a control line does not stop at the first conjunct it refutes."""
+    for name, text in [("ops.lth", CONJ_THEORY), ("ops.lut", CONJ_MODELS)]:
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    broken = f"brokenOps : Ops := {{ plus := fn x y {{ x - y }} }}\n"
+    (tmp_path / "ops.test.lut").write_text(CONJ_BROKEN.replace('import "ops.lth" Ops', 'import "ops.lth" Ops\n' + broken),
+                                          encoding="utf-8")
+    outcome, = tester.run_tests(tmp_path / "ops.test.lut", store=True)
+    assert outcome.verdict == "Refuted"
+    # every conjunct ran, past the first refuted one (`Commutative`), each its control entry
+    assert [p.conjunct for p in outcome.parts] == outcome.parts[0].entry["conjuncts"] and len(outcome.parts) > 2
+    entries = json.loads((tmp_path / "ops.cert.json").read_text(encoding="utf-8"))
+    assert {e.get("conjunct") for e in entries if e.get("kind") == "Control"} == {None} | {p.conjunct for p in outcome.parts}
+    assert "  control of conjunct " in tester.line(outcome)
+
+
+def test_the_tape_example_lists_its_controls_per_conjunct():
+    """Bite D1's acceptance: of the four conjuncts of `Tape` and the five of `MarkIsAMetric`, those with a
+    refuted model in the tape's store; `hooked` now runs every conjunct, so `ReadingSteps` is refuted
+    too, and `MetresWithin t` is controlled by `noRoom`, its own law's control."""
+    lines, claims = tester.line_claims(TAPE)
+    entries = certify.read_stores(claims)
+    controls = [e for e in entries if certify.is_control(e)]
+    parts = tester.line_conjuncts(TAPE)
+    found = {}
+    for law, cone, control in lines:
+        if not control and parts.get(law):
+            found[law] = certify.uncontrolled_conjuncts(controls, law, cone, [c for c, _, _ in parts[law]],
+                                                        {c: (h, k) for c, h, k in parts[law]}, entries)
+    assert [c for c, _ in found["Tape"]] == ["ReadingSymmetric t"]
+    assert len(found["MarkIsAMetric"]) == 4 and not any(c.startswith("MetricZeroOnEqual") for c, _ in found["MarkIsAMetric"])

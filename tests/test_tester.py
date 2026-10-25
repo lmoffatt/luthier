@@ -246,6 +246,8 @@ def test_a_control_line_is_read_and_its_refutation_is_the_control_passing(capsys
     assert lines[0] == ("control of CellsOfTheirKind: exhaustive, 1 cases, refuted at t = holeT: "
                         "the control passed (ran)")
     # ten since core bite 11 (TableIsIndexed, TableIsAnObject)
+    # [bite D1] a control of a conjunction prints a line per conjunct below its own
+    lines = [line for line in lines if not line.startswith("  ")]
     assert len(lines) == 10 and all(line.endswith(": the control passed (ran)") for line in lines)
 
 

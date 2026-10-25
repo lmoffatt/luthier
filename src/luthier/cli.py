@@ -271,7 +271,8 @@ def _standings(path, line_of, files=()):
     """`check -v`: per law a test line of the file names, its standing from the store against the
     current hash of its cone (12.S11, 12.S14): the grade, refuted, not run, stale or uncertified;
     and its control status from the control entries of the stores of the claims of every file
-    checked (7.S19, L9.14): controlled, control failed, or uncontrolled. Per control line, its
+    checked (7.S19, L9.14): controlled, control failed, or uncontrolled, and the conjuncts with no
+    refuted model (bite D1, the unit of control the conjunct). Per control line, its
     control's standing. The stores read are those of the files that make the lines' claims
     (tester.py's `claim_file`, L10.12), never one beside a test program. Only for a file with test
     lines; True when the program cannot be loaded."""
@@ -279,14 +280,21 @@ def _standings(path, line_of, files=()):
     try:
         if not collect_tests(path):
             return False
-        from .certify import control_standing, control_status, controls_in, read_stores, standing
+        from .certify import (conjunct_controls, control_standing, control_status, controls_in, read_stores,
+                              standing, uncontrolled_text)
+        from .tester import line_conjuncts
         lines, claims = line_claims(path)
         controls = controls_in(claims + _claims_of(files, path))
         entries = read_stores(claims)
+        # [bite D1, L9.14] each law's conjuncts with no refuted model
+        parts = line_conjuncts(path)
         for law, current, control in lines:
             if not control:
+                conj = parts.get(law) or []
+                of = conjunct_controls(controls, law, current, [c for c, _, _ in conj],
+                                       {c: (h, k) for c, h, k in conj}, entries)
                 print(f"{path}:{line_of(law)}: certificate {law}: {standing(entries, law, current)}; "
-                      f"{control_status(controls, law, current)}")
+                      f"{control_status(controls, law, current)}{uncontrolled_text(None, of)}")
         for law, current, control in lines:
             if control:
                 print(f"{path}:{line_of(law)}: certificate control of {law}: "

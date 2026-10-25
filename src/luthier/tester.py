@@ -266,6 +266,7 @@ class Outcome:
     law_store: object = None     # the file that states the line's law (`law_file`), whose store holds its controls
     held: int | None = None      # the cases in which every premise held, when the law states one (`premises_of`)
     measured: dict | None = None  # a numerical law's worst ratio, overall and per region (`measured_record`, bite C1)
+    heads: dict | None = None    # a conjunction's: per conjunct, the law it applies and its cone (`conjunct_heads`, bite D1)
 
 
 # ---------------------------------------------------------------------- loading
@@ -2245,6 +2246,10 @@ def _tail(outcome):
         return f"assumed, an axiom: {outcome.evidence.statement}"
     if outcome.spec.control and outcome.verdict == "Refuted":
         return f"refuted at {_case_text(outcome)}{ratio_text(outcome.measured)}: the control passed"
+    if outcome.spec.control and outcome.grade is not None and _CONJUNCT in outcome.spec.law:
+        # [bite D1] one conjunct holding on the broken model is no failure of the control: the line
+        # fails only when no conjunct refutes it
+        return f"held ({_GRADE_WORDS.get(outcome.grade, outcome.grade)}): this conjunct does not see the break"
     if outcome.spec.control and outcome.grade is not None:
         return f"{_CONTROL_FAILED} ({_GRADE_WORDS.get(outcome.grade, outcome.grade)})"
     if outcome.verdict == "Refuted":
@@ -2291,6 +2296,8 @@ def _entry_tail(entry):
         return f"supported, {grade}: held at {certify.tested_text(tested)}{more}"
     if "ControlRefuted" in o:
         return f"refuted at {o['ControlRefuted']}: the control passed"
+    if "ControlConfirmed" in o and entry.get("conjunct") is not None:
+        return f"held ({o['ControlConfirmed']}): this conjunct does not see the break"
     if "ControlConfirmed" in o:
         return f"{_CONTROL_FAILED} ({o['ControlConfirmed']})"
     if "Failed" in o:
@@ -2303,15 +2310,19 @@ def _entry_tail(entry):
 
 def line(outcome):
     """One line per test: the law, the mode, the cases evaluated, the grade or the refuting case,
-    and whether it ran or its outcome was known (7.S13)."""
+    and whether it ran or its outcome was known (7.S13). A control of a conjunction, then a line per
+    conjunct (bite D1)."""
     spec = outcome.spec
     if outcome.parts is not None and not spec.control:
         return _conjunction_line(outcome)
+    if outcome.parts is not None:
+        return "\n".join([line(replace(outcome, parts=None))] + ["  " + line(o) for o in outcome.parts])
     mode = f"sampled (seed {spec.seed}, size {spec.size}, placement ignored)" if spec.sampled else "exhaustive"
     counted = f"{outcome.evaluated} cases"
     if isinstance(outcome.evidence, Tested) or "Tested" in (outcome.evidence if isinstance(outcome.evidence, dict) else {}):
         mode, counted = f"sequential (seed {spec.seed % SEEDS})", f"{outcome.evaluated} samples"
-    law = spec.law if outcome.conjunct is None or spec.control else f"conjunct {outcome.conjunct}"
+    law = spec.law if outcome.conjunct is None or (spec.control and _CONJUNCT not in spec.law) \
+        else f"conjunct {outcome.conjunct}"
     head = f"{'control of ' if spec.control else ''}{law}: {mode}, {counted}"
     if outcome.known is not None:
         tail = f"{head}, {_entry_tail(outcome.entry)} (known, {outcome.known}"
@@ -2443,19 +2454,26 @@ def _run_conjunction(runner, loaded, spec, parts, cones, given, home, stores, de
     bindings by name, its missing variables drawn by the generators of their types. A law's line
     gives each conjunct its entry, in the store of the conjunction's claim: the conjunction's law and
     cone, the conjunct named (`conjunct`, part of the identity) and the conjuncts listed
-    (`conjuncts`), and its outcome is the conjunction's (`_conjunction_outcome`). A control's line
-    passes when it refutes one conjunct: the conjuncts run in order until one is refuted, and the
-    line writes one control entry, the conjunction's, whose binding is every conjunct's."""
+    (`conjuncts`), and its outcome is the conjunction's (`_conjunction_outcome`). [wave D, bite D1;
+    L9.14, D-2026-10-25-a question 4: the unit of control is the conjunct] A control's line runs every
+    conjunct on the broken model, each its own control entry (`conjunct` in its identity), and passes
+    when it refutes one; it also writes the conjunction's control entry, whose binding is every
+    conjunct's and whose outcome is the first refutation, as before D1, so that a line that refutes
+    no conjunct still fails its control loudly. Each outcome carries the law each conjunct applies
+    with that law's cone (`heads`), so that a control line of the conjunct's own law counts for it."""
     of = _as_called(loaded, spec.law)
     specs = [replace(spec, law=c.called) for c in parts]
     entries = [new_entry(runner, loaded, s, cones, given, (spec.law, c, parts)) for s, c in zip(specs, parts)]
+    heads = conjunct_heads(runner, parts, cones)
+    done = []
+    for s, c, e in zip(specs, parts, entries):
+        o = _run_line(runner, loaded, s, e, given, home, stores, deep, store)
+        o.conjunct = c.shown
+        done.append(o)
     if not spec.control:
-        done = []
-        for s, c, e in zip(specs, parts, entries):
-            o = _run_line(runner, loaded, s, e, given, home, stores, deep, store)
-            o.conjunct = c.shown
-            done.append(o)
-        return _conjunction_outcome(spec, done, cones.hash(of), home)
+        outcome = _conjunction_outcome(spec, done, cones.hash(of), home)
+        outcome.heads = heads
+        return outcome
     entry = dict(entries[0], law=spec.law)
     for k in ("conjunct", "conjuncts"):
         entry.pop(k, None)
@@ -2463,17 +2481,40 @@ def _run_conjunction(runner, loaded, spec, parts, cones, given, home, stores, de
     entry["reach"] = list({json.dumps(r, sort_keys=True): r for e in entries for r in e["reach"]}.values())
     entry["hosts"] = sorted({tuple(h) for e in entries for h in e["hosts"]})
     entry["hosts"] = [list(h) for h in entry["hosts"]]
+    outcome = _run_line(runner, loaded, spec, entry, given, home, stores, deep, store,
+                        lambda start: _conjunction_outcome(spec, done, entry["cone"], home))
+    outcome.parts, outcome.heads = done, heads
+    return outcome
 
-    def run(start):
-        done = []
-        for s, c in zip(specs, parts):
-            o = judged(runner, loaded, s, run_measured(runner, s, given, loaded), given)
-            o.conjunct = c.shown
-            done.append(o)
-            if o.verdict == "Refuted":
-                break
-        return _conjunction_outcome(spec, done, entry["cone"], home)
-    return _run_line(runner, loaded, spec, entry, given, home, stores, deep, store, run)
+
+def conjunct_heads(runner, parts, cones):
+    """[bite D1] Per conjunct, the law it applies, as a test line names it, and the hash of that law's
+    cone: a control line of `MetresWithin` controls the conjunct `MetresWithin t` of `Tape`."""
+    defined = {a.name for a in runner.program if isinstance(a, t.Define)}
+    heads = {}
+    for c in parts:
+        d = next((a for a in runner.program if isinstance(a, t.Define) and a.name == c.called), None)
+        body = d.body if d is not None else None
+        while isinstance(body, t.Lam):
+            body = body.body
+        head, _ = _spine(body) if body is not None else (None, ())
+        if isinstance(head, t.Var) and head.name in defined:
+            heads[c.shown] = (head.name.partition("@")[0], cones.hash(head.name))
+    return heads
+
+
+def line_conjuncts(path, fuel=1_000_000):
+    """[bite D1] Per law a line of the file names, its conjuncts as the tester names them, each with the
+    law it applies and that law's cone (`conjunct_heads`); a law no conjunction has none."""
+    runner, specs, loaded = prepare(path, fuel)
+    cones = certify.Cones(runner)
+    found = {}
+    for spec in specs:
+        if spec.law in found:
+            continue
+        parts = conjuncts_of(runner, _as_called(loaded, spec.law))
+        found[spec.law] = [(c.shown, *conjunct_heads(runner, [c], cones).get(c.shown, (None, None))) for c in parts]
+    return found
 
 
 def _conjunction_outcome(spec, parts, cone, home):

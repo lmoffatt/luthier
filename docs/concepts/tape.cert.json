@@ -1,5 +1,909 @@
 [
  {
+  "law": "MarkIsAMetric",
+  "cone": "sha256:91b6bbf369fdc0732e7bc52fb2e0b0ea4ccf936f47f58401c92dc9d138e60dbc",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "hookedMetric (Listed)",
+    "fingerprint": "sha256:3a1cb311994fe62385e71f1cad525a81af22e4da596a9e2952f9d27ff940065a"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrNat x (generator, size 50000)",
+    "fingerprint": "sha256:607aaed13b2df6e2a3deea65fcd6a29fc8c69531a365a1130ee98318b73ed2f7,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "hookedMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "sampled"
+  },
+  "date": "2026-10-25T22:43:52+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MetricNonNegative Mark (model).d",
+  "conjuncts": [
+   "MetricZeroOnEqual Mark (structural Mark) model",
+   "MetricIndiscernible Mark (structural Mark) model",
+   "Commutative Mark Float64 (structural Float64) (model).d",
+   "Triangular Mark (model).d",
+   "MetricNonNegative Mark (model).d"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 12
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 1
+   }
+  ]
+ },
+ {
+  "law": "MarkIsAMetric",
+  "cone": "sha256:91b6bbf369fdc0732e7bc52fb2e0b0ea4ccf936f47f58401c92dc9d138e60dbc",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "hookedMetric (Listed)",
+    "fingerprint": "sha256:3a1cb311994fe62385e71f1cad525a81af22e4da596a9e2952f9d27ff940065a"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrNat x (generator, size 50000)",
+    "fingerprint": "sha256:607aaed13b2df6e2a3deea65fcd6a29fc8c69531a365a1130ee98318b73ed2f7,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "hookedMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "sampled"
+  },
+  "date": "2026-10-25T22:43:52+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Triangular Mark (model).d",
+  "conjuncts": [
+   "MetricZeroOnEqual Mark (structural Mark) model",
+   "MetricIndiscernible Mark (structural Mark) model",
+   "Commutative Mark Float64 (structural Float64) (model).d",
+   "Triangular Mark (model).d",
+   "MetricNonNegative Mark (model).d"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 13
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 3
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "z boundary"
+    },
+    "n": 12
+   }
+  ]
+ },
+ {
+  "law": "MarkIsAMetric",
+  "cone": "sha256:91b6bbf369fdc0732e7bc52fb2e0b0ea4ccf936f47f58401c92dc9d138e60dbc",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "hookedMetric (Listed)",
+    "fingerprint": "sha256:3a1cb311994fe62385e71f1cad525a81af22e4da596a9e2952f9d27ff940065a"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrNat x (generator, size 50000)",
+    "fingerprint": "sha256:607aaed13b2df6e2a3deea65fcd6a29fc8c69531a365a1130ee98318b73ed2f7,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "hookedMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "sampled"
+  },
+  "date": "2026-10-25T22:43:52+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Commutative Mark Float64 (structural Float64) (model).d",
+  "conjuncts": [
+   "MetricZeroOnEqual Mark (structural Mark) model",
+   "MetricIndiscernible Mark (structural Mark) model",
+   "Commutative Mark Float64 (structural Float64) (model).d",
+   "Triangular Mark (model).d",
+   "MetricNonNegative Mark (model).d"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 12
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 1
+   }
+  ]
+ },
+ {
+  "law": "MarkIsAMetric",
+  "cone": "sha256:91b6bbf369fdc0732e7bc52fb2e0b0ea4ccf936f47f58401c92dc9d138e60dbc",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "hookedMetric (Listed)",
+    "fingerprint": "sha256:3a1cb311994fe62385e71f1cad525a81af22e4da596a9e2952f9d27ff940065a"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "sameOrNat x (generator, size 50000)",
+    "fingerprint": "sha256:607aaed13b2df6e2a3deea65fcd6a29fc8c69531a365a1130ee98318b73ed2f7,sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "hookedMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Vacuous": 200
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "vacuous: no premise held in the 200 cases evaluated (D-2026-10-16-m)"
+  },
+  "date": "2026-10-25T22:43:52+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MetricIndiscernible Mark (structural Mark) model",
+  "conjuncts": [
+   "MetricZeroOnEqual Mark (structural Mark) model",
+   "MetricIndiscernible Mark (structural Mark) model",
+   "Commutative Mark Float64 (structural Float64) (model).d",
+   "Triangular Mark (model).d",
+   "MetricNonNegative Mark (model).d"
+  ],
+  "kind": "Control"
+ },
+ {
+  "law": "MarkIsAMetric",
+  "cone": "sha256:91b6bbf369fdc0732e7bc52fb2e0b0ea4ccf936f47f58401c92dc9d138e60dbc",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "hookedMetric (Listed)",
+    "fingerprint": "sha256:3a1cb311994fe62385e71f1cad525a81af22e4da596a9e2952f9d27ff940065a"
+   },
+   {
+    "parameter": "p",
+    "generator": "equalMarks (Listed)",
+    "fingerprint": "sha256:7790df579a87d079c5983a50c934c000aa0913413f3a91203a9176bbc46b9160"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "hookedMetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := 0, y := 0 }"
+      },
+      {
+       "Printed": "{ x := 1234, y := 1234 }"
+      },
+      {
+       "Printed": "{ x := 50000, y := 50000 }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "model = hookedMetric, p = { x := 0, y := 0 }"
+  },
+  "date": "2026-10-25T22:43:52+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MetricZeroOnEqual Mark (structural Mark) model",
+  "conjuncts": [
+   "MetricZeroOnEqual Mark (structural Mark) model",
+   "MetricIndiscernible Mark (structural Mark) model",
+   "Commutative Mark Float64 (structural Float64) (model).d",
+   "Triangular Mark (model).d",
+   "MetricNonNegative Mark (model).d"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "p boundary"
+    },
+    "n": 200
+   }
+  ]
+ },
+ {
+  "law": "Tape",
+  "cone": "sha256:0bdfde3ed8322431830a3a4efe138ac226d10793965239f1ce00e5624b09a52f",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "hooked (Listed)",
+    "fingerprint": "sha256:8fe107030466889c3ffa12cb40b13a5fdfafc585cf6cc609298aa31aa582f6f5"
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "a",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "b",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "hooked"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "a",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "t = hooked, d = doubles, a = 25222, b = 709"
+  },
+  "date": "2026-10-25T22:43:50+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MetresWithin t",
+  "conjuncts": [
+   "ReadingSymmetric t",
+   "ReadingAdds t",
+   "ReadingSteps t",
+   "MetresWithin t"
+  ],
+  "kind": "Control",
+  "measured": {
+   "measured": 200,
+   "worst": 413212187115.42346,
+   "distance": 0.001000000000000112,
+   "bound": 2.420064149077916e-15,
+   "regions": [
+    {
+     "region": {
+      "source": "FromLaw",
+      "name": "a boundary"
+     },
+     "worst": 219977513181.6539
+    },
+    {
+     "region": {
+      "source": "FromLaw",
+      "name": "b boundary"
+     },
+     "worst": 168819568443.82803
+    }
+   ]
+  },
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "a boundary"
+    },
+    "n": 13
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 12
+   }
+  ]
+ },
+ {
+  "law": "Tape",
+  "cone": "sha256:0bdfde3ed8322431830a3a4efe138ac226d10793965239f1ce00e5624b09a52f",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "hooked (Listed)",
+    "fingerprint": "sha256:8fe107030466889c3ffa12cb40b13a5fdfafc585cf6cc609298aa31aa582f6f5"
+   },
+   {
+    "parameter": "a",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Step",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "hooked"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "a",
+    "reach": {
+     "Interval": [
+      0.0,
+      49999.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "t = hooked, a = 25222"
+  },
+  "date": "2026-10-25T22:43:50+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ReadingSteps t",
+  "conjuncts": [
+   "ReadingSymmetric t",
+   "ReadingAdds t",
+   "ReadingSteps t",
+   "MetresWithin t"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "a boundary"
+    },
+    "n": 12
+   }
+  ]
+ },
+ {
+  "law": "Tape",
+  "cone": "sha256:0bdfde3ed8322431830a3a4efe138ac226d10793965239f1ce00e5624b09a52f",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "hooked (Listed)",
+    "fingerprint": "sha256:8fe107030466889c3ffa12cb40b13a5fdfafc585cf6cc609298aa31aa582f6f5"
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over InOrder",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "hooked"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "t = hooked, p = { a := 36254, b := 41964, c := 44418 }"
+  },
+  "date": "2026-10-25T22:43:50+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ReadingAdds t",
+  "conjuncts": [
+   "ReadingSymmetric t",
+   "ReadingAdds t",
+   "ReadingSteps t",
+   "MetresWithin t"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "p boundary"
+    },
+    "n": 200
+   }
+  ]
+ },
+ {
+  "law": "Tape",
+  "cone": "sha256:0bdfde3ed8322431830a3a4efe138ac226d10793965239f1ce00e5624b09a52f",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "hooked (Listed)",
+    "fingerprint": "sha256:8fe107030466889c3ffa12cb40b13a5fdfafc585cf6cc609298aa31aa582f6f5"
+   },
+   {
+    "parameter": "a",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "b",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 50000) over Mark",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 200,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "hooked"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "a",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Interval": [
+      0.0,
+      50000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 200,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "sampled"
+  },
+  "date": "2026-10-25T22:43:50+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ReadingSymmetric t",
+  "conjuncts": [
+   "ReadingSymmetric t",
+   "ReadingAdds t",
+   "ReadingSteps t",
+   "MetresWithin t"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "a boundary"
+    },
+    "n": 13
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 12
+   }
+  ]
+ },
+ {
   "law": "MetresWithin",
   "cone": "sha256:9e04551516a732a42796d0b6e9939c50a27e20c7e732a1c5493ae8473dbea8d1",
   "binding": [

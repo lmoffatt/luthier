@@ -1523,8 +1523,11 @@ def control_status(controls, law, current):
     """A law's control status from control entries (any store's, or a run's): "control failed" when
     one at the law's current cone hash came out confirmed, else "controlled" when one there was
     refuted, else uncontrolled (with what the controls of other hashes, or not run, were). The
-    law and cone must both match: mutually dependent laws can share one cone hash."""
-    at = [e for e in controls if is_control(e) and e["law"] == law and e["cone"] == current]
+    law and cone must both match: mutually dependent laws can share one cone hash. [bite D1] Read
+    from the line's entries, not its conjuncts' (`conjunct_control`): a conjunct that holds on the
+    broken model fails no control."""
+    at = [e for e in controls if is_control(e) and e["law"] == law and e["cone"] == current
+          and e.get("conjunct") is None]
     held = [e for e in at if _held(e)]
     if held:
         on = "; ".join(", ".join(d["generator"] for d in e["binding"]) for e in held) or "no binding"
@@ -1540,11 +1543,78 @@ def control_status(controls, law, current):
     return UNCONTROLLED
 
 
+# [wave D, bite D1; L9.14, D-2026-10-25-a question 4, spec 7.S19, 7.S22] The unit of control is the
+# conjunct: a broken monoid refuted at `Associative` leaves `Neutral` with no wrong model. A control line
+# on a conjunction runs every conjunct and writes an entry per conjunct (tester.py's `_run_conjunction`);
+# a conjunct is controlled when one of them was refuted at the law's hash, or when its own law (the
+# law it applies, `MetresWithin` for the conjunct `MetresWithin t` of `Tape`) has a refuted control at
+# that law's hash, or, for the entries written before D1, when the line's refutation names it. Its
+# rate of detection over seeds is the refuted seeds over the seeds its controls ran (7.S19). An axiom
+# conjunct, graded assumed with no case, has no control to run. The rest are uncontrolled: listed by
+# `certify` and `check -v`, never refused (admission unchanged, the audit's reading of the policy).
+
+def conjunct_control(controls, law, current, conjunct, head=None, head_cone=None, own=()):
+    """One conjunct's control: ("controlled", how), ("axiom", why) or ("uncontrolled", why)."""
+    at = [e for e in controls if is_control(e) and e["law"] == law and e["cone"] == current
+          and e.get("conjunct") == conjunct]
+    refuted = [e for e in at if _refuted(e)]
+    if refuted:
+        ran = {e["seed"] for e in at if _refuted(e) or _held(e)}
+        return "controlled", f"refuted at {len({e['seed'] for e in refuted})} of {len(ran)} seeds"
+    if head is not None and any(is_control(e) and e["law"] == head and e["cone"] == head_cone and _refuted(e)
+                                for e in controls):
+        return "controlled", f"by a control of {head}"
+    if any(is_control(e) and e["law"] == law and e["cone"] == current and e.get("conjunct") is None and _refuted(e)
+           and str(e["outcome"]["ControlRefuted"]).startswith(conjunct + ":") for e in controls):
+        return "controlled", "refuted by the line before D1"
+    if any(e["law"] == law and e["cone"] == current and e.get("conjunct") == conjunct and not is_control(e)
+           and isinstance(e.get("evidence"), dict) and "Assumed" in e["evidence"] for e in own):
+        return "axiom", "an axiom, assumed: no case to refute"
+    if any(_held(e) for e in at):
+        return "uncontrolled", "held on every broken model"
+    if at:
+        return "uncontrolled", show_outcome(at[0]["outcome"]).replace("not run: ", "its control not run, ", 1)
+    return "uncontrolled", "no control ran it"
+
+
+def conjunct_controls(controls, law, current, conjuncts, heads=None, own=()):
+    """[bite D1] Each conjunct of a law with its control: [(conjunct, kind, how)] (`conjunct_control`)."""
+    heads = heads or {}
+    return [(c, *conjunct_control(controls, law, current, c, *heads.get(c, (None, None)), own)) for c in conjuncts or ()]
+
+
+def uncontrolled_conjuncts(controls, law, current, conjuncts, heads=None, own=()):
+    """[bite D1] The conjuncts of a law with no refuted model, each with why: [(conjunct, why)]."""
+    return [(c, why) for c, kind, why in conjunct_controls(controls, law, current, conjuncts, heads, own)
+            if kind == "uncontrolled"]
+
+
+def uncontrolled_text(found, of=None):
+    """How a law's line lists its conjuncts' control (bite D1): how many have a refuted model of the
+    `of` that can have one (an axiom cannot), and the uncontrolled with why; "" for a law with no
+    conjunct, or every conjunct controlled. A detection rate below one is said."""
+    if not of:
+        return ""
+    checkable = [x for x in of if x[1] != "axiom"]
+    partial = [f"{c} {how}" for c, kind, how in of if kind == "controlled" and how.startswith("refuted at")
+               and how.split()[2] != how.split()[4]]
+    found = [(c, how) for c, kind, how in of if kind == "uncontrolled"]
+    if not found and not partial:
+        return ""
+    text = f"; {len(checkable) - len(found)} of {len(checkable)} conjuncts controlled"
+    if partial:
+        text += f" (detected at fewer seeds: {', '.join(partial)})"
+    if found:
+        text += "; uncontrolled (L9.14): " + ", ".join(f"{c} ({why})" for c, why in found)
+    return text
+
+
 def control_standing(entries, law, current):
     """The standing of a law's control lines in a store: of its control entries at the law's
     current cone hash, a failed one first, else a refuted one, else the latest, as `show_outcome`
     reads it; stale or no entry otherwise."""
-    at = [e for e in entries if is_control(e) and e["law"] == law and e["cone"] == current]
+    at = [e for e in entries if is_control(e) and e["law"] == law and e["cone"] == current
+          and e.get("conjunct") is None]  # the line's own entry; its conjuncts' are `conjunct_control`'s
     if at:
         return show_outcome(next((e for e in at if _held(e)), next((e for e in at if _refuted(e)), at[0]))["outcome"])
     if any(is_control(e) and e["law"] == law for e in entries):
@@ -1941,7 +2011,7 @@ def certify_file(path, seed=None, deep=False, fuel=None, store=True):
                          if e is not None])
     except Exception as exc:  # the file's failure is reported with the file, the others go on
         return {"path": str(path), "error": f"{type(exc).__name__}: {exc}"}
-    laws, conjuncts = {}, {}
+    laws, conjuncts, heads = {}, {}, {}
     for o in outcomes:
         if not o.spec.control:
             laws.setdefault(o.spec.law, o.cone)
@@ -1949,6 +2019,7 @@ def certify_file(path, seed=None, deep=False, fuel=None, store=True):
             # as its entries list them
             if o.parts and o.spec.law not in conjuncts:
                 conjuncts[o.spec.law] = [p.conjunct for p in o.parts]
+                heads[o.spec.law] = {c: list(h) for c, h in (o.heads or {}).items()}
     # each control line with its own entry's outcome (the run's, or the store's when known)
     controls = [(o.spec.law, ", ".join(d["generator"] for d in o.entry["binding"]), show_outcome(o.entry["outcome"]))
                 for o in outcomes if o.spec.control and o.entry is not None]
@@ -1958,10 +2029,15 @@ def certify_file(path, seed=None, deep=False, fuel=None, store=True):
         if store else []
     return {"path": str(path),
             "laws": [(law, cone, standing(entries, law, cone, conjuncts.get(law))) for law, cone in laws.items()],
+            # [bite D1] what `certify` needs to list a law's uncontrolled conjuncts
+            "conjuncts": conjuncts, "heads": heads,
+            "assumed": [e for e in entries if not is_control(e) and isinstance(e.get("evidence"), dict)
+                        and "Assumed" in e["evidence"]],
             "controls": controls,
             "control entries": [e for e in entries + stated if is_control(e)],
-            "ran": sum(1 for o in outcomes if o.known is None),
-            "known": sum(1 for o in outcomes if o.known is not None),
+            # a line ran when it, or a conjunct of its control, ran (bite D1)
+            "ran": sum(1 for o in outcomes if o.known is None or any(p.known is None for p in o.parts or ())),
+            "known": sum(1 for o in outcomes if o.known is not None and all(p.known is not None for p in o.parts or ())),
             "graded": all(certificate_grade(entries, law, cone, conjuncts=conjuncts.get(law)) is not None
                           for law, cone in laws.items())}
 
@@ -2003,7 +2079,9 @@ def certify(paths, jobs=1, seed=None, deep=False, fuel=None, out=print, store=Tr
         for law, cone, s in result["laws"]:
             status = control_status(controls, law, cone)
             ok &= not status.startswith("CONTROL FAILED")
-            out(f"  {law}: {s}; {status}")
+            of = conjunct_controls(controls, law, cone, result["conjuncts"].get(law),
+                                   {c: tuple(h) for c, h in result["heads"].get(law, {}).items()}, result["assumed"])
+            out(f"  {law}: {s}; {status}{uncontrolled_text(None, of)}")
         for law, on, s in result["controls"]:
             ok &= not s.startswith("CONTROL FAILED")
             out(f"  control of {law} on {on}: {s}")

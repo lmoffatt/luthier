@@ -136,7 +136,8 @@ def test_the_conjuncts_entries_are_stored_and_known_and_grade_the_conjunction(ba
     first = tester.run_tests(bare, store=True)
     store = bare.parent / "bare.cert.json"
     entries = json.loads(store.read_text(encoding="utf-8"))
-    assert sum(1 for e in entries if e.get("conjunct")) == 3 + 3 + 2
+    # the law lines' conjuncts (a control's conjuncts have entries of their own kind, bite D1)
+    assert sum(1 for e in entries if e.get("conjunct") and e.get("kind") is None) == 3 + 3 + 2
     again = tester.run_tests(bare, store=True)
     assert all(o.known is not None for o in again[0].parts) and again[0].known is not None
     assert tester.line(again[0]).splitlines()[0].endswith("sampled (known)")
