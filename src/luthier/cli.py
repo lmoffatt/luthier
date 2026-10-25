@@ -49,6 +49,9 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("--strategy", choices=["forward-on-demand", "call-by-need"], default=None,
                        help="the strategy asked [default forward-on-demand, 8.S3]; run.py computes either by call "
                             "by need, its specimen (TheDefaultsAgree, 8.S4), and the record says which ran")
+    p_run.add_argument("--bound", type=float, default=None, metavar="RATIO",
+                       help="the cap on a numerical law's worst ratio of error to its theory's bound that a "
+                            "certificate must meet to serve (demand.lth's bound, laws.lth §5) [default 1]")
     p_run.add_argument("--combine", choices=["weakest", "strongest"], default=None,
                        help="how a law's grades combine over its regions and bindings (5.S8, D-2026-10-16-i) "
                             "[default weakest; proposed, a field of the demand]")
@@ -124,7 +127,7 @@ def main(argv: list[str] | None = None) -> int:
             grade, assumes = _accepts(ns.accept)
             strategy = {"forward-on-demand": "ForwardOnDemand", "call-by-need": "CallByNeed"}.get(ns.strategy)
             output, values, state = run(ns.file, ns.main, ns.fuel, ns.set, grade, ns.checked, ns.fresh, assumes,
-                                        ns.time_limit, strategy, ns.combine)
+                                        ns.time_limit, strategy, ns.combine, ns.bound)
             print(output, end="")
             record(ns.file, state["demand"]["entry"], values, output, state)
             return 0

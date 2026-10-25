@@ -62,7 +62,6 @@ import "term.lth" Term
 -- holes. D-2026-10-13-m, after the slice's failures. In this draft the cutoff is the weakest
 -- grade accepted (`accepts`, D-2026-10-14-c) and the price of an assumption is whether that grade
 -- admits `AssumedGrade` (§2). `C` is certification.lth's hole, the same cost type (core bite 13b).
-bound : Demand -> C
 evidence : Demand -> C
 assumed : Demand -> Maybe C
 
@@ -107,6 +106,17 @@ Strategy : U := data {
 -- and bindings (5.S8, D-2026-10-16-i: `weakest` or `strongest`). None changes the value any result
 -- takes, only which certificates serve, so `plan.lth`'s `demandKey` does not read them (8.S8: the
 -- key holds what the cone reads); the record does, and the run's certificate is read against it.
+-- [wave C, bite C1, 2026-10-25, Claude Opus 5.5; D-2026-10-18-j, the three-levels report 2.5
+-- (2f9c42b)] `bound`, the cap on a numerical law's worst ratio of distance to the theory's bound
+-- (laws.lth §5) that an entry must meet to serve (certify.py's `serves`, `run --bound`), one by
+-- default, the ratio at which the law passes, so that every passed entry serves as before. It was
+-- the hole `bound : Demand -> C` of 6.S15; at the metric level the cost is that ratio, a `Float64`
+-- under `<=` (the numerical order of admission; the categorical order of the error base is B2's,
+-- core/structures/algebraic.lth). [proposed] A cap on the ratio and not an output tolerance in the
+-- law's units: the law's own bound is the theory's (D-2026-10-18-j), and a demand's tolerance in the
+-- units of the output is pulled back through the bound transformer (core/properties/functions.lth's
+-- `pullback`) when the planner reads it, not compared with a certificate here. Like `combine`, it
+-- changes which certificates serve and no result's value, so `demandKey` does not read it.
 -- [proposed] The entry is a name; 8.S1's term as entry waits for an action that asks for one.
 -- [proposed] `delta` is `nothing` in this draft, since no statistic becomes a cost before
 -- D-2026-10-13-m; when one does it is required as `assumed` is, with no default. Every field is a
@@ -115,7 +125,7 @@ Strategy : U := data {
 Demand = { entry : String, decoration : Maybe Decoration, accepts : Grade, assumes : List String,
            delta : Maybe Float64, fuel : Maybe Nat, timeLimit : Maybe Float64, sets : List (String * Value),
            checked : Bool, pinned : Maybe String, strategy : Strategy, fresh : Bool,
-           axioms : Grade, roots : List String, combine : String }
+           axioms : Grade, roots : List String, combine : String, bound : Float64 }
 
 -- the value a demand gives a hole of the program, if it gives one (12.S18: a hole left without a
 -- value is an error that asks for `--set`)
@@ -149,7 +159,7 @@ lawDemand (d : Demand) (law : String) (cone : Hash) : LawDemand :=
 inner (d : Demand) (entry : String) : Demand :=
   { entry := entry, decoration := d.decoration, accepts := d.accepts, assumes := d.assumes, delta := d.delta,
     fuel := d.fuel, timeLimit := d.timeLimit, sets := d.sets, checked := d.checked, pinned := d.pinned,
-    strategy := d.strategy, fresh := d.fresh, axioms := d.axioms, roots := d.roots, combine := d.combine }
+    strategy := d.strategy, fresh := d.fresh, axioms := d.axioms, roots := d.roots, combine := d.combine, bound := d.bound }
 
 -- ---------------------------------------------------------------- §3 What a run records
 
@@ -158,18 +168,19 @@ inner (d : Demand) (entry : String) : Demand :=
 -- cone it ran, every parameter it set, the grade it accepted and the provisionals it runs as
 -- assumed, the confidence, the fuel and the time limit given, whether it ran checked, the lock,
 -- the type demanded, the strategy asked and whether it was fresh (D-2026-10-16-d: every mode
--- recorded), and, since 2026-10-23, the three policies of §1 (`axioms`, `roots`, `combine`). The time, the output, the fuel spent, the strategy that ran (the plan's) and the
+-- recorded), and, since 2026-10-23, the three policies of §1 (`axioms`, `roots`, `combine`), and since
+-- 2026-10-25 the cap on a numerical law's ratio (`bound`, bite C1). The time, the output, the fuel spent, the strategy that ran (the plan's) and the
 -- states of the cone are the run's, not the demand's, and are not here. [proposed,
 -- D-2026-10-15-h] The decoration is recorded (B1 of summary-BCD.md): the key of a result reads it
 -- (8.S8, `KeyReadsTheType`), and the key is a function of the record (plan.lth's `keyOf`).
 RunRecord = { entry : String, cone : Hash, parameters : List (String * Value), accept : Grade, assumes : List String,
            delta : Maybe Float64, fuel : Maybe Nat, timeLimit : Maybe Float64, checked : Bool, lock : Maybe String,
            decoration : Maybe Decoration, strategy : Strategy, fresh : Bool,
-           axioms : Grade, roots : List String, combine : String }
+           axioms : Grade, roots : List String, combine : String, bound : Float64 }
 recorded (d : Demand) (h : Hash) : RunRecord :=
   { entry := d.entry, cone := h, parameters := d.sets, accept := d.accepts, assumes := d.assumes, delta := d.delta,
     fuel := d.fuel, timeLimit := d.timeLimit, checked := d.checked, lock := d.pinned, decoration := d.decoration,
-    strategy := d.strategy, fresh := d.fresh, axioms := d.axioms, roots := d.roots, combine := d.combine }
+    strategy := d.strategy, fresh := d.fresh, axioms := d.axioms, roots := d.roots, combine := d.combine, bound := d.bound }
 
 -- L5.18: a run's record lists every policy its demand carried: the cutoff, the grade and the
 -- roots accepted for axioms, the provisionals run as assumed, and the way grades combine. A record
@@ -178,7 +189,7 @@ recorded (d : Demand) (h : Hash) : RunRecord :=
 -- one can be drawn
 RecordKeepsThePolicies (record : Demand -> Hash -> RunRecord) (d : Demand) (h : Hash) : Bool :=
   (record d h).accept == d.accepts and (record d h).axioms == d.axioms and (record d h).roots == d.roots
-    and (record d h).assumes == d.assumes and (record d h).combine == d.combine
+    and (record d h).assumes == d.assumes and (record d h).combine == d.combine and (record d h).bound == d.bound
 -- [core bite 13b] gathered so that this file claims it (4.S14)
 RecordLaws := RecordKeepsThePolicies
 

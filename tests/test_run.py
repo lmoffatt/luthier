@@ -1394,7 +1394,7 @@ def test_the_record_holds_the_demand_the_plan_and_the_key(tmp_path, capsys):
                  "parameters": {"usedHole": 1, "unusedHole": 7}, "accept": "sampled", "assumes": [], "delta": None,
                  "fuel": 5000, "timeLimit": None, "checked": False, "lock": None, "decoration": None,
                  "strategy": "ForwardOnDemand", "fresh": False,
-                 "axioms": "assumed", "roots": ["ObserverIsFaithful"], "combine": "weakest"}
+                 "axioms": "assumed", "roots": ["ObserverIsFaithful"], "combine": "weakest", "bound": 1.0}
     # the fields kept beside it say the same
     assert (first["entry"], first["parameters"], first["checked"], first["fuel"]["given"],
             first["certification"]["accept"]) == (d["entry"], d["parameters"], d["checked"], d["fuel"], d["accept"])

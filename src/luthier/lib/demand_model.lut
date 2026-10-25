@@ -30,7 +30,8 @@ theDemand (entry : String <- "main") (accepts : Grade <- Sampled) (assumes : Lis
           (fuel : Maybe Nat <- nothing) (timeLimit : Maybe Float64 <- nothing)
           (sets : List (String * Value) <- nil) (checked : Bool <- false) (pinned : Maybe String <- nothing)
           (strategy : Strategy <- ForwardOnDemand) (fresh : Bool <- false)
-          (axioms : Grade <- AssumedGrade) (roots : List String <- ["ObserverIsFaithful"]) (combine : String <- "weakest") : Demand :=
+          (axioms : Grade <- AssumedGrade) (roots : List String <- ["ObserverIsFaithful"]) (combine : String <- "weakest")
+          (bound : Float64 <- 1.0) : Demand :=
   { entry := entry, decoration := nothing, accepts := accepts, assumes := assumes, delta := nothing, fuel := fuel,
     timeLimit := timeLimit, sets := sets, checked := checked, pinned := pinned, strategy := strategy, fresh := fresh,
-    axioms := axioms, roots := roots, combine := combine }
+    axioms := axioms, roots := roots, combine := combine, bound := bound }

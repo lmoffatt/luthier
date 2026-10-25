@@ -1945,7 +1945,7 @@ ACCEPT = "Sampled"
 # provisional run as assumed (D-2026-10-16-c).
 DEMAND_DEFAULTS = {"entry": "main", "accepts": ACCEPT, "assumes": (), "fuel": None, "timeLimit": None, "sets": (),
                    "checked": False, "strategy": "ForwardOnDemand", "fresh": False,
-                   "axioms": "AssumedGrade", "roots": ("ObserverIsFaithful",), "combine": "weakest"}
+                   "axioms": "AssumedGrade", "roots": ("ObserverIsFaithful",), "combine": "weakest", "bound": 1.0}
 
 # the strategy that computes a demand, by the strategy it asks (demand.lth's `Ran`,
 # `RanIsASpecimenOfTheAsked`): run.py reduces by call by need whatever is asked
@@ -1994,6 +1994,9 @@ class Demand:
     # D-2026-10-16-i; certify.COMBINATIONS), the weakest by default (`run --combine`). Declared in
     # demand.lth and demand_model.lut (`theDemand`) with `axioms` and `roots`, and recorded
     combine: str = DEMAND_DEFAULTS["combine"]
+    # [wave C, bite C1] the cap on a numerical law's worst ratio of distance to the theory's bound
+    # (demand.lth's `bound`, laws.lth §5; certify.serves), one by default (`run --bound`); recorded
+    bound: float = DEMAND_DEFAULTS["bound"]
 
     def inner(self, entry):
         """demand.lth's `inner`: the demand an inner action receives, every cutoff kept (L12.3)."""
@@ -2007,7 +2010,7 @@ class Demand:
         whose body is an axiom (`axiom`) that the demand accepts by name (`roots`, or `assumed:NAME`),
         the cutoff is the weaker of `accepts` and `axioms`."""
         return {"law": law, "cone": cone, "given": given, "accepts": self.cutoff(axiom, law), "fingerprints": fingerprints,
-                "combine": self.combine}
+                "combine": self.combine, "bound": self.bound}
 
     def cutoff(self, axiom=False, law=None):
         """The weakest grade accepted for a law: `accepts`, or for an axiom the demand accepts by
@@ -2026,7 +2029,8 @@ class Demand:
                 "accept": certify.GRADE_WORDS[self.accepts], "assumes": list(self.assumes), "delta": self.delta,
                 "fuel": self.fuel, "timeLimit": self.time_limit, "checked": self.checked, "lock": self.pinned,
                 "decoration": self.decoration, "strategy": self.strategy, "fresh": self.fresh,
-                "axioms": certify.GRADE_WORDS[self.axioms], "roots": list(self.roots), "combine": self.combine}
+                "axioms": certify.GRADE_WORDS[self.axioms], "roots": list(self.roots), "combine": self.combine,
+                "bound": self.bound}
 
     def key(self, live_holes):
         """plan.lth's `demandKey` (8.S8, `KeyReadsOnlyTheCone`, `KeyReadsTheType`): the decoration,
@@ -2036,7 +2040,7 @@ class Demand:
 
 
 def demand_of(main=None, fuel=None, values=(), accept=None, checked=None, pinned=None, assumes=None,
-              time_limit=None, strategy=None, fresh=None, combine=None, axioms=None, roots=None):
+              time_limit=None, strategy=None, fresh=None, combine=None, axioms=None, roots=None, bound=None):
     """The run's demand from its arguments, a missing one given its default (`DEMAND_DEFAULTS`,
     demand_model.lut's `theDemand`); `pinned` is what the lock pins (`lock_status`, 12.S13)."""
     d = DEMAND_DEFAULTS
@@ -2054,7 +2058,8 @@ def demand_of(main=None, fuel=None, values=(), accept=None, checked=None, pinned
                   fresh=d["fresh"] if fresh is None else fresh,
                   combine=d["combine"] if combine is None else combine,
                   axioms=d["axioms"] if axioms is None else axioms,
-                  roots=tuple(dict.fromkeys(d["roots"] if roots is None else roots)))
+                  roots=tuple(dict.fromkeys(d["roots"] if roots is None else roots)),
+                  bound=d["bound"] if bound is None else float(bound))
 
 
 def _head_name(x):
@@ -3043,7 +3048,7 @@ def refuse_provisional(kept, entry, assumes=()):
 
 
 def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=None, assumes=None,
-        time_limit=None, strategy=None, combine=None):
+        time_limit=None, strategy=None, combine=None, bound=None):
     """Run `main` of the file at `path` with its holes filled by `sets`, once the store certifies
     its cone at the grade `accept` (12.S17; `Refused` otherwise, before anything is evaluated);
     gives the standard output, the values set and the certification state of the cone. `checked`
@@ -3084,7 +3089,7 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
     loaded = Loaded(path)
     values, empty = fill(loaded, sets)
     demand = demand_of(main, fuel, values, accept, checked, lock["pinned"], assumes, time_limit, strategy, fresh,
-                       combine)
+                       combine, bound=bound)
     entry = loaded.name(loaded.top, demand.entry) or demand.entry
     kept = runtime_slice(loaded.acts, entry, core_data(loaded))
     roots = _first_action_roots(loaded, kept)
