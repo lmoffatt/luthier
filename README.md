@@ -1,124 +1,154 @@
 # Luthier
 
-> Being rebuilt from zero (2026-10-13, D-2026-10-13-h): first the theories of Luthier, written in
-> Luthier, then the Python that implements them. The interpreter this page describes is at the tag
-> `v0.1-final` (`git checkout v0.1-final`); the specification it will follow is `docs/spec/`.
+A language that verifies models of theories. A theory is a type together with its laws. A model is
+a value of that type, a claim that its operations satisfy the laws, and declaring a model declares
+its tests. What runs is decided by a demand from outside, which asks for a value, a test or a
+program run. Version 0 tests; it does not prove.
 
-A language that verifies models of theories. A theory is a type with its laws; a model is a value
-of it, and defining a model defines its test. The common case is a function type with its laws, a
-theory of one symbol over types already modelled with their equality; a function is a model of it
-and has sense only in that context.
-What runs is decided by a demand from outside, which picks among the models of a theory by cost.
-Version 0 tests; it does not prove.
+The interpreter is at the tag `v0.3` (`git tag`): the core of the language is written in Luthier
+and loaded before every file as a prelude, so its names are visible without an import. The
+interpreter is a Python package (3.11 or later) that imports numpy (`tester.py`, `run.py`); `pyproject.toml` declares no dependency, so install numpy yourself. What exists, what is decided and what is only
+proposed is marked clause by clause in the specification (`docs/spec/`); where this page and the
+specification differ, the specification holds.
 
-```
-import "algebra"
+## Where to start
 
-Z7 : U := { k : Int | 0 <= k and k < 7 }
+- `docs/concepts.md` (draft 1, awaiting Luciano's annotations): the key concepts and the logic that
+  joins them, written around one small example, a tape measure. Its four files are in
+  `docs/concepts/`. Start here.
+- `docs/guide/00-fundamental-elements.md`: the few ideas a program is made of, one program executed
+  by hand and one read through.
+- `docs/principles-for-readers.md` (draft 7, unapproved): the ideas behind Luthier in prose, with
+  no apparatus.
+- `docs/spec/00-index.md`: the specification, twelve chapters; each rule carries its status
+  (implemented, decided or proposed) and its accept and reject programs in `tests/spec/`.
+- `docs/principles.md`: the principles the specification realizes, for the people writing it.
 
-eqZ7 (a b : Z7) : Bool := a == b
-addMod7 (a b : Z7) : Z7 := (a + b) mod 7
-mulMod7 (a b : Z7) : Z7 := (a * b) mod 7
-negMod7 (a : Z7) : Z7 := (7 - a) mod 7
+## An example
 
-ringZ7 : CommutativeRing Z7 := {
-  eq  := eqZ7,
-  add := { monoid := { op := addMod7, unit := 0 }, inv := negMod7 },
-  mul := { op := mulMod7, unit := 1 } }
-
-test ringZ7 exhaustive
-```
-
-```
-$ luthier test examples/z7ring.lut
-ringZ7: passed
-  ok   Associative Z7 Z7 eqZ7 addMod7 addMod7   [exhaustive, 343 cases]
-  ok   LeftIdentity Z7 Z7 eqZ7 addMod7 0   [exhaustive, 7 cases]
-  ...
-  ok   Symmetric Z7 Z7 (eqZ7, ((addMod7, 0), negMod7), mulMod7, 1).eq (eqZ7, ((addMod7, 0), negMod7), mulMod7, 1).mul.op   [exhaustive, 49 cases]
-```
-
-`CommutativeRing` is a type in the `algebra` library, built from the structures below it: an
-abelian group and a monoid over one equality, joined by distributivity, with a symmetric product.
-`CommutativeRing` is the theory and `ringZ7` a model of it over `Z7`. Declaring
-`ringZ7 : CommutativeRing Z7` records the obligation; `test` runs it and writes the certificate. A wrong implementation fails with a counterexample:
+The theory of a tape measure, from `docs/concepts/tape.lth`. A mark on a fifty-metre tape is an
+integer number of millimetres from its zero, and a tape is a way of reading the distance between
+two marks. Each law is a predicate over a model of the theory, and the theory is the conjunction of
+its laws (a shortened excerpt):
 
 ```
-badRing : Ring Bool := {
-  eq  := eqB,
-  add := { monoid := { op := or, unit := false }, inv := not },
-  mul := { op := and, unit := true } }
-  FAIL LeftInverse Bool eqB (or, false).op (or, false).unit not   [exhaustive, 1 cases]
-       counterexample: x = true
+Mark : U := { k : Int | 0 <= k and k <= 50000 }
+Tape : { reading : Mark -> Mark -> Float64 }
+
+ReadingSymmetric (t : Tape) (a b : Mark) : Bool := t.reading a b == t.reading b a
+InOrder : U := { a b c : Mark | a <= b and b <= c }
+ReadingAdds (t : Tape) (p : InOrder) : Bool := t.reading p.a p.c == t.reading p.a p.b + t.reading p.b p.c
+Step : U := { k : Mark | k < 50000 }
+ReadingSteps (t : Tape) (a : Step) : Bool := t.reading a (a + 1) == 1.0
+
+Tape (t : Tape) := ReadingSymmetric t & ReadingAdds t & ReadingSteps t & MetresWithin t
 ```
 
-## What a program is
-
-A program is a set of declarations (`x : T`), definitions (`x : T := t`) and aliases (`x = t`),
-in any order. Everything is a type, and a value is a type with one inhabitant, so `x : T` reads
-"x refines T": a later `x := t` makes `x` the inhabitant `t` if `t : T`, or the subtype of `T` that
-`t` cuts out if `t` is a predicate over `T`. A type is declared over a labeled base, its laws are
-written over it, and it is defined by them:
+The first line of `Tape` declares it as a record of operations, with no body. The last line gives
+it one: the records for which the four laws hold. A model, in its own file (`tape.lut`), is a value
+of the theory:
 
 ```
-Codec : { parse : String -> Maybe Table, render : Table -> String, eq : Table -> Table -> Bool }
-RoundTrip (c : Codec) (t : Table) : Bool := match c.parse (c.render t) { nothing -> false ; just u -> c.eq t u }
-Codec := RoundTrip & Canonical & Tolerant & Rejects
-
-csv : Codec := { parse := extern "python:luthier.tables.parse", render := extern "python:luthier.tables.render", eq := sameTable }
-test csv with 200
+tape : Tape := { reading := fn a b { toFloat64 (if a <= b then b - a else a - b) } }
 ```
 
-The checker reads the whole program and checks it object by object: a declared type, its laws and
-its definition form a cycle of the dependency graph, and that cycle is the object. A definition
-may use only types that are defined; a lawless product is not a new type and is named with `=`;
-the environment (Python) gives values, never types. Products, sums and functions are primitive and
-structural; `data` is for recursive types. A vector is a function `Fin n -> Float64`, and a numpy array
-is a value of that type as it is.
+A test program (`tape.test.lut`) is the demand that checks the claim. It names the law, a mode, the
+number of cases, the seed and where each argument comes from. `luthier test docs/concepts/tape.test.lut`
+printed, among other lines (the store already held these entries, so they are marked known):
 
-The specification: `docs/spec/`, twelve chapters with an index, `docs/spec/00-index.md`; each rule
-carries its status (implemented, decided, proposed) and its accept and reject programs in `tests/spec/`.
+```
+Tape: conjunction of 4, 800 cases, sampled (known)
+  conjunct ReadingSymmetric t: sampled (seed 20261021, size 50000, placement ignored), 200 cases, sampled (known, ...)
+  conjunct MetresWithin t: sampled (seed 20261021, size 50000, placement ignored), 200 cases, sampled, worst ratio 0.414938 (known, ...)
+control of Tape: sampled (seed 20261021, size 50000, placement ignored), 400 cases, refuted at ReadingAdds t: t = hooked, p = { a := 36254, b := 41964, c := 44418 }: the control passed (known, ...)
+```
+
+A law that passes proves nothing if it could not fail, so each test line can be repeated with a
+model broken on purpose, a control, which the law must refute. Here `hooked` is a tape whose hook
+adds one millimetre to every reading, and `ReadingAdds` refutes it with a counterexample.
+
+## What a program is made of
+
+- A program is a set of declarations (`x : T`), definitions (`x : T := t`) and aliases (`x = t`),
+  in any order. The order of the text carries no meaning; the dependencies among the names are the
+  only order (L4.1, time is rebuilt from the dependencies, never from the text).
+- A type with laws is a theory, and a value of it is a model. A declaration with no body is a hole:
+  a name with a type, no value yet. A hole of a plain type such as `String` or `Float64` is a
+  parameter, which `luthier run --set` fills.
+- A file has one of three kinds, declared by its suffix (spec 12.R2): a theory `.lth` (types,
+  declarations and laws, never an action or a model value), a model or library `.lut` (definitions
+  that claim a theory), and an executive file, which holds a demand and is never imported: a run
+  `x.run.lut` with its `main`, or a test program `x.test.lut` with its `test` lines. An import names
+  what enters with its theory, `import "world_model.lut" HostConsole host : HostConsole`, and the
+  importer sees the model only through that theory.
+- The names of the core resolve by the type of their arguments: `d` or `+` means the operation of
+  the model that the type names (spec 4.R13).
+- The world is a token `W` that an action takes and gives back, so that the order of actions is an
+  edge of the dependency graph (spec 10). `examples/hello.run.lut` is the first program with an
+  action.
 
 ## Install and run
 
 ```
 pip install -e .
-luthier check examples/z7ring.lut              # parse and type-check
-luthier check -v examples/z7ring.lut           # and list what is certified, stale, pending, provisional
-luthier test  file.test.lut --seed 1           # run a test program's test lines, write the certificates
-luthier certify tests/tester/*.test.lut        # several test programs, each in its own process
-luthier eval  examples/z7ring.lut "addMod7 3 5"
-luthier run   program.run.lut --set param=value  # evaluate main, record the run in program.run.json
+luthier check docs/concepts/tape.lut              # parse and check; -v lists certified, stale, pending
+luthier test docs/concepts/tape.test.lut          # run the test lines of one test program
+luthier certify docs/concepts/tape.test.lut       # the same for several programs, each in its own process
+luthier run examples/hello.run.lut                # evaluate main against the world
+luthier eval docs/concepts/tape.lut "tape.reading 1200 3450"
+luthier session docs/concepts/tape.lut            # one item per line from standard input
 pytest
 ```
 
+Each command has `--help`. The options that matter most:
+
+- `check [-v] [--no-core] files`: parses and checks; `-v` lists each name's certificate state;
+  `--no-core` reads the files without the prelude.
+- `test file` and `certify files`: `--seed SEED` replaces each line's seed, `--fuel FUEL` bounds the
+  reduction steps per case, `--deep` runs again a line whose outcome the store knows, `--no-cert`
+  neither reads nor writes the store. `certify` also takes `--jobs JOBS` (files run at a time) and
+  `--prune` (rewrite the stores bounded, running nothing).
+- `run file`: `--set NAME=VALUE` fills a parameter hole of type `String`, `Int`, `Float64` or
+  `Bool`; `--main MAIN` names another entry; `--fuel` and `--time-limit SECONDS` cut the run;
+  `--accept GRADE` sets the weakest grade (`proved`, `exhaustive`, `cases`, `sampled`, `assumed`)
+  a certificate may have to serve the run, and `--accept assumed:NAME` runs the provisional extern
+  or the refuted law `NAME` as assumed; `--bound RATIO` caps the worst ratio of error to bound that
+  a numerical law's certificate may have; `--combine {weakest,strongest}` says how a law's grades
+  combine over its regions; `--checked` tests each value an extern returns against its declared
+  type; `--fresh` executes even when the results store holds the run's key; `--strategy
+  {forward-on-demand,call-by-need}` asks for an evaluation strategy. `--accept` defaulting to
+  `sampled`, and `--combine`, are marked proposed in the help text.
+- `eval files term` and `session [--world] [files]`: probes that record nothing and demand no
+  certificate; `--world` is proposed.
+
+`luthier run` refuses to start when a name in the cone of `main` is not certified (spec 12.S17,
+certification is the default). It appends each run to `x.run.json` beside the file. The entries of
+a certificate go to `y.cert.json` beside the file `y` that makes the claim (spec 12.S10); a store
+is accepted by the hash of the definition's dependency cone, so what has not changed is not run
+again unless `--deep`. A run also writes `luthier.lock`, which pins the interpreter's version
+(spec 12.S13).
+
 ## Layout
 
-- `src/luthier/`: the interpreter. `parser.py`, `graph.py` (the objects of a file), `checker.py`
-  (elaboration, obligations, the rules), `evaluator.py` and `machine.py` (reduction; call by need),
-  `generators.py`, `testing.py`, `certify.py`, `cli.py`, `api.py` (loading a program from Python).
-- `src/luthier/core.lut`: the kernel's own definitions, loaded implicitly: `Unit`, `Empty`, `Bool`,
-  `Int`, `Float64`, `String`, `Maybe`, `List`, `Nat`, `Fin`.
-- `src/luthier/lib/`: libraries in Luthier, imported on demand (`docs/spec/12-files-and-tools.md`).
-- `tests/spec/`: one program the checker must accept and one it must reject per rule of 05, and the
-  kernel's type formers. `tests/test_kernel.py`: the mechanisms.
-- `examples/`, `docs/guide/`, `docs/spec/`, `docs/rationale/`.
-- `record/`: the development record: the voice notes the design comes from (`record/audios/`),
-  Luciano's notes, plans, decisions, audits, and what preceded the specification of 2026-10-04
-  (`record/archive/`).
+- `src/luthier/`: the interpreter and the host functions it calls. `parse.py` (lexer and parser),
+  `elaborate.py` (elaboration and typing for resolution), `kernel.py` (reduction), `check.py` (the
+  static rules), `tester.py` (`luthier test`), `certify.py` (the hash of a cone, the store,
+  `luthier certify`), `run.py` (`luthier run`), `host.py` (the world's actions), `generators.py`,
+  `cli.py`; `arrays.py`, `tables.py`, `rational.py`, `lm.py` and `plots.py` are the Python behind
+  libraries.
+- `src/luthier/lib/core/`: the prelude. `core.lut` holds the primitive data and operations (`Unit`,
+  `Empty`, `Bool`, `Int`, `Float64`, `String`, `Maybe`, `Nat` and the rest) and claims, for each,
+  the theory that says what it is; `lists.lut`; `structures/` (universal, algebraic, order,
+  equality, containers) and `properties/` state the theories.
+- `src/luthier/lib/`: libraries imported by name, each a theory `.lth` with its model `.lut` and
+  its store: `numbers`, `arrays`, `tables`, `probability`, `laws`, `test`, `world`, `demand`,
+  `plan`, `plot` and others.
+- `tests/`: `tests/spec/` holds a program the checker must accept and one it must reject per rule;
+  `tests/tester/` holds the test programs that certify the library; the rest is the interpreter's
+  own suite.
+- `examples/`: `hello.run.lut`, and `sonolocalizacion/`, a distance-graph check over the first
+  measurements of the sonolocalización project. `docs/concepts/` holds the tape example.
+- `docs/`: the guide, the specification, the principles and the rationale. `record/` holds the
+  record of the development: sources, plans, decisions and audits.
 
-## Libraries and certificates
-
-`import "x"` searches next to the importing file, then `LUTHIER_PATH`, then the shipped `lib/`;
-`import "x" as m` qualifies the names. A file can declare a value with its laws and another file
-give it a body (`sqrt := extern "python:math.sqrt"`), inheriting the laws as obligations.
-`luthier test` writes a certificate with a hash of each definition's dependency cone; importing a
-file accepts the entries whose hash still matches, so certified libraries are not rerun unless
-`--deep`. Every run draws a seed and records it with the generators and the first cases, so
-`--seed N` repeats it exactly.
-
-Generators are Luthier values (`Gen A = Nat -> Int -> A * Int`, in `random`) or Python functions
-(`gen T := extern "python:mod.fn"`); a function over `Fin n` is generated as its table, a
-function of an infinite domain as a constant or an affine map (a thin sample, and the certificate
-says so). One
-parameter, `--size`, bounds every generated value and grows over a run.
+The earlier interpreter, from before the specification, is at the tag `v0.1-final`.
