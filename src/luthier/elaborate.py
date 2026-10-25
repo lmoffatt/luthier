@@ -989,6 +989,30 @@ def pattern_types(q, ty, c):
     bind_pattern(q, ty, c)
 
 
+def _result_head(ty):
+    while isinstance(ty, t.Pi): ty = ty.codomain
+    return head_of(ty)[0]
+
+
+def refutable(q, c):
+    """Whether the pattern `q` can fail to match some value of its type (L5.20, 2.S17): a literal,
+    a label of a sum with other labels, a constructor of a data type with other constructors."""
+    match q:
+        case t.PVar() | t.PWild(): return False
+        case t.PLit(): return True
+        case t.PPair(a, b): return refutable(a, c) or refutable(b, c)
+        case t.PInj(_, p): return True
+        case t.PCon(name, ps):
+            ctype = c.types.get(name)
+            if name in c.datas and ctype is not None:
+                h = _result_head(ctype)
+                alone = sum(1 for n in c.datas if n in c.types and _result_head(c.types[n]) == h) == 1
+            else:
+                alone = False
+            return not alone or any(refutable(p, c) for p in ps)
+    return False
+
+
 def is_action(ty):
     """An action's result: `W * A` for the world `W` (D8, D-2026-10-13-ag)."""
     return isinstance(ty, t.Sigma) and isinstance(ty.domain, t.World)
@@ -1023,6 +1047,9 @@ def block(items, body, c, expected):
         else:
             q = pattern(item.pattern, inner, fresh=True)
         pattern_types(q, ty, inner)
+        if refutable(q, inner):
+            raise ElaborationError('a refutable pattern on `<-` is refused: it can fail to match; '
+                                   'write the explicit `match` (L5.20, spec 2.S17)')
         return t.Match(value, ((q, block(rest, body, inner, expected)),))
     inner = c.child()
     n = inner.fresh(name); inner.names[name] = n; inner.types[n] = ty

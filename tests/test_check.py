@@ -766,3 +766,11 @@ def test_a_mixed_operator_term_is_refused_since_the_core_s_bite_4():
     passes `check` (4.R9, the right operand fits the binding's domain)."""
     failures = c.check(program('f (x : Int) : Int := x + "a"\n'))
     assert any(f.rule == '4.R9' and f.name == 'f' for f in failures)
+
+
+def test_a_refutable_arrow_pattern_is_an_elaboration_error():
+    # D-2026-10-17-h item 27 (L5.20): the checker reports it through the elaborator
+    bad = program('act (w : World) : World * Maybe Int := (w, nothing)\nf (w : World) : World := { (w, just x) <- act w ; w }')
+    assert 'refutable pattern' in (c.elaboration_error(bad) or '')
+    ok = program('act (w : World) : World * Maybe Int := (w, nothing)\nf (w : World) : World := { (w, x) <- act w ; w }')
+    assert c.elaboration_error(ok) is None

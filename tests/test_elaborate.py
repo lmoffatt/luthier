@@ -638,3 +638,12 @@ def test_an_operator_bound_at_a_subtype_does_not_serve_a_sibling_subtype():
     for x in ('w', 'b'):
         assert 'wideJoin' in show(term(f'{x} + {x}', OPERATOR_SIBLINGS))
     assert 'wideJoin' not in show(term('a + a', OPERATOR_SIBLINGS))
+
+
+def test_a_refutable_pattern_on_an_arrow_is_refused():
+    # D-2026-10-17-h item 27, L5.20, 2.S17: `(w, just x) <- ...` can fail; the explicit `match` is the verbose form
+    ctx = 'w0 : World\nact : World -> World * Maybe Int\nboth : World -> World * Int'
+    for text in ('{ (w, just x) <- act w0 ; w }', '{ (w, 1) <- both w0 ; w }'):
+        with pytest.raises(ElaborationError, match='refutable pattern on `<-`'):
+            term(text, ctx)
+    term('{ (w, x) <- both w0 ; w }', ctx)
