@@ -1702,10 +1702,20 @@ L13.2  (His reading) Rounding `Real -> Float64` is a functor in Lawvere's sense,
 L13.3  Rounding does not expand distances by at most a constant: two reals astride a rounding
        boundary land one ulp apart at any distance, so no multiplicative constant exists; rounding
        is non-expansive up to an additive defect of about ε|x|, and for subtraction and division the
-       sensitivity is per input, the condition number (`11` §7). [mark pending]
+       sensitivity is per input, the condition number (`11` §7). (D-2026-10-25-a) The carrier of a
+       numerical law is the affine bound transformer (L, η, D, r): the output's error is at most
+       L·δ_in + η on the domain D and below the radius r, L the sensitivity of the function and η
+       the algorithm's own error (L9.18); the defect lives in the maps of the error level, outside
+       the tensor of its quantale (L6.15). [settled]
 L13.4  The functor reading stands with "non-expansive plus an additive term", and the cost algebra
        needs both parts: a multiplicative one where a Lipschitz constant exists and an additive one
-       where rounding enters (`11` §5). [mark pending]
+       where rounding enters (`11` §5). (D-2026-10-25-a) Two transformers compose along a cone as
+       (L₂L₁, L₂η₁ + η₂, D₁ ∩ f₁⁻¹(D₂), min(r₁, (r₂ − η₁)/L₁)), and over several inputs by the sum,
+       ε ≤ Σᵢ Lᵢ δᵢ + η, the max where a law names it (Fuzz's product; the first-order bound of
+       Higham's and LAPACK's theorems); so L6.8's pull-back is δ = (ε − η)/L, a demand's ε below η
+       is infeasible (clause 5), an unknown L permits no substitution, and how the backward
+       allocation is split among inputs is under-determined, the demand's weight deciding (L6.2).
+       [settled]
 L13.5  A cutoff is read against the realization's defect at the point where it is met: a demand's
        tolerance below what rounding resolves there (ε times the magnitudes compared, times the
        condition number where one enters) asks for evidence the computation cannot give, and the
@@ -1718,14 +1728,20 @@ Quote:      "un functor que va de Real--> Float64 y que ahi vemos algunas propie
             proyectadas en Float" (annotation on draft 2, 2c18c41)
 Source:     Luciano, 2026-05-29; the floats note of 2026-10-11 (5cc41fa); the functor 2026-10-11
             (annotation on draft 2, 2c18c41)
-Status:     settled in its statement; clauses 3 and 4 are the correction proposed, his mark pending
+Status:     settled in its statement; clauses 3 and 4, the correction on rounding, settled as the
+            affine bound transformer and its composition (D-2026-10-25-a, question 3); clause 5
+            proposed
 History:    draft 0 (6d9dbd3): stated. draft 3 (c085ba4), his annotation: rounding as a functor.
             draft 4 (c7c6396): the correction on the additive defect, proposed. draft 10 (72cc7be,
             81c1794, 25f9c5e, b7a7e23): renumbered from L15. draft 11, step 3 (2026-10-12): the
             formulation split into numbered clauses with the status each sentence had in draft 10,
             the examples into Example, the provenance phrases into this History, the wording
             otherwise as draft 10 had it. draft 11 (2026-10-12): renumbered from L8 of draft 10
-            (D-2026-10-12-v). 2026-10-16: clause 5 added, proposed (D-2026-10-16-b).
+            (D-2026-10-12-v). 2026-10-16: clause 5 added, proposed (D-2026-10-16-b). 2026-10-26:
+            clauses 3 and 4 settled on question 3 of the algebra audit (D-2026-10-25-a): the
+            carrier (L, η, D, r) of D-2026-10-18-j's bound, its composition along a cone and over
+            several inputs, the pull-back and the infeasible ε; the wording of the question, which
+            he accepted with "OK".
 ```
 
 (History: L11 at draft 11 step 3, merged into L9 in step 4: L11 An action is verified by observing
