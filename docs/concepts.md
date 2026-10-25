@@ -885,7 +885,9 @@ projected onto `Float64` with its cost (L13.2 (his reading)) [settled]. It is no
 an additive defect of about $\epsilon_{\text{mach}}|x|$, since two reals astride a rounding boundary
 land one ulp (unit in the last place) apart however close they are, so the algebra of costs needs a
 multiplicative part where a Lipschitz constant exists and an additive part where rounding enters
-(L13.3, L13.4 [mark pending]).
+(L13.3, L13.4 [mark pending in the principles]). D-2026-10-25-a (question 3) settled the two in one
+form, the bound transformer of 9.3 [settled]: the multiplicative part is its sensitivity, the
+additive part its defect.
 
 ### 9.2 Every equality has a version within a bound
 
@@ -912,30 +914,102 @@ its inputs, so that the output's error is at most the sensitivity times the inpu
 algorithm's own; and every such law states as a premise its range of validity, since the bounds
 hold for small tolerances only (L9.18 [proposed]).
 
-### 9.3 The example
+A numerical law has its own form since bite C1 (laws.lth §5, 40271b8):
+
+```
+Within : (A : U) -> (A -> A -> Float64) -> Float64 -> A -> A -> Law
+```
+
+`Within A d bound x y` holds when the distance `d x y` is at most `bound`, the theory's bound at the
+case. Its evidence at a case is `Measured dist bound`, and over the cases the certificate records how
+tight the bound is: the largest ratio of distance to bound seen, overall and per region, the law
+passing at a ratio of at most one (L9.18) [proposed in the principles; implemented]. The verdict is
+the comparison and the ratio only a record, since a quotient can round to one a unit in the last
+place past the bound; a positive distance at a bound of zero has no finite ratio and fails
+(laws.lth §5, `Measuring`). The fixed `tol` left these laws: `Elementary`'s identities and the
+norms and trace of arrays.lth are `Within` laws whose bounds are derived in their comments
+(6727ccd, 4a9c485) [settled as implemented; the pseudo-inverse's laws keep their `tol` until their
+perturbation bound is written].
+
+A demand reads the ratio. Its field `bound`, default 1, caps the worst ratio of the entries that
+serve it, so `run --bound 0.5` refuses a numerical law whose certificate saw more than half its
+bound (5c1f499) [proposed: bite C1's own decision, a cap on the ratio and not a tolerance in the
+law's units, since the law's bound is the theory's and a tolerance in output units is pulled back
+by the planner].
+
+### 9.3 The bound transformer
+
+D-2026-10-18-j gives a numerical law its content, the output's error at most the sensitivity times
+the input's error plus the algorithm's own. D-2026-10-25-a (question 3: "OK") settled its carrier
+and how it composes [settled]. A numerical step is described by four things,
+$t = (L, \eta, D, r)$: $L$ the sensitivity (a Lipschitz constant), $\eta$ the algorithm's own error
+at exact inputs (its defect), $D$ the domain on which the bounds hold, and $r$ the radius, the
+largest input error $\delta$ for which they hold. On $D$ and for $\delta \le r$,
+
+$$\varepsilon_{\text{out}} \le L\,\delta + \eta .$$
+
+Two steps $f_1$ then $f_2$, with transformers $t_1$ and $t_2$, compose to
+
+$$t_2 \circ t_1 = \bigl(L_2 L_1,\; L_2\eta_1 + \eta_2,\; D_1 \cap f_1^{-1}(D_2),\; \min(r_1, (r_2 - \eta_1)/L_1)\bigr):$$
+
+the second step amplifies the first one's error, its own defect included, and adds its own; the
+input must lie where the first step's output lands in the second's domain; and the input error must
+stay small enough that the error handed to the second step, $L_1\delta + \eta_1$, is within its
+radius. Over several inputs the errors add, $\varepsilon \le \sum_i L_i \delta_i + \eta$, or take the
+max where a law names it. Read backward, a demand that needs $\varepsilon$ at the output can allow
+$\delta = (\varepsilon - \eta)/L$ at the input (L6.8, the pull-back); a demand below the defect,
+$\varepsilon < \eta$, is infeasible (L13.5 (a cutoff is read against the realization's defect at the
+point where it is met) [proposed]); and an unknown or infinite $L$ allows no substitution (L6.8).
+How a demand's $\varepsilon$ is split among several inputs is not determined by the bound, and the
+demand's weight decides it (L6.2). This is the first-order bound that Higham's and LAPACK's theorems
+state, and the sum over inputs is the product of Reed and Pierce's Fuzz (the audit's section 5).
+
+Bite C1 built it in the core, beside `Lipschitz` (core/properties/functions.lth, d34e24b):
+`Affine A` is the record (lipschitz, defect, radius, domain), `Transformer A` its `Maybe` (nothing
+when the sensitivity is unknown), with `composeAffine`, `pullback`, `transformSum` and
+`transformMax`; the theory `BoundTransformer` states nine laws (sound composition, associativity, an
+empty domain composes to an empty one, the radius, the unknown, the infeasible, the pull-back meets
+its tolerance, the max below the sum), certified on listed transformers with five controls refuted,
+among them a composition that drops $L_2\eta_1$ [settled as implemented]. The dot product is its
+first claim: `DotStable`, $|\mathrm{dot}(x, y) - x\cdot y| \le 3\gamma_n \sum|x_k y_k|$ with
+$\gamma_n = nu/(1 - nu)$, certified at a worst ratio of 0.116, and `DotSensitive`, whose bound is
+`dotTransformer`'s with $L = (1 + \gamma_{2n+8})\lVert y \rVert$ (Cauchy and Schwarz), at a worst ratio
+of 1, tight at $n = 1$ where Cauchy and Schwarz is an equality (4a9c485).
+
+### 9.4 The example
 
 `MetresWithin` is a stability law at exact inputs, of the simplest kind. The exact distance in
-metres is $D = |a - b|/1000$, with $a, b$ the marks. The computed one divides each mark by a
+metres is $\Delta = |a - b|/1000$, with $a, b$ the marks. The computed one divides each mark by a
 thousand, once rounded each, and subtracts, once rounded:
-$\hat D = |\mathrm{fl}(\mathrm{fl}(a/1000) - \mathrm{fl}(b/1000))|$, writing fl for the machine's
-rounding. With $A = a/1000$, $B = b/1000$ and the standard model $\mathrm{fl}(x) = x(1 + \eta)$,
-$|\eta| \le u$,
+$\hat\Delta = |\mathrm{fl}(\mathrm{fl}(a/1000) - \mathrm{fl}(b/1000))|$, writing fl for the machine's
+rounding. With $A = a/1000$, $B = b/1000$ and the standard model $\mathrm{fl}(x) = x(1 + \theta)$,
+$|\theta| \le u$,
 
-$$|\hat D - D| \le u(|A| + |B|)(1 + u) + 2u\,D \le \epsilon_{\text{mach}}\,(|A| + |B| + D).$$
+$$|\hat\Delta - \Delta| \le u(|A| + |B|)(1 + u) + 2u\,\Delta \le \epsilon_{\text{mach}}\,(|A| + |B| + \Delta).$$
 
-The bound grows with $|A| + |B|$, the size of the marks, as well as with $D$: two marks far
+The bound grows with $|A| + |B|$, the size of the marks, as well as with $\Delta$: two marks far
 along the tape and close to each other lose relative precision in the subtraction. This is the
 cancellation 11.S15 speaks of, at the scale of a tape. A demand that asked for that distance to
 within a relative $10^{-16}$ would ask for evidence the computation can't give: below the
-resolution of rounding a stricter cutoff buys nothing (L13.5 (a cutoff is read against the
-realization's defect at the point where it is met) [proposed]).
+resolution of rounding a stricter cutoff buys nothing (L13.5) [proposed].
 
 The law's range is the type of its variables, marks of the tape (D-2026-10-18-j), and its control
-is `noRoom` (section 7): with the bound at zero the law fails at a pair whose division rounds. L9.18
-also asks the certificate to record how tight the bound is, the largest ratio of error to bound
-seen; today's entries don't record it [building].
+is `noRoom` (section 7): with the bound at zero the law fails at a pair whose division rounds. Its
+certificate records a worst ratio of 0.41 over the 200 cases, 0.41 in the region of the boundary
+of `a` and 0.39 in that of `b` (section 8.1): the bound covers the error with room, as its comment
+in `tape.lth` says it should.
 
-### 9.4 How a budget scales with a bound
+The tape is also a transformer [mine: tape.lth states only the defect]. The marks of the law are exact, so
+$\delta = 0$ and the law is the defect alone, $\eta = \epsilon_{\text{mach}}(|A| + |B| + \Delta)$. A real
+reading is not exact: a mark read $\delta_a$ millimetres off, and the other $\delta_b$ off, move
+the distance in metres by at most $(\delta_a + \delta_b)/1000$, so the tape is the transformer with
+$L = 1/1000$ per millimetre on each of its two inputs, summed,
+$\varepsilon \le (\delta_a + \delta_b)/1000 + \eta$. Pulled back, a run of `tape.run.lut` that
+needs its answer right to a millimetre, $\varepsilon = 10^{-3}$ m, allows the two readings together
+to be off by $1000\,(10^{-3} - \eta)$ mm, a millimetre less about $2 \times 10^{-11}$ mm, since at fifty
+metres $\eta$ is about $2 \times 10^{-14}$ m; and no demand below $\eta$ can be met.
+
+### 9.5 How a budget scales with a bound
 
 Luciano's candidate for a fundamental principle (D-2026-10-18-d; L9.17 [proposed]): the law of an
 algorithm states how its budget scales with the bound demanded, the resource (steps, samples,
@@ -943,7 +1017,9 @@ memory, bits of precision) as a function of the bound and of the problem's featu
 condition, unit roundoff), with the floor below which no budget suffices. It is the modulus of
 Bishop's constructive analysis and what LAPACK states in its error bounds and operation counts.
 The test of 6.4 is an instance: certifying a law by sampling to a failure fraction $p$ at
-confidence $1 - \delta$ needs about $\ln(1/\delta)/p$ cases.
+confidence $1 - \delta$ needs about $\ln(1/\delta)/p$ cases. A tester mode that runs a law at
+several bounds and compares the slope of the resource with the stated one is the audit
+execution's bite C2, after C1 [building].
 
 ## 10. Error, uncertainty, evidence and resources
 
@@ -951,7 +1027,8 @@ G2 (laws are valued in cost: one logic, extended to the non-negative reals) is L
 eureka: Boolean type theory works for the integers and breaks on floating point, linear algebra and
 statistics, where a law holds up to an error; logic extended to $[0, \infty]$, with the Booleans as
 a special case, would let the composition of errors in numerical libraries be handled by one logic
-[settled as the organizer; its algebra open, O1].
+[settled as the organizer; its algebra open in part, O1: D-2026-10-25-a settled the error and
+evidence bases and the carrier of a numerical law].
 
 What "cost" meant has since been split. D-2026-10-18-i [settled], written as L6.15 [proposed]:
 cost was four things.
@@ -970,18 +1047,57 @@ claim at a bound about those quantities ("the distance to the reference is at mo
 measuring the quantity and the demand supplying ε. The four share an algebra: each is a model of a
 commutative ordered monoid, a quantale in its complete form, the base of Lawvere's enriched
 categories, and a function propagates them when it is non-expansive or Lipschitz,
-$d(f x, f y) \le c\, d(x, y)$ (D-2026-10-18-i). The bases:
+$d(f x, f y) \le c\, d(x, y)$ (D-2026-10-18-i). The bases, as corrected since and as
+D-2026-10-25-a settled them:
 
 | Quantity | Carrier | Composition | Order |
 |---|---|---|---|
 | error | $[0, \infty]$ | $+$ | $\ge$ |
 | uncertainty | distribution functions of distances | a t-norm, or convolution | pointwise $\ge$ |
-| evidence | $[0, 1]$ | $+$ (the union bound), or max when nested | $\le$ |
-| resources | $[0, \infty]$ | $+$ in sequence, max in parallel | not stated |
+| evidence | pairs $(\hat\varepsilon, \delta)$ in $[0, 1]^2$ | capped sum $\min(1, a + b)$ in each part, by default | $\ge$ |
+| resources | a typed vector (work, span, peak memory) | per component, in sequence and in parallel | not one semiring |
 
-The order of the error base is Lawvere's, the opposite of the usual one, so that the empty join is
-∞ and the tensor preserves it (the correction to D-2026-10-18-i, from bite 6's finding 1); the
-decision names no order for the resources.
+Each row moved since D-2026-10-18-i, or is still to be built.
+
+- *Error.* The order is Lawvere's, the opposite of the usual one, so that the empty join is ∞ and
+  the tensor preserves it (the correction to D-2026-10-18-i, from bite 6's finding 1). The core
+  claims `ErrorBase`, $([0, \infty], +, \ge)$ over equality.lth's `Extended`, and certifies it on
+  listed cases, ∞ among them (bite B2, a9f8f8a) [settled as implemented].
+- *Evidence.* D-2026-10-18-i wrote $[0, 1]$ with $+$ or max, ordered by $\le$. The audit showed two
+  defects: the record held two compositions that differ, the failure fractions summed (the union
+  bound) and the costs in nats summed, which multiplies the success bounds and so assumes the two
+  failures independent (two links at $\hat\varepsilon = 0.1$ give 0.2 by the first and 0.19 by the
+  second); and the order $\le$ is the one in which the tensor does not preserve the empty join,
+  the defect bite 6 corrected on the error base. Luciano settled the evidence base as the pair
+  $(\hat\varepsilon, \delta)$ under the capped sum $\min(1, a + b)$ (the Łukasiewicz t-norm) in
+  Lawvere's orientation $\ge$, the sum in nats only under a declared premise of independence, and
+  added: "Luthier should provide the mechanisms for definining any reasonable choice, as long as we
+  do not get into an infinite loop" (D-2026-10-25-a, question 1) [settled]. Bite B2 built it so: the
+  composition is a parameter, a record `EvidenceComposition` holding only the tensor; any such
+  composition is a dioid (an idempotent semiring) whose unit is its top, which is what "reasonable"
+  means there; `cappedSumComposition` is the default, `AtLeastTheUnionBound` (Boole's inequality)
+  the law that an assumption-free composition obeys, and the product $a + b - ab$ is
+  `IndependentComposition`, valid under the axiom `FailuresIndependent`, which a demand accepts by
+  name. The product, certified as a model of the default's law, is refuted at $(0.1, 0.1)$, the
+  audit's 0.19 against 0.2 (a9f8f8a) [settled as implemented]. Totality, the language's, is what
+  keeps a composition from looping.
+- *Resources.* D-2026-10-18-i said "$+$ in sequence, max in parallel: the tropical semiring". That
+  doesn't hold, and the coordinator corrected it (03723fa, after the audit's 4.4): work adds in
+  sequence and in parallel, span adds in sequence and takes the max in parallel, peak memory takes
+  the max in sequence and adds in parallel (Blumofe and Leiserson's work and span), so resources are
+  a typed vector with no one semiring [settled as the record's correction; building: bite C2's
+  `Resources`].
+- *Uncertainty.* Marginals don't determine the distribution of a sum, so convolution needs
+  independence or a joint; the pushforward with its hypothesis as a premise is to be declared, with
+  no model until the sequential test consumes it (the audit execution's bite C3) [building].
+
+Two orders meet at every base, and they read each other backwards (algebraic.lth, at `Quantale`; the
+audit's 4.1). The categorical order is Lawvere's: y is above x when it knows at least as much, a
+smaller error or a smaller failure bound, so refining a certificate and strengthening a demand both
+go up. The numerical order is admission's: a demand's cutoff is met when the entry's value is at
+most it (spec 6.S15). No `leq` is shared between them. The bases are claimed as dioids and not as
+quantales, since a quantale's join over an arbitrary family can't be computed by a total model; the
+quantale stays the ideal (B2's report, decision 1) [proposed].
 
 Three earlier facts still hold inside this picture.
 
@@ -996,10 +1112,13 @@ Three earlier facts still hold inside this picture.
   likelihood, is a density of any value, whose logarithm is no cost in $[0, \infty]$ (L12.6 [proposed]; D-2026-10-13-n)
   [settled].
 
-Today all of this waits. First everything Boolean: every law is a Boolean predicate, and every
-cutoff it needs is a parameter of the law that the demand supplies, never a constant in a file; the
-cost types come later, on the failures of the sonolocalización slice (D-2026-10-14-c) [settled as
-the interim]. The core implements the Boolean and the metric bases; the probabilistic one is
+What waits is the cost types. First everything Boolean: every law is a Boolean predicate or a
+`Within` law, every cutoff it needs comes from the demand or, for a numerical law, from its theory,
+never a constant in a file; the cost types come later, on the failures of the sonolocalización slice
+(D-2026-10-14-c) [settled as the interim]. So the bases exist as certified models in the core, and
+certification still admits by the chain of grades and the cap on the worst ratio: its cost type
+`C` and `entryBound` are holes in certification.lth (spec 6.S4), and certify.py's `entry_bound` is
+their specimen at the metric level (bite C1, 95dda71) [building]. The probabilistic level is
 declared in `equality.lth` (Menger's axioms, no model claimed) and comes after, on the sequential
 test (D-2026-10-18-c) [building].
 
