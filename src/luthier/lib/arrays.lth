@@ -45,6 +45,7 @@
 
 import "numbers.lth" Tolerance within abs absDistance Positive Elementary Doubles
 import "numbers_model.lut" elementary : Elementary
+import "laws.lth" Law Within Case
 
 -- ---------------------------------------------------------------- §1 The types (11.S9)
 
@@ -254,18 +255,59 @@ MscalePointwise (m : Arrays) (r c : Dim) (s : Float64) (a : MatOf r c) : Bool :=
   Pointwise2 Float64 (MatOf r c) (Mat Float64) (matObject Float64) m.mscale mscaleDef s a
 
 -- the inner product: commutative exactly (the same products, summed in one order; the core's
--- `Commutative`), the basis orthonormal exactly (one term, the rest exact zeros), and within
--- `3 gamma n` of the native sum relative to the sum of the magnitudes of the terms (§3's bounds,
--- Higham 2002 eq. 3.5; D-2026-10-18-j)
+-- `Commutative`), the basis orthonormal exactly (one term, the rest exact zeros), and its two
+-- numerical laws (D-2026-10-18-j, L9.18; wave C, bite C1, 2026-10-25, Claude Opus 5.5):
+-- - stability at exact inputs: within `3 gamma n` of the native sum relative to the sum of the
+--   magnitudes of the terms (§3's bounds, Higham 2002 eq. 3.5), a `Within` law whose certificate
+--   records the worst ratio of the difference to that bound (laws.lth §5). This was `DotAgrees`.
+-- - sensitivity: moving `x` to `x'` moves the product by at most `|x' - x| |y|` (Cauchy and
+--   Schwarz: the product is Lipschitz in `x` with the norm of `y` as constant, D-2026-10-18-i), plus
+--   the algorithm's error at the two points, each within `gamma n` of its exact value relative to
+--   its magnitudes, taken as 3 gamma n each, the stability law's bound, with room for the
+--   roundings of the bound itself. The bound is `dotTransformer`'s, the core's bound transformer
+--   (core/properties/functions.lth): `L` the norm of `y` widened by `gamma (2n + 8)` for the roundings of the two computed norms (each a sum of
+--   n squares after n differences, a square root and a product: below `(n + 4) u` relative, Higham
+--   2002 section 3.1), `eta` the algorithm's error, the domain the moderate vectors, the radius the
+--   moderate range (the product is bilinear, so the bound holds at every distance the range allows).
+--   Its range is its premise: the sum range and moderate entries, and `x'` admissible.
+-- The output's error is at most the sensitivity times the input's plus the algorithm's own error
+-- (L9.18); the demand fixes one tolerance and the transformer's pull-back gives the other (L6.8).
 DotCommutative (m : Arrays) (n : Dim) (x y : VecOf n) : Bool := Commutative (VecOf n) Float64 (structural Float64) m.dot x y
 DotOnBasis (m : Arrays) (n : Dim) (x : VecOf n) (j : Fin n) : Bool := m.dot x (basis n j) == x.f j
-DotAgrees (m : Arrays) (fp : Doubles Float64) (n : Dim) (x y : VecOf n) : Bool :=
-  not (sumRange n and moderateVec x and moderateVec y) or Ball Float64 absDistance (fn p q { 3.0 * gammaN fp n * absSumTo n (fn k { x.f k * y.f k }) }) (m.dot x y) (dotDef x y)
--- the norm: the root of the inner product, one on the basis, scaling with the magnitude
+DotStable (m : Arrays) (fp : Doubles Float64) (n : Dim) (x y : VecOf n) : Law :=
+  if sumRange n and moderateVec x and moderateVec y
+  then Within Float64 absDistance (3.0 * gammaN fp n * absSumTo n (fn k { x.f k * y.f k })) (m.dot x y) (dotDef x y)
+  else Case true
+-- the transformer of the product with `y` at the moderate vectors of length n, its defect the
+-- algorithm's error at `x` and `x'`
+dotTransformer (fp : Doubles Float64) (n : Dim) (x x' y : Vec Float64) : Affine (Vec Float64) :=
+  { lipschitz := (1.0 + gammaN fp (2 * n + 8)) * normDef y,
+    defect := 3.0 * gammaN fp n * (absSumTo n (fn k { x'.f k * y.f k }) + absSumTo n (fn k { x.f k * y.f k })),
+    radius := 1.0e150,
+    domain := moderateVec }
+DotSensitive (m : Arrays) (fp : Doubles Float64) (n : Dim) (x x' y : VecOf n) : Law :=
+  { t := dotTransformer fp n x x' y
+    if sumRange n and moderateVec x and moderateVec x' and moderateVec y and admissible (Vec Float64) t x (distance x' x)
+    then Within Float64 absDistance (transform (Vec Float64) t (distance x' x)) (m.dot x' y) (m.dot x y)
+    else Case true }
+-- the norm: the root of the inner product, one on the basis, scaling with the magnitude. [bite C1,
+-- D-2026-10-18-j] The last two are `Within` laws with the theory's bound in place of the demand's
+-- tolerance: a sum of n squares is within `gamma n` of the exact one relative to itself (its terms
+-- are not negative, so the sum of their magnitudes is the sum), the root halves that and rounds
+-- once, so each computed norm is within `gamma (n + 2)` of the exact one relative to it, and two
+-- computations differ by twice that; scaling the entries first rounds each once more (`u`), and the
+-- product by `c` once. `3 gamma (n + 2)` bounds both with room for the bound's own roundings, as §3
+-- does. Range: the sum range and moderate entries (their squares stay normal), and the scaled
+-- vector moderate.
 NormOfBasis (m : Arrays) (n : Dim) (j : Fin n) : Bool := m.norm (basis n j) == 1.0
-NormOfDot (m : Arrays) (tol : Tolerance) (n : Dim) (x : VecOf n) : Bool := within tol (m.norm x) (elementary.sqrt (m.dot x x))
-NormScales (m : Arrays) (tol : Tolerance) (n : Dim) (c : Positive) (x : VecOf n) : Bool :=
-  within tol (m.norm (m.scale c x)) (c * m.norm x)
+NormOfDot (m : Arrays) (fp : Doubles Float64) (n : Dim) (x : VecOf n) : Law :=
+  if sumRange n and moderateVec x
+  then Within Float64 absDistance (3.0 * gammaN fp (n + 2) * m.norm x) (m.norm x) (elementary.sqrt (m.dot x x))
+  else Case true
+NormScales (m : Arrays) (fp : Doubles Float64) (n : Dim) (c : Positive) (x : VecOf n) : Law :=
+  if sumRange n and moderateVec x and moderateVec (m.scale c x)
+  then Within Float64 absDistance (3.0 * gammaN fp (n + 2) * c * m.norm x) (m.norm (m.scale c x)) (c * m.norm x)
+  else Case true
 
 -- a matrix acting: its table on the basis is the matrix, exactly; on any vector each entry is
 -- within `3 gamma c` of the native sum relative to the magnitudes of the row's terms (Higham 2002
@@ -316,14 +358,20 @@ RankUnderRotation (m : Arrays) (tol : Tolerance) (fl : RankFloor) (k : Dim) (q :
   m.retainedRank fl (m.matMul (m.transpose q) (m.matMul s q)) == m.retainedRank fl s
 
 -- The trace: of the identity its size, exactly (a sum of ones); linear and cyclic within the
--- demand's tolerance, the cyclic law relative to the magnitudes of the products summed (both
--- sides sum the same r c products in different orders, 11.S14); and within the tolerance of the
--- native sum relative to the magnitudes of the diagonal (v0.1 array.lut:247-252 held the
--- tolerance; here the demand gives it, 11.S18).
--- spec 11.S14, 11.S18
+-- theory's bounds, the cyclic law relative to the magnitudes of the products summed (both
+-- sides sum the same r c products in different orders, 11.S14); and within the bound of the
+-- native sum relative to the magnitudes of the diagonal (v0.1 array.lut:247-252 held a
+-- tolerance; core bite 11 and bite C1 replaced it by the theory's bound, D-2026-10-18-j).
+-- [bite C1] Linearity as a `Within` law: the sum of two matrices rounds each diagonal entry once,
+-- each trace sums k entries (`gamma k` relative to their magnitudes), and the sum of two traces
+-- rounds once: `3 gamma (k + 1)` times the magnitudes of both diagonals bounds the difference.
+-- spec 11.S14
 TraceOfIdentity (m : Arrays) (k : Dim) : Bool := m.trace (identity k) == toFloat64 k
-TraceAdditive (m : Arrays) (tol : Tolerance) (k : Dim) (a b : MatOf k k) : Bool :=
-  within tol (m.trace (m.madd a b)) (m.trace a + m.trace b)
+TraceAdditive (m : Arrays) (fp : Doubles Float64) (k : Dim) (a b : MatOf k k) : Law :=
+  if sumRange k and moderateMat a and moderateMat b
+  then Within Float64 absDistance (3.0 * gammaN fp (k + 1) * (absSumTo k (fn i { a.f i i }) + absSumTo k (fn i { b.f i i })))
+    (m.trace (m.madd a b)) (m.trace a + m.trace b)
+  else Case true
 -- [core bite 11; D-2026-10-18-j] the cyclic law and the agreement with the native sum take §3's
 -- bounds, not the demand's tolerance: each side of the cyclic law sums the r c products twice
 -- nested, within `gamma (r + c)` of the exact sum relative to their magnitudes (Higham 2002,
@@ -409,7 +457,7 @@ PinvScales (m : Arrays) (tol : Tolerance) (fl : RankFloor) (c : Positive) (s : S
     pinvAtScale m tol fl s p c and (fl == 0.0 or frobDef s == 0.0 or pinvAtScale m tol fl s p (c * fl / frobDef s)) }
 
 Arrays := AddPointwise & SubPointwise & ScalePointwise & TransposePointwise & MaddPointwise & MsubPointwise & MscalePointwise
-  & DotCommutative & DotOnBasis & DotAgrees & NormOfBasis & NormOfDot & NormScales
+  & DotCommutative & DotOnBasis & DotStable & DotSensitive & NormOfBasis & NormOfDot & NormScales
   & MatVecOnBasis & MatVecAgrees & MatMulNeutral & MatMulByIdentity & MatMulTransposes & MatMulAgrees
   & RankOfDiagonal & RankOfZeroAndIdentity & RankBounded & RankScales & RankUnderRotation
   & TraceOfIdentity & TraceAdditive & TraceCyclic & TraceAgrees

@@ -8,6 +8,9 @@
 -- metric, tolerance and rank floor; seed 20261015. The broken models copy numpy's other fields.
 -- PinvRestricts and PinvTraceIsRank run on listed matrices, as the laws do where sampling the
 -- shape fails (see arrays_laws.test.lut).
+-- 2026-10-25, wave C bite C1 (Claude Opus 5.5, record/plan/audit-algebras-2026-10-22/prompt-wave-bc.md):
+-- the controls of `DotAgrees` are `DotStable`'s; `scaledDot` (the product one per cent too large,
+-- just past the sensitivity's bound where Cauchy and Schwarz is tight) is `DotSensitive`'s.
 
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear symmetric symmetricOf orthogonal
@@ -17,7 +20,7 @@ import "numbers.lth" Tolerance Doubles
 import "numbers_model.lut" doubles : Doubles
 import "arrays.lth" Arrays Vec Mat RankFloor mat vec identity zeroMat frobDef transposeDef
   AddPointwise SubPointwise ScalePointwise TransposePointwise MaddPointwise MsubPointwise MscalePointwise
-  DotCommutative DotOnBasis DotAgrees NormOfBasis NormOfDot NormScales MatVecOnBasis MatVecAgrees
+  DotCommutative DotOnBasis DotStable DotSensitive NormOfBasis NormOfDot NormScales MatVecOnBasis MatVecAgrees
   MatMulNeutral MatMulByIdentity MatMulTransposes MatMulAgrees RankOfDiagonal RankOfZeroAndIdentity RankBounded RankScales
   RankUnderRotation TraceOfIdentity TraceAdditive TraceCyclic TraceAgrees PinvOfDiagonal PinvOfZero
   PinvOfIdentity PinvProjects PinvSymmetric PinvRestricts PinvTraceIsRank PinvScales
@@ -232,6 +235,29 @@ dropDot : Arrays := {
 }
 pdropDot : List Binding := [
   { parameter := just "m", type := nothing, generator := "dropDot", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
+
+-- dot one per cent too large: Lipschitz in x with 1.01 |y|, not |y|
+scaledDot : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := fn x y { 1.01 * numpy.dot x y },
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+pscaledDot : List Binding := [
+  { parameter := just "m", type := nothing, generator := "scaledDot", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
   { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
   { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed } ]
@@ -682,7 +708,9 @@ test "DotCommutative" (SampledMode linear) (seed <- 20261015) (profile <- pskewD
 -- dropDot: on the last basis vector the dot is 0, not x_j
 test "DotOnBasis" (SampledMode linear) (seed <- 20261015) (profile <- pdropDot) (control <- true)
 -- dropDot: the native sum has the last term
-test "DotAgrees" (SampledMode linear) (seed <- 20261015) (profile <- pdropDot) (control <- true)
+test "DotStable" (SampledMode linear) (seed <- 20261015) (profile <- pdropDot) (control <- true)
+-- scaledDot: one per cent more than the product moves, past `|x' - x| |y|` at one term
+test "DotSensitive" (SampledMode linear) (seed <- 20261015) (profile <- pscaledDot) (control <- true)
 -- norm1: the norm of a basis vector is 2
 test "NormOfBasis" (SampledMode linear) (seed <- 20261015) (profile <- pnorm1) (control <- true)
 -- sqNorm: the norm is the inner product, not its root
@@ -914,7 +942,7 @@ pthirdTrace : List Binding := [
   { parameter := just "fp", type := nothing, generator := "doublesThird", coverage := Listed },
   { parameter := just "k", type := nothing, generator := "witnessThree", coverage := Listed },
   { parameter := just "a", type := nothing, generator := "witnessDiagonal", coverage := Listed } ]
-test "DotAgrees" ExhaustiveMode (seed <- 20261022) (profile <- pthirdDot) (control <- true)
+test "DotStable" ExhaustiveMode (seed <- 20261022) (profile <- pthirdDot) (control <- true)
 test "MatVecAgrees" ExhaustiveMode (seed <- 20261022) (profile <- pthirdMatVec) (control <- true)
 test "MatMulAgrees" ExhaustiveMode (seed <- 20261022) (profile <- pthirdMatMul) (control <- true)
 test "TraceAgrees" ExhaustiveMode (seed <- 20261022) (profile <- pthirdTrace) (control <- true)

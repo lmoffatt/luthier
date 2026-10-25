@@ -10,6 +10,8 @@
 -- (7.R1): each listed line has a sampled twin whose matrix is drawn by a family of
 -- generators_model.lut (symmetric, positive semidefinite, orthogonal with a symmetric of its
 -- size, a diagonal with an atom at 0); the listed lines are kept.
+-- 2026-10-25, wave C bite C1 (Claude Opus 5.5, record/plan/audit-algebras-2026-10-22/prompt-wave-bc.md):
+-- `DotAgrees` is `DotStable`, beside it `DotSensitive` (D-2026-10-18-j), both `Within` laws.
 
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear symmetric symmetricOf gram orthogonal clearDiagonal
@@ -18,7 +20,7 @@ import "laws.lth" Listed
 import "numbers.lth" Tolerance Doubles
 import "numbers_model.lut" doubles : Doubles
 import "arrays.lth" Arrays Vec Mat RankFloor mat vec identity zeroMat transposeDef AddPointwise SubPointwise ScalePointwise
-  TransposePointwise MaddPointwise MsubPointwise MscalePointwise DotCommutative DotOnBasis DotAgrees NormOfBasis
+  TransposePointwise MaddPointwise MsubPointwise MscalePointwise DotCommutative DotOnBasis DotStable DotSensitive NormOfBasis
   NormOfDot NormScales MatVecOnBasis MatVecAgrees MatMulNeutral MatMulByIdentity MatMulTransposes MatMulAgrees RankOfDiagonal
   RankOfZeroAndIdentity RankBounded RankScales RankUnderRotation TraceOfIdentity TraceAdditive TraceCyclic
   TraceAgrees PinvOfDiagonal PinvOfZero PinvOfIdentity PinvProjects PinvSymmetric PinvRestricts PinvTraceIsRank
@@ -95,7 +97,8 @@ test "MscalePointwise" (SampledMode linear) (seed <- 20261014) (profile <- model
 -- the inner product and the norm
 test "DotCommutative" (SampledMode linear) (seed <- 20261014) (profile <- models)
 test "DotOnBasis" (SampledMode linear) (seed <- 20261014) (profile <- models)
-test "DotAgrees" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "DotStable" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "DotSensitive" (SampledMode linear) (seed <- 20261014) (profile <- models)
 test "NormOfBasis" (SampledMode linear) (seed <- 20261014) (profile <- models)
 test "NormOfDot" (SampledMode linear) (seed <- 20261014) (profile <- models)
 test "NormScales" (SampledMode linear) (seed <- 20261014) (profile <- models)
