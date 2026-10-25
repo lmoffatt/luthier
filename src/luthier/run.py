@@ -2559,6 +2559,7 @@ def certification(loaded, program, entry, demand, refuse=True):
     # each entry's canonical JSON
     served = {_entry_hash(e) for c in with_laws for d in c["laws"] for e in certify.witness(d, entries) or ()}
     evidence = _cone_evidence(with_laws, entries, demand)
+    grades, weakest = _cone_grades(with_laws, entries, demand, assumed)
     at_first = {f["name"] for f in firsts}
     code_only = {"code": cones.cone(entry)["code"], "hosts": [], "interpreter": ""}
     return {"cone": cones.hash(entry), "interpreter": certify.interpreter_revision(),
@@ -2584,9 +2585,35 @@ def certification(loaded, program, entry, demand, refuse=True):
             "certificates": sorted(served), "stores_read": stores_read,
             # the pair (ε̂, δ) of the cone at the demand's δ, by its composition (bite B1, L10.3)
             "evidence": evidence,
+            # the grade of each law of the cone and their combination by the demand's (bite B3, 5.S8)
+            "grades": grades, "grade": weakest,
             "_firsts": firsts,
             # what a refusal would have listed, for `eval` only: a run that starts has none
             **({} if refuse else {"refused": [certify.show_refusal(r, entries) for r in refusals]})}
+
+
+def _cone_grades(with_laws, entries, demand, assumed):
+    """[wave B, bite B3; L10.2, 5.S8 extended to the cone] The grade each law of the cone is served at
+    (its witnesses' grades over its regions, `certify.served_grade`, combined by the demand's
+    `combine`), an axiom accepted as an assumption at assumed; and their combination over the cone by
+    the same `combine`, the weakest by default: the vector beside its summary, the summary the
+    Boolean slice's admission reads (L10.5)."""
+    from . import certify
+    comb = certify.COMBINATIONS[demand.combine]
+    vector = []
+    for c in with_laws:
+        for d in c["laws"]:
+            g = None
+            for e in certify.witness(d, entries) or ():
+                g = comb(g, certify.served_grade(d, e, entries)) if g is not None else certify.served_grade(d, e, entries)
+            if g is not None:
+                vector.append({"name": c["name"], "law": d["law"], "grade": certify.GRADE_WORDS[g]})
+    vector += [{"name": a["name"], "law": a["law"], "grade": "assumed"} for a in assumed if a.get("law") and "axiom" in a]
+    summary = None
+    for v in vector:
+        g = certify.GRADES[v["grade"]]
+        summary = g if summary is None else comb(summary, g)
+    return vector, (certify.GRADE_WORDS[summary] if summary is not None else None)
 
 
 def _cone_evidence(with_laws, entries, demand):

@@ -425,7 +425,8 @@ def test_a_changed_definition_makes_the_entry_stale(laws, capsys):
     rest = [e for e in before if e["law"] != "Small"]
     assert [e for e in after if e["law"] != "Small"][-len(rest):] == rest
     assert all(e["cone"] == small[0].entry["cone"] for e in after if e["law"] == "Small")
-    assert dict(certify.standings(laws))["Small"] == "sampled"
+    # its two bindings' samples of 100, each its ε̂, composed by the capped sum (bite B1)
+    assert dict(certify.standings(laws))["Small"] == "sampled, ε̂ 0.06 at δ 0.05 (100 + 100 cases)"
 
 
 def test_the_entry_holds_what_certification_lth_names(laws):
@@ -466,7 +467,7 @@ def test_certify_several_files(tmp_path, capsys):
     assert out[0] == f"{paths[0]}: 4 laws, 6 lines ran, 0 known"
     # each law with its control status (7.S19): none of these has a control
     out = [line.replace("; uncontrolled: untested against any wrong model (7.S19)", "") for line in out]
-    assert "  NotInvolutive: exhaustive" in out and "  IntPlusCommutes: sampled" in out
+    assert "  NotInvolutive: exhaustive" in out and any(o.startswith("  IntPlusCommutes: sampled, ε̂ ") for o in out)
     assert "  Small: refuted at x = 552" in out and "  AndIsOr: refuted at a = true, b = false" in out
     # weakest.test.lut: one law under two bindings, the weakest
     assert out[out.index(f"{paths[1]}: 1 laws, 2 lines ran, 0 known") + 1] == "  NotInvolutive: cases"
@@ -766,7 +767,7 @@ def control(outcome, cone="sha256:1", law="L", seed=0):
 
 
 def test_a_control_entry_is_no_evidence_of_the_law():
-    es = [entry(grade="Cases")]
+    es = [dict(entry(), grade="Cases", evidence=_points("Listed"))]  # a pass over listed cases (bite B3)
     refuted = control({"ControlRefuted": "x = 1"})
     assert certify.certificate_grade([refuted] + es, "L", "sha256:1") == "Cases"
     assert certify.state([refuted] + es, "L", "sha256:1") == ("current", "Passed")
@@ -1198,10 +1199,11 @@ def test_two_stretches_of_100_cases_with_different_seeds_give_a_grade_over_200(t
     binding = certify.union_key(entries[0])  # the binding with its sampling budgets (bite 13c)
     assert certify.pooled(entries, "IntPlusCommutes", one.cone, binding) == 200
     assert certify.certificate_grade(entries, "IntPlusCommutes", one.cone) == "Sampled"
-    assert dict(certify.standings(path))["IntPlusCommutes"] == "sampled; pooled over seeds 1, 2: 200 cases in all"
+    assert dict(certify.standings(path))["IntPlusCommutes"] == \
+        "sampled, ε̂ 0.015 at δ 0.05 (200 cases); pooled over seeds 1, 2: 200 cases in all"
     # one stretch is the line's own n, and the standing reads as before
     assert certify.pooled(entries[1:], "IntPlusCommutes", one.cone, binding) == 100
-    assert certify.standing(entries[1:], "IntPlusCommutes", one.cone) == "sampled"
+    assert certify.standing(entries[1:], "IntPlusCommutes", one.cone) == "sampled, ε̂ 0.03 at δ 0.05 (100 cases)"
 
 
 def test_a_replayed_seed_does_not_double_n(tmp_path):
@@ -1478,11 +1480,13 @@ def test_the_store_reader_refuses_a_grade_the_evidence_does_not_admit(tmp_path):
     """Audit 1.8: `heldAsRun`'s `admits`. Drawn points graded proved break the store's predicate."""
     bad = dict(_entry(), evidence=_points("Drawn 0"), grade="Proved")
     assert certify.store_errors([bad]) and "does not admit" in certify.store_errors([bad])[0]
-    for coverage, grade in [("Drawn 0", "Sampled"), ("Drawn 0", "Cases"), ("Listed", "Cases"),
+    for coverage, grade in [("Drawn 0", "Sampled"), ("Listed", "Cases"),
                             ("Exhaustive", "ExhaustiveGrade"), ("Bounded 4", "ExhaustiveGrade")]:
         formed = dict(_entry(), evidence=_points(coverage), grade=grade, budgets=dict.fromkeys(certify.SAMPLED_REQUIRES, 1))
         assert certify.store_errors([formed]) == [], coverage
-    for coverage, grade in [("Listed", "ExhaustiveGrade"), ("Bounded 4", "Cases"), ("Exhaustive", "Proved")]:
+    # [bite B3] the grade is derived: a sample is sampled, never cases (a drawn coverage admitted both before)
+    for coverage, grade in [("Listed", "ExhaustiveGrade"), ("Bounded 4", "Cases"), ("Exhaustive", "Proved"),
+                            ("Drawn 0", "Cases")]:
         assert certify.store_errors([dict(_entry(), evidence=_points(coverage), grade=grade)]), coverage
     assert certify.store_errors([dict(_entry(), evidence={"NotRun": "x"}, grade="Cases")])
     (tmp_path / "x.cert.json").write_text(json.dumps([bad]))
@@ -1968,3 +1972,56 @@ def test_a_run_records_the_evidence_of_its_cone(tmp_path, capsys):
     # the conjuncts of `Ops` passed over listed cases: exact, so the cone knows (0, 0)
     assert (evidence["failure"], evidence["risk"]) == (0.0, 0.0) and evidence["links"]
     assert record["demand"]["delta"] == 0.01
+
+
+# ---------------------------------------------------------------------- bite B3: the grade as a projection
+
+def _live_stores():
+    import subprocess
+    listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "*.cert.json"], capture_output=True, text=True,
+                            check=True).stdout.split()
+    return [ROOT / f for f in listed if not f.startswith("record/")]
+
+
+def test_every_stored_grade_is_the_derived_one():
+    """Bite B3's reader check (L10.2): over every store of the tree, each pass's grade is the
+    projection of its evidence's (domain, cost), and every store keeps its predicate."""
+    checked = 0
+    for where in _live_stores():
+        entries = json.loads(where.read_text(encoding="utf-8"))
+        assert certify.store_errors(entries) == [], where
+        for e in entries:
+            if e.get("grade") is not None:
+                assert certify.derived_grade(e.get("evidence")) == e["grade"], (where, e["law"], e.get("conjunct"))
+                checked += 1
+    assert checked > 1000
+
+
+def test_the_grade_is_the_projection_of_domain_and_cost():
+    """certification.lth's `strengthOf` and `gradeOfStrength` (L10.2): one grade per evidence."""
+    def points(coverage):
+        return {"Points": {"evaluated": 3, "raised": 0, "coverage": coverage, "verdict": "Supported"}}
+    assert certify.strength(points("(Drawn 7)")) == ("DistributionDomain", "StatisticalCost")
+    assert certify.derived_grade(points("(Drawn 7)")) == "Sampled"
+    assert certify.derived_grade(points("Listed")) == "Cases"
+    assert certify.derived_grade(points("Exhaustive")) == "ExhaustiveGrade"
+    assert certify.derived_grade(points("(Bounded 4)")) == "ExhaustiveGrade"
+    assert certify.derived_grade({"Cited": "a theorem"}) == "Proved"
+    assert certify.derived_grade("Assumed") == "AssumedGrade"
+    assert certify.derived_grade({"Tested": {"verdict": "Holds"}}) == "Sampled"
+    assert certify.derived_grade({"NotRun": "why"}) is None
+    # a sample no longer admits cases, nor an enumeration cases: the grade is derived, not chosen
+    assert not certify.admits(points("(Drawn 7)"), "Cases") and not certify.admits(points("Exhaustive"), "Cases")
+
+
+def test_a_run_records_its_cone_s_grades_beside_the_weakest(tmp_path, capsys):
+    """Bite B3: the vector of the cone's grades and their combination by the demand's `combine`."""
+    for name, text in [("ops.lth", CONJ_THEORY), ("ops.lut", CONJ_MODELS), ("ops.test.lut", CONJ_TEST),
+                       ("ops.run.lut", CONJ_RUN_OPS)]:
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    main(["certify", str(tmp_path / "ops.test.lut")])
+    capsys.readouterr()
+    assert main(["run", str(tmp_path / "ops.run.lut")]) == 0, capsys.readouterr()
+    certification = json.loads((tmp_path / "ops.run.json").read_text(encoding="utf-8"))[-1]["certification"]
+    assert certification["grades"] and {g["grade"] for g in certification["grades"]} == {"cases"}
+    assert certification["grade"] == "cases"

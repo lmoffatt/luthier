@@ -552,10 +552,11 @@ def _failed(entry):
     return isinstance(entry["outcome"], dict) and "Failed" in entry["outcome"]
 
 
-# certification.lth's `admits` over the coverage of `Points` (test.lth's `grade` of a confirming or a
-# supporting verdict): the grades each coverage admits, `None` for evidence with no coverage
-ADMITTED = {"Exhaustive": {"ExhaustiveGrade", "Cases"}, "Bounded": {"ExhaustiveGrade"}, "Listed": {"Cases"},
-            "Drawn": {"Cases", "Sampled"}, None: {"Cases"}}
+# [wave B, bite B3; L10.2, L10.5, D-2026-10-25-a question 2] certification.lth's `strengthOf`: a pass's
+# strength is the pair (domain, cost), the five grades its projection (`gradeOfStrength`). The domain of
+# points by their coverage; the cost exact on it, statistical for a sample, priced for an assumption.
+COVERAGE_DOMAIN = {"Exhaustive": "WholeDomain", "Bounded": "BoxDomain", "Listed": "ListedDomain",
+                   "Drawn": "DistributionDomain"}
 
 
 def _coverage(evidence):
@@ -565,22 +566,46 @@ def _coverage(evidence):
     return coverage.strip("()").split(" ", 1)[0] if isinstance(coverage, str) else None
 
 
-def admits(evidence, grade):
-    """certification.lth's `admits`: the grades a pass's evidence admits. A citation proved, an
-    assumption assumed, a not-run none, a statistical pass a `Holds` graded sampled, and points
-    the grades their coverage admits (`ADMITTED`)."""
+def strength(evidence):
+    """certification.lth's `strengthOf`: (domain, cost) of a pass's evidence, None for a not-run or a
+    statistical test that did not hold. A citation is exact under its hypotheses, an assumption
+    priced on what it asserts, a statistical `Holds` and a drawn sample statistical on their
+    distribution, points exact on their coverage's domain (listed when they name none)."""
     if isinstance(evidence, dict):
         if "Cited" in evidence:
-            return grade == "Proved"
+            return ("UnderHypotheses", "ExactCost")
         if "Assumed" in evidence:
-            return grade == "AssumedGrade"
-        if "NotRun" in evidence:
-            return False
+            return ("AssertedDomain", "PricedCost")
+        if "NotRun" in evidence or "Vacuous" in evidence:
+            return None
         if "Tested" in evidence:
-            return evidence["Tested"].get("verdict") == "Holds" and grade == "Sampled"
+            return ("DistributionDomain", "StatisticalCost") if evidence["Tested"].get("verdict") == "Holds" else None
     elif evidence == "Assumed":
-        return grade == "AssumedGrade"
-    return grade in ADMITTED[_coverage(evidence)]
+        return ("AssertedDomain", "PricedCost")
+    domain = COVERAGE_DOMAIN.get(_coverage(evidence), "ListedDomain")
+    return (domain, "StatisticalCost" if domain == "DistributionDomain" else "ExactCost")
+
+
+def grade_of_strength(pair):
+    """certification.lth's `gradeOfStrength`: the projection of (domain, cost) to the five grades (L10.2)."""
+    domain, cost = pair
+    if cost == "PricedCost":
+        return "AssumedGrade"
+    if cost == "StatisticalCost":
+        return "Sampled"
+    return {"UnderHypotheses": "Proved", "WholeDomain": "ExhaustiveGrade", "BoxDomain": "ExhaustiveGrade"}.get(domain, "Cases")
+
+
+def derived_grade(evidence):
+    """certification.lth's `derivedGrade`: the grade a pass's evidence projects to, or None."""
+    pair = strength(evidence)
+    return None if pair is None else grade_of_strength(pair)
+
+
+def admits(evidence, grade):
+    """certification.lth's `admits`: a pass's evidence admits exactly its derived grade (bite B3;
+    before, a drawn or an exhaustive coverage admitted two)."""
+    return grade is not None and derived_grade(evidence) == grade
 
 
 def held_as_listed(entry):
