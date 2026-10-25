@@ -975,7 +975,15 @@ L6.15  (His words) What was called cost is four things: the error, a value's pro
        of one structure, a quantale, the base of the levels of equivalence (L3.5): error over [0, ∞]
        with +, uncertainty over distribution functions with a t-norm, evidence over [0, 1] with + or
        max, resources with + in sequence and max in parallel; and a function propagates them when it
-       is non-expansive or Lipschitz (clause 8) (D-2026-10-18-i). [proposed]
+       is non-expansive or Lipschitz (clause 8) (D-2026-10-18-i). (D-2026-10-25-a) For the evidence
+       the base is the pair of the failure bound and its risk, (ε̂, δ), both parts composed by the
+       capped sum, with the orientation Lawvere gives every base, the unit on top and the empty join
+       at the bottom, which for the error is ([0, ∞], +, ≥) (the correction of 2026-10-21 to
+       D-2026-10-18-i); the sum in nats, L10.3's conversion, is a map out of it. (The coordinator's
+       correction of 2026-10-23 to D-2026-10-18-i, from the audit of the algebras) The resources
+       are a typed vector, work, span and peak memory, and no one semiring: work adds in sequence
+       and in parallel, span adds in sequence and takes the max in parallel, peak memory takes the
+       max in sequence and adds in parallel (Blumofe and Leiserson's work and span). [proposed]
 Example:    γ_n needs n·u < 1, false for float32 over an hour at 48 kHz, so the cited bound is void
             there (clause 9)
 References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q, D-2026-10-12-u; W5; P5
@@ -1009,7 +1017,12 @@ History:    draft 0 (6d9dbd3): stated. draft 2 (cd24137): stated as a quotient. 
             identity-law clause of L5.4 joined as clause 11. draft 11 (2026-10-12), his mark: clause
             3 a candidate, with log(resources) added to the cost as the better form
             (D-2026-10-12-u). draft 11 (2026-10-12): renumbered from L13 of draft 10
-            (D-2026-10-12-v). 2026-10-20: clause 15 added, proposed (D-2026-10-18-i).
+            (D-2026-10-12-v). 2026-10-20: clause 15 added, proposed (D-2026-10-18-i). 2026-10-26:
+            clause 15 gains the evidence base of D-2026-10-25-a (the pair (ε̂, δ), the capped sum,
+            Lawvere's orientation, with the error base's orientation of the 2026-10-21 correction)
+            and the coordinator's correction of 2026-10-23 on the resources, a typed vector of work,
+            span and peak memory in place of "+ in sequence and max in parallel"; the clause's
+            original words kept, the corrections after them.
 
 L7  The core is minimal, executable by hand, and its programs are data.
 From:       G0 (a type theory is a few rules whose judgments a person checks; a small trusted
@@ -1348,7 +1361,12 @@ L10.3  The conversion from statistics to an evidence cost is a function with a d
        sample's statistics and the demand's level in, a cost out, filled per theory
        (D-2026-10-12-r); the first instance is −log(1 − ε̂(n, δ)) in nats, with ε̂ the bound on the
        fraction of the distribution where the law's bound fails, from n samples at confidence 1 − δ,
-       and δ the demand's parameter. [settled]
+       and δ the demand's parameter. (D-2026-10-25-a) The base of evidence is the pair (ε̂, δ)
+       itself, under the capped sum min(1, a + b) and in Lawvere's orientation ≥, a smaller pair
+       knowing more; the conversion to nats is a map out of that base and not the base, and the
+       sum of nats, which multiplies the success bounds, is sound only under a declared premise
+       that the failures are independent. Nothing in an entry changes: ε̂ is computed when the
+       entry is served, at the demand's δ. [settled]
 L10.4  A certificate is identified by a hash over its dependency cone (code, cases, seed, the
        distribution and level sampled); it is a frozen snapshot, and a later check does not change
        it but issues a new one that supersedes it, both kept, the latest in front (P3), so progress
@@ -1377,7 +1395,14 @@ L10.8  Links sampled over different distributions do not compose without a law r
        failure fractions summed, which is the probabilistic bound the planner waited for
        (D-2026-10-12-q). The composition algebra belongs to the theory's cost type, the sum its
        first instance; whether a demand accepts a sampled path is its evidence cutoff, a parameter
-       (P11). [proposed]
+       (P11). (D-2026-10-25-a) The union bound is this clause's first instance because it assumes
+       nothing of the links: two links at ε̂ = 0.1 compose to 0.2 by it and to 0.19 by the product
+       that independence would allow. The composition is a parameter of the demand, the capped sum
+       its default, and (his words) "Luthier should provide the mechanisms for definining any
+       reasonable choice, as long as we do not get into an infinite loop": reasonable means that
+       composing never knows more than either part, and the mechanism is the core's
+       `EvidenceComposition`, a theory whose tensor is the one field that varies, the product under
+       the independence premise its second model (bite B2, a9f8f8a). [settled]
 L10.9  No operation on certificates raises a grade, lowers an evidence cost or widens a domain
        without new evidence. [settled]
 L10.10 Only a certifier builds a certificate: the constructor of `Certificate` is in no interface
@@ -1427,7 +1452,7 @@ Source:     the critiques of draft 10 (`record/IA/principles 2026 10 12/`, 1429f
 Status:     proposed in draft 11; clauses 3 and 9 settled on his marks (D-2026-10-12-w); clauses 4
             to 6 settled, moved from L5 and L11; clause 2 reworded on D-2026-10-12-t; clause 7
             carries his correction of draft 7 in grades; clause 10 settled (D-2026-10-13-c, -e);
-            clause 13 proposed (D-2026-10-22-b)
+            clause 13 proposed (D-2026-10-22-b); clause 8 settled (D-2026-10-25-a, question 1)
 History:    draft 11, step 4 (2026-10-12): new entry, under G1, after L7. draft 11 (2026-10-12), his
             marks: clause 2 elaborated with the two kinds of assumption (D-2026-10-12-t); clauses 3
             and 9 marked ok (D-2026-10-12-w). draft 11 (2026-10-12): renumbered from L16 of draft 10
@@ -1437,7 +1462,14 @@ History:    draft 11, step 4 (2026-10-12): new entry, under G1, after L7. draft 
             Boolean slice until the cost types (D-2026-10-16-b). 2026-10-22: clause 13 added,
             proposed (D-2026-10-22-b): GPT's three kinds of record (certificate of a model, evidence
             of one computation, derivation of a value) written against this entry, with the absence
-            of a cycle the model's and the precedent D-2026-10-22-a his.
+            of a cycle the model's and the precedent D-2026-10-22-a his. 2026-10-26: clauses 3 and
+            8 gain the evidence base of D-2026-10-25-a (question 1 of the algebra audit,
+            record/plan/audit-algebras-2026-10-22/decisions.md): the pair (ε̂, δ) under the capped
+            sum in Lawvere's orientation, the union bound clause 8's first instance, the nats a map
+            out of the base, the product only under independence; his addition, that the
+            composition is a parameter and any choice that cannot loop is definable, with the core's
+            `EvidenceComposition` of bite B2 (report-B2.md beside the decisions, a9f8f8a) as the
+            mechanism; clause 8 settled on it, clause 3 already settled.
 
 L11 Luthier orchestrates other languages: an extern is a specimen certified by its laws, and what
     does not follow Luthier's way lives in a world.
