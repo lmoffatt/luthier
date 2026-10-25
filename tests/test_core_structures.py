@@ -70,6 +70,41 @@ def test_every_core_control_refutes_its_candidate(controls):
         (o.spec.law, (o.verdict, o.raised[:1], o.conjunct)) for o in controls if o.verdict != 'Refuted']
 
 
+# The bases of evidence and error (bite B2 of record/plan/audit-algebras-2026-10-22/execution.md,
+# D-2026-10-25-a): core.lut's five claims graded on their listed cases, their six controls refuted,
+# the product composition refuted as assumption-free at a = b = 0.1 (the audit's 4.2).
+BASE_CLAIMS = {'ExtendedIsAnObject', 'ErrorIsABase', 'CappedSumIsAssumptionFree', 'ProductIsAComposition', 'NatsIsAConversion'}
+
+
+@pytest.fixture(scope='module')
+def bases():
+    return tester.run_tests(TESTER / 'bases_laws.test.lut')
+
+
+@pytest.fixture(scope='module')
+def base_controls():
+    return tester.run_tests(TESTER / 'bases_controls.test.lut')
+
+
+def test_the_two_bases_are_graded_on_their_listed_cases(bases):
+    assert {o.spec.law for o in bases} == BASE_CLAIMS
+    assert all(o.grade is not None and o.verdict != 'Refuted' for o in bases), [
+        (o.spec.law, o.verdict, o.raised[:1]) for o in bases if o.grade is None or o.verdict == 'Refuted']
+
+
+def test_every_base_control_is_refuted(base_controls):
+    assert {o.spec.law for o in base_controls} == BASE_CLAIMS
+    assert len(base_controls) == 6
+    assert all(o.verdict == 'Refuted' for o in base_controls), [
+        (o.spec.law, (o.verdict, o.raised[:1], o.conjunct)) for o in base_controls if o.verdict != 'Refuted']
+
+
+def test_the_product_composition_is_below_the_union_bound(base_controls):
+    refuted = [o for o in base_controls if o.spec.law == 'CappedSumIsAssumptionFree']
+    assert len(refuted) == 1 and refuted[0].conjunct.startswith('AtLeastTheUnionBound')
+    assert '0.1' in str(refuted[0].refuting)
+
+
 def test_core_import_cycle_keeps_the_global_type_identities():
     from luthier.check import check
     path = CORE / 'lists.lut'
