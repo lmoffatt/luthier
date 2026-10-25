@@ -86,15 +86,44 @@ when every part of every law has a model it refuted (L9).
 
 The certificate is the object everything else leans on. It records what is known of a law: the
 domain the check covered, the bound observed, and the evidence, which is a cost: zero for a
-theorem or an exhaustive run, a finite cost for a sample, computed from its statistics, and for an
-assumption the cost the demander is willing to pay for it, which no default supplies. A
-certificate is frozen; a later check does not change it but issues a new one that supersedes it,
-and progress is the chain of certificates. A certificate serves every demand whose cutoff it
-meets, and it travels: if one implementation is certified and another is certified equal to it
-within some distance, the second inherits the first's guarantee, the bound and the evidence cost
-added up, on the inputs both cover, and on nothing else. Two sampled links compose when they were
-sampled over the same distribution, by adding their chances of failure; nothing raises a grade or
-widens a domain without new evidence (L10).
+theorem or an exhaustive run, zero for chosen cases on the cases listed and infinite elsewhere, a
+finite cost for a sample, computed from its statistics, and for an assumption the cost the
+demander is willing to pay for it, which no default supplies. The strength of a certificate is
+therefore a pair, the domain it covers and the cost of its evidence there, and the five grades
+are names for the reader. Three chosen cases say nothing about a fourth input, where a sample
+does say something, so neither grade outranks the other; a theorem, an exhaustive run and chosen
+cases are one kind, exact on a stated domain. A demand is met by a certificate whose domain covers
+its input and whose cost is within the demand's cutoff. The interpreter, whose laws are still
+Boolean, ranks the five grades in one line until the cost types exist. For a sample the evidence
+is itself a pair: ε̂, a bound on the fraction of the sampled distribution where the law fails, and
+δ, the chance that this bound is wrong, which the demand chooses. A single number can be made of
+the pair, but that number is a reading of it, and adding such numbers along a chain is sound only
+when the failures are declared independent. A certificate is frozen; a later check does not change
+it but issues a new one that supersedes it, and progress is the chain of certificates. A
+certificate serves every demand whose cutoff it meets, and it travels: if one implementation is
+certified and another is certified equal to it within some distance, the second inherits the
+first's guarantee, the bound and the evidence cost added up, on the inputs both cover, and on
+nothing else. Two sampled links compose when they were sampled over the same distribution, by
+adding their chances of failure, capped at one. The sum is the default because it assumes nothing
+about how the failures depend on each other: two links at ε̂ = 0.1 compose to 0.2, where
+independence would allow 0.19. The rule of composition is a parameter of the demand, and Luciano
+asked that Luthier provide the mechanism to define any reasonable rule, provided none can loop;
+reasonable means that a composition never knows more than either of its parts. Nothing raises a
+grade or widens a domain without new evidence (L10).
+
+Evidence serves what it is about, and nothing else. A law that passes on one model is evidence
+about that model; a run on another model of the same theory needs passes of its own. A failure
+counts against the model it failed on, with one exception: when a law is stated for every model of
+a theory and fails on a model that satisfies the theory's defining laws, the law does not follow
+from the theory, and the failure counts against every model. A control is about the law: that the
+law refutes a broken model holds whatever model it is later checked on, so one control serves
+every model of the theory. What a run observes of one result, the residual on these inputs or the
+error a crossing between languages added, is about that result: it goes into the result's
+derivation and the run's record, and it changes no certificate of the model. So the certificate of
+a model, the evidence of one computation and the derivation of its value are three records; a
+derivation names the certificates its route relied on, a certificate names no result, and no
+object carries all three. The interpreter has kept passes, failures and controls apart this way
+since 2026-10-22; the principle that says it, with the derivation, is proposed (L10.13).
 
 Declaring comes before defining, and defining before inhabiting. A name declared without a body
 is a hole: it may be an axiom, an input, an external function, or something not yet written.
