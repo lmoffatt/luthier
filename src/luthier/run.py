@@ -1945,7 +1945,8 @@ ACCEPT = "Sampled"
 # provisional run as assumed (D-2026-10-16-c).
 DEMAND_DEFAULTS = {"entry": "main", "accepts": ACCEPT, "assumes": (), "fuel": None, "timeLimit": None, "sets": (),
                    "checked": False, "strategy": "ForwardOnDemand", "fresh": False,
-                   "axioms": "AssumedGrade", "roots": ("ObserverIsFaithful",), "combine": "weakest", "bound": 1.0}
+                   "axioms": "AssumedGrade", "roots": ("ObserverIsFaithful",), "combine": "weakest", "bound": 1.0,
+                   "delta": 0.05, "composition": "cappedSumComposition"}
 
 # the strategy that computes a demand, by the strategy it asks (demand.lth's `Ran`,
 # `RanIsASpecimenOfTheAsked`): run.py reduces by call by need whatever is asked
@@ -1971,7 +1972,9 @@ class Demand:
     `recorded`). `entry` the name as the user writes it; `accepts` the weakest grade
     accepted (test.lth's `Grade`, by constructor name); `sets` each hole's value (`--set`, parsed by
     the hole's type, `fill`), in the order given; `pinned` the interpreter's revision the lock pins,
-    None when none does. `decoration` and `delta` are `nothing` in this draft (demand.lth §1).
+    None when none does. `decoration` is `nothing` in this draft (demand.lth §1); [bite B1] `delta`
+    the confidence of sampled evidence, 0.05 by default (`run --delta`), and `composition` how the
+    evidence of the cone's laws composes, core.lut's capped sum by default (`run --composition`).
     `assumes` the provisional externs run as assumed, by name (`--accept assumed:NAME`,
     D-2026-10-16-c); the modes of running (D-2026-10-16-d): `fuel` the reduction steps, None for no
     bound; `time_limit` in seconds, None for none; `strategy` the strategy asked, by constructor
@@ -1983,7 +1986,7 @@ class Demand:
     checked: bool
     pinned: str | None
     decoration: None = None
-    delta: float | None = None
+    delta: float = DEMAND_DEFAULTS["delta"]
     axioms: str = DEMAND_DEFAULTS["axioms"]
     roots: tuple = DEMAND_DEFAULTS["roots"]
     assumes: tuple = ()
@@ -1997,6 +2000,9 @@ class Demand:
     # [wave C, bite C1] the cap on a numerical law's worst ratio of distance to the theory's bound
     # (demand.lth's `bound`, laws.lth §5; certify.serves), one by default (`run --bound`); recorded
     bound: float = DEMAND_DEFAULTS["bound"]
+    # [wave B, bite B1] how the pairs (ε̂, δ) of the cone's laws compose (certify.COMPOSITIONS, by the
+    # name of core.lut's model), the capped sum by default (L10.8, D-2026-10-25-a); recorded
+    composition: str = DEMAND_DEFAULTS["composition"]
 
     def inner(self, entry):
         """demand.lth's `inner`: the demand an inner action receives, every cutoff kept (L12.3)."""
@@ -2030,7 +2036,7 @@ class Demand:
                 "fuel": self.fuel, "timeLimit": self.time_limit, "checked": self.checked, "lock": self.pinned,
                 "decoration": self.decoration, "strategy": self.strategy, "fresh": self.fresh,
                 "axioms": certify.GRADE_WORDS[self.axioms], "roots": list(self.roots), "combine": self.combine,
-                "bound": self.bound}
+                "bound": self.bound, "composition": self.composition}
 
     def key(self, live_holes):
         """plan.lth's `demandKey` (8.S8, `KeyReadsOnlyTheCone`, `KeyReadsTheType`): the decoration,
@@ -2040,7 +2046,8 @@ class Demand:
 
 
 def demand_of(main=None, fuel=None, values=(), accept=None, checked=None, pinned=None, assumes=None,
-              time_limit=None, strategy=None, fresh=None, combine=None, axioms=None, roots=None, bound=None):
+              time_limit=None, strategy=None, fresh=None, combine=None, axioms=None, roots=None, bound=None,
+              delta=None, composition=None):
     """The run's demand from its arguments, a missing one given its default (`DEMAND_DEFAULTS`,
     demand_model.lut's `theDemand`); `pinned` is what the lock pins (`lock_status`, 12.S13)."""
     d = DEMAND_DEFAULTS
@@ -2049,6 +2056,16 @@ def demand_of(main=None, fuel=None, values=(), accept=None, checked=None, pinned
     from . import certify
     if combine is not None and combine not in certify.COMBINATIONS:
         raise RunError(f"unknown combination {combine}: one of {', '.join(certify.COMBINATIONS)}")
+    if composition is not None and composition not in certify.COMPOSITIONS:
+        raise RunError(f"unknown composition {composition}: one of {', '.join(certify.COMPOSITIONS)}")
+    if delta is not None and not 0.0 < float(delta) <= 1.0:
+        raise RunError(f"--delta {delta}: a confidence level, above 0 and at most 1")
+    premise = certify.COMPOSITION_PREMISES.get(composition)
+    if premise is not None and premise not in (assumes or ()) and premise not in (roots or d["roots"]):
+        # [proposed, bite B1] the product composes only under the independence of the failures
+        # (algebraic.lth's `IndependentComposition`), which the demand accepts by name (L10.3)
+        raise RunError(f"--composition {composition} holds only if {premise}: accept it by name with "
+                       f"--accept assumed:{premise}")
     return Demand(entry=d["entry"] if main is None else main, accepts=accept or d["accepts"],
                   fuel=d["fuel"] if fuel is None else fuel, sets=tuple(dict(values).items()),
                   checked=d["checked"] if checked is None else checked, pinned=pinned,
@@ -2059,7 +2076,9 @@ def demand_of(main=None, fuel=None, values=(), accept=None, checked=None, pinned
                   combine=d["combine"] if combine is None else combine,
                   axioms=d["axioms"] if axioms is None else axioms,
                   roots=tuple(dict.fromkeys(d["roots"] if roots is None else roots)),
-                  bound=d["bound"] if bound is None else float(bound))
+                  bound=d["bound"] if bound is None else float(bound),
+                  delta=d["delta"] if delta is None else float(delta),
+                  composition=d["composition"] if composition is None else composition)
 
 
 def _head_name(x):
@@ -2539,6 +2558,7 @@ def certification(loaded, program, entry, demand, refuse=True):
     # and every conjunct of its theory a law without a model parameter stands for, by the hash of
     # each entry's canonical JSON
     served = {_entry_hash(e) for c in with_laws for d in c["laws"] for e in certify.witness(d, entries) or ()}
+    evidence = _cone_evidence(with_laws, entries, demand)
     at_first = {f["name"] for f in firsts}
     code_only = {"code": cones.cone(entry)["code"], "hosts": [], "interpreter": ""}
     return {"cone": cones.hash(entry), "interpreter": certify.interpreter_revision(),
@@ -2562,9 +2582,41 @@ def certification(loaded, program, entry, demand, refuse=True):
             "assumed": assumed,
             # the certificates that served the cone and the stores read, by hash (8.S8, D-2026-10-15-d)
             "certificates": sorted(served), "stores_read": stores_read,
+            # the pair (ε̂, δ) of the cone at the demand's δ, by its composition (bite B1, L10.3)
+            "evidence": evidence,
             "_firsts": firsts,
             # what a refusal would have listed, for `eval` only: a run that starts has none
             **({} if refuse else {"refused": [certify.show_refusal(r, entries) for r in refusals]})}
+
+
+def _cone_evidence(with_laws, entries, demand):
+    """[wave B, bite B1; L10.3, L10.8, D-2026-10-25-a question 1] What the certificates that served the
+    cone know, as the core's evidence base: per witness entry (each once) the pair (ε̂, δ) at the
+    demand's δ (`certify.entry_evidence`; a sample with its cases and its regions, each region's ε̂
+    from its own cases), composed by the demand's composition, the capped sum by default. Computed from
+    the entries and the demand, recorded with the run, stored in no entry. An assumed or a
+    statistical witness gives no pair (the first is listed under `assumed`, the second carries its
+    rates in its entry)."""
+    from . import certify
+    links, seen = [], set()
+    for c in with_laws:
+        for d in c["laws"]:
+            for e in certify.witness(d, entries) or ():
+                h = _entry_hash(e)
+                pair = certify.entry_evidence(e, entries, demand.delta)
+                if h in seen or pair is None:
+                    continue
+                seen.add(h)
+                link = {"law": e["law"], **({"conjunct": e["conjunct"]} if e.get("conjunct") else {}),
+                        "failure": pair[0], "risk": pair[1]}
+                if certify._sampled_pass(e):
+                    link["cases"] = certify.pooled(entries, e["law"], e["cone"], certify.union_key(e))
+                    link["regions"] = {r: {"cases": n, "failure": eps}
+                                       for r, (n, eps) in certify.region_evidence(entries, e, demand.delta).items()}
+                links.append(link)
+    failure, risk = certify.compose([(l["failure"], l["risk"]) for l in links], demand.composition)
+    return {"failure": failure, "risk": risk, "delta": demand.delta, "composition": demand.composition,
+            "links": links}
 
 
 def _refutes(refusal):
@@ -3048,7 +3100,7 @@ def refuse_provisional(kept, entry, assumes=()):
 
 
 def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=None, assumes=None,
-        time_limit=None, strategy=None, combine=None, bound=None):
+        time_limit=None, strategy=None, combine=None, bound=None, delta=None, composition=None):
     """Run `main` of the file at `path` with its holes filled by `sets`, once the store certifies
     its cone at the grade `accept` (12.S17; `Refused` otherwise, before anything is evaluated);
     gives the standard output, the values set and the certification state of the cone. `checked`
@@ -3089,7 +3141,7 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
     loaded = Loaded(path)
     values, empty = fill(loaded, sets)
     demand = demand_of(main, fuel, values, accept, checked, lock["pinned"], assumes, time_limit, strategy, fresh,
-                       combine, bound=bound)
+                       combine, bound=bound, delta=delta, composition=composition)
     entry = loaded.name(loaded.top, demand.entry) or demand.entry
     kept = runtime_slice(loaded.acts, entry, core_data(loaded))
     roots = _first_action_roots(loaded, kept)

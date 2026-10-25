@@ -75,6 +75,7 @@ import hashlib
 import importlib.metadata
 import importlib.util
 import json
+import math
 import os
 import platform
 import subprocess
@@ -1241,6 +1242,144 @@ def pools(entries, law, current):
     return words
 
 
+# ---------------------------------------------------------------------- the evidence of a sampled pass
+
+# [wave B, bite B1, 2026-10-26; L10.3, spec 7.S11, D-2026-10-25-a question 1] What a sampled pass
+# knows of its law is the pair (ε̂, δ), the core's `EvidenceBound` (core/structures/algebraic.lth):
+# with n cases drawn and none failed, the fraction of the distribution where the law fails is at most
+# ε̂(n, δ), except with probability δ. ε̂ is computed here when an entry is read for a demand, from the
+# n of the union of the law's stretches (`pooled`; per region, `region_evidence`) at the demand's δ, and
+# stored nowhere: the entry keeps n and δ is the demand's, so storing ε̂ would bake in a δ. A pass that
+# is exact on its domain (exhaustive, cases, proved) knows (0, 0), the base's unit; a statistical
+# law's pass (`Tested`) carries its own rates and an assumed one the demand's price, so neither gives
+# a pair here [proposed]. The pairs of several obligations (the conjuncts of a law, the laws of a
+# run's cone) compose by the demand's composition, the capped sum by default (L10.8).
+
+# demand_model.lut's `theDemand` default for δ, the confidence of sampled evidence (8.S1's `delta d`,
+# L5.19); run.py's DEMAND_DEFAULTS mirrors it
+DELTA = 0.05
+
+
+def epsilon_hat(n, delta):
+    """certification_model.lut's `ruleOfThree` (certification.lth's `SampledBound`): min(1, −log δ / n),
+    the rule of three at δ = 0.05 (Hanley and Lippman-Hand 1983; spec 7.S11: 3/n, nothing below three
+    cases), 1 when nothing was drawn or δ is 0. Sound: (1 − ε̂)^n ≤ e^(−n ε̂) ≤ δ (`SoundAtNoFailure`).
+    [proposed] Not the exact 1 − δ^(1/n), which is smaller by about ε̂²/2; the spec's rule kept."""
+    if n <= 0 or delta <= 0.0:
+        return 1.0
+    return min(1.0, -math.log(delta) / n)
+
+
+UNIT = (0.0, 0.0)  # the evidence base's neutral: certainty
+
+
+def capped_sum(x, y):
+    """core.lut's `cappedSumComposition`: min(1, a + b) in each part (Boole's inequality, L10.8)."""
+    return (min(1.0, x[0] + y[0]), min(1.0, x[1] + y[1]))
+
+
+def product(x, y):
+    """core.lut's `productComposition`: a + b − ab in each part, sound only when the failures of the
+    links are independent (`IndependentComposition`'s axiom `FailuresIndependent`)."""
+    return (x[0] + y[0] - x[0] * y[0], x[1] + y[1] - x[1] * y[1])
+
+
+# the compositions a demand may name (demand.lth's `composition`), by the name of core.lut's model,
+# the capped sum by default; and the axiom a demand must accept by name to compose by one of them
+COMPOSITIONS = {"cappedSumComposition": capped_sum, "productComposition": product}
+COMPOSITION = "cappedSumComposition"
+COMPOSITION_PREMISES = {"productComposition": "FailuresIndependent"}
+COMPOSITION_WORDS = {"cappedSumComposition": "the capped sum", "productComposition": "the product"}
+
+
+def compose(pairs, composition=COMPOSITION):
+    """The tensor of the pairs by the composition named, from the unit."""
+    return functools.reduce(COMPOSITIONS[composition], pairs, UNIT)
+
+
+def _sampled_pass(entry):
+    """A pass over points drawn from a distribution (`Drawn`): the passes whose evidence is a sample."""
+    return passed(entry) and isinstance(entry.get("evidence"), dict) and "Points" in entry["evidence"] \
+        and _coverage(entry["evidence"]) == "Drawn"
+
+
+def entry_evidence(entry, entries, delta=DELTA):
+    """The pair (ε̂, δ) a passed entry gives a demand at its δ: for a sample, ε̂ of the size of the
+    union its entry belongs to (`pooled`, at the entry's cone); (0, 0) for a pass exact on its domain;
+    None for a statistical or an assumed pass, or no pass."""
+    if not passed(entry) or entry.get("grade") is None:
+        return None
+    if _sampled_pass(entry):
+        n = pooled(entries, entry["law"], entry["cone"], union_key(entry))
+        return (epsilon_hat(n, delta), delta)
+    if entry["grade"] in ("Proved", "ExhaustiveGrade", "Cases"):
+        return UNIT
+    return None
+
+
+def region_evidence(entries, entry, delta=DELTA):
+    """Per grading region of the entry's law under its binding, (n, ε̂(n, δ)), n the region's cases
+    over the union of its stretches (`binding_evidence`); {} for a law with no region."""
+    counts = binding_evidence(entries, entry["law"], entry["cone"], entry["binding"], entry.get("conjunct"))
+    regions = law_regions([e for e in _laws_own(entries) if e["law"] == entry["law"] and e["cone"] == entry["cone"]
+                           and e.get("conjunct") == entry.get("conjunct")])
+    return {r["name"]: (counts.get(_key(r), 0), epsilon_hat(counts.get(_key(r), 0), delta)) for r in regions}
+
+
+def obligation_evidence(entries, law, current, conjunct=None, delta=DELTA, composition=COMPOSITION):
+    """The evidence of one obligation of a law at its hash (the law, or its conjunct named): per union
+    of its sampled passes (one binding and sampling), ε̂ of the union's size, composed across unions
+    (two bindings are two obligations); (0, 0) when its passes are exact; None when it has no pass
+    that gives a pair. With the sizes of the unions."""
+    own = [e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current and e.get("conjunct") == conjunct]
+    pairs, sizes, seen = [], [], []
+    for e in own:
+        key = union_key(e)
+        if not _sampled_pass(e) or key in seen:
+            continue
+        seen.append(key)
+        n = pooled(entries, law, current, key)
+        pairs.append((epsilon_hat(n, delta), delta))
+        sizes.append(n)
+    if pairs:
+        return compose(pairs, composition), sizes
+    if any(entry_evidence(e, entries, delta) == UNIT for e in own):
+        return UNIT, []
+    return None
+
+
+def _g(x):
+    return f"{x:.2g}"
+
+
+def evidence_text(entries, law, current, conjuncts=None, delta=DELTA, composition=COMPOSITION):
+    """What `certify` and `check -v` add to a sampled law's standing (bite B1): ε̂ at δ per obligation
+    with its cases, and for a conjunction the pair its conjuncts compose to; "" when no obligation
+    was sampled."""
+    if not conjuncts:
+        found = obligation_evidence(entries, law, current, None, delta, composition)
+        if found is None or not found[1]:
+            return ""
+        (failure, risk), sizes = found
+        return f"ε̂ {_g(failure)} at δ {_g(delta)} ({' + '.join(str(n) for n in sizes)} cases)"
+    found = {c: obligation_evidence(entries, law, current, c, delta, composition) for c in conjuncts}
+    sampled = {c: f for c, f in found.items() if f is not None and f[1]}
+    if not sampled:
+        return ""
+    shown = {c: (_g(f[0][0]), " + ".join(str(n) for n in f[1])) for c, f in sampled.items()}
+    if len(set(shown.values())) == 1:
+        (eps, n), = set(shown.values())
+        which = f"each of {len(conjuncts)} conjuncts" if len(sampled) == len(conjuncts) else \
+            f"each of {len(sampled)} of {len(conjuncts)} conjuncts"
+        head = f"ε̂ {eps} at δ {_g(delta)} in {which} ({n} cases)"
+    else:
+        head = f"at δ {_g(delta)}, ε̂ " + ", ".join(f"{eps} in {c} ({n} cases)" for c, (eps, n) in shown.items())
+    if len([f for f in found.values() if f is not None]) < 2:
+        return head
+    failure, risk = compose([f[0] for f in found.values() if f is not None], composition)
+    return f"{head}, ({_g(failure)}, {_g(risk)}) composed by {COMPOSITION_WORDS[composition]}"
+
+
 CUTOFFS = ("alpha", "beta", "delta", "initial")  # one test: the same rates and sample size; the budget aside
 
 
@@ -1312,6 +1451,13 @@ def standing(entries, law, current, conjuncts=None):
         shown = f"supported, {GRADE_WORDS[g]}: held at {tested_text(tested)}" if tested else GRADE_WORDS[g]
         if lowered:  # the regions with no case that held the grade at sampled (D-2026-10-16-i)
             shown += f" (no case in {', '.join(lowered)})"
+        # [bite B1] ε̂ at the default δ, computed from the union's n (L10.3)
+        if conjuncts is None:
+            conjuncts = list(dict.fromkeys(c for e in _laws_own(entries) if e["law"] == law and e["cone"] == current
+                                           for c in e.get("conjuncts") or ())) or None
+        evidence = evidence_text(entries, law, current, conjuncts)
+        if evidence:
+            shown += f", {evidence}"
         # the union of its stretches, when it pools two or more (D-2026-10-16-g)
         return "; ".join([shown] + pools(entries, law, current))
     failed = next((e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current

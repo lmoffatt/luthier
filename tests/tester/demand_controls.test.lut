@@ -78,17 +78,20 @@ dropAxioms (d : Demand) (h : Hash) : RunRecord := { entry := (recorded d h).entr
   accept := (recorded d h).accept, assumes := (recorded d h).assumes, delta := (recorded d h).delta, fuel := (recorded d h).fuel,
   timeLimit := (recorded d h).timeLimit, checked := (recorded d h).checked, lock := (recorded d h).lock,
   decoration := (recorded d h).decoration, strategy := (recorded d h).strategy, fresh := (recorded d h).fresh,
-  axioms := AssumedGrade, roots := (recorded d h).roots, combine := (recorded d h).combine, bound := (recorded d h).bound }
+  axioms := AssumedGrade, roots := (recorded d h).roots, combine := (recorded d h).combine, bound := (recorded d h).bound,
+  composition := (recorded d h).composition }
 dropRoots (d : Demand) (h : Hash) : RunRecord := { entry := (recorded d h).entry, cone := h, parameters := (recorded d h).parameters,
   accept := (recorded d h).accept, assumes := (recorded d h).assumes, delta := (recorded d h).delta, fuel := (recorded d h).fuel,
   timeLimit := (recorded d h).timeLimit, checked := (recorded d h).checked, lock := (recorded d h).lock,
   decoration := (recorded d h).decoration, strategy := (recorded d h).strategy, fresh := (recorded d h).fresh,
-  axioms := (recorded d h).axioms, roots := nil, combine := (recorded d h).combine, bound := (recorded d h).bound }
+  axioms := (recorded d h).axioms, roots := nil, combine := (recorded d h).combine, bound := (recorded d h).bound,
+  composition := (recorded d h).composition }
 dropCombine (d : Demand) (h : Hash) : RunRecord := { entry := (recorded d h).entry, cone := h, parameters := (recorded d h).parameters,
   accept := (recorded d h).accept, assumes := (recorded d h).assumes, delta := (recorded d h).delta, fuel := (recorded d h).fuel,
   timeLimit := (recorded d h).timeLimit, checked := (recorded d h).checked, lock := (recorded d h).lock,
   decoration := (recorded d h).decoration, strategy := (recorded d h).strategy, fresh := (recorded d h).fresh,
-  axioms := (recorded d h).axioms, roots := (recorded d h).roots, combine := "weakest", bound := (recorded d h).bound }
+  axioms := (recorded d h).axioms, roots := (recorded d h).roots, combine := "weakest", bound := (recorded d h).bound,
+  composition := (recorded d h).composition }
 policyDemands : List Demand := [theDemand (entry <- "main") (axioms <- Cases), theDemand (entry <- "main") (roots <- ["Other"]),
   theDemand (entry <- "main") (combine <- "strongest"), theDemand (entry <- "main") (bound <- 0.5)]
 -- [bite C1] and for the cap on a numerical law's ratio, put back at its default
@@ -96,7 +99,8 @@ dropBound (d : Demand) (h : Hash) : RunRecord := { entry := (recorded d h).entry
   accept := (recorded d h).accept, assumes := (recorded d h).assumes, delta := (recorded d h).delta, fuel := (recorded d h).fuel,
   timeLimit := (recorded d h).timeLimit, checked := (recorded d h).checked, lock := (recorded d h).lock,
   decoration := (recorded d h).decoration, strategy := (recorded d h).strategy, fresh := (recorded d h).fresh,
-  axioms := (recorded d h).axioms, roots := (recorded d h).roots, combine := (recorded d h).combine, bound := 1.0 }
+  axioms := (recorded d h).axioms, roots := (recorded d h).roots, combine := (recorded d h).combine, bound := 1.0,
+  composition := (recorded d h).composition }
 droppers : List (Demand -> Hash -> RunRecord) := [dropAxioms, dropRoots, dropCombine, dropBound]
 hashes : List Hash := ["sha256:aaaa"]
 test "RecordKeepsThePolicies" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "record" "droppers",

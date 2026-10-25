@@ -52,6 +52,14 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("--bound", type=float, default=None, metavar="RATIO",
                        help="the cap on a numerical law's worst ratio of error to its theory's bound that a "
                             "certificate must meet to serve (demand.lth's bound, laws.lth §5) [default 1]")
+    p_run.add_argument("--delta", type=float, default=None, metavar="DELTA",
+                       help="the confidence of sampled evidence: a sampled certificate bounds the failure "
+                            "fraction by ε̂(n, δ) except with probability δ (demand.lth's delta, L10.3) "
+                            "[default 0.05]")
+    p_run.add_argument("--composition", choices=["cappedSumComposition", "productComposition"], default=None,
+                       help="how the evidence (ε̂, δ) of the cone's laws composes (core.lut's models, L10.8) "
+                            "[default cappedSumComposition; productComposition needs --accept "
+                            "assumed:FailuresIndependent]")
     p_run.add_argument("--combine", choices=["weakest", "strongest"], default=None,
                        help="how a law's grades combine over its regions and bindings (5.S8, D-2026-10-16-i) "
                             "[default weakest; proposed, a field of the demand]")
@@ -127,7 +135,7 @@ def main(argv: list[str] | None = None) -> int:
             grade, assumes = _accepts(ns.accept)
             strategy = {"forward-on-demand": "ForwardOnDemand", "call-by-need": "CallByNeed"}.get(ns.strategy)
             output, values, state = run(ns.file, ns.main, ns.fuel, ns.set, grade, ns.checked, ns.fresh, assumes,
-                                        ns.time_limit, strategy, ns.combine, ns.bound)
+                                        ns.time_limit, strategy, ns.combine, ns.bound, ns.delta, ns.composition)
             print(output, end="")
             record(ns.file, state["demand"]["entry"], values, output, state)
             return 0

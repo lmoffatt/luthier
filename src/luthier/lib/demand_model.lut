@@ -25,13 +25,14 @@ import "test.lth" Grade Sampled AssumedGrade
 -- needed more, and `certify` keeps its own budget, 7.S8); forward on demand as the strategy
 -- (8.S3; run.py's call by need is its specimen while plan.lth's `TheDefaultsAgree` holds); not
 -- fresh; `main` as the entry; no hole set; not checked; nothing pinned; no decoration (the
--- identity, 8.S1); no confidence (demand.lth §1).
+-- identity, 8.S1); [bite B1] a confidence of 0.05 for sampled evidence, the spec's rule of three
+-- (7.S11), and the capped sum as the composition of evidence (L10.8, D-2026-10-25-a).
 theDemand (entry : String <- "main") (accepts : Grade <- Sampled) (assumes : List String <- nil)
           (fuel : Maybe Nat <- nothing) (timeLimit : Maybe Float64 <- nothing)
           (sets : List (String * Value) <- nil) (checked : Bool <- false) (pinned : Maybe String <- nothing)
           (strategy : Strategy <- ForwardOnDemand) (fresh : Bool <- false)
           (axioms : Grade <- AssumedGrade) (roots : List String <- ["ObserverIsFaithful"]) (combine : String <- "weakest")
-          (bound : Float64 <- 1.0) : Demand :=
-  { entry := entry, decoration := nothing, accepts := accepts, assumes := assumes, delta := nothing, fuel := fuel,
+          (bound : Float64 <- 1.0) (delta : ProbabilityLevel <- 0.05) (composition : String <- "cappedSumComposition") : Demand :=
+  { entry := entry, decoration := nothing, accepts := accepts, assumes := assumes, delta := delta, fuel := fuel,
     timeLimit := timeLimit, sets := sets, checked := checked, pinned := pinned, strategy := strategy, fresh := fresh,
-    axioms := axioms, roots := roots, combine := combine, bound := bound }
+    axioms := axioms, roots := roots, combine := combine, bound := bound, composition := composition }

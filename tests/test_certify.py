@@ -1887,3 +1887,84 @@ def test_the_latest_in_front_is_the_order_written():
     late, early = entry(seed=1), dict(entry(seed=2), date="2026-10-13T00:00:00+00:00")
     assert certify.store_errors([early, late]) == []
     assert certify.record([late], early) == [early, late]
+
+
+# ---------------------------------------------------------------------- bite B1: ε̂ at serve time
+
+TAPE = ROOT / "docs" / "concepts" / "tape.test.lut"
+
+
+def _drawn(n, seed=1, conjunct=None, law="L", regions=None):
+    e = {"law": law, "cone": "h", "binding": [{"parameter": "x", "generator": "SampledMode", "fingerprint": "d"}],
+         "seed": seed, "cases": n, "reach": [], "outcome": "Passed", "grade": "Sampled",
+         "evidence": {"Points": {"evaluated": n, "raised": 0, "coverage": f"(Drawn {seed})", "verdict": "Supported"}}}
+    if conjunct is not None:
+        e.update(conjunct=conjunct, conjuncts=["P", "Q"])
+    if regions is not None:
+        e["regions"] = [{"region": {"source": "FromLaw", "name": r}, "n": k} for r, k in regions.items()]
+    return e
+
+
+def test_epsilon_hat_is_the_rule_of_three_and_sound():
+    """L10.3, 7.S11: min(1, −log δ / n), 1 with nothing drawn; (1 − ε̂)^n ≤ δ (`SoundAtNoFailure`)."""
+    assert f"{certify.epsilon_hat(200, 0.05):.2g}" == "0.015"
+    assert certify.epsilon_hat(0, 0.05) == 1.0 and certify.epsilon_hat(2, 0.05) == 1.0
+    for n in (1, 3, 10, 200, 10_000):
+        for delta in (0.01, 0.05, 0.5, 1.0):
+            e = certify.epsilon_hat(n, delta)
+            assert e >= 1.0 or (1.0 - e) ** n <= delta
+
+
+def test_a_sampled_pass_gives_its_pair_at_the_demand_s_delta_and_the_union_s_n():
+    """Bite B1: ε̂ from the pooled n (two seeds of 100 are one sample of 200), at the δ asked, stored
+    nowhere; an exact pass gives (0, 0); the composition is the capped sum by default."""
+    a, b = _drawn(100, seed=1), _drawn(100, seed=2)
+    pair = certify.entry_evidence(a, [a, b], 0.05)
+    assert pair == (certify.epsilon_hat(200, 0.05), 0.05)
+    assert certify.entry_evidence(a, [a, b], 0.01)[0] > pair[0]
+    assert "failure" not in a and "risk" not in a  # nothing written in the entry
+    exact = dict(_drawn(5), grade="Cases",
+                 evidence={"Points": {"evaluated": 5, "raised": 0, "coverage": "Listed", "verdict": "Supported"}})
+    assert certify.entry_evidence(exact, [exact]) == certify.UNIT
+    assert certify.compose([(0.1, 0.1), (0.1, 0.1)]) == (0.2, 0.2)
+    assert certify.compose([(0.1, 0.1), (0.1, 0.1)], "productComposition") == pytest.approx((0.19, 0.19))
+    # per region, each from its own cases
+    r = _drawn(200, regions={"x boundary": 13})
+    assert certify.region_evidence([r], r) == {"x boundary": (13, certify.epsilon_hat(13, 0.05))}
+
+
+def test_the_tape_example_reports_its_epsilon_per_conjunct():
+    """Bite B1's acceptance (docs/concepts.md 6.4): ε̂ = 0.015 at δ = 0.05 for 200 cases per conjunct."""
+    shown = dict(certify.standings(TAPE))
+    assert "ε̂ 0.015 at δ 0.05 in each of 4 conjuncts (200 cases)" in shown["Tape"], shown
+    assert "composed by the capped sum" in shown["Tape"]
+
+
+def test_the_demand_carries_delta_and_its_composition(tmp_path):
+    """Bite B1, L5.19: δ has a declared default; the product composes only with its axiom accepted."""
+    from luthier.run import RunError, demand_of
+    d = demand_of()
+    assert (d.delta, d.composition) == (0.05, "cappedSumComposition")
+    rec = demand_of(delta=0.01).record("sha256:c")
+    assert (rec["delta"], rec["composition"]) == (0.01, "cappedSumComposition")
+    with pytest.raises(RunError):
+        demand_of(composition="productComposition")
+    assert demand_of(composition="productComposition", assumes=["FailuresIndependent"]).composition == "productComposition"
+    with pytest.raises(RunError):
+        demand_of(delta=0.0)
+
+
+def test_a_run_records_the_evidence_of_its_cone(tmp_path, capsys):
+    """Bite B1: the run's certification carries the pair of its cone at its δ, by its composition."""
+    for name, text in [("ops.lth", CONJ_THEORY), ("ops.lut", CONJ_MODELS), ("ops.test.lut", CONJ_TEST),
+                       ("ops.run.lut", CONJ_RUN_OPS)]:
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    main(["certify", str(tmp_path / "ops.test.lut")])
+    capsys.readouterr()
+    assert main(["run", str(tmp_path / "ops.run.lut"), "--delta", "0.01"]) == 0, capsys.readouterr()
+    record = json.loads((tmp_path / "ops.run.json").read_text(encoding="utf-8"))[-1]
+    evidence = record["certification"]["evidence"]
+    assert (evidence["delta"], evidence["composition"]) == (0.01, "cappedSumComposition")
+    # the conjuncts of `Ops` passed over listed cases: exact, so the cone knows (0, 0)
+    assert (evidence["failure"], evidence["risk"]) == (0.0, 0.0) and evidence["links"]
+    assert record["demand"]["delta"] == 0.01

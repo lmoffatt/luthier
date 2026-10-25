@@ -220,7 +220,8 @@ demandKey (d : Demand) (live : List String) : DemandKey := { decoration := d.dec
 withSet (d : Demand) (n : String) (v : Value) : Demand :=
   { entry := d.entry, decoration := d.decoration, accepts := d.accepts, assumes := d.assumes, delta := d.delta,
     fuel := d.fuel, timeLimit := d.timeLimit, sets := cons (n, v) d.sets, checked := d.checked, pinned := d.pinned,
-    strategy := d.strategy, fresh := d.fresh, axioms := d.axioms, roots := d.roots, combine := d.combine, bound := d.bound }
+    strategy := d.strategy, fresh := d.fresh, axioms := d.axioms, roots := d.roots, combine := d.combine, bound := d.bound,
+    composition := d.composition }
 
 -- The identity of a result (8.S8, L5.6, D-2026-10-13-g): the demand's key, the hash of the cone
 -- (the code, the hosts behind its externs and the interpreter, certification.lth §4), the mode,
