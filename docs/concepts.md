@@ -556,11 +556,11 @@ cases fail.
 What a sampled certificate carries is that pair, $(\hat\varepsilon, \delta)$: the bound on the
 failure fraction and the risk that the bound is wrong. Luciano settled it as the evidence base
 (D-2026-10-25-a, question 1: "the evidence base is the pair (ε̂, δ) under the capped sum") [settled];
-section 10 says how two such pairs compose. L10.3 (the conversion from statistics to an evidence
-cost is a function with a declared shape; its first instance is $-\log(1 - \hat\varepsilon(n,
-\delta))$ nats) [settled] stands as a map out of that base, a cost in nats that adds correctly only
-when the failures it sums are independent (D-2026-10-25-a; B2, a9f8f8a, claims it as
-`NatsConversion`, a monotone map of the orders). Nothing about ε̂ needs storing: an entry keeps
+section 10 says how two such pairs compose. L10.3 says the same since 2026-10-26: the conversion
+from statistics to an evidence cost, whose first instance is $-\log(1 - \hat\varepsilon(n,
+\delta))$ nats, "is a map out of that base and not the base", and the sum of nats is sound only
+under a declared premise that the failures are independent [settled] (B2, a9f8f8a, claims the
+conversion as `NatsConversion`, a monotone map of the orders). Nothing about ε̂ needs storing: an entry keeps
 its $n$ per region, and δ is the demand's, so ε̂ is computed when the entry serves, at the
 demand's δ (the audit execution's bite B1) [building: today an entry records the grade `Sampled`
 and its counts, and nothing computes ε̂; spec 7.S11 is suspended by D-2026-10-14-c, first
@@ -590,7 +590,8 @@ The grade of a certificate is one of the five certifiers' names, and it is deriv
 and the evidence cost: proved and exhaustive have evidence cost 0 on their domain; cases, 0 on the
 cases listed and ∞ outside; sampled, the finite cost of its statistics; assumed, the cost the
 demand assigns to assumptions, with no default, so that a demand that names none refuses assumed
-values (L10.2 [proposed]; D-2026-10-12-r; spec 6.S7) [building]. The five names are for the
+values (L10.2 (the grade is derived from the domain and the evidence cost) [settled];
+D-2026-10-12-r; spec 6.S7) [building]. The five names are for the
 reader; the planner reads the costs. When a law is a conjunction, how the grades of its parts
 combine is the demand's choice, the weakest by default (spec 5.S8) [settled].
 
@@ -599,7 +600,8 @@ Proved`, and a demand admits an entry whose grade is at least the weakest it acc
 the Boolean slice's stand-in for the evidence cost (D-2026-10-16-k). Luciano settled what replaces
 it when the cost types come: a certificate's strength is the pair (domain, cost), ordered by
 inclusion and by cost, `Cases` and `Sampled` incomparable, and a `Cases` certificate serves a run
-only at an input it lists (D-2026-10-25-a, question 2) [settled; building: bites B3 and B4]. Three
+only at an input it lists (D-2026-10-25-a, question 2, now in L10.2) [settled; building: bites B3
+and B4]. Three
 listed marks say nothing of a fourth, where 200 sampled ones say ε̂; under the chain, three listed
 points would certify a run at a fourth. The tape's entries are sampled, and a run on real marks is
 served by sampled, proved or exhaustive evidence, since its inputs are rarely the ones listed.
@@ -702,9 +704,10 @@ L9.14 was written before a conjunction was split into its conjuncts, each with i
 (D-2026-10-18-f; spec 7.S22). A control line runs the conjuncts in order and stops at the first one
 it refutes, writing one control entry for the law (spec 7.S22) [settled as implemented]. So a
 broken monoid refuted at `Associative` leaves `Neutral` with no wrong model, and the law still reads
-"controlled" (the audit's 1.7). Luciano settled that the unit of control is the conjunct: a theory
-is done when each conjunct has a refuted model, and `check -v` lists the conjuncts with none
-(D-2026-10-25-a, question 4: "Yes") [settled; building: bite D1].
+"controlled" (the audit's 1.7). Luciano settled that the unit of control is the conjunct: a control
+runs every conjunct, a theory is done when each conjunct has a refuted model, and `check -v` lists
+the conjuncts with none (D-2026-10-25-a, question 4: "Yes"; L9.14 (a law is evidence of nothing
+until a wrong model refutes it), its sentence of 2026-10-26) [settled; building: bite D1].
 
 The example shows what this will report [mine: the reading of its entries]. `hooked` is refuted at
 `ReadingAdds`, and it could not have been refuted at `ReadingSymmetric`, since a tape one millimetre
@@ -852,8 +855,9 @@ certified on inputs Y with distance d and evidence cost e′, then A is certifie
 bound $b + d$, evidence cost $e + e'$, at the weaker of the two grades, and on nothing else; a path
 of identities composes link by link (L10.7 [proposed]; spec 6.S11, 6.S12 [building: suspended by
 D-2026-10-14-c]). Two links sampled over the same distribution compose by the union bound, their
-failure fractions summed (L10.8 [proposed]; D-2026-10-12-q), which D-2026-10-25-a makes the default
-of a composition a demand may replace (section 10) [settled]. Where the identity is Boolean, `==`
+failure fractions summed (L10.8 (links sampled over the same distribution compose by the union
+bound) [settled]; D-2026-10-12-q), and D-2026-10-25-a makes it the default of a composition a demand
+may replace (section 10). Where the identity is Boolean, `==`
 structural, the certificate transports exactly (L9.9) [settled]. This is what will let the planner
 substitute one specimen for another (section 13) and what lets a renaming of a record's fields
 carry certificates at no cost (L3.4 (two types that differ only in the names of their fields are
@@ -885,9 +889,9 @@ projected onto `Float64` with its cost (L13.2 (his reading)) [settled]. It is no
 an additive defect of about $\epsilon_{\text{mach}}|x|$, since two reals astride a rounding boundary
 land one ulp (unit in the last place) apart however close they are, so the algebra of costs needs a
 multiplicative part where a Lipschitz constant exists and an additive part where rounding enters
-(L13.3, L13.4 [mark pending in the principles]). D-2026-10-25-a (question 3) settled the two in one
-form, the bound transformer of 9.3 [settled]: the multiplicative part is its sensitivity, the
-additive part its defect.
+(L13.3, L13.4). D-2026-10-25-a (question 3) settled the two in one form, the bound transformer of
+9.3, and both clauses now say so [settled]: the multiplicative part is its sensitivity, the additive
+part its defect.
 
 ### 9.2 Every equality has a version within a bound
 
@@ -1285,9 +1289,9 @@ settled it (D-2026-10-25-a, question 5: "OK") [settled]. The result key can't be
 the metric level closeness is not transitive (3.2), so there is no class to take a canonical form
 of, only the ball. So the equality of consequence is a certified relation between two realizations,
 a law over derivations computed when a demand asks for it; the result key is the identity of the
-realization; and a canonical form exists only at the Boolean level. L5.22's sentence "the key is
-the identity of the derivation" reads "of the realization" [building: the principles' sentences of
-D-2026-10-25-a are being written now].
+realization; and a canonical form exists only at the Boolean level. L5.22 [proposed] now reads so:
+"What clause 6 identifies a result by is the identity of the realization, and the key is no
+quotient" (ff7356f).
 
 A value carries no more of its derivation than its demand asks (L5.23 [proposed]): the demand
 selects the projection of the derivation that is carried, as it selects the cone (12.2) and the
@@ -1394,9 +1398,9 @@ The questions of `docs/principles.md` that the concepts above rest on, each with
 - O1, the algebra of costs. D-2026-10-25-a settled three of its parts: the evidence base, the pair
   $(\hat\varepsilon, \delta)$ under the capped sum by default with any reasonable composition
   definable (10); a certificate's strength as the pair (domain, cost) (6.5); and the carrier of a
-  numerical law, the bound transformer (9.3). Open: the cost type `C` that certification is written
-  over and its conversions, the uncertainty's composition (bite C3), the resources as a typed vector
-  (bite C2), and the four bases as models of one structure. It blocks the cost types, transport
+  numerical law, the bound transformer (9.3). Open, as O1 now says: the cost types' implementation
+  (the type `C` that certification is written over), the uncertainty base (bite C3) and the
+  extension to Bayes; and, from the record's correction, the resources as a typed vector (bite C2). It blocks the cost types, transport
   (8.5), the planner (13) and the decorated outputs. `Cost` is a library, its algebra decided when
   it is implemented (D-2026-10-12-al).
 - O2, the type with its equality as the base of every theory, and how a type names its equality:
@@ -1420,6 +1424,6 @@ The questions of `docs/principles.md` that the concepts above rest on, each with
   core's files; the specification has no clause for them yet.
 - The execution of the algebra audit (section 3.5): bites B1 (ε̂ at serve time), B3 and B4 (the
   grade from domain and cost, serving checks the domain), C2 and C3, D1 (a control per conjunct)
-  and, with the planner, E1 to E3 [building]. The sentences that D-2026-10-25-a puts in L5.22,
-  L6.15, L9.14, L10.3, L10.8, L13.3, L13.4 and O13 are being written into the principles; until
-  they land, this text cites the decision.
+  and, with the planner, E1 to E3 [building]. The principles carry D-2026-10-25-a since 2026-10-26
+  (153e2d1, ff7356f, b0c88c1): L10.2, L10.3, L10.8, L9.14, L13.3 and L13.4 settled on it, L5.22,
+  L6.15 and O13 reworded and still proposed.
