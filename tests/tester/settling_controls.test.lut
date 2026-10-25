@@ -11,12 +11,14 @@
 -- Written 2026-10-22 by Claude Sonnet 5.5 on record/plan/core-2026-10-17/prompt-bite-13b.md.
 -- A vacuous run that supports (`vacuousSupports`) added 2026-10-23 by Claude Opus 5.5, wave A bite A3
 -- (record/plan/audit-algebras-2026-10-22/prompt-wave-a.md; laws.lth's `VacuousIsUnsettled`).
+-- A measurement that confirms whatever the bound (`measuredIgnoresTheBound`) added 2026-10-25 by Claude
+-- Opus 5.5, wave C bite C1 (record/plan/audit-algebras-2026-10-22/prompt-wave-bc.md; `WithinIsMeasured`).
 
 import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed Settling Law Evidence Verdict Case Forall Exists Conjunction Either Not Then Statistical Evaluated At Points
   EvidencePair Side Cited Assumed NotRun Tested Vacuous Coverage Exhaustive Bounded Drawn Confirmed Refuted Supported Unsettled Cites
-  Assumes StatisticalVerdict Rates Holds Fails Unresolved byPValue StatisticalLaw Sequential isRefuted isConfirmed isSupported
+  Assumes StatisticalVerdict Rates Holds Fails Unresolved byPValue StatisticalLaw Sequential Within Measured isRefuted isConfirmed isSupported
 import "laws_model.lut" settling settle combineVerdicts
 
 bools : List Bool := [true, false]
@@ -42,6 +44,9 @@ nats : List U := [Nat]
 aRate : Rates := { alpha := 0.05, beta := 0.05, delta := 0.5, spent := 1 }
 treated : List StatisticalVerdict := [Holds aRate, Fails aRate, Unresolved aRate]
 counts : List Nat := [0, 3]
+-- [bite C1] a metric and the distances and bounds `WithinIsMeasured` reads
+metrics : List (Int -> Int -> Float64) := [fn x y { if x == y then 0.0 else 1.0 }]
+floats : List Float64 := [0.0, 1.0, 2.0]
 
 -- the broken models: the good one's settling with one shape of law or evidence read wrongly
 with (f : Law -> Evidence -> Maybe Verdict) (c : Verdict -> Verdict -> Verdict) : Settling :=
@@ -75,6 +80,8 @@ notRunRefutes (l : Law) (e : Evidence) : Maybe Verdict := match e { NotRun r -> 
 vacuousSupports (l : Law) (e : Evidence) : Maybe Verdict := match e { Vacuous n -> just Supported ; _ -> nothing }
 testConfirms (l : Law) (e : Evidence) : Maybe Verdict :=
   match l { Statistical S T sl draw c -> (match e { Tested v -> (match v { Holds r -> just Confirmed ; _ -> nothing }) ; _ -> nothing }) ; _ -> nothing }
+measuredIgnoresTheBound (l : Law) (e : Evidence) : Maybe Verdict :=
+  match l { Within A d w a b -> (match e { Measured dist bound -> just Confirmed ; _ -> nothing }) ; _ -> nothing }
 
 firstArgument (u v : Verdict) : Verdict := u
 -- distinct verdicts combine to the third of Confirmed, Supported, Unsettled: commutative, not associative
@@ -102,6 +109,7 @@ bAssumed : List Settling := [with assumptionConfirms good]
 bNotRun : List Settling := [with notRunRefutes good]
 bVacuous : List Settling := [with vacuousSupports good]
 bTest : List Settling := [with testConfirms good]
+bMeasured : List Settling := [with measuredIgnoresTheBound good]
 bFirst : List Settling := [with noFlaw firstArgument]
 bThird : List Settling := [with noFlaw thirdOfThree]
 bStrongest : List Settling := [with noFlaw strongest]
@@ -113,7 +121,8 @@ profile (m : String) : List Binding := [bind "m" m, ofType "Bool" "bools",
   bind "r" "strings", bind "A" "types", bind "a" "ints", ofType "Law" "laws", bind "body" "quantified",
   ofType "Evidence" "evidences", bind "pts" "points", ofType "Coverage" "coverages", ofType "Verdict" "verdicts",
   bind "S" "scalarTypes", bind "T" "nats", bind "l" "pvalueLaws", bind "draw" "draws",
-  ofType "Sequential" "cutoffs", ofType "StatisticalVerdict" "treated", bind "n" "counts"]
+  ofType "Sequential" "cutoffs", ofType "StatisticalVerdict" "treated", bind "n" "counts",
+  bind "d" "metrics", bind "bound" "floats", bind "x" "ints", bind "y" "ints", bind "dist" "floats", bind "w" "floats"]
 
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bCase") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bForallAt") (control <- true)
@@ -130,6 +139,7 @@ test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bAs
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bNotRun") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bVacuous") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bTest") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bMeasured") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bFirst") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bThird") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bStrongest") (control <- true)

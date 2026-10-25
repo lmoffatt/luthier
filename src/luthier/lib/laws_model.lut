@@ -12,9 +12,12 @@
 --
 -- `Vacuous n` settles nothing, as `NotRun` (laws.lth's `VacuousIsUnsettled`; wave A, bite A3, by
 -- Claude Opus 5.5 on record/plan/audit-algebras-2026-10-22/prompt-wave-a.md, 2026-10-23).
+--
+-- `Within` is settled by `Measured` as a case by its value (laws.lth's `WithinIsMeasured`; wave C,
+-- bite C1, by Claude Opus 5.5 on record/plan/audit-algebras-2026-10-22/prompt-wave-bc.md, 2026-10-25).
 
-import "laws.lth" Settling Law Evidence Verdict Case Forall Exists Conjunction Either Not Then Statistical
-  Evaluated At Points EvidencePair Side Cited Assumed NotRun Tested Vacuous Coverage Exhaustive StatisticalVerdict
+import "laws.lth" Settling Law Evidence Verdict Case Forall Exists Conjunction Either Not Then Statistical Within
+  Evaluated At Points EvidencePair Side Cited Assumed NotRun Tested Vacuous Measured Coverage Exhaustive StatisticalVerdict
   Confirmed Refuted Supported Unsettled Cites Assumes Holds Fails Unresolved
   isRefuted isConfirmed isSupported isConfirmedOrSupported reversedVerdict existsVerdict
 
@@ -60,6 +63,9 @@ settle (l : Law) (e : Evidence) : Verdict := match e {
       _ -> Unsettled } ;
     Not p -> reversedVerdict (settle p e) ;
     Then p q -> settle (Not (Conjunction p (Not q))) e ;
-    Statistical S T sl draw c -> match e { Tested v -> (match v { Holds r -> Supported ; Fails r -> Refuted ; Unresolved r -> Unsettled }) ; _ -> Unsettled } } }
+    Statistical S T sl draw c -> match e { Tested v -> (match v { Holds r -> Supported ; Fails r -> Refuted ; Unresolved r -> Unsettled }) ; _ -> Unsettled } ;
+    Within A d w a b -> match e {
+      Measured dist bound -> (if not (dist == d a b and bound == w) then Unsettled else if dist <= w then Confirmed else Refuted) ;
+      _ -> Unsettled } } }
 
 settling : Settling := { settles := settle, combine := combineVerdicts }

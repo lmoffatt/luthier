@@ -29,6 +29,9 @@
 --      statistical law as a theory of its statistic and its alternative, Wald's
 --      sequential test over a stream of samples (7.S17 to 7.S19, L9.15,
 --      D-2026-10-15-b).                                                             done
+--   §5 Numerical laws: `Within`, a distance at most the theory's bound, its evidence
+--      `Measured`, and the ratio of error to bound the certificate records
+--      (D-2026-10-18-j, L9.18; wave C, bite C1).                                     done
 
 import "checks.lth" Failures
 
@@ -80,6 +83,7 @@ Law : U := data {
   Not : Law -> Law ;
   Then : Law -> Law -> Law ;
   Statistical : (S T : U) -> StatisticalLaw S -> (Nat -> T -> S * T) -> Sequential -> Law ;
+  Within : (A : U) -> (A -> A -> Float64) -> Float64 -> A -> A -> Law ;
 }
 
 -- How much of a type the cases of a `forall` cover: all of it; all of it up to a size, the box
@@ -140,6 +144,7 @@ Evidence : U := data {
   NotRun : String -> Evidence ;
   Tested : StatisticalVerdict -> Evidence ;
   Vacuous : Nat -> Evidence ;
+  Measured : Float64 -> Float64 -> Evidence ;
 }
 
 -- What evidence settles: confirmed, refuted, supported (by a census or a sample, never confirmed),
@@ -231,6 +236,12 @@ AssumedWhole (m : Settling) (p : Law) : Bool := m.settles p Assumed == Assumes
 NotRunIsUnsettled (m : Settling) (p : Law) (r : String) : Bool := m.settles p (NotRun r) == Unsettled
 -- [bite A3] nor does a run in which no premise held (D-2026-10-16-m), whatever it evaluated
 VacuousIsUnsettled (m : Settling) (p : Law) (n : Nat) : Bool := m.settles p (Vacuous n) == Unsettled
+-- [bite C1] a numerical law at a case is settled by the distance measured and the bound the theory
+-- gives there (§5), as a case by its value: confirmed at a distance within the bound, refuted past
+-- it, and evidence that is not the law's own distance and bound settles nothing
+WithinIsMeasured (m : Settling) (A : U) (d : A -> A -> Float64) (bound : Float64) (x y : A) (dist w : Float64) : Bool :=
+  m.settles (Within A d bound x y) (Measured dist w)
+    == (if not (dist == d x y and w == bound) then Unsettled else if dist <= bound then Confirmed else Refuted)
 -- a statistical law is settled by the verdict of its sequential test (§4): holding supports it (a
 -- sample never confirms, 7.S10), failing refutes it, and an unresolved test settles nothing
 StatisticalByTest (m : Settling) (S T : U) (l : StatisticalLaw S) (draw : Nat -> T -> S * T) (c : Sequential) (v : StatisticalVerdict) : Bool :=
@@ -250,7 +261,7 @@ CombineNeverConfirmsMore (m : Settling) (u v : Verdict) : Bool :=
 
 Settling (m : Settling) := CaseIsEvaluated m & ForallAtOnePoint m & ForallOnPoints m & ExistsAtOnePoint m & ExistsOnPoints m
   & ConjunctionByPair m & EitherBySide m & EitherRefutedByBoth m & NotFlips m & ThenIsMaterial m & CitedWhole m
-  & AssumedWhole m & NotRunIsUnsettled m & VacuousIsUnsettled m & StatisticalByTest m & Commutative Verdict Verdict (structural Verdict) m.combine
+  & AssumedWhole m & NotRunIsUnsettled m & VacuousIsUnsettled m & StatisticalByTest m & WithinIsMeasured m & Commutative Verdict Verdict (structural Verdict) m.combine
   & Associative Verdict (structural Verdict) m.combine & CombineAbsorbs m & CombineNeverConfirmsMore m
 
 -- ---------------------------------------------------------------- §4 Statistical laws
@@ -345,3 +356,51 @@ ratioAfter (S T : U) (l : StatisticalLaw S) (draw : Nat -> T -> S * T) (c : Sequ
   else match draw c.initial t { (x, t2) -> ratioAfter S T l draw c t2 (ratio * l.ratio c.delta (l.statistic x)) (spent + 1) }
 -- the samples a verdict spent
 spentOf (v : StatisticalVerdict) : Nat := match v { Holds r -> r.spent ; Fails r -> r.spent ; Unresolved r -> r.spent }
+
+-- ---------------------------------------------------------------- §5 Numerical laws
+
+-- [wave C, bite C1, 2026-10-25, Claude Opus 5.5, on record/plan/audit-algebras-2026-10-22/
+-- execution.md C1; sources D-2026-10-18-j, L9.18, the audit of 2026-10-22 section 5 "Boundary cases"
+-- (report.md, 5b1a05e), the three-levels report 2.3 and 2.4 (2f9c42b)] A numerical law relates the
+-- error it allows to a bound its theory proves, a function of the case (Higham's gamma n times the
+-- magnitudes summed, a Lipschitz constant times the input's distance plus the algorithm's own
+-- error): `Within A d bound a b` holds when the distance `d a b` is at most `bound`. The bound is the
+-- law's, never the demand's (D-2026-10-18-j: the fixed `tol` leaves the law); the law states its range
+-- of validity as its premise, outside which its body is `Case true` and claims nothing. Its evidence
+-- at a case is `Measured dist bound`, and over the cases the certificate records how tight the bound
+-- is: the largest ratio of distance to bound seen, the law passing at a ratio of at most one.
+-- [proposed] No `scale` beside the bound (the three-levels report's form had one): with the bound
+-- the theory's, it already carries the scale of what is compared (11.S14), and a second factor would
+-- only multiply it.
+--
+-- The ratio at the boundary cases the audit lists: a distance of zero has ratio zero whatever the
+-- bound, a zero bound included (an exact agreement is as tight as can be); a positive distance with
+-- a bound of zero or below has no finite ratio (`nothing`), and the law fails there. The verdict is
+-- the comparison `dist <= bound`, not the ratio: the quotient rounds, and a distance one unit in the
+-- last place above its bound can give a ratio that rounds to one. A bound that cannot be evaluated
+-- (it raises, overflows, or the premise it needs fails) gives no evidence at that case; the tester
+-- counts the case as raised, which settles nothing (7.S12).
+ratioOf (dist bound : Float64) : Maybe Float64 :=
+  if dist == 0.0 then just 0.0 else if bound <= 0.0 then nothing else just (dist / bound)
+-- the worse of two ratios, an unbounded one worst: what the certificate keeps over cases and regions
+-- and what the union of two stretches keeps (the three-levels report 2.5)
+worseRatio (r s : Maybe Float64) : Maybe Float64 := match r {
+  nothing -> nothing ;
+  just a -> match s { nothing -> nothing ; just b -> (if a < b then just b else just a) } }
+
+-- What the certifier computes of a numerical law's evidence, as a theory whose model is the two
+-- definitions above (certify.py and tester.py are its specimens): a distance of zero is exact at any
+-- bound; a ratio is never negative; the worse of two is commutative, associative and an unbounded one
+-- absorbs. A demand's cap (demand.lth's `bound`) serves an entry whose worst ratio is a number within
+-- it, never an unbounded one (certify.py's `within_cap`).
+Measuring : { ratioOf : Float64 -> Float64 -> Maybe Float64, worseRatio : Maybe Float64 -> Maybe Float64 -> Maybe Float64 }
+ZeroDistanceIsExact (m : Measuring) (bound : Float64) : Bool := m.ratioOf 0.0 bound == just 0.0
+RatioNotNegative (m : Measuring) (dist bound : Float64) : Bool :=
+  dist < 0.0 or (match m.ratioOf dist bound { nothing -> bound <= 0.0 ; just a -> 0.0 <= a })
+WorseRatioCommutes (m : Measuring) (r s : Maybe Float64) : Bool := m.worseRatio r s == m.worseRatio s r
+WorseRatioAssociates (m : Measuring) (r s q : Maybe Float64) : Bool :=
+  m.worseRatio (m.worseRatio r s) q == m.worseRatio r (m.worseRatio s q)
+UnboundedAbsorbs (m : Measuring) (r : Maybe Float64) : Bool := m.worseRatio nothing r == nothing
+Measuring (m : Measuring) := ZeroDistanceIsExact m & RatioNotNegative m & WorseRatioCommutes m & WorseRatioAssociates m
+  & UnboundedAbsorbs m
+measuring : Measuring := { ratioOf := ratioOf, worseRatio := worseRatio }
