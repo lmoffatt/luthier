@@ -1,0 +1,76 @@
+-- tests/tester/transformer_laws.test.lut: the bound transformer of core/properties/functions.lth
+-- (`BoundTransformer`, its model `affineTransformers`) on listed transformers over `Float64`, and its
+-- controls, each the model broken on purpose in the way one law forbids.
+-- Written 2026-10-25 by Claude Opus 5.5, wave C bite C1 (record/plan/audit-algebras-2026-10-22/
+-- prompt-wave-bc.md; execution.md C1: "`compose`'s law certified on listed transformers with a control
+-- (a composition that drops L2 eta1)"). Every number is dyadic and small, so the arithmetic of the
+-- bounds is exact and a law fails only where its model does.
+
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+
+dist (a b : Float64) : Float64 := if a < b then b - a else a - b
+metrics : List (Float64 -> Float64 -> Float64) := [dist]
+everywhere (x : Float64) : Bool := true
+-- the first step: the identity realized exactly or shifted by a quarter, and the double
+firsts : List (Float64 -> Float64) := [fn x { x }, fn x { 2.0 * x }]
+realizedFirsts : List (Float64 -> Float64) := [fn x { x }, fn x { x + 0.25 }, fn x { 2.0 * x }]
+-- the second step: times four, which carries a first error four times over
+seconds : List (Float64 -> Float64) := [fn y { 4.0 * y }]
+firstBounds : List (Affine Float64) := [
+  { lipschitz := 1.0, defect := 0.25, radius := 8.0, domain := everywhere },
+  { lipschitz := 2.0, defect := 0.5, radius := 4.0, domain := fn x { 0.0 <= x } },
+  { lipschitz := 0.0, defect := 0.25, radius := 1.0, domain := everywhere } ]
+secondBounds : List (Affine Float64) := [
+  { lipschitz := 4.0, defect := 0.0, radius := 16.0, domain := everywhere },
+  { lipschitz := 0.5, defect := 0.125, radius := 0.125, domain := everywhere },
+  { lipschitz := 4.0, defect := 0.0, radius := 16.0, domain := fn y { 0.0 <= y } } ]
+maybes : List (Transformer Float64) := [nothing, just { lipschitz := 1.0, defect := 0.25, radius := 8.0, domain := everywhere }]
+inputPairs : List (Affine2 Float64 Float64) := [
+  { lipschitzA := 1.0, lipschitzB := 2.0, defect := 0.25, radiusA := 4.0, radiusB := 4.0, domain := fn a b { true } } ]
+points : List Float64 := [0.0, 1.0, -2.0, 0.5]
+deltas : List Float64 := [0.0, 0.5, 4.0]
+tolerances : List Float64 := [0.0, 0.25, 1.0, 64.0]
+
+good : BoundTransformer Float64 Float64 := affineTransformers Float64 Float64
+models : List (BoundTransformer Float64 Float64) := [good]
+-- the theory at the doubles, the model a parameter the line binds (a type is no value a census lists)
+OnDoubles (m : BoundTransformer Float64 Float64) : Bool := BoundTransformer Float64 Float64 m
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+profile (m : String) : List Binding := [bind "m" m, bind "n" m,
+  bind "dA" "metrics", bind "dB" "metrics", bind "dC" "metrics", bind "f1" "firsts", bind "g1" "realizedFirsts",
+  bind "f2" "seconds", bind "g2" "seconds", bind "f" "firsts", bind "t1" "firstBounds", bind "t2" "secondBounds",
+  bind "t3" "secondBounds", bind "t" "firstBounds", bind "ta" "maybes", bind "tb" "maybes", bind "p" "inputPairs",
+  bind "x" "points", bind "x'" "points", bind "delta" "deltas", bind "deltaA" "deltas", bind "deltaB" "deltas",
+  bind "eps" "tolerances"]
+
+test "OnDoubles" ExhaustiveMode (seed <- 20261025) (whereBindings <- profile "models")
+
+-- the controls: `affineTransformers` with one part read wrongly
+-- the composite's defect without the sensitivity that carries the first's (eta1 + eta2, the audit's case)
+dropsCarried : List (BoundTransformer Float64 Float64) := [{ compose := fn f a b { { lipschitz := b.lipschitz * a.lipschitz,
+  defect := a.defect + b.defect, radius := (composeAffine Float64 Float64 f a b).radius,
+  domain := (composeAffine Float64 Float64 f a b).domain } }, pullback := good.pullback, bySum := good.bySum, byMax := good.byMax }]
+-- the radius read without the first's defect, r2 / L1
+radiusWithoutDefect : List (BoundTransformer Float64 Float64) := [{ compose := fn f a b { { lipschitz := b.lipschitz * a.lipschitz,
+  defect := b.lipschitz * a.defect + b.defect, radius := (if a.lipschitz == 0.0 then a.radius else b.radius / a.lipschitz),
+  domain := (composeAffine Float64 Float64 f a b).domain } }, pullback := good.pullback, bySum := good.bySum, byMax := good.byMax }]
+-- the domain of the first alone, not the preimage of the second's
+firstDomainOnly : List (BoundTransformer Float64 Float64) := [{ compose := fn f a b { { lipschitz := b.lipschitz * a.lipschitz,
+  defect := b.lipschitz * a.defect + b.defect, radius := (composeAffine Float64 Float64 f a b).radius,
+  domain := a.domain } }, pullback := good.pullback, bySum := good.bySum, byMax := good.byMax }]
+-- the pull-back that ignores the defect, eps / L, feasible at any tolerance
+pullbackWithoutDefect : List (BoundTransformer Float64 Float64) := [{ compose := good.compose,
+  pullback := fn t eps { match t { nothing -> nothing ; just a -> (if a.lipschitz == 0.0 then just a.radius else just (eps / a.lipschitz)) } },
+  bySum := good.bySum, byMax := good.byMax }]
+-- the max of two inputs read with the sum of the sensitivities, a bound above the sum's
+maxAboveSum : List (BoundTransformer Float64 Float64) := [{ compose := good.compose, pullback := good.pullback, bySum := good.bySum,
+  byMax := fn p a b { (p.lipschitzA + p.lipschitzB) * (if a < b then b else a) + p.defect } }]
+
+test "OnDoubles" ExhaustiveMode (seed <- 20261025) (whereBindings <- profile "dropsCarried") (control <- true)
+test "OnDoubles" ExhaustiveMode (seed <- 20261025) (whereBindings <- profile "radiusWithoutDefect") (control <- true)
+test "OnDoubles" ExhaustiveMode (seed <- 20261025) (whereBindings <- profile "firstDomainOnly") (control <- true)
+test "OnDoubles" ExhaustiveMode (seed <- 20261025) (whereBindings <- profile "pullbackWithoutDefect") (control <- true)
+test "OnDoubles" ExhaustiveMode (seed <- 20261025) (whereBindings <- profile "maxAboveSum") (control <- true)

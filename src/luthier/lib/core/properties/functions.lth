@@ -71,3 +71,116 @@ NonExpansiveMap (A B : U) (dA : A -> A -> Float64) (dB : B -> B -> Float64) : { 
 NonExpansiveMap (A B : U) (dA : A -> A -> Float64) (dB : B -> B -> Float64) (m : NonExpansiveMap A B dA dB) := NonExpansive A B dA dB m.apply
 LipschitzMap (A B : U) (dA : A -> A -> Float64) (dB : B -> B -> Float64) : { apply : A -> B, coefficient : NonNegativeFloat }
 LipschitzMap (A B : U) (dA : A -> A -> Float64) (dB : B -> B -> Float64) (m : LipschitzMap A B dA dB) := Lipschitz A B dA dB m.apply m.coefficient
+
+-- ---------------------------------------------------------------- bound transformers
+
+-- [wave C, bite C1, 2026-10-25, Claude Opus 5.5, on record/plan/audit-algebras-2026-10-22/
+-- execution.md C1; sources D-2026-10-25-a question 3 (a numerical law's carrier is (L, eta, D, r),
+-- composed along a cone and summed over several inputs), D-2026-10-18-j, L6.8, L13.5, the audit of
+-- 2026-10-22 section 5 (report.md, 5b1a05e)] A numerical law relates an input's distance delta to
+-- an output's: a realization `g` of `f` at `x` and a perturbed `x'` within the radius `r` of `x`, in
+-- the domain `D`, is within `L delta + eta` of `f x`, `L` the sensitivity (a Lipschitz constant,
+-- possibly of the case) and `eta` the algorithm's own error (Higham's first-order bounds, LAPACK's
+-- form; Reed and Pierce's Fuzz for the sensitivity). `Affine A` is that carrier over the inputs `A`;
+-- a sensitivity that is unknown or infinite is no transformer at all (`Transformer A`, `nothing`),
+-- and where there is none there is no substitution (L6.8). A negative radius admits no perturbation,
+-- not even none: the transformer's domain is empty.
+Affine (A : U) = { lipschitz : Float64, defect : Float64, radius : Float64, domain : A -> Bool }
+Transformer (A : U) = Maybe (Affine A)
+-- the bound at an input distance, and where it applies
+transform (A : U) (t : Affine A) (delta : Float64) : Float64 := t.lipschitz * delta + t.defect
+admissible (A : U) (t : Affine A) (x : A) (delta : Float64) : Bool := t.domain x and 0.0 <= delta and delta <= t.radius
+-- `g` realizes `f` within `t` at `x` and `x'`: where `t` applies at their distance, the output is within
+-- its bound
+Realizes (A B : U) (dA : A -> A -> Float64) (dB : B -> B -> Float64) (f g : A -> B) (t : Affine A) (x x' : A) : Bool :=
+  implies (admissible A t x (dA x' x)) (dB (g x') (f x) <= transform A t (dA x' x))
+
+-- Along a cone, `f1` then `f2` (D-2026-10-25-a q3): the composite's sensitivity is the product, its
+-- defect the first's carried through the second plus the second's, (L2 L1, L2 eta1 + eta2); its domain
+-- the inputs in the first's domain whose image is in the second's, D1 and the preimage of D2; its
+-- radius the largest delta whose image stays within the second's radius, min(r1, (r2 - eta1) / L1),
+-- r1 itself when L1 is zero and eta1 fits, negative (empty) when eta1 alone exceeds r2. Adding the two
+-- defects without the sensitivity (eta1 + eta2) is the error the audit names: an ill-conditioned
+-- second step multiplies the first's error.
+composeAffine (A B : U) (f : A -> B) (t1 : Affine A) (t2 : Affine B) : Affine A :=
+  { lipschitz := t2.lipschitz * t1.lipschitz,
+    defect := t2.lipschitz * t1.defect + t2.defect,
+    radius := (if t1.lipschitz == 0.0 then (if t1.defect <= t2.radius then t1.radius else t2.radius - t1.defect)
+               else { through := (t2.radius - t1.defect) / t1.lipschitz
+                      if through < t1.radius then through else t1.radius }),
+    domain := fn x { t1.domain x and t2.domain (f x) } }
+-- The pull-back of a demand's output tolerance `eps` to the input (L6.8): the largest delta whose bound
+-- is within `eps`, (eps - eta) / L capped by the radius; nothing below the defect, where no input
+-- precision suffices (L13.5: the request is below what the realization resolves); nothing for an
+-- unknown sensitivity or an empty domain; the whole radius for a sensitivity of zero.
+pullback (A : U) (t : Transformer A) (eps : Float64) : Maybe Float64 :=
+  match t {
+    nothing -> nothing ;
+    just a -> (if eps < a.defect or a.radius < 0.0 then nothing
+               else if a.lipschitz == 0.0 then just a.radius
+               else { through := (eps - a.defect) / a.lipschitz
+                      just (if through < a.radius then through else a.radius) }) }
+
+-- Several inputs (D-2026-10-25-a q3): over two, the sum, eps <= LA deltaA + LB deltaB + eta, the
+-- transformer under the sum of the inputs' metrics (Fuzz's tensor product); the max of the two terms
+-- is a stronger claim a law may name instead (a function whose output moves only as far as the
+-- farther-moved input carries), and every bound by the max is a bound by the sum.
+Affine2 (A B : U) = { lipschitzA lipschitzB defect radiusA radiusB : Float64, domain : A -> B -> Bool }
+transformSum (A B : U) (t : Affine2 A B) (deltaA deltaB : Float64) : Float64 :=
+  t.lipschitzA * deltaA + t.lipschitzB * deltaB + t.defect
+transformMax (A B : U) (t : Affine2 A B) (deltaA deltaB : Float64) : Float64 :=
+  { a := t.lipschitzA * deltaA
+    b := t.lipschitzB * deltaB
+    (if a < b then b else a) + t.defect }
+
+-- The theory of bound transformers between `A` and `B`: composition along a cone, the pull-back of
+-- a tolerance, and the bound over two inputs by the sum and by the max. Its model is the definitions
+-- above, `affineTransformers`. Its laws, certified on listed transformers whose values are dyadic so
+-- that the arithmetic is exact (tests/tester/transformer_laws.test.lut, with controls):
+-- - the composite of two sound transformers is sound for the composite of the realizations, with no
+--   premise but the two soundnesses (the bound's content; the control drops L2 eta1);
+-- - composition is associative in its sensitivity, its defect and its domain;
+-- - an empty domain composes to an empty domain, and a delta admissible for the composite is
+--   admissible for the first and its image for the second (the radius);
+-- - an unknown sensitivity anywhere gives no composite and no pull-back (L6.8), a tolerance below the
+--   defect pulls back to nothing (L13.5), and a pull-back that exists meets the tolerance within the
+--   radius;
+-- - over two inputs, the max bound is at most the sum bound.
+BoundTransformer (A B : U) : {
+  compose : (A -> B) -> Affine A -> Affine B -> Affine A,
+  pullback : Transformer A -> Float64 -> Maybe Float64,
+  bySum byMax : Affine2 A B -> Float64 -> Float64 -> Float64,
+}
+noBound (X : U) (v : Maybe X) : Bool := match v { nothing -> true ; just a -> false }
+ComposeSound (A B C : U) (m : BoundTransformer A B) (dA : A -> A -> Float64) (dB : B -> B -> Float64) (dC : C -> C -> Float64)
+    (f1 g1 : A -> B) (f2 g2 : B -> C) (t1 : Affine A) (t2 : Affine B) (x x' : A) : Bool :=
+  implies (Realizes A B dA dB f1 g1 t1 x x' and Realizes B C dB dC f2 g2 t2 (f1 x) (g1 x'))
+    (Realizes A C dA dC (fn a { f2 (f1 a) }) (fn a { g2 (g1 a) }) (m.compose f1 t1 t2) x x')
+-- associativity needs the composition on `B` too, `n`, for the second step's own composite
+ComposeAssociative (A B : U) (m : BoundTransformer A B) (n : BoundTransformer B B) (f1 : A -> B) (f2 : B -> B)
+    (t1 : Affine A) (t2 t3 : Affine B) (x : A) : Bool :=
+  { left := m.compose (fn a { f2 (f1 a) }) (m.compose f1 t1 t2) t3
+    right := m.compose f1 t1 (n.compose f2 t2 t3)
+    left.lipschitz == right.lipschitz and left.defect == right.defect and left.domain x == right.domain x }
+EmptyDomainComposesEmpty (A B : U) (m : BoundTransformer A B) (f : A -> B) (t1 : Affine A) (t2 : Affine B) (x : A) : Bool :=
+  implies ((m.compose f t1 t2).domain x) (t1.domain x and t2.domain (f x))
+RadiusKeepsBothAdmissible (A B : U) (m : BoundTransformer A B) (f : A -> B) (t1 : Affine A) (t2 : Affine B) (x : A) (delta : Float64) : Bool :=
+  implies (admissible A (m.compose f t1 t2) x delta) (admissible A t1 x delta and admissible B t2 (f x) (transform A t1 delta))
+UnknownComposesUnknown (A B : U) (m : BoundTransformer A B) (f : A -> B) (ta : Transformer A) (tb : Transformer B) : Bool :=
+  noBound (Affine A) (composeTransformers A B m f nothing tb) and noBound (Affine A) (composeTransformers A B m f ta nothing)
+UnknownGivesNoPullback (A B : U) (m : BoundTransformer A B) (eps : Float64) : Bool := noBound Float64 (m.pullback nothing eps)
+InfeasibleBelowTheDefect (A B : U) (m : BoundTransformer A B) (t : Affine A) (eps : Float64) : Bool :=
+  implies (eps < t.defect) (noBound Float64 (m.pullback (just t) eps))
+PullbackMeets (A B : U) (m : BoundTransformer A B) (t : Affine A) (eps : Float64) : Bool :=
+  match m.pullback (just t) eps { nothing -> true ; just delta -> 0.0 <= delta and delta <= t.radius and transform A t delta <= eps }
+MaxBelowSum (A B : U) (m : BoundTransformer A B) (p : Affine2 A B) (deltaA deltaB : Float64) : Bool :=
+  implies (0.0 <= p.lipschitzA and 0.0 <= p.lipschitzB and 0.0 <= deltaA and 0.0 <= deltaB)
+    (m.byMax p deltaA deltaB <= m.bySum p deltaA deltaB)
+BoundTransformer (A B : U) (m : BoundTransformer A B) := ComposeSound A B B m & ComposeAssociative A B m
+  & EmptyDomainComposesEmpty A B m & UnknownComposesUnknown A B m & RadiusKeepsBothAdmissible A B m
+  & UnknownGivesNoPullback A B m & InfeasibleBelowTheDefect A B m & PullbackMeets A B m & MaxBelowSum A B m
+affineTransformers (A B : U) : BoundTransformer A B :=
+  { compose := composeAffine A B, pullback := pullback A, bySum := transformSum A B, byMax := transformMax A B }
+-- a composition with an unknown sensitivity anywhere along the cone is unknown
+composeTransformers (A B : U) (m : BoundTransformer A B) (f : A -> B) (t1 : Transformer A) (t2 : Transformer B) : Transformer A :=
+  match t1 { nothing -> nothing ; just a -> match t2 { nothing -> nothing ; just b -> just (m.compose f a b) } }
