@@ -98,8 +98,8 @@ clearDiagonal : Gen ClearDiagonal := fn size seed { hostGenerators.clearDiagonal
 intsWithin : Gen Int := fn n s { ((scrambled s) mod (2 * n + 1) - n, nextSeed s) }
 natsWithin : Gen Int := fn n s { ((scrambled s) mod (n + 1), nextSeed s) }
 floatsWithin : Gen Float64 := fn n s { (toFloat64 n * (2.0 * unitOf s - 1.0), nextSeed s) }
-pickFrom (T : U) (first : T) (rest : List T) : Gen T :=
-  fn n s { (match nth T (cons first rest) ((scrambled s) mod (size rest + 1)) { just y -> y ; nothing -> first }, nextSeed s) }
+pickFrom (A : U) (first : A) (rest : List A) : Gen A :=
+  fn n s { (match nth A (cons first rest) ((scrambled s) mod (size rest + 1)) { just y -> y ; nothing -> first }, nextSeed s) }
 -- the second of a pair, equal to the first in a quarter of the draws and otherwise one of the above:
 -- the families a line binds `y` to when its law's premise is `x` equal to `y` (antisymmetry,
 -- indiscernibility; generators.lth's `equalOr`). The share is fixed here, so it is in the family's
