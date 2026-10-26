@@ -7,11 +7,13 @@
 -- that differ only in what the record does not carry, a seed); a `certifying` whose `serves`
 -- ignores the cutoff; one whose `serves` takes only an entry graded exactly at the cutoff. The
 -- demands and entries are demand_laws.test.lut's.
+-- `dropCutoffs`, a record without the per-law cutoffs, added 2026-10-26 by Claude Opus 5.5
+-- (D-2026-10-16-k item 20; `RecordKeepsThePolicies`).
 
 import "test.lth" test ExhaustiveMode Grade Proved Cases Sampled AssumedGrade defaultBudgets
 import "generators.lth" Binding
 import "laws.lth" Listed Cited
-import "certification.lth" Certifying Entry Hash Outcome Passed Failed
+import "certification.lth" Certifying Entry Hash Outcome Passed Failed Number
 import "certification_model.lut" certifying
 import "demand.lth" Demand LawDemand RunRecord Stored RunStore recorded OneIdentityOneResult NoPriceRefusesAssumed LoweringLosesNothing
   Ran RanIsASpecimenOfTheAsked RecordKeepsThePolicies Strategy ForwardOnDemand CallByNeed
@@ -79,29 +81,37 @@ dropAxioms (d : Demand) (h : Hash) : RunRecord := { entry := (recorded d h).entr
   timeLimit := (recorded d h).timeLimit, checked := (recorded d h).checked, lock := (recorded d h).lock,
   decoration := (recorded d h).decoration, strategy := (recorded d h).strategy, fresh := (recorded d h).fresh,
   axioms := AssumedGrade, roots := (recorded d h).roots, combine := (recorded d h).combine, bound := (recorded d h).bound,
-  composition := (recorded d h).composition }
+  composition := (recorded d h).composition, cutoffs := (recorded d h).cutoffs }
 dropRoots (d : Demand) (h : Hash) : RunRecord := { entry := (recorded d h).entry, cone := h, parameters := (recorded d h).parameters,
   accept := (recorded d h).accept, assumes := (recorded d h).assumes, delta := (recorded d h).delta, fuel := (recorded d h).fuel,
   timeLimit := (recorded d h).timeLimit, checked := (recorded d h).checked, lock := (recorded d h).lock,
   decoration := (recorded d h).decoration, strategy := (recorded d h).strategy, fresh := (recorded d h).fresh,
   axioms := (recorded d h).axioms, roots := nil, combine := (recorded d h).combine, bound := (recorded d h).bound,
-  composition := (recorded d h).composition }
+  composition := (recorded d h).composition, cutoffs := (recorded d h).cutoffs }
 dropCombine (d : Demand) (h : Hash) : RunRecord := { entry := (recorded d h).entry, cone := h, parameters := (recorded d h).parameters,
   accept := (recorded d h).accept, assumes := (recorded d h).assumes, delta := (recorded d h).delta, fuel := (recorded d h).fuel,
   timeLimit := (recorded d h).timeLimit, checked := (recorded d h).checked, lock := (recorded d h).lock,
   decoration := (recorded d h).decoration, strategy := (recorded d h).strategy, fresh := (recorded d h).fresh,
   axioms := (recorded d h).axioms, roots := (recorded d h).roots, combine := "weakest", bound := (recorded d h).bound,
-  composition := (recorded d h).composition }
+  composition := (recorded d h).composition, cutoffs := (recorded d h).cutoffs }
 policyDemands : List Demand := [theDemand (entry <- "main") (axioms <- Cases), theDemand (entry <- "main") (roots <- ["Other"]),
-  theDemand (entry <- "main") (combine <- "strongest"), theDemand (entry <- "main") (bound <- 0.5)]
+  theDemand (entry <- "main") (combine <- "strongest"), theDemand (entry <- "main") (bound <- 0.5),
+  theDemand (entry <- "main") (cutoffs <- [{ law := "PinvProjects", parameter := "tol", value := Number 1.0e-8 }])]
 -- [bite C1] and for the cap on a numerical law's ratio, put back at its default
 dropBound (d : Demand) (h : Hash) : RunRecord := { entry := (recorded d h).entry, cone := h, parameters := (recorded d h).parameters,
   accept := (recorded d h).accept, assumes := (recorded d h).assumes, delta := (recorded d h).delta, fuel := (recorded d h).fuel,
   timeLimit := (recorded d h).timeLimit, checked := (recorded d h).checked, lock := (recorded d h).lock,
   decoration := (recorded d h).decoration, strategy := (recorded d h).strategy, fresh := (recorded d h).fresh,
   axioms := (recorded d h).axioms, roots := (recorded d h).roots, combine := (recorded d h).combine, bound := 1.0,
-  composition := (recorded d h).composition }
-droppers : List (Demand -> Hash -> RunRecord) := [dropAxioms, dropRoots, dropCombine, dropBound]
+  composition := (recorded d h).composition, cutoffs := (recorded d h).cutoffs }
+-- [D-2026-10-16-k item 20, 2026-10-26] and for the per-law cutoffs, dropped
+dropCutoffs (d : Demand) (h : Hash) : RunRecord := { entry := (recorded d h).entry, cone := h, parameters := (recorded d h).parameters,
+  accept := (recorded d h).accept, assumes := (recorded d h).assumes, delta := (recorded d h).delta, fuel := (recorded d h).fuel,
+  timeLimit := (recorded d h).timeLimit, checked := (recorded d h).checked, lock := (recorded d h).lock,
+  decoration := (recorded d h).decoration, strategy := (recorded d h).strategy, fresh := (recorded d h).fresh,
+  axioms := (recorded d h).axioms, roots := (recorded d h).roots, combine := (recorded d h).combine, bound := (recorded d h).bound,
+  composition := (recorded d h).composition, cutoffs := nil }
+droppers : List (Demand -> Hash -> RunRecord) := [dropAxioms, dropRoots, dropCombine, dropBound, dropCutoffs]
 hashes : List Hash := ["sha256:aaaa"]
 test "RecordKeepsThePolicies" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "record" "droppers",
   bind "d" "policyDemands", bind "h" "hashes"]) (control <- true)

@@ -65,6 +65,11 @@ def main(argv: list[str] | None = None) -> int:
                             "[default weakest; proposed, a field of the demand]")
     p_run.add_argument("--set", action="append", default=[], metavar="NAME=VALUE",
                        help="give a hole of the file (a declared String, Int, Float64 or Bool) its value (12.S18)")
+    p_run.add_argument("--cutoff", action="append", default=[], metavar="LAW.PARAMETER=VALUE",
+                       help="give a law of the cone the value of one of its parameters (a tolerance, a floor), "
+                            "read as a literal of that parameter's type: the demand's per-law cutoff, which "
+                            "only the entries covering it serve (demand.lth's cutoffs, D-2026-10-16-k item 20) "
+                            "[default none]")
     p_run.add_argument("--accept", action="append", default=[], metavar="GRADE|assumed:NAME",
                        help="a grade (proved, exhaustive, cases, sampled, assumed): the weakest an entry of the "
                             "store may have to serve the run (6.S15, 7.S15) [proposed: sampled when none is "
@@ -137,7 +142,8 @@ def main(argv: list[str] | None = None) -> int:
             # `print` writes at once, checked (D-2026-10-16-n); `output` is the standard output as
             # observed, for the record
             output, values, state = run(ns.file, ns.main, ns.fuel, ns.set, grade, ns.checked, ns.fresh, assumes,
-                                        ns.time_limit, strategy, ns.combine, ns.bound, ns.delta, ns.composition)
+                                        ns.time_limit, strategy, ns.combine, ns.bound, ns.delta, ns.composition,
+                                        cutoffs=ns.cutoff)
             record(ns.file, state["demand"]["entry"], values, output, state)
             return 0
         except Cut as cut:

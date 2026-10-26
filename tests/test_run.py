@@ -1007,6 +1007,53 @@ def test_an_entry_serves_only_the_model_its_reach_holds(tmp_path):
         run_file(path, main="other")
 
 
+WITHIN = """\
+Close : { f : Float64 -> Float64 }
+NearItself (m : Close) (tol : Float64) (x : Float64) : Bool := m.f x - x <= tol
+Close := NearItself
+ident : Close := { f := fn x { x } }
+"""
+WITHIN_TEST = """\
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "within.lut" NearItself ident
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+tols : List Float64 := [1.0e-6]
+xs : List Float64 := [0.0, 1.0]
+test "NearItself" ExhaustiveMode (whereBindings <- [bind "m" "ident", bind "tol" "tols", bind "x" "xs"])
+"""
+USES_WITHIN = """\
+import "world_model.lut" HostConsole host : HostConsole
+import "within.lut" Close ident
+tol : Float64
+main (w : W) : W * Unit := host.print w (if ident.f 1.0 == 1.0 then "yes" else "no")
+"""
+
+
+def test_a_per_law_cutoff_reaches_its_law_and_a_hole_reaches_none(tmp_path, capsys):
+    # D-2026-10-16-k item 20: a law's cutoff is a typed field of the demand (`--cutoff LAW.PARAMETER=VALUE`,
+    # read by the parameter's type), given to that law alone; a hole `--set` fills of the same name
+    # reaches no law (before, `sets` reached every law with a parameter of that name)
+    from luthier.tester import run_tests
+    for name, text in (("within.lut", WITHIN), ("within.test.lut", WITHIN_TEST), ("uses_within.run.lut", USES_WITHIN)):
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    assert [o.grade for o in run_tests(tmp_path / "within.test.lut", store=True)] == ["Cases"]
+    path = tmp_path / "uses_within.run.lut"
+    assert main(["run", str(path), "--set", "tol=1e-9"]) == 0
+    assert main(["run", str(path), "--cutoff", "NearItself.tol=1e-6"]) == 0
+    assert capsys.readouterr().out == "yes\n" * 2
+    demand = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["demand"]
+    assert demand["cutoffs"] == [{"law": "NearItself", "parameter": "tol", "value": {"Number": 1e-6}}]
+    with pytest.raises(Refused, match="ident: NearItself: passed, but no passed entry's reach covers"):
+        run(path, cutoffs=["NearItself.tol=1e-9"])
+    with pytest.raises(RunError, match=r"--cutoff NearItself.tol=small: not a literal of type Float64"):
+        run(path, cutoffs=["NearItself.tol=small"])
+    with pytest.raises(RunError, match=r"--cutoff Nowhere.tol=1.0: no law Nowhere"):
+        run(path, cutoffs=["Nowhere.tol=1.0"])
+    capsys.readouterr()
+
+
 def test_a_change_to_the_model_or_to_the_law_makes_the_entry_stale(tmp_path):
     # StaleCertifiesNothing: the model's cone against the binding's fingerprint, the law's cone
     # against the entry's hash

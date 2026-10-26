@@ -1888,7 +1888,14 @@ def parameter(hole, text):
                          for b in hole.binders)
         raise RunError(f"--set {hole.name}: {hole.name}{' ' + shown if shown else ''} : {_show_type(ty)} "
                        f"is not a parameter; --set gives a String, an Int, a Float64 or a Bool")
-    if ty.name == "String":
+    return literal_of(ty.name, text, f"--set {hole.name}={text}")
+
+
+def literal_of(base, text, said):
+    """`text` read as a literal of the primitive type `base` (String, Int, Float64, Bool): a String
+    is the text as written, the others are parsed as a Luthier literal; `said` names the argument in
+    the error."""
+    if base == "String":
         return text
     parsed = parse(f"value := {text}")
     term = None
@@ -1898,13 +1905,60 @@ def parameter(hole, text):
     if isinstance(term, s.Neg):
         sign, term = -1, term.value
     literal = term.literal if isinstance(term, s.Literal) else None
-    if ty.name == "Int" and isinstance(literal, s.IntLit):
+    if base == "Int" and isinstance(literal, s.IntLit):
         return sign * literal.value
-    if ty.name == "Float64" and isinstance(literal, s.FloatLit):
+    if base == "Float64" and isinstance(literal, s.FloatLit):
         return sign * literal.value
-    if ty.name == "Bool" and sign == 1 and isinstance(term, s.Name) and term.name in ("true", "false"):
+    if base == "Bool" and sign == 1 and isinstance(term, s.Name) and term.name in ("true", "false"):
         return term.name == "true"
-    raise RunError(f"--set {hole.name}={text}: not a literal of type {ty.name}")
+    raise RunError(f"{said}: not a literal of type {base}")
+
+
+def law_cutoffs(loaded, items):
+    """[D-2026-10-16-k item 20] The per-law cutoffs of `run --cutoff LAW.PARAMETER=VALUE`, each
+    (law, parameter, value): the law a definition of a file the run loads, the parameter one of its
+    explicit ones, the value read as a literal of that parameter's type, its aliases and refinements
+    unfolded down to String, Int, Float64 or Bool (demand.lth's `LawCutoff`). [proposed] The
+    refinement is not checked here: an entry whose reach does not cover the value does not serve."""
+    found = []
+    for item in items:
+        named, sep, text = item.partition("=")
+        law, dot, p = named.rpartition(".")
+        if not sep or not dot or not law or not p:
+            raise RunError(f"--cutoff {item}: expected LAW.PARAMETER=VALUE")
+        define = next((a for a in loaded.acts if isinstance(a, s.Define) and a.name.partition("@")[0] == law
+                       and any(isinstance(b, s.Explicit) for b in a.binders)), None)
+        if define is None:
+            raise RunError(f"--cutoff {item}: no law {law} in the files {loaded.top.name} loads")
+        if not any(isinstance(b, s.Explicit) and p in b.names for b in define.binders):
+            raise RunError(f"--cutoff {item}: {law} has no parameter {p}")
+        program = _elaborated(runtime_slice(loaded.acts, define.name, core_data(loaded)))
+        kernel_law = next((a for a in program if isinstance(a, t.Define) and a.name == define.name), None)
+        ty = kernel_law.type if kernel_law is not None else None
+        while isinstance(ty, t.Pi) and ty.name != p:
+            ty = ty.codomain
+        base = _primitive_of(program, ty.domain) if isinstance(ty, t.Pi) else None
+        if base is None:
+            raise RunError(f"--cutoff {item}: {law}'s {p} is not of a type a cutoff reads (a String, an Int, "
+                           f"a Float64 or a Bool, or a refinement of one)")
+        found.append((law, p, literal_of(base, text, f"--cutoff {item}")))
+    return tuple(found)
+
+
+def _primitive_of(program, ty):
+    """The primitive a kernel type unfolds to through its aliases and refinements, by its plain name,
+    or None."""
+    defined = {a.name: a for a in program if isinstance(a, t.Define)}
+    for _ in range(50):
+        if isinstance(ty, t.Subtype):
+            ty = ty.type
+        elif isinstance(ty, t.Var) and ty.name.partition("@")[0] in PARAMETER_TYPES:
+            return ty.name.partition("@")[0]
+        elif isinstance(ty, t.Var) and ty.name in defined and isinstance(defined[ty.name].type, t.Universe):
+            ty = defined[ty.name].body
+        else:
+            return None
+    return None
 
 
 def _literal(value):
@@ -1977,7 +2031,7 @@ ACCEPT = "Sampled"
 DEMAND_DEFAULTS = {"entry": "main", "accepts": ACCEPT, "assumes": (), "fuel": None, "timeLimit": None, "sets": (),
                    "checked": False, "strategy": "ForwardOnDemand", "fresh": False,
                    "axioms": "AssumedGrade", "roots": ("FileSystemKeeps", "SystemDelivers"), "combine": "weakest", "bound": 1.0,
-                   "delta": 0.05, "composition": "cappedSumComposition"}
+                   "delta": 0.05, "composition": "cappedSumComposition", "cutoffs": ()}
 
 # the strategy that computes a demand, by the strategy it asks (demand.lth's `Ran`,
 # `RanIsASpecimenOfTheAsked`): run.py reduces by call by need whatever is asked
@@ -2037,6 +2091,9 @@ class Demand:
     # [wave B, bite B1] how the pairs (ε̂, δ) of the cone's laws compose (certify.COMPOSITIONS, by the
     # name of core.lut's model), the capped sum by default (L10.8, D-2026-10-25-a); recorded
     composition: str = DEMAND_DEFAULTS["composition"]
+    # [D-2026-10-16-k item 20] the per-law cutoffs, each (law, parameter, value), given to that law
+    # alone (`law`; demand.lth's `cutoffsOf`), none by default (`run --cutoff`); recorded
+    cutoffs: tuple = ()
 
     def inner(self, entry):
         """demand.lth's `inner`: the demand an inner action receives, every cutoff kept (L12.3)."""
@@ -2070,7 +2127,8 @@ class Demand:
                 "fuel": self.fuel, "timeLimit": self.time_limit, "checked": self.checked, "lock": self.pinned,
                 "decoration": self.decoration, "strategy": self.strategy, "fresh": self.fresh,
                 "axioms": certify.GRADE_WORDS[self.axioms], "roots": list(self.roots), "combine": self.combine,
-                "bound": self.bound, "composition": self.composition}
+                "bound": self.bound, "composition": self.composition,
+                "cutoffs": [{"law": law, "parameter": p, "value": _given(v)} for law, p, v in self.cutoffs]}
 
     def key(self, live_holes):
         """plan.lth's `demandKey` (8.S8, `KeyReadsOnlyTheCone`, `KeyReadsTheType`): the decoration,
@@ -2081,7 +2139,7 @@ class Demand:
 
 def demand_of(main=None, fuel=None, values=(), accept=None, checked=None, pinned=None, assumes=None,
               time_limit=None, strategy=None, fresh=None, combine=None, axioms=None, roots=None, bound=None,
-              delta=None, composition=None):
+              delta=None, composition=None, cutoffs=None):
     """The run's demand from its arguments, a missing one given its default (`DEMAND_DEFAULTS`,
     demand_model.lut's `theDemand`); `pinned` is what the lock pins (`lock_status`, 12.S13)."""
     d = DEMAND_DEFAULTS
@@ -2112,7 +2170,8 @@ def demand_of(main=None, fuel=None, values=(), accept=None, checked=None, pinned
                   roots=tuple(dict.fromkeys(d["roots"] if roots is None else roots)),
                   bound=d["bound"] if bound is None else float(bound),
                   delta=d["delta"] if delta is None else float(delta),
-                  composition=d["composition"] if composition is None else composition)
+                  composition=d["composition"] if composition is None else composition,
+                  cutoffs=tuple(d["cutoffs"] if cutoffs is None else cutoffs))
 
 
 def _head_name(x):
@@ -2462,7 +2521,7 @@ def certification(loaded, program, entry, demand, refuse=True):
     first; a law whose latest entry at the current hash passed but does not serve the cutoff counts
     as uncertified, its line saying why."""
     from . import certify
-    accept, values = demand.accepts, dict(demand.sets)
+    accept = demand.accepts
     cones = certify.Cones(program)
     names = sorted(cones.names(entry))
     theories = _Theories(loaded.acts)
@@ -2489,6 +2548,7 @@ def certification(loaded, program, entry, demand, refuse=True):
                                                         theory_laws=True))) \
         if laws else None
     cone, firsts, axioms, axiom_laws = [], [], {}, set()
+    used = set()
     for n in names:
         demands = []
         if n in stating and n not in provisional:
@@ -2512,7 +2572,10 @@ def certification(loaded, program, entry, demand, refuse=True):
                     fingerprints[m] = cones.hash(n)
                 params = [p for a in theories.acts.get(law, ()) if isinstance(a, s.Define)
                           for b in a.binders if isinstance(b, s.Explicit) for p in b.names]
-                given += [(p, _given(values[p])) for p in params if p in values and p != m]
+                # [D-2026-10-16-k item 20] the law's own cutoffs; the holes `--set` fills reach no law
+                plain = law.partition("@")[0]
+                given += [(p, _given(v)) for named, p, v in demand.cutoffs if named == plain and p in params and p != m]
+                used.update((named, p) for named, p, _ in demand.cutoffs if named == plain and p in params)
                 axiom = theories.axiom_of(law)
                 d = demand.law(law.partition("@")[0], law_cones.hash(law), given, fingerprints, axiom is not None)
                 # [wave A, A4; audit 1.3] the law's conjuncts as its definition states them
@@ -2530,6 +2593,9 @@ def certification(loaded, program, entry, demand, refuse=True):
                 demands.append(d)
         cone.append({"name": n.partition("@")[0],
                      "provisional": n in provisional and n.partition("@")[0] not in demand.assumes, "laws": demands})
+    unused = [f"{law}.{p}" for law, p, _ in demand.cutoffs if (law, p) not in used]
+    if unused:
+        raise RunError(f"--cutoff {', '.join(unused)}: no law of the run's cone takes it (D-2026-10-16-k item 20)")
     stores_read = _stores_read(loaded.files)
     entries = sorted((e for f in loaded.files for e in certify.read_store(f)),
                      key=lambda e: e.get("date", ""), reverse=True)
@@ -3167,7 +3233,8 @@ def refuse_provisional(kept, entry, assumes=()):
 
 
 def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=None, assumes=None,
-        time_limit=None, strategy=None, combine=None, bound=None, delta=None, composition=None, stream=None):
+        time_limit=None, strategy=None, combine=None, bound=None, delta=None, composition=None, stream=None,
+        cutoffs=()):
     """Run `main` of the file at `path` with its holes filled by `sets`, once the store certifies
     its cone at the grade `accept` (12.S17; `Refused` otherwise, before anything is evaluated);
     gives the standard output, the values set and the certification state of the cone. `checked`
@@ -3216,7 +3283,8 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
     loaded = Loaded(path)
     values, empty = fill(loaded, sets)
     demand = demand_of(main, fuel, values, accept, checked, lock["pinned"], assumes, time_limit, strategy, fresh,
-                       combine, roots=lock["roots"], bound=bound, delta=delta, composition=composition)
+                       combine, roots=lock["roots"], bound=bound, delta=delta, composition=composition,
+                       cutoffs=law_cutoffs(loaded, cutoffs))
     entry = loaded.name(loaded.top, demand.entry) or demand.entry
     kept = runtime_slice(loaded.acts, entry, core_data(loaded))
     roots = _first_action_roots(loaded, kept)
