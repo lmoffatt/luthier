@@ -12,8 +12,8 @@ import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
 import "numbers_model.lut" doubles elementary
-import "resources.lth" Bound Modulus Scaling sufficient
-import "../../examples/bisection.lut" Problem Bracket bisectionModulus bisectionScaling bisectionFloor halvings stepRoom
+import "resources.lth" Bound Modulus Scaling sufficient unknown infeasible outsideDomain
+import "../../examples/bisection.lut" Problem Bracket Bisected bisect bisectionModulus bisectionScaling bisectionFloor halvings stepRoom
   BisectionModulusIsAModulus BisectionMeets NeedsNoMoreThanItsModulus BisectionScalesAsStated
 
 problems : List Problem := [
@@ -29,22 +29,23 @@ boundLists : List (List Bound) := [[1.0e-2, 1.0e-4, 1.0e-6, 1.0e-8, 1.0e-10, 1.0
   [0.00390625, 1.52587890625e-05, 5.9604644775390625e-08, 2.3283064365386963e-10, 9.094947017729282e-13]]
 moduli : List (Modulus Bracket) := [bisectionModulus doubles]
 scalings : List (Scaling Bracket) := [bisectionScaling elementary]
+solvers : List (Problem -> Bound -> Bisected) := [bisect]
 
 bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
 models : List Binding := [
   { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed } ]
-listed (m s : String) : List Binding := [bind "m" m, bind "s" s, bind "p" "problems", bind "f" "brackets", bind "b" "bounds",
+listed (m s a : String) : List Binding := [bind "m" m, bind "s" s, bind "solve" a, bind "p" "problems", bind "f" "brackets", bind "b" "bounds",
   bind "c" "bounds", bind "bounds" "boundLists"]
 
 -- the modulus is a modulus, on listed brackets and bounds
-test "BisectionModulusIsAModulus" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "scalings") (profile <- models)
+test "BisectionModulusIsAModulus" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "scalings" "solvers") (profile <- models)
 -- the root within its bound, at every bound of the list (the tester's scaling record: what each bound cost)
-test "BisectionMeets" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "scalings") (profile <- models)
+test "BisectionMeets" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "scalings" "solvers") (profile <- models)
 -- the steps measured, no more than the modulus says
-test "NeedsNoMoreThanItsModulus" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "scalings") (profile <- models)
+test "NeedsNoMoreThanItsModulus" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "scalings" "solvers") (profile <- models)
 -- the steps scale as log2 (L / b) to the first power
-test "BisectionScalesAsStated" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "scalings") (profile <- models)
+test "BisectionScalesAsStated" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "scalings" "solvers") (profile <- models)
 
 -- the controls
 -- a modulus that promises half the halvings: log2 (sqrt (L / b)), the exponent one half inside the log
@@ -55,6 +56,36 @@ halvedModulus : List (Modulus Bracket) := [{ need := fn b f { match (bisectionMo
 squaredScaling : List (Scaling Bracket) := [{ rate := (bisectionScaling elementary).rate, exponent := 2.0, grain := 1.0 }]
 -- and with exponent one half
 rootScaling : List (Scaling Bracket) := [{ rate := (bisectionScaling elementary).rate, exponent := 0.5, grain := 1.0 }]
-test "NeedsNoMoreThanItsModulus" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "halvedModulus" "scalings") (profile <- models) (control <- true)
-test "BisectionScalesAsStated" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "squaredScaling") (profile <- models) (control <- true)
-test "BisectionScalesAsStated" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "rootScaling") (profile <- models) (control <- true)
+test "NeedsNoMoreThanItsModulus" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "halvedModulus" "scalings" "solvers") (profile <- models) (control <- true)
+test "BisectionScalesAsStated" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "squaredScaling" "solvers") (profile <- models) (control <- true)
+test "BisectionScalesAsStated" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "rootScaling" "solvers") (profile <- models) (control <- true)
+
+-- a bisection that answers the low end of its last bracket, not the midpoint: off by up to the whole
+-- width, twice what the law allows
+lowEndFrom (f : Float64 -> Float64) (lo hi flo tol : Float64) (steps : Nat) : Bisected :=
+  if hi - lo <= tol then { root := lo, steps := steps }
+  else { mid := lo + (hi - lo) / 2.0
+         fm := f mid
+         if (flo < 0.0 and fm < 0.0) or (0.0 <= flo and 0.0 <= fm) then lowEndFrom f mid hi fm tol (steps + 1)
+         else lowEndFrom f lo mid flo tol (steps + 1) }
+lowEnd : List (Problem -> Bound -> Bisected) := [fn p b { lowEndFrom p.f p.lo p.hi (p.f p.lo) b 0 }]
+test "BisectionMeets" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "scalings" "lowEnd") (profile <- models) (control <- true)
+
+-- the modulus's own laws, each refuted by a modulus broken in the way it forbids
+-- known only for bounds below a hundredth, unknown above: a looser bound less known than a stronger
+knownOnlyBelow : List (Modulus Bracket) := [{ need := fn b f { if b < 0.01 then (bisectionModulus doubles).need b f else unknown unit },
+  floor := (bisectionModulus doubles).floor, domain := (bisectionModulus doubles).domain }]
+-- the halvings to the bound itself, the floor ignored: a promise below it
+noFloor : List (Modulus Bracket) := [{ need := fn b f { if f.brackets then sufficient { work := halvings f.width b, span := halvings f.width b, memory := 3 }
+    else infeasible (outsideDomain unit) }, floor := (bisectionModulus doubles).floor, domain := (bisectionModulus doubles).domain }]
+-- a promise whether the bracket brackets or not
+noDomain : List (Modulus Bracket) := [{ need := fn b f { (bisectionModulus doubles).need b { width := f.width, scale := f.scale, brackets := true } },
+  floor := (bisectionModulus doubles).floor, domain := (bisectionModulus doubles).domain }]
+-- nothing known anywhere above the floor
+knowsNothing : List (Modulus Bracket) := [{ need := fn b f { match (bisectionModulus doubles).need b f { sufficient r -> unknown unit ; n -> n } },
+  floor := (bisectionModulus doubles).floor, domain := (bisectionModulus doubles).domain }]
+OnModulus (m : Modulus Bracket) : Bool := Modulus Bracket m
+test "OnModulus" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "knownOnlyBelow" "scalings" "solvers") (control <- true)
+test "OnModulus" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "noFloor" "scalings" "solvers") (control <- true)
+test "OnModulus" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "noDomain" "scalings" "solvers") (control <- true)
+test "OnModulus" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "knowsNothing" "scalings" "solvers") (control <- true)

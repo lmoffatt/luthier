@@ -72,6 +72,9 @@ BisectionModulusIsAModulus (d : Doubles Float64) : Bool := Modulus Bracket (bise
 
 -- ---------------------------------------------------------------- the laws of the algorithm
 
+-- Each law takes the algorithm as a parameter, `solve`, which the test binds to `bisect`, so that an
+-- algorithm broken on purpose can be refuted by it (L9.14).
+
 -- the work a need promises, none when it promises nothing
 workNeeded (n : Need) : Nat := match n { sufficient r -> r.work ; _ -> 0 }
 
@@ -80,17 +83,17 @@ workNeeded (n : Need) : Nat := match n { sufficient r -> r.work ; _ -> 0 }
 -- so within `b / 2 + floor + blur` (the floor is far above the rounding terms). A numerical law
 -- (laws.lth §5) with its bound a parameter: tested at a list of bounds, the tester records what each
 -- costs (tester.py's scaling record). Its range: a bracket, a bound at or above the floor.
-BisectionMeets (d : Doubles Float64) (p : Problem) (b : Bound) : Law :=
+BisectionMeets (d : Doubles Float64) (solve : Problem -> Bound -> Bisected) (p : Problem) (b : Bound) : Law :=
   { f := featuresOf p
     if f.brackets and bisectionFloor d f <= b then
-      Within Float64 absDistance (b / 2.0 + bisectionFloor d f + p.blur) (bisect p b).root p.root
+      Within Float64 absDistance (b / 2.0 + bisectionFloor d f + p.blur) (solve p b).root p.root
     else Case true }
 
 -- The modulus against the steps measured: where the modulus promises, the run takes no more halvings
 -- than it says (the audit's 6: a sufficient bound, measured use below it). `m` is a parameter so that a
 -- modulus that promises too little is refuted (the control `halvedModulus`).
-NeedsNoMoreThanItsModulus (m : Modulus Bracket) (p : Problem) (b : Bound) : Bool :=
-  if isSufficient (m.need b (featuresOf p)) then (bisect p b).steps <= workNeeded (m.need b (featuresOf p)) else true
+NeedsNoMoreThanItsModulus (m : Modulus Bracket) (solve : Problem -> Bound -> Bisected) (p : Problem) (b : Bound) : Bool :=
+  if isSufficient (m.need b (featuresOf p)) then (solve p b).steps <= workNeeded (m.need b (featuresOf p)) else true
 
 -- What bisection states of its scaling: the steps are `log2 (L / b)` to the first power, counted in
 -- whole steps, the count at least the rate and less than one step above it (the halvings rounded up,
@@ -98,8 +101,8 @@ NeedsNoMoreThanItsModulus (m : Modulus Bracket) (p : Problem) (b : Bound) : Bool
 bisectionScaling (e : Elementary) : Scaling Bracket :=
   { rate := fn b f { e.log (f.width / b) / e.log 2.0 }, exponent := 1.0, grain := 1.0 }
 
-stepsAt (p : Problem) (bs : List Bound) : List Float64 :=
-  match bs { nil -> nil ; cons b rest -> cons (toFloat64 (bisect p b).steps) (stepsAt p rest) }
+stepsAt (solve : Problem -> Bound -> Bisected) (p : Problem) (bs : List Bound) : List Float64 :=
+  match bs { nil -> nil ; cons b rest -> cons (toFloat64 (solve p b).steps) (stepsAt solve p rest) }
 ratesAt (s : Scaling Bracket) (f : Bracket) (bs : List Bound) : List Float64 :=
   match bs { nil -> nil ; cons b rest -> cons (s.rate b f) (ratesAt s f rest) }
 aboveTheFloor (d : Doubles Float64) (f : Bracket) (bs : List Bound) : Bool :=
@@ -109,7 +112,8 @@ aboveTheFloor (d : Doubles Float64) (f : Bracket) (bs : List Bound) : Bool :=
 -- their slope in log scale against the stated rate's equal to the stated exponent. `s` is a parameter
 -- so that a wrong exponent is refuted (the control `squaredScaling`); a modulus too small by a constant
 -- factor it cannot see, which `NeedsNoMoreThanItsModulus` does.
-BisectionScalesAsStated (e : Elementary) (d : Doubles Float64) (s : Scaling Bracket) (p : Problem) (bounds : List Bound) : Law :=
+BisectionScalesAsStated (e : Elementary) (d : Doubles Float64) (s : Scaling Bracket) (solve : Problem -> Bound -> Bisected)
+    (p : Problem) (bounds : List Bound) : Law :=
   { f := featuresOf p
-    if f.brackets and aboveTheFloor d f bounds then ScalesAs e d s.exponent s.grain (stepsAt p bounds) (ratesAt s f bounds)
+    if f.brackets and aboveTheFloor d f bounds then ScalesAs e d s.exponent s.grain (stepsAt solve p bounds) (ratesAt s f bounds)
     else Case true }
