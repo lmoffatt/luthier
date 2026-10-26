@@ -502,3 +502,44 @@ def test_premises_are_read_from_then_from_if_else_true_and_through_an_applied_la
     count = {s.law: len(tester.premises_of(runner, tester._as_called(loaded, s.law))) for s in specs}
     assert count == {"NeverNegative": 1, "NeverNegativeIf": 1, "NeverNegativeApplied": 1, "NeverNegativeOr": 1,
                      "NotNegative": 0, "TwoNegations": 0, "SometimesNegative": 1, "ZeroIsNeutral": 0, "NothingIsFalse": 0}
+
+
+# ---------------------------------------------------------------------- a control over a conjunction, partly known
+# report-controls-M.md 3.2: a control line over a conjunction whose refuting conjunct's entry is known
+# while the line's own entry is new (a binding reaching one conjunct only) crashed in `settle`, which
+# read `.coverage` from the reused outcome's evidence, the store's dict
+
+PARTS = '''LeftZero (f : Int -> Int -> Int) (x : Int) : Bool := f 0 x == x
+Swaps (f : Int -> Int -> Int) (a : Int) (b : Int) : Bool := f a b == f b a
+LocalPair (f : Int -> Int -> Int) := LeftZero f & Swaps f
+'''
+PARTS_LINES = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "parts.lut" LocalPair
+broken : Int -> Int -> Int := fn a b { if a == 0 then b else a }
+small : List Int := [0, 1, 2]
+other : List Int := [0, 2]
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+ofType (t g : String) : Binding := { parameter := nothing, type := just t, generator := g, coverage := Listed }
+profile : List Binding := [bind "f" "broken", ofType "Int" "small"EXTRA]
+test "LocalPair" ExhaustiveMode (whereBindings <- profile) (control <- true)
+'''
+
+
+def test_a_control_over_a_conjunction_settles_from_a_known_refuting_conjunct(tmp_path):
+    (tmp_path / "parts.lut").write_text(PARTS, encoding="utf-8")
+    path = tmp_path / "parts.test.lut"
+    path.write_text(PARTS_LINES.replace("EXTRA", ""), encoding="utf-8")
+    first, = tester.run_tests(path, store=True)
+    assert first.verdict == "Refuted" and tester.passes(first)
+    # `x` bound by name reaches `LeftZero` alone: `Swaps`, the refuting conjunct, stays known
+    path.write_text(PARTS_LINES.replace("EXTRA", ', bind "x" "other"'), encoding="utf-8")
+    again, = tester.run_tests(path, store=True)
+    assert [o.known is not None for o in again.parts] == [False, True]
+    assert again.known is None and again.verdict == "Refuted" and tester.passes(again)
+    assert again.entry["outcome"] == first.entry["outcome"]
+    assert again.entry["evidence"]["Points"]["verdict"] == "Refuted"
+    assert again.entry["evidence"]["Points"]["coverage"] == first.entry["evidence"]["Points"]["coverage"]
+    assert tester.line(again).splitlines()[0] == ("control of LocalPair: exhaustive, 11 cases, refuted at "
+                                                  "Swaps f: f = broken, a = 1, b = 2: the control passed (ran)")

@@ -2335,6 +2335,8 @@ def line(outcome):
     if outcome.differs is not None:
         how += (f"; replay disagrees with the known entry of {outcome.differs}: both kept, the law refused "
                 f"until a later run agrees (D-2026-10-15-f)")
+    if isinstance(outcome.evidence, dict):  # settled from a known conjunct's entry (`_settle_known`)
+        return f"{head}, {_entry_tail(outcome.entry)} ({how})"
     return f"{head}, {_tail(outcome)} ({how})"
 
 
@@ -2898,6 +2900,8 @@ def settle(entry, outcome):
         return entry
     if isinstance(outcome.evidence, Tested):
         return _settle_tested(entry, outcome)
+    if isinstance(outcome.evidence, dict):  # a known conjunct's evidence, as its store records it
+        return _settle_known(entry, outcome)
     if isinstance(outcome.evidence, Vacuous):  # laws.lth's `Vacuous n`, not run (D-2026-10-16-m), a control too
         entry["evidence"] = {"Vacuous": outcome.evidence.evaluated}
         entry["outcome"] = {"NotRunFor": vacuity_reason(outcome.evidence.evaluated)}
@@ -2929,6 +2933,39 @@ def settle(entry, outcome):
         entry["outcome"], entry["grade"] = "Passed", outcome.grade
     else:
         entry["outcome"] = {"NotRunFor": _tail(outcome)}
+    return entry
+
+
+def _settle_known(entry, outcome):
+    """[report-controls-M.md 3.2] A conjunction's entry whose evidence is a known conjunct's, reused
+    from its store (`_run_line`), so already recorded: that record with the conjunction's cases and
+    verdict, as `settle` writes a run's; its refuting case is the one the conjunct's entry records,
+    the conjunct named as `_case_text` names it; otherwise as `settle`."""
+    base = next((o for o in outcome.parts or () if o.evidence is outcome.evidence), None)
+    known = base.entry["outcome"] if base is not None and base.entry is not None else None
+    evidence = json.loads(json.dumps(outcome.evidence))
+    points = evidence.get("Points")
+    if points is not None:
+        points.update(evaluated=outcome.evaluated, verdict=outcome.verdict)
+        points.pop("held", None)  # a conjunction states no premise of its own, as when it runs
+    entry["evidence"] = evidence
+    if outcome.regions is not None:
+        entry["regions"] = outcome.regions
+    if outcome.labels:
+        entry["labels"] = outcome.labels
+    control = outcome.spec.control
+    if outcome.verdict == "Refuted":
+        case = next(iter(known.values())) if isinstance(known, dict) else _case_text(outcome)
+        if points is not None and outcome.conjunct is not None and isinstance(known, dict):
+            case = f"{outcome.conjunct}: {case}"
+        entry["outcome"] = {"ControlRefuted" if control else "Failed": case}
+    elif outcome.grade is not None:
+        if control:
+            entry["outcome"] = {"ControlConfirmed": _GRADE_WORDS.get(outcome.grade, outcome.grade)}
+        else:
+            entry["outcome"], entry["grade"] = "Passed", outcome.grade
+    else:
+        entry["outcome"] = known if isinstance(known, dict) and "NotRunFor" in known else {"NotRunFor": _tail(outcome)}
     return entry
 
 
