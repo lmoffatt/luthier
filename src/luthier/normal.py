@@ -1122,6 +1122,8 @@ def recognize(law):
             elif w in entry.structural:
                 carrier = _object_param(ty)
                 carrier = _subst_types(carrier, tsub) if carrier is not None else None
+                if carrier is not None and set(kernel.free_names(carrier)) & (entry.type_params - set(tsub)):
+                    carrier = None
                 at.append((w, "structural " + _atom(carrier, law.written) if carrier is not None else "structural ?"))
             elif n in sigma:
                 at.append((w, show(sigma[n], law.written)))
@@ -1202,4 +1204,10 @@ def show(u, names=None):
         return f"fn {u.name} {{ {show(u.body, names)} }}"
     if isinstance(u, t.Pi):
         return f"{_atom(u.domain, names)} -> {show(u.codomain, names)}"
+    if isinstance(u, t.Sigma):
+        return f"{_atom(u.domain, names)} * {_atom(u.codomain, names)}"
+    if isinstance(u, t.Record):
+        return "{ " + ", ".join(f"{n} : {show(v, names)}" for n, v in u.fields) + " }"
+    if isinstance(u, t.Hole):
+        return "?"
     return repr(u)
