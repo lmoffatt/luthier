@@ -246,10 +246,11 @@ def test_a_control_line_is_read_and_its_refutation_is_the_control_passing(capsys
     assert code == 0  # the control passed: `luthier test` succeeds
     assert lines[0] == ("control of CellsOfTheirKind: exhaustive, 1 cases, refuted at t = holeT: "
                         "the control passed (ran)")
-    # ten since core bite 11 (TableIsIndexed, TableIsAnObject)
+    # ten since core bite 11 (TableIsIndexed, TableIsAnObject), twelve since 5ca7e15 (the symmetry and
+    # the transitivity of the tables' equality)
     # [bite D1] a control of a conjunction prints a line per conjunct below its own
     lines = [line for line in lines if not line.startswith("  ")]
-    assert len(lines) == 10 and all(line.endswith(": the control passed (ran)") for line in lines)
+    assert len(lines) == 12 and all(line.endswith(": the control passed (ran)") for line in lines)
 
 
 def test_a_law_line_is_no_control_by_default():
