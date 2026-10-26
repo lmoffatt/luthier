@@ -1209,6 +1209,20 @@ def test_equality_on_a_unit_label_applied_to_unit():
     assert step(p, bin_("==", App(infinite, Var("unit")), infinite)) is None
 
 
+def test_a_match_on_a_unit_label_reads_it_bare_or_applied_to_unit():
+    # night bite T: `match r { stopA u -> 1 ; _ -> 2 }` on a bare `stopA` took the wildcard (the
+    # pattern has one part, the value none), and `stopA` as a pattern missed `stopA unit`
+    unit_data = Define("Unit", Universe(), Data("Unit", (("unit", Var("Unit")),)))
+    p = (unit_data, Define("R", Universe(), Sum((("stopA", Var("Unit")), ("stopB", Var("Int"))))))
+    bare, applied = Var("stopA"), App(Var("stopA"), Var("unit"))
+    for value in (bare, applied):
+        with_part = Match(value, ((PCon("stopA", (PVar("u"),)), Var("u")), (PWild(), num(2))))
+        assert reduce(p, 30, with_part) == Var("unit")
+        without = Match(value, ((PCon("stopA", ()), num(1)), (PWild(), num(2))))
+        assert reduce(p, 30, without) == num(1)
+    assert reduce(p, 30, Match(App(Var("stopB"), num(3)), ((PCon("stopA", ()), num(1)), (PWild(), num(2))))) == num(2)
+
+
 # 3.S31 [proposed]: a record type's label binds in the later fields' types.
 def _mat():
     from luthier.term import Pi

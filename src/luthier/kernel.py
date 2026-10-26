@@ -824,6 +824,10 @@ def _pattern(env: dict[str, Term | None], constructors: dict[str, frozenset[str]
             view = _constructor(v)
             if view is not None and view[0] not in env and view[0] == c:
                 args = view[1]
+                if len(args) != len(ps) and c in getattr(constructors, "unit_labels", ()) and len(args) + len(ps) == 1:
+                    # [night bite T] a label whose part is `Unit`, bare or applied to `unit`, on
+                    # either side: bare, its part is `unit`; written, it is not read
+                    args = (Var("unit"),) if ps else ()
                 if len(args) != len(ps):
                     return None
                 bs: Bindings = ()
