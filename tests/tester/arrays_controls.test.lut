@@ -995,19 +995,21 @@ test "MatIsAnObject" ExhaustiveMode (seed <- 20261021) (profile <- onNoFewerRows
 test "MatIsAnObject" ExhaustiveMode (seed <- 20261021) (profile <- onNearRows) (control <- true)
 
 -- MapCompose: a map is a functor by the free theorem of its type once it fixes identities, so a
--- total model that breaks only the second law must look at the values (a map that reads the value 1
--- as "the first entry"). It keeps `map id`, on vectors whose 1 is the first entry or absent, and
--- loses `map (g . h)` against `map g . map h`, where `h` turns an entry into a 1: (5, -1) goes by
--- `negated` to (-5, 1), and `twiceInt` then gives (-10, -10), not (-10, 2).
-valueOneVecFunctor : Functor Vec := { map := fn (A B : U) g v { vec B v.n (fn k { if v.f k == 1 then g (v.f 0) else g (v.f k) }) } }
-valueOneMatFunctor : Functor Mat := { map := fn (A B : U) g a { mat B a.m a.n (fn i j { if a.f i j == 1 then g (a.f 0 0) else g (a.f i j) }) } }
+-- total model that breaks only the second law must look at the values. The first controls did (a
+-- map that read the value 1 as "the first entry", comparing an entry of type `A` with `1`); since
+-- the comparisons are typed (night bite T, 2026-10-26, Claude Opus 5.5: 4.R9 refuses `v.f k == 1`
+-- at `A`) no model can, and the control breaks `map id` too: a map that reverses the entries.
+-- Twice reversed is in order, once is not: (5, -1) goes by `negated` and then `twiceInt` to
+-- (-10, 2), and by their composite, reversed once, to (2, -10).
+reversedVecFunctor : Functor Vec := { map := fn (A B : U) g v { vec B v.n (fn k { g (v.f (v.n - 1 - k)) }) } }
+reversedMatFunctor : Functor Mat := { map := fn (A B : U) g a { mat B a.m a.n (fn i j { g (a.f i (a.n - 1 - j)) }) } }
 sentinelVectors : List (Vec Int) := [ vec Int 1 (fn k { 1 }), vec Int 2 (fn k { if k == 0 then 5 else 0 - 1 }) ]
 sentinelMatrices : List (Mat Int) := [ mat Int 1 1 (fn i j { 1 }), mat Int 1 2 (fn i j { if j == 0 then 5 else 0 - 1 }) ]
 onVecMapCompose : List Binding := [
   { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
   { parameter := just "B", type := nothing, generator := "entryType", coverage := Listed },
   { parameter := just "C", type := nothing, generator := "entryType", coverage := Listed },
-  { parameter := just "model", type := nothing, generator := "valueOneVecFunctor", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "reversedVecFunctor", coverage := Listed },
   { parameter := just "o", type := nothing, generator := "vecEquality", coverage := Listed },
   { parameter := just "g", type := nothing, generator := "twiceInt", coverage := Listed },
   { parameter := just "h", type := nothing, generator := "negated", coverage := Listed },
@@ -1017,7 +1019,7 @@ onMatMapCompose : List Binding := [
   { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
   { parameter := just "B", type := nothing, generator := "entryType", coverage := Listed },
   { parameter := just "C", type := nothing, generator := "entryType", coverage := Listed },
-  { parameter := just "model", type := nothing, generator := "valueOneMatFunctor", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "reversedMatFunctor", coverage := Listed },
   { parameter := just "o", type := nothing, generator := "matEquality", coverage := Listed },
   { parameter := just "g", type := nothing, generator := "twiceInt", coverage := Listed },
   { parameter := just "h", type := nothing, generator := "negated", coverage := Listed },
