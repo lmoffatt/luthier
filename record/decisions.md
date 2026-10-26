@@ -3460,3 +3460,12 @@ Source:     record/plan/audit-algebras-2026-10-22/decisions.md, his annotations 
 Kind:       waves B to E of record/plan/audit-algebras-2026-10-22/execution.md; principles L10.3,
             L10.8, L6.15, L13.3, L13.4, L9.14, L5.22, O13
 Status:     current
+
+D-2026-10-26-a  An integer literal takes the other operand's numeric type, in arithmetic as in
+                comparisons (`x + 0` and `x < 0` with `x : Float64` read `0` as `0.0`), as Haskell
+                reads a literal through `fromInteger` (L7.6). The coordinator's, on
+                report-night-T.md's question; comparisons do it since 444973f, arithmetic next.
+Author:     the coordinator (one commit undoes it; Luciano told the next morning)
+Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-26 night)
+Kind:       elaborate.py (`comparison`, `operator_use`), spec 4.R9
+Status:     current
