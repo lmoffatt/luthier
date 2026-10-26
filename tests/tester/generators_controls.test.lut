@@ -21,11 +21,16 @@
 -- certify did not count); the law's second control, probability_model.lut's `lump`, every value
 -- 0.9, came here from probability_controls.test.lut with the `SourceIsUniform` line it controlled
 -- there, which computed the same test as this law's line.
+-- The four controls of `Resolution` added 2026-10-26 by Claude Opus 5.5 (D-2026-10-16-l, G6), each a
+-- resolution broken in the way one conjunct forbids: `where` read whole before the profile (the
+-- parameter in the profile loses to its type in `where`, `ParameterWinsAcrossPlaces`), a type before
+-- a parameter (`ParameterWins`), the profile before `where` (`WhereWins`), and a binding found where
+-- none is (`NothingBindsNothing`).
 
-import "test.lth" test SampledMode
+import "test.lth" test SampledMode ExhaustiveMode
 import "generators_model.lut" linear UniformSampleIsUniform skewedSample SymmetricGivesSymmetric SymmetricOfGivesItsSize
   GramGivesPsd OrthogonalGivesOrthogonal UnitListGivesUnitValues ClearDiagonalGivesClear
-import "generators.lth" Binding Seed Gen
+import "generators.lth" Binding Seed Gen Resolution resolve firstBinding bindsParameter bindsType byParameter byType
 import "laws.lth" Listed Sequential
 import "numbers.lth" Tolerance
 import "arrays.lth" Vec Mat Dim RankFloor MatOf SymmetricMatrix SymmetricOf ClearDiagonal mat vec identity
@@ -77,3 +82,26 @@ onLump : List Binding := [ { parameter := just "source", type := nothing, genera
 test "UniformSampleIsUniform" (SampledMode linear) (seed <- 20261015) (whereBindings <- onSkewed) (profile <- onWald) (control <- true)
 -- lump: every value 0.9, the p-value near zero on every sample
 test "UniformSampleIsUniform" (SampledMode linear) (seed <- 20261015) (whereBindings <- onLump) (profile <- onWald) (control <- true)
+
+-- [D-2026-10-16-l, G6] resolutions broken on purpose, over generators_laws.test.lut's censuses
+names : List String := ["a", "b"]
+bindingLists : List (List Binding) := [nil, [byParameter "a" "a"], [byType "b" "b"], [byParameter "b" "a", byType "a" "b"]]
+either (x t : String) (b : Binding) : Bool := bindsParameter x b or bindsType t b
+whereFirst : List Resolution := [{ bindingOf := fn ws ps x t {
+  match firstBinding (either x t) ws { just g -> just g ; nothing -> firstBinding (either x t) ps } } }]
+typeFirst : List Resolution := [{ bindingOf := fn ws ps x t {
+  match firstBinding (bindsType t) ws { just g -> just g ; nothing ->
+  match firstBinding (bindsType t) ps { just g -> just g ; nothing ->
+  match firstBinding (bindsParameter x) ws { just g -> just g ; nothing -> firstBinding (bindsParameter x) ps } } } } }]
+profileFirst : List Resolution := [{ bindingOf := fn ws ps x t { resolve ps ws x t } }]
+somethingAlways : List Resolution := [{ bindingOf := fn ws ps x t {
+  match resolve ws ps x t { just g -> just g ; nothing -> just (byType t t) } } }]
+onResolution (r : String) : List Binding := [
+  { parameter := just "r", type := nothing, generator := r, coverage := Listed },
+  { parameter := nothing, type := just "String", generator := "names", coverage := Listed },
+  { parameter := just "whereBs", type := nothing, generator := "bindingLists", coverage := Listed },
+  { parameter := just "profile", type := nothing, generator := "bindingLists", coverage := Listed } ]
+test "Resolution" ExhaustiveMode (seed <- 20261026) (whereBindings <- onResolution "whereFirst") (control <- true)
+test "Resolution" ExhaustiveMode (seed <- 20261026) (whereBindings <- onResolution "typeFirst") (control <- true)
+test "Resolution" ExhaustiveMode (seed <- 20261026) (whereBindings <- onResolution "profileFirst") (control <- true)
+test "Resolution" ExhaustiveMode (seed <- 20261026) (whereBindings <- onResolution "somethingAlways") (control <- true)

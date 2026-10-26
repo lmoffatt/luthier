@@ -20,12 +20,15 @@
 -- takes the family as its parameter `g` [proposed]; a line binds `g` to a census of one listing
 -- the family (a binding that names a `Gen T` itself would be drawn from), so that
 -- generators_controls.test.lut can bind a family broken on purpose to the same law.
+-- `Resolution` on generators_model.lut's `resolution` (the tester's `resolve_binding`) added
+-- 2026-10-26 by Claude Opus 5.5 (D-2026-10-16-l, G6: the most specific binding wins), over listed
+-- names and lists of bindings; its controls are in generators_controls.test.lut.
 
 import "test.lth" test ExhaustiveMode SampledMode
-import "generators_model.lut" linear SymmetricGivesSymmetric SymmetricOfGivesItsSize GramGivesPsd
+import "generators_model.lut" linear resolution SymmetricGivesSymmetric SymmetricOfGivesItsSize GramGivesPsd
   OrthogonalGivesOrthogonal UnitListGivesUnitValues UniformSampleIsUniform ClearDiagonalGivesClear
   symmetric symmetricOf gram orthogonal unitList clearDiagonal uniformSample
-import "generators.lth" Binding Gen
+import "generators.lth" Binding Gen Resolution byParameter byType
 import "laws.lth" Listed Sequential
 import "numbers.lth" Tolerance
 import "arrays.lth" RankFloor Dim MatOf SymmetricMatrix SymmetricOf ClearDiagonal
@@ -57,3 +60,15 @@ test "OrthogonalGivesOrthogonal" (SampledMode linear) (seed <- 20261014) (whereB
 test "UnitListGivesUnitValues" (SampledMode linear) (seed <- 20261014) (whereBindings <- family "unitListFamily") (profile <- cutoffs)
 test "UniformSampleIsUniform" (SampledMode linear) (seed <- 20261014) (whereBindings <- onUniformSample) (profile <- cutoffs)
 test "ClearDiagonalGivesClear" (SampledMode linear) (seed <- 20261014) (whereBindings <- family "clearDiagonalFamily") (profile <- cutoffs)
+
+-- [D-2026-10-16-l, G6] the resolution of bindings, exhaustive over two names for each of a
+-- parameter, a type and two generators, and lists of bindings that name them or not
+resolutions : List Resolution := [resolution]
+names : List String := ["a", "b"]
+bindingLists : List (List Binding) := [nil, [byParameter "a" "a"], [byType "b" "b"], [byParameter "b" "a", byType "a" "b"]]
+onResolution (r : String) : List Binding := [
+  { parameter := just "r", type := nothing, generator := r, coverage := Listed },
+  { parameter := nothing, type := just "String", generator := "names", coverage := Listed },
+  { parameter := just "whereBs", type := nothing, generator := "bindingLists", coverage := Listed },
+  { parameter := just "profile", type := nothing, generator := "bindingLists", coverage := Listed } ]
+test "Resolution" ExhaustiveMode (seed <- 20261026) (whereBindings <- onResolution "resolutions")

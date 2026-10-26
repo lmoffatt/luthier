@@ -284,7 +284,14 @@ WhereWins (r : Resolution) (profile : List Binding) (x t g h : String) : Bool :=
 TypeBindsEveryParameter (r : Resolution) (x t g : String) : Bool :=
   generatorOf (r.bindingOf nil [byType t g] x t) == just g
 NothingBindsNothing (r : Resolution) (x t : String) : Bool := r.bindingOf nil nil x t == nothing
-Resolution := ParameterWins & WhereWins & TypeBindsEveryParameter & NothingBindsNothing
+-- [D-2026-10-16-l, G6, 2026-10-26] the most specific binding wins: a parameter named over its type
+-- wherever each is bound, so a parameter bound in the profile wins over its type bound in `where`;
+-- `where` over the profile only at equal specificity (`WhereWins`). By 7.R1's reason: only a binding
+-- by parameter tells two parameters of one type apart, and a line that binds the type does not
+-- undo it. `ParameterWins` alone did not see a resolution that reads `where` whole first.
+ParameterWinsAcrossPlaces (r : Resolution) (x t g h : String) : Bool :=
+  generatorOf (r.bindingOf [byType t h] [byParameter x g] x t) == just g
+Resolution := ParameterWins & WhereWins & TypeBindsEveryParameter & NothingBindsNothing & ParameterWinsAcrossPlaces
 
 -- ---------------------------------------------------------------- §6 Budgets
 
