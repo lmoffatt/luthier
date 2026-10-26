@@ -626,3 +626,22 @@ test "LogOfExp" (SampledMode linear) (seed <- 20261015) (profile <- expScaledPro
 test "ExpAdds" (SampledMode linear) (seed <- 20261015) (profile <- expScaledProfile) (control <- true)
 -- log adds 1e-4, so log (x * y) has one shift and log x + log y two
 test "LogMultiplies" (SampledMode linear) (seed <- 20261015) (profile <- logShiftedProfile) (control <- true)
+
+-- [2026-10-26, Claude Sonnet 5.5, record/plan/audit-algebras-2026-10-22/prompt-controls.md] The
+-- conjuncts of AbsDistanceIsAMetricWithin the two controls above do not reach (L9.14), each with a
+-- distance that breaks it and only it, over the same listed equal pairs and the sampled x, y, z:
+-- a distance that is 1 between a number and itself (the diagonal), and one that counts the
+-- difference twice when the first argument is the larger (symmetry; a quasimetric, so the
+-- triangle holds).
+distanceOffDiagonal : MetricWithin Float64 (structural Float64) :=
+  { d := fn a b { absDistance a b + (if a == b then 1.0 else 0.0) }, bound := absDistanceIsAMetricWithinModel.bound }
+distanceOneWay : MetricWithin Float64 (structural Float64) :=
+  { d := fn a b { if a <= b then absDistance a b else 2.0 * absDistance a b }, bound := absDistanceIsAMetricWithinModel.bound }
+onDistanceOffDiagonal : List Binding := [
+  { parameter := just "model", type := nothing, generator := "distanceOffDiagonal", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "equalDoubles", coverage := Listed } ]
+onDistanceOneWay : List Binding := [
+  { parameter := just "model", type := nothing, generator := "distanceOneWay", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "equalDoubles", coverage := Listed } ]
+test "AbsDistanceIsAMetricWithin" (SampledMode linear) (seed <- 20261021) (profile <- onDistanceOffDiagonal) (control <- true)
+test "AbsDistanceIsAMetricWithin" (SampledMode linear) (seed <- 20261021) (profile <- onDistanceOneWay) (control <- true)
