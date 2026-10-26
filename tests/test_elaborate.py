@@ -649,6 +649,20 @@ def test_a_refutable_pattern_on_an_arrow_is_refused():
     term('{ (w, x) <- both w0 ; w }', ctx)
 
 
+def test_a_comparison_types_its_operands_and_an_integer_literal_takes_float64():
+    # night bite T (report-wave-a-3.md, A9's finding): the comparisons take two values of one type
+    # (4.R9); an integer literal compared with a Float64 is the Float64 it denotes, on either side
+    ctx = 'x : Float64\nn : Int\ns : String'
+    lt = lambda a, b: apps(t.Var('<'), [a, b])
+    eq('x < 0', lt(t.Var('x'), t.Lit(t.FloatConst(0.0))), ctx)
+    eq('0 < x', lt(t.Lit(t.FloatConst(0.0)), t.Var('x')), ctx)
+    eq('x < -1', lt(t.Var('x'), apps(t.Var('-'), [t.Lit(t.FloatConst(0.0)), t.Lit(t.FloatConst(1.0))])), ctx)
+    eq('n < 0', lt(t.Var('n'), t.Lit(t.IntConst(0))), ctx)
+    for text in ('n == "a"', 's /= 1', 'n < 1.5', 'x >= s'):
+        with pytest.raises(TypingError, match='compares two values of one type'):
+            term(text, ctx)
+
+
 def test_a_claim_s_binder_is_solved_by_a_type_parameter_of_the_same_name():
     # night bite T (report-wave-a-3b.md, "For others"): `size xs` with `xs : List A` resolved
     # ListIsIndexed's binder `A` by an equal pattern and left it unsolved; swapped names (`B * A`

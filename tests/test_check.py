@@ -784,6 +784,17 @@ def test_a_refutable_arrow_pattern_is_an_elaboration_error():
     assert c.elaboration_error(ok) is None
 
 
+def test_a_comparison_of_two_types_is_refused():
+    """Night bite T (report-wave-a-3.md, A9's finding): `x == "a"` with `x : Int` passed `check`;
+    the comparisons now take two values of one type (4.R9), and `x < 0` with `x : Float64` checks."""
+    for text in ('g (x : Int) : Bool := x == "a"\n', 'g (x : Int) : Bool := x < 1.5\n', 'g (x : String) : Bool := x /= 0\n'):
+        failures = c.check(program(text))
+        assert any(f.rule == '4.R9' and f.name == 'g' and 'one type' in f.message for f in failures), (text, failures)
+    for text in ('g (x : Float64) : Bool := x < 0 and 0 <= x and x > -1\n', 'g (x : Int) : Bool := x == 2\n',
+                 'g (x : String) : Bool := x == "a"\n'):
+        assert not c.check(program(text)), text
+
+
 def test_a_type_parameter_named_as_a_claim_s_binder_resolves_the_claim():
     """Night bite T (report-wave-a-3b.md, "For others"): a function whose type parameter is `A`
     got "the model ListIsIndexed gives depends on A" from `size` on a `List A`."""

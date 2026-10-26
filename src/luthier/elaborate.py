@@ -677,6 +677,8 @@ def label_type(label, c):
 # the kernel's symbols, read by their head when no definition names them
 COMPARISONS = frozenset({'==', '/=', '<', '<=', '>', '>=', 'and', 'or', 'implies', 'holds', 'not'})
 ARITHMETIC = frozenset({'+', '-', '*', '/', 'mod'})
+# the comparisons whose two operands are of one type (4.R9; `comparison`)
+TYPED_COMPARISONS = frozenset({'==', '/=', '<', '<=', '>', '>='})
 
 
 def app_type(v, f, a, c):
@@ -1648,11 +1650,14 @@ def walk(v, c, expected=None):
                 product = right_product(v, c)
                 if product is not None:
                     return product
-            left = walk(a, c); right = walk(b, c)
+            left = walk(a, c)
             try:
                 ty = infer(left, c)
             except Untyped:
                 ty = None
+            if op in TYPED_COMPARISONS:
+                return comparison(op, a, b, left, ty, c)
+            right = walk(b, c)
             if op in {'->', '*', '+'} and ty is not None and is_type(left, ty, c):
                 # a type, typed by `U` or by a subtype of it (`T * Float64` with `T : Concrete`,
                 # 2.S8; core bite 12a), makes the function type, the product or the sum
@@ -1808,6 +1813,45 @@ def operator_use(op, a, left, right, ty, c):
                               f'but {show_term(right)} has type {show(rty)}', '4.R9')
     target = apps(binding.term, [sigma[n] for n in binding.vars]) if binding.vars else binding.term
     return apps(target, [left, right])
+
+
+def _known(ty):
+    return ty is not None and not isinstance(ty, t.Hole) and not has_hole(ty)
+
+
+def _is_float(ty, c):
+    return _known(ty) and any(plain(x) == t.Var('Float64') for x in bases(ty, c))
+
+
+def _float_literal(v):
+    """An integer literal written as an operand (`0`, `-1`), elaborated as the `Float64` it denotes
+    (`0.0`, `- 0.0 1.0`, as `-1.0` is); None for any other operand."""
+    if isinstance(v, s.Literal) and isinstance(v.literal, s.IntLit):
+        return t.Lit(t.FloatConst(float(v.literal.value)))
+    if isinstance(v, s.Neg) and (x := _float_literal(v.value)) is not None:
+        return apps(t.Var('-'), [t.Lit(t.FloatConst(0.0)), x])
+    return None
+
+
+def comparison(op, a, b, left, ty, c):
+    """`a op b` for a comparison of the kernel (`==`, `/=`, `<`, `<=`, `>`, `>=`): both operands of
+    one type (4.R9; 4.R8 for `==`). The right operand is walked at the left operand's type; an
+    integer literal compared with a `Float64` is the `Float64` it denotes (`x < 0` is `x < 0.0`, on
+    either side), since the kernel compares constants of one type only (3.S17). [proposed, night
+    bite T, 2026-10-26; the finding of report-wave-a-3.md, A9]"""
+    typed = _known(ty) and not is_type(left, ty, c)
+    right = (_float_literal(b) if _is_float(ty, c) else None) or walk(b, c, ty if typed else None)
+    try:
+        rty = infer(right, c)
+    except Untyped:
+        rty = None
+    if _is_float(rty, c) and not _is_float(ty, c) and (x := _float_literal(a)) is not None:
+        left, ty = x, t.Var('Float64')
+    if _known(ty) and _known(rty) and not is_type(left, ty, c) and not (
+            fits(rty, ty, c) or fits(ty, rty, c) or fits(plain(rty), plain(ty), c) or fits(plain(ty), plain(rty), c)):
+        raise TypingError(f'{show_term(left)} {op} {show_term(right)}: {op} compares two values of one type, '
+                          f'but {show_term(left)} has type {show(ty)} and {show_term(right)} has type {show(rty)}', '4.R9')
+    return apps(t.Var(op), [left, right])
 
 
 def refined_record(v):
