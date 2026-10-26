@@ -2408,7 +2408,16 @@ def run_tests(path, seed=None, fuel=None, deep=False, store=False):
 
 def _run_line(runner, loaded, spec, entry, given, home, stores, deep, store, run=None):
     """One line whose entry is `entry`: its known outcome from the store of `home`, unless `deep`;
-    else run (`run_spec`, or `run` given the statistical start) and recorded there when `store`."""
+    else run (`run_spec`, or `run` given the statistical start) and recorded there when `store`. A
+    line that binds a census of another type than its parameter's is refused at its start, not run
+    with the reason (`mistyped_census`), whatever its store knows, and nothing is stored."""
+    refusal = mistyped_census(runner, loaded, spec) if run is None else None
+    if refusal is not None:
+        names = tuple(n for n, _ in parameters(runner, _as_called(loaded, spec.law)) or [])
+        outcome = _not_run(spec, refusal, names)
+        settle(entry, outcome)
+        outcome.cone, outcome.entry, outcome.store = entry["cone"], entry, home
+        return outcome
     entries = stores[home]
     key = certify.identity(entry)
     found = certify.known(entries, key)
@@ -2448,6 +2457,115 @@ def _run_line(runner, loaded, spec, entry, given, home, stores, deep, store, run
         certify.add_entry(home, entry)
         stores[home] = certify.read_store(home)
     return outcome
+
+
+def mistyped_census(runner, loaded, spec):
+    """[report-controls-M.md 3.1] Why a line's binding cannot stand, or None: a parameter bound to a
+    census whose values are not of the parameter's type. A binding by name reaches every conjunct
+    with a parameter of that name (`x` the verdicts of `Commutative` and an `A` of `WithinIsMeasured`
+    in `Settling`), and the law ran on values of another type. A type that names an earlier
+    parameter is read with that parameter's value when its census has one member (`A` bound to
+    `[Int]`), and not checked otherwise; a generator is not checked (its draws are typed by it)."""
+    law = _as_called(loaded, spec.law)
+    params = parameters(runner, law) or []
+    names = [n for n, _ in params]
+    known = {}  # an earlier parameter bound to a census of one member: that member
+    for k, (name, ty) in enumerate(params):
+        b = resolve_binding(spec, name, _head_name(ty))
+        if b is None:
+            continue
+        called = _as_called(loaded, b.generator)
+        definition = next((a for a in runner.program if isinstance(a, t.Define) and a.name == called), None)
+        if definition is None or definition.type is None:
+            continue
+        try:
+            if generator_of(runner, called, names[:k]) is not None:
+                continue
+            members = census(runner, b, ty, called)
+        except (NoGenerator, RunError):
+            continue
+        for n, v in known.items():
+            ty = kernel.substitute(n, v, ty)
+        if len(members) == 1:
+            known[name] = members[0]
+        if set(names[:k]) & set(kernel.free_names(ty)):
+            continue
+        value = definition.type
+        if _list_depth(runner, value) > _list_depth(runner, ty):
+            value = _applied(runner.resolve(value), "List")
+        if _surely_differ(runner, ty, value):
+            return (f"{name} : {_show(ty)} is bound to the census {b.generator}, whose values are "
+                    f"{_show(value)}: bind a census of its type (a binding by name reaches every "
+                    f"conjunct with a parameter {name}; bind by type there)")
+    return None
+
+
+def _surely_differ(runner, a, b):
+    """Whether two types surely differ: their kinds, as far as they are read (`_type_kind`), differ,
+    or their parts do. What is not read (a type computed by a function, a value inside a type, a
+    dependent arrow) is taken as the same: the check refuses only what it is sure of. `Nat`, `Int`
+    and `Fin n` are one kind, an integer (a census's values are checked against the refinement)."""
+    a, b = _type_unfolded(runner, a), _type_unfolded(runner, b)
+    if kernel.alpha_equal(a, b):
+        return False
+    ka, kb = _type_kind(a), _type_kind(b)
+    if ka is None or kb is None:
+        return False
+    if ka != kb:
+        return True
+    if isinstance(a, t.App):
+        xs, ys = _spine(a)[1], _spine(b)[1]
+        return len(xs) == len(ys) and any(_surely_differ(runner, x, y) for x, y in zip(xs, ys))
+    if isinstance(a, t.Record):
+        return any(_surely_differ(runner, x, y) for (_, x), (_, y) in zip(a.fields, b.fields))
+    if isinstance(a, t.Sum):
+        return any(_surely_differ(runner, x, y) for (_, x), (_, y) in zip(a.alternatives, b.alternatives))
+    if isinstance(a, (t.Pi, t.Sigma)):
+        if a.name in kernel.free_names(a.codomain) or b.name in kernel.free_names(b.codomain):
+            return False
+        return _surely_differ(runner, a.domain, b.domain) or _surely_differ(runner, a.codomain, b.codomain)
+    return False
+
+
+def _type_kind(ty):
+    """What `_surely_differ` reads of a type, or None: a primitive's name, a data type's, `List` or
+    `Maybe` with its arity, a record's labels, a sum's, an arrow, a pair."""
+    if isinstance(ty, t.Var):
+        name = ty.name.partition("@")[0]
+        return ("integer",) if name in _INTEGERS else ("named", name) if name in _PRIMITIVE_TYPES else None
+    if isinstance(ty, t.Data):
+        return ("data", ty.name)
+    if isinstance(ty, t.App):
+        head, args = _spine(ty)
+        name = head.name.partition("@")[0] if isinstance(head, t.Var) else None
+        return ("integer",) if name == "Fin" else (name, len(args)) if name in ("List", "Maybe") else None
+    if isinstance(ty, t.Record):
+        return ("record", tuple(n for n, _ in ty.fields))
+    if isinstance(ty, t.Sum):
+        return ("sum", tuple(n for n, _ in ty.alternatives))
+    if isinstance(ty, t.Pi):
+        return ("arrow",)
+    if isinstance(ty, t.Sigma):
+        return ("pair",)
+    return None
+
+
+_INTEGERS = {"Int", "Nat"}
+_PRIMITIVE_TYPES = {"Float64", "String", "Unit", "Bool"}
+
+
+def _type_unfolded(runner, ty):
+    """A type as `Runner.resolve` unfolds it, and a name defined as a value that is a type
+    (`pushedType : Concrete := Int`) unfolded to it."""
+    for _ in range(64):
+        ty = runner.resolve(ty)
+        if not isinstance(ty, t.Var):
+            return ty
+        d = next((a for a in runner.program if isinstance(a, t.Define) and a.name == ty.name), None)
+        if d is None or d.body is None or isinstance(d.body, t.Lam) or d.body == ty:
+            return ty
+        ty = d.body
+    return ty
 
 
 def _run_conjunction(runner, loaded, spec, parts, cones, given, home, stores, deep, store):

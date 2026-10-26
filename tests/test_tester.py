@@ -1,5 +1,6 @@
 """`luthier test`, bite 1 (record/IA/tester-2026-10-14/prompt.md): test.lth's Tester over the
 programs under tests/tester/; names scoped by run.py's loader since run.py bite 6 (prompt-6.md)."""
+import json
 import os
 from pathlib import Path
 
@@ -543,3 +544,45 @@ def test_a_control_over_a_conjunction_settles_from_a_known_refuting_conjunct(tmp
     assert again.entry["evidence"]["Points"]["coverage"] == first.entry["evidence"]["Points"]["coverage"]
     assert tester.line(again).splitlines()[0] == ("control of LocalPair: exhaustive, 11 cases, refuted at "
                                                   "Swaps f: f = broken, a = 1, b = 2: the control passed (ran)")
+
+
+# ---------------------------------------------------------------------- a census of the wrong type
+# report-controls-M.md 3.1: a binding by name reaches every conjunct with a parameter of that name; a
+# census whose values are not of the parameter's type ran the law on them (integers for verdicts)
+
+MISTYPED = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+LocalExcluded (x : Bool) : Bool := x or not x
+LocalSquare (x : Int) : Bool := x * x >= 0
+LocalBoth (k : Int) := LocalExcluded & LocalSquare
+ints : List Int := [0, 1]
+bools : List Bool := [true, false]
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+onInts : List Binding := [bind "x" "ints"]
+fine : List Binding := [bind "x" "bools"]
+test "LocalExcluded" ExhaustiveMode (whereBindings <- onInts)
+test "LocalSquare" ExhaustiveMode (whereBindings <- onInts)
+test "LocalExcluded" ExhaustiveMode (whereBindings <- fine)
+test "LocalBoth" ExhaustiveMode (whereBindings <- [bind "k" "ints", bind "x" "ints"])
+'''
+
+
+def test_a_census_of_another_type_than_its_parameter_is_refused(tmp_path):
+    path = tmp_path / "mistyped.test.lut"
+    path.write_text(MISTYPED, encoding="utf-8")
+    refused, square, fine, conjunction = tester.run_tests(path)
+    assert isinstance(refused.evidence, tester.NotRun) and refused.evaluated == 0 and not tester.passes(refused)
+    reason = refused.evidence.reason
+    assert "x : Bool" in reason and "the census ints" in reason and "Int" in reason
+    assert square.grade is not None and square.evaluated == 2
+    assert fine.grade is not None and fine.evaluated == 2
+    # in a conjunction, the conjunct whose `x` is a Bool is refused, the one whose `x` is an Int runs
+    excluded, squared = conjunction.parts
+    assert isinstance(excluded.evidence, tester.NotRun) and "x : Bool" in excluded.evidence.reason
+    assert squared.grade is not None and squared.evaluated == 4
+    # refused at the line's start: nothing stored, nothing known reused
+    stored = tester.run_tests(path, store=True)[0]
+    assert isinstance(stored.evidence, tester.NotRun) and stored.known is None
+    entries = json.loads((tmp_path / "mistyped.test.cert.json").read_text(encoding="utf-8"))
+    assert entries and all("NotRun" not in e["evidence"] for e in entries)
