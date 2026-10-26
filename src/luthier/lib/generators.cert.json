@@ -1,5 +1,4213 @@
 [
  {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "somethingAlways (Listed)",
+    "fingerprint": "sha256:7f8b49ffa45475bd62da3204a34461dd2f383998bf944259d49f472932e5cda5"
+   },
+   {
+    "parameter": "whereBs",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((((resolve ws) ps) x) t) { just (g) -> (just g); nothing -> (just ((byType t) t)) } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "whereBs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 348,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "NothingBindsNothing: r = { bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((((resolve ws) ps) x) t) { just (g) -> (just g); nothing -> (just ((byType t) t)) } } } } } }, x = \"a\", t = \"a\""
+  },
+  "date": "2026-10-26T08:05:37+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "somethingAlways (Listed)",
+    "fingerprint": "sha256:7f8b49ffa45475bd62da3204a34461dd2f383998bf944259d49f472932e5cda5"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((((resolve ws) ps) x) t) { just (g) -> (just g); nothing -> (just ((byType t) t)) } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T08:05:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ParameterWinsAcrossPlaces",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "somethingAlways (Listed)",
+    "fingerprint": "sha256:7f8b49ffa45475bd62da3204a34461dd2f383998bf944259d49f472932e5cda5"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((((resolve ws) ps) x) t) { just (g) -> (just g); nothing -> (just ((byType t) t)) } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "r = { bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((((resolve ws) ps) x) t) { just (g) -> (just g); nothing -> (just ((byType t) t)) } } } } } }, x = \"a\", t = \"a\""
+  },
+  "date": "2026-10-26T08:05:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "NothingBindsNothing",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "somethingAlways (Listed)",
+    "fingerprint": "sha256:7f8b49ffa45475bd62da3204a34461dd2f383998bf944259d49f472932e5cda5"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((((resolve ws) ps) x) t) { just (g) -> (just g); nothing -> (just ((byType t) t)) } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T08:05:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "TypeBindsEveryParameter",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "somethingAlways (Listed)",
+    "fingerprint": "sha256:7f8b49ffa45475bd62da3204a34461dd2f383998bf944259d49f472932e5cda5"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((((resolve ws) ps) x) t) { just (g) -> (just g); nothing -> (just ((byType t) t)) } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 64,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T08:05:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "WhereWins",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "somethingAlways (Listed)",
+    "fingerprint": "sha256:7f8b49ffa45475bd62da3204a34461dd2f383998bf944259d49f472932e5cda5"
+   },
+   {
+    "parameter": "whereBs",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((((resolve ws) ps) x) t) { just (g) -> (just g); nothing -> (just ((byType t) t)) } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "whereBs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 256,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T08:05:37+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ParameterWins",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "profileFirst (Listed)",
+    "fingerprint": "sha256:c12d1e846768ebcdc0f045a4e14450089f3304835e83d4e87ad9566a176c16fe"
+   },
+   {
+    "parameter": "whereBs",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { ((((resolve ps) ws) x) t) } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "whereBs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 348,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "ParameterWins: r = { bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { ((((resolve ps) ws) x) t) } } } } }, whereBs = nil, profile = ((cons ((byParameter \"a\") \"a\")) nil), x = \"a\", t = \"a\", g = \"b\", h = \"a\""
+  },
+  "date": "2026-10-26T08:05:16+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "profileFirst (Listed)",
+    "fingerprint": "sha256:c12d1e846768ebcdc0f045a4e14450089f3304835e83d4e87ad9566a176c16fe"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { ((((resolve ps) ws) x) t) } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T08:05:17+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ParameterWinsAcrossPlaces",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "profileFirst (Listed)",
+    "fingerprint": "sha256:c12d1e846768ebcdc0f045a4e14450089f3304835e83d4e87ad9566a176c16fe"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { ((((resolve ps) ws) x) t) } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T08:05:17+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "NothingBindsNothing",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "profileFirst (Listed)",
+    "fingerprint": "sha256:c12d1e846768ebcdc0f045a4e14450089f3304835e83d4e87ad9566a176c16fe"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { ((((resolve ps) ws) x) t) } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T08:05:16+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "TypeBindsEveryParameter",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "profileFirst (Listed)",
+    "fingerprint": "sha256:c12d1e846768ebcdc0f045a4e14450089f3304835e83d4e87ad9566a176c16fe"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { ((((resolve ps) ws) x) t) } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 64,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "r = { bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { ((((resolve ps) ws) x) t) } } } } }, profile = nil, x = \"a\", t = \"a\", g = \"a\", h = \"b\""
+  },
+  "date": "2026-10-26T08:05:16+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "WhereWins",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "profileFirst (Listed)",
+    "fingerprint": "sha256:c12d1e846768ebcdc0f045a4e14450089f3304835e83d4e87ad9566a176c16fe"
+   },
+   {
+    "parameter": "whereBs",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { ((((resolve ps) ws) x) t) } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "whereBs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 256,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "r = { bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { ((((resolve ps) ws) x) t) } } } } }, whereBs = nil, profile = ((cons ((byParameter \"a\") \"a\")) nil), x = \"a\", t = \"a\", g = \"b\", h = \"a\""
+  },
+  "date": "2026-10-26T08:05:16+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ParameterWins",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "typeFirst (Listed)",
+    "fingerprint": "sha256:d60edebac7ea5572780e149cb4f3d13032769788c055a7484874e3723cefad78"
+   },
+   {
+    "parameter": "whereBs",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding (bindsType t)) ws) { just (g) -> (just g); nothing -> match ((firstBinding (bindsType t)) ps) { just (g) -> (just g); nothing -> match ((firstBinding (bindsParameter x)) ws) { just (g) -> (just g); nothing -> ((firstBinding (bindsParameter x)) ps) } } } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "whereBs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 348,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "ParameterWins: r = { bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding (bindsType t)) ws) { just (g) -> (just g); nothing -> match ((firstBinding (bindsType t)) ps) { just (g) -> (just g); nothing -> match ((firstBinding (bindsParameter x)) ws) { just (g) -> (just g); nothing -> ((firstBinding (bindsParameter x)) ps) } } } } } } } }, whereBs = nil, profile = nil, x = \"a\", t = \"a\", g = \"a\", h = \"b\""
+  },
+  "date": "2026-10-26T08:04:54+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "typeFirst (Listed)",
+    "fingerprint": "sha256:d60edebac7ea5572780e149cb4f3d13032769788c055a7484874e3723cefad78"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding (bindsType t)) ws) { just (g) -> (just g); nothing -> match ((firstBinding (bindsType t)) ps) { just (g) -> (just g); nothing -> match ((firstBinding (bindsParameter x)) ws) { just (g) -> (just g); nothing -> ((firstBinding (bindsParameter x)) ps) } } } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "r = { bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding (bindsType t)) ws) { just (g) -> (just g); nothing -> match ((firstBinding (bindsType t)) ps) { just (g) -> (just g); nothing -> match ((firstBinding (bindsParameter x)) ws) { just (g) -> (just g); nothing -> ((firstBinding (bindsParameter x)) ps) } } } } } } } }, x = \"a\", t = \"a\", g = \"a\", h = \"b\""
+  },
+  "date": "2026-10-26T08:04:54+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ParameterWinsAcrossPlaces",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "typeFirst (Listed)",
+    "fingerprint": "sha256:d60edebac7ea5572780e149cb4f3d13032769788c055a7484874e3723cefad78"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding (bindsType t)) ws) { just (g) -> (just g); nothing -> match ((firstBinding (bindsType t)) ps) { just (g) -> (just g); nothing -> match ((firstBinding (bindsParameter x)) ws) { just (g) -> (just g); nothing -> ((firstBinding (bindsParameter x)) ps) } } } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T08:04:54+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "NothingBindsNothing",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "typeFirst (Listed)",
+    "fingerprint": "sha256:d60edebac7ea5572780e149cb4f3d13032769788c055a7484874e3723cefad78"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding (bindsType t)) ws) { just (g) -> (just g); nothing -> match ((firstBinding (bindsType t)) ps) { just (g) -> (just g); nothing -> match ((firstBinding (bindsParameter x)) ws) { just (g) -> (just g); nothing -> ((firstBinding (bindsParameter x)) ps) } } } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T08:04:54+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "TypeBindsEveryParameter",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "typeFirst (Listed)",
+    "fingerprint": "sha256:d60edebac7ea5572780e149cb4f3d13032769788c055a7484874e3723cefad78"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding (bindsType t)) ws) { just (g) -> (just g); nothing -> match ((firstBinding (bindsType t)) ps) { just (g) -> (just g); nothing -> match ((firstBinding (bindsParameter x)) ws) { just (g) -> (just g); nothing -> ((firstBinding (bindsParameter x)) ps) } } } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 64,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "r = { bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding (bindsType t)) ws) { just (g) -> (just g); nothing -> match ((firstBinding (bindsType t)) ps) { just (g) -> (just g); nothing -> match ((firstBinding (bindsParameter x)) ws) { just (g) -> (just g); nothing -> ((firstBinding (bindsParameter x)) ps) } } } } } } } }, profile = ((cons ((byType \"b\") \"b\")) nil), x = \"a\", t = \"b\", g = \"a\", h = \"a\""
+  },
+  "date": "2026-10-26T08:04:54+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "WhereWins",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "typeFirst (Listed)",
+    "fingerprint": "sha256:d60edebac7ea5572780e149cb4f3d13032769788c055a7484874e3723cefad78"
+   },
+   {
+    "parameter": "whereBs",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding (bindsType t)) ws) { just (g) -> (just g); nothing -> match ((firstBinding (bindsType t)) ps) { just (g) -> (just g); nothing -> match ((firstBinding (bindsParameter x)) ws) { just (g) -> (just g); nothing -> ((firstBinding (bindsParameter x)) ps) } } } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "whereBs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 256,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "r = { bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding (bindsType t)) ws) { just (g) -> (just g); nothing -> match ((firstBinding (bindsType t)) ps) { just (g) -> (just g); nothing -> match ((firstBinding (bindsParameter x)) ws) { just (g) -> (just g); nothing -> ((firstBinding (bindsParameter x)) ps) } } } } } } } }, whereBs = nil, profile = nil, x = \"a\", t = \"a\", g = \"a\", h = \"b\""
+  },
+  "date": "2026-10-26T08:04:54+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ParameterWins",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "whereFirst (Listed)",
+    "fingerprint": "sha256:f357da3d23ed9f1fe29cb98901d3c07747a51dd4c280cb1dfa1f043acc47d6cb"
+   },
+   {
+    "parameter": "whereBs",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding ((either x) t)) ws) { just (g) -> (just g); nothing -> ((firstBinding ((either x) t)) ps) } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "whereBs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 348,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "ParameterWinsAcrossPlaces: r = { bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding ((either x) t)) ws) { just (g) -> (just g); nothing -> ((firstBinding ((either x) t)) ps) } } } } } }, x = \"a\", t = \"a\", g = \"a\", h = \"b\""
+  },
+  "date": "2026-10-26T08:04:40+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "whereFirst (Listed)",
+    "fingerprint": "sha256:f357da3d23ed9f1fe29cb98901d3c07747a51dd4c280cb1dfa1f043acc47d6cb"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding ((either x) t)) ws) { just (g) -> (just g); nothing -> ((firstBinding ((either x) t)) ps) } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "r = { bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding ((either x) t)) ws) { just (g) -> (just g); nothing -> ((firstBinding ((either x) t)) ps) } } } } } }, x = \"a\", t = \"a\", g = \"a\", h = \"b\""
+  },
+  "date": "2026-10-26T08:04:40+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ParameterWinsAcrossPlaces",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "whereFirst (Listed)",
+    "fingerprint": "sha256:f357da3d23ed9f1fe29cb98901d3c07747a51dd4c280cb1dfa1f043acc47d6cb"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding ((either x) t)) ws) { just (g) -> (just g); nothing -> ((firstBinding ((either x) t)) ps) } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T08:04:40+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "NothingBindsNothing",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "whereFirst (Listed)",
+    "fingerprint": "sha256:f357da3d23ed9f1fe29cb98901d3c07747a51dd4c280cb1dfa1f043acc47d6cb"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding ((either x) t)) ws) { just (g) -> (just g); nothing -> ((firstBinding ((either x) t)) ps) } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T08:04:40+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "TypeBindsEveryParameter",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "whereFirst (Listed)",
+    "fingerprint": "sha256:f357da3d23ed9f1fe29cb98901d3c07747a51dd4c280cb1dfa1f043acc47d6cb"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding ((either x) t)) ws) { just (g) -> (just g); nothing -> ((firstBinding ((either x) t)) ps) } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 64,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T08:04:40+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "WhereWins",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "whereFirst (Listed)",
+    "fingerprint": "sha256:f357da3d23ed9f1fe29cb98901d3c07747a51dd4c280cb1dfa1f043acc47d6cb"
+   },
+   {
+    "parameter": "whereBs",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ bindingOf := fn (ws : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (ps : (List { parameter : (Maybe String), type : (Maybe String), generator : String, coverage : Coverage })) { fn (x : String) { fn (t : String) { match ((firstBinding ((either x) t)) ws) { just (g) -> (just g); nothing -> ((firstBinding ((either x) t)) ps) } } } } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "whereBs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 256,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T08:04:40+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ParameterWins",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "resolutions (Listed)",
+    "fingerprint": "sha256:8a436e762897eee7a3fa4541683a9f5b2bc7bf12476350804b1c7a6fd0c8e480"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "resolution"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T08:04:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ParameterWinsAcrossPlaces",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "resolutions (Listed)",
+    "fingerprint": "sha256:8a436e762897eee7a3fa4541683a9f5b2bc7bf12476350804b1c7a6fd0c8e480"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "resolution"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T08:04:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "NothingBindsNothing",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "resolutions (Listed)",
+    "fingerprint": "sha256:8a436e762897eee7a3fa4541683a9f5b2bc7bf12476350804b1c7a6fd0c8e480"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "resolution"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T08:04:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "TypeBindsEveryParameter",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "resolutions (Listed)",
+    "fingerprint": "sha256:8a436e762897eee7a3fa4541683a9f5b2bc7bf12476350804b1c7a6fd0c8e480"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "resolution"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 64,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T08:04:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "WhereWins",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "regions": []
+ },
+ {
+  "law": "Resolution",
+  "cone": "sha256:184506f8ea430733cbf5d14e72adfcc53a32975e7bb2cacb4707a16cac5ab6ea",
+  "binding": [
+   {
+    "parameter": "r",
+    "generator": "resolutions (Listed)",
+    "fingerprint": "sha256:8a436e762897eee7a3fa4541683a9f5b2bc7bf12476350804b1c7a6fd0c8e480"
+   },
+   {
+    "parameter": "whereBs",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "profile",
+    "generator": "bindingLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:4bf5f70440a66f154676cf0a64331747e22f5e0734f7d1366388188d05cfad05"
+   },
+   {
+    "parameter": "x",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "t",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "g",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   },
+   {
+    "parameter": "h",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:3856ec9c6b99c82b0d6cacd6138458072edecdfcbd04032b75d396138384a59a"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "resolution"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "whereBs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "profile",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons ((byParameter \"a\") \"a\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byType \"b\") \"b\")) nil)"
+      },
+      {
+       "Printed": "((cons ((byParameter \"b\") \"a\")) ((cons ((byType \"a\") \"b\")) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 256,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T08:04:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "ParameterWins",
+  "conjuncts": [
+   "ParameterWins",
+   "WhereWins",
+   "TypeBindsEveryParameter",
+   "NothingBindsNothing",
+   "ParameterWinsAcrossPlaces"
+  ],
+  "regions": []
+ },
+ {
   "law": "CaseNamesAreDistinct",
   "cone": "sha256:89c5fdba4099f0548bdbd08ec8c8cbbb768786638585e17ef366e09594f8d5c0",
   "binding": [

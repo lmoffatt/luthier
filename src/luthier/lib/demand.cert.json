@@ -1,17 +1,17 @@
 [
  {
   "law": "RecordKeepsThePolicies",
-  "cone": "sha256:5bed268e95891052b44aa5f1b7bc3ad7fda5574b50f9589ef2233c9c427deefc",
+  "cone": "sha256:78260932af59e5ce4a5675e84a5b2c77ac041e664073eef87171d54b51422509",
   "binding": [
    {
     "parameter": "record",
     "generator": "recorders (Listed)",
-    "fingerprint": "sha256:66589703a3faddc3086885f4b85f6f71d0ece6d4ba6ffabc4d39413729118b7f"
+    "fingerprint": "sha256:a5c9c53c42b8e4a93212282f32e00bdc0c615174f66d490ba72439d8eb963c36"
    },
    {
     "parameter": "d",
     "generator": "policyDemands (Listed)",
-    "fingerprint": "sha256:159677c71070ded8b42933461a3e306e0010df5d78359a55085b836b7a12a013,sha256:6cec0e49d7eda265d3cf6c5dd963fd986de46a09e5ff7426f5e704bbcc137e80"
+    "fingerprint": "sha256:1b813dae23c108a8c8d85377db592a4cb81380f5b3ee154bb0d6fced44965107,sha256:30e97e41b3a14ea8451401c77c1d95338748f407eccdc189ba34152e88b23270"
    },
    {
     "parameter": "h",
@@ -55,13 +55,13 @@
        "Printed": "sampledDemand"
       },
       {
-       "Printed": "((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) Cases) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"weakest\") 1.0) 0.05) \"cappedSumComposition\")"
+       "Printed": "(((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) Cases) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"weakest\") 1.0) 0.05) \"cappedSumComposition\") nil)"
       },
       {
-       "Printed": "((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) AssumedGrade) ((cons \"Other\") nil)) \"weakest\") 1.0) 0.05) \"cappedSumComposition\")"
+       "Printed": "(((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) AssumedGrade) ((cons \"Other\") nil)) \"weakest\") 1.0) 0.05) \"cappedSumComposition\") nil)"
       },
       {
-       "Printed": "((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) AssumedGrade) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"strongest\") 1.0) 0.05) \"cappedSumComposition\")"
+       "Printed": "(((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) AssumedGrade) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"strongest\") 1.0) 0.05) \"cappedSumComposition\") nil)"
       }
      ]
     }
@@ -87,9 +87,120 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-26T04:46:06+00:00",
+  "date": "2026-10-26T08:04:16+00:00",
   "interpreter": "v0.3",
   "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "RecordKeepsThePolicies",
+  "cone": "sha256:78260932af59e5ce4a5675e84a5b2c77ac041e664073eef87171d54b51422509",
+  "binding": [
+   {
+    "parameter": "record",
+    "generator": "droppers (Listed)",
+    "fingerprint": "sha256:ccef7dfa500acb679cd23e04d4c0f8073ee2d267a74be91852cdffc7b6f3518b,sha256:a8a0b24e82d75074a1b4f1e5fd69453abcdbd3babd251b5ef5b04ade2703edc7,sha256:14b923c85c38ed551fe132b2acfbfbf1fe4ed6c85053b13946d8fbbf97acecf5,sha256:7ee639fdb3e9c2313ef3baf442c10beec2082848d6b2a2f34836b80498bfcc98,sha256:45c02a00d3e4e85f029ba3f613bc8eaf1f1297a1e9dda256b78703acd9fbeaf9"
+   },
+   {
+    "parameter": "d",
+    "generator": "policyDemands (Listed)",
+    "fingerprint": "sha256:b7cf8632b9a39677707c7087a8dd37df577a88a0607ecdbe510fc59ccfd80b53"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:9487f8c83c0aaf81b11ffcd357209664bfc4a29c160c10940ccf1022dcce46c1"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "record",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "dropAxioms"
+      },
+      {
+       "Printed": "dropRoots"
+      },
+      {
+       "Printed": "dropCombine"
+      },
+      {
+       "Printed": "dropBound"
+      },
+      {
+       "Printed": "dropCutoffs"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) Cases) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"weakest\") 1.0) 0.05) \"cappedSumComposition\") nil)"
+      },
+      {
+       "Printed": "(((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) AssumedGrade) ((cons \"Other\") nil)) \"weakest\") 1.0) 0.05) \"cappedSumComposition\") nil)"
+      },
+      {
+       "Printed": "(((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) AssumedGrade) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"strongest\") 1.0) 0.05) \"cappedSumComposition\") nil)"
+      },
+      {
+       "Printed": "(((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) AssumedGrade) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"weakest\") 0.5) 0.05) \"cappedSumComposition\") nil)"
+      },
+      {
+       "Printed": "(((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) AssumedGrade) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"weakest\") 1.0) 0.05) \"cappedSumComposition\") ((cons { law := \"PinvProjects\", parameter := \"tol\", value := (Number 1e-08) }) nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:aaaa\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 25,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "record = dropAxioms, d = (((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) Cases) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"weakest\") 1.0) 0.05) \"cappedSumComposition\") nil), h = \"sha256:aaaa\""
+  },
+  "date": "2026-10-26T08:04:11+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
   "regions": []
  },
  {
@@ -104,12 +215,12 @@
    {
     "parameter": "eq",
     "generator": "keyEqs (Listed)",
-    "fingerprint": "sha256:e3f44513a3409e48f097ad03282a1f2c89b98833668487737da7531fd2bb8ee7"
+    "fingerprint": "sha256:73270a9dfdd606e50b39b8515d52a3ff626ed8bdeddee316b07af3563bf2b882"
    },
    {
     "parameter": "st",
     "generator": "stores (Listed)",
-    "fingerprint": "sha256:b97e3c0836e41f94b91be33c4fe5271b7af29ee32d9baa60354bda2cfb2514e0,sha256:e7dddc34396ca365c9d815d1de02b464790de0185ce4ec7965cfdb71cd4b7553,sha256:8b8a6d6b868e8fd1170d2b287ebfe6d05ff5375258642a599c25a3305c4c592d"
+    "fingerprint": "sha256:009577c3a0de0799d10289e68e91208c3bed88a512de38b04cad379b0252128d,sha256:1c3aef8e76cf3bd2e0c74eb419c1bd4cd2a120194c6714f3b91a42d8030423c7,sha256:c926362a823b6ca4de769e33ffed10228573a44ed7241d0254ea92cc96e157e3"
    }
   ],
   "seed": 20261015,
@@ -135,7 +246,7 @@
     "reach": {
      "Members": [
       {
-       "Printed": "{ entry : String, cone : String, parameters : (List (_ : String) * Value), accept : Grade, assumes : (List String), delta : ProbabilityLevel, fuel : (Maybe Nat), timeLimit : (Maybe Float64), checked : Bool, lock : (Maybe String), decoration : (Maybe Decoration), strategy : Strategy, fresh : Bool, axioms : Grade, roots : (List String), combine : String, bound : Float64, composition : String }"
+       "Printed": "{ entry : String, cone : String, parameters : (List (_ : String) * Value), accept : Grade, assumes : (List String), delta : ProbabilityLevel, fuel : (Maybe Nat), timeLimit : (Maybe Float64), checked : Bool, lock : (Maybe String), decoration : (Maybe Decoration), strategy : Strategy, fresh : Bool, axioms : Grade, roots : (List String), combine : String, bound : Float64, composition : String, cutoffs : (List { law : String, parameter : String, value : Value }) }"
       }
      ]
     }
@@ -177,119 +288,14 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-26T04:46:05+00:00",
+  "date": "2026-10-26T08:04:11+00:00",
   "interpreter": "v0.3",
   "hosts": [],
-  "regions": []
- },
- {
-  "law": "RecordKeepsThePolicies",
-  "cone": "sha256:5bed268e95891052b44aa5f1b7bc3ad7fda5574b50f9589ef2233c9c427deefc",
-  "binding": [
-   {
-    "parameter": "record",
-    "generator": "droppers (Listed)",
-    "fingerprint": "sha256:b799f2da7c6faf3acf1acab7ec297238114eb0674df963954e8416e3dfa944bc,sha256:5a4265a23270a22c4070fbbd48d1940fe02eb7316fda3fecd6fea260564eb0fa,sha256:b31fb196f6faaf98d8ac1981bb8210c4a9de369c490c51cf66120145763d49c0,sha256:82315d6af1f891a7abb5ea4ae2338d77e813badfa3d6e2a4bc5de770ab76f407"
-   },
-   {
-    "parameter": "d",
-    "generator": "policyDemands (Listed)",
-    "fingerprint": "sha256:07d5cc54fbd5eb4eba4c9dc2f5079c49ed64a82a753269e2b6241754143edf16"
-   },
-   {
-    "parameter": "h",
-    "generator": "hashes (Listed)",
-    "fingerprint": "sha256:9487f8c83c0aaf81b11ffcd357209664bfc4a29c160c10940ccf1022dcce46c1"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "fuel": 3000000,
-   "regionNumbers": 4000,
-   "regionEntries": 400,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "record",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "dropAxioms"
-      },
-      {
-       "Printed": "dropRoots"
-      },
-      {
-       "Printed": "dropCombine"
-      },
-      {
-       "Printed": "dropBound"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) Cases) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"weakest\") 1.0) 0.05) \"cappedSumComposition\")"
-      },
-      {
-       "Printed": "((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) AssumedGrade) ((cons \"Other\") nil)) \"weakest\") 1.0) 0.05) \"cappedSumComposition\")"
-      },
-      {
-       "Printed": "((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) AssumedGrade) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"strongest\") 1.0) 0.05) \"cappedSumComposition\")"
-      },
-      {
-       "Printed": "((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) AssumedGrade) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"weakest\") 0.5) 0.05) \"cappedSumComposition\")"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "h",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"sha256:aaaa\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 16,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "record = dropAxioms, d = ((((((((((((((((theDemand \"main\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false) Cases) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"weakest\") 1.0) 0.05) \"cappedSumComposition\"), h = \"sha256:aaaa\""
-  },
-  "date": "2026-10-26T04:45:57+00:00",
-  "interpreter": "v0.3",
-  "hosts": [],
-  "kind": "Control",
   "regions": []
  },
  {
   "law": "LoweringLosesNothing",
-  "cone": "sha256:a3ec26c88bd92bdbf6ea998974296b7f620926dfd324a473e2797c36f55555a0",
+  "cone": "sha256:aa7bde0a7ad6e6e5898e86a5c889a3034c6b43570ebe0aee2abc6860e9368fba",
   "binding": [
    {
     "parameter": "k",
@@ -299,7 +305,7 @@
    {
     "parameter": "d",
     "generator": "demands (Listed)",
-    "fingerprint": "sha256:159677c71070ded8b42933461a3e306e0010df5d78359a55085b836b7a12a013,sha256:3c6df010e6a49b29404864eb530b52809a090ab9a15a9e8aede38976a5896108,sha256:32966a0233c072351845fbecaf3b62caf24de6090422cd2ea751b60e51ff397b"
+    "fingerprint": "sha256:1b813dae23c108a8c8d85377db592a4cb81380f5b3ee154bb0d6fced44965107,sha256:2913c70d10d888854fa73955dec31f0a985bd6bb45498f20462342706738a6a9,sha256:4768b222fe59a0cbe4bb40bf7a16499652870ad1791b6af822aaed52f0ff2fa7"
    },
    {
     "parameter": "law",
@@ -423,7 +429,7 @@
   "outcome": {
    "ControlRefuted": "k = servesAtExactly, d = sampledDemand, law = \"L\", cone = \"sha256:cccc\", e = sampledPass, g = AssumedGrade"
   },
-  "date": "2026-10-26T04:45:56+00:00",
+  "date": "2026-10-26T08:04:09+00:00",
   "interpreter": "v0.3",
   "hosts": [],
   "kind": "Control",
@@ -439,7 +445,7 @@
  },
  {
   "law": "NoPriceRefusesAssumed",
-  "cone": "sha256:5a704397ec6ec60229865edcd07bb64a36d9399314d87d92632af1f198669f87",
+  "cone": "sha256:abed1a80379c1a509c334b572969cfdbfdb737b00e92a9f68f6b020c230fd129",
   "binding": [
    {
     "parameter": "k",
@@ -449,7 +455,7 @@
    {
     "parameter": "d",
     "generator": "demands (Listed)",
-    "fingerprint": "sha256:159677c71070ded8b42933461a3e306e0010df5d78359a55085b836b7a12a013,sha256:3c6df010e6a49b29404864eb530b52809a090ab9a15a9e8aede38976a5896108,sha256:32966a0233c072351845fbecaf3b62caf24de6090422cd2ea751b60e51ff397b"
+    "fingerprint": "sha256:1b813dae23c108a8c8d85377db592a4cb81380f5b3ee154bb0d6fced44965107,sha256:2913c70d10d888854fa73955dec31f0a985bd6bb45498f20462342706738a6a9,sha256:4768b222fe59a0cbe4bb40bf7a16499652870ad1791b6af822aaed52f0ff2fa7"
    },
    {
     "parameter": "law",
@@ -566,10 +572,187 @@
   "outcome": {
    "ControlRefuted": "k = servesAnyPass, d = sampledDemand, law = \"L\", cone = \"sha256:cccc\", e = assumedPass"
   },
-  "date": "2026-10-26T04:45:56+00:00",
+  "date": "2026-10-26T08:04:08+00:00",
   "interpreter": "v0.3",
   "hosts": [],
   "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "OneIdentityOneResult",
+  "cone": "sha256:287c0c722d480cd045d2499eb8c5a2a4e33705a3c425221c348e6a6b4a9cc475",
+  "binding": [
+   {
+    "parameter": "K",
+    "generator": "keyTypes (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167"
+   },
+   {
+    "parameter": "eq",
+    "generator": "keyEqs (Listed)",
+    "fingerprint": "sha256:73270a9dfdd606e50b39b8515d52a3ff626ed8bdeddee316b07af3563bf2b882"
+   },
+   {
+    "parameter": "st",
+    "generator": "brokenStores (Listed)",
+    "fingerprint": "sha256:ba67ce328c1bcc6bb3c7e16469dfa81e1b1b625ff5c1ef1790bb9b0d3b299ade"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "K",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ entry : String, cone : String, parameters : (List (_ : String) * Value), accept : Grade, assumes : (List String), delta : ProbabilityLevel, fuel : (Maybe Nat), timeLimit : (Maybe Float64), checked : Bool, lock : (Maybe String), decoration : (Maybe Decoration), strategy : Strategy, fresh : Bool, axioms : Grade, roots : (List String), combine : String, bound : Float64, composition : String, cutoffs : (List { law : String, parameter : String, value : Value }) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqRecord"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "twoResults"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "K = { entry : String, cone : String, parameters : (List (_ : String) * Value), accept : Grade, assumes : (List String), delta : ProbabilityLevel, fuel : (Maybe Nat), timeLimit : (Maybe Float64), checked : Bool, lock : (Maybe String), decoration : (Maybe Decoration), strategy : Strategy, fresh : Bool, axioms : Grade, roots : (List String), combine : String, bound : Float64, composition : String, cutoffs : (List { law : String, parameter : String, value : Value }) }, eq = eqRecord, st = twoResults"
+  },
+  "date": "2026-10-26T08:04:06+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "OneIdentityOneResult",
+  "cone": "sha256:287c0c722d480cd045d2499eb8c5a2a4e33705a3c425221c348e6a6b4a9cc475",
+  "binding": [
+   {
+    "parameter": "K",
+    "generator": "keyTypes (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167"
+   },
+   {
+    "parameter": "eq",
+    "generator": "keyEqs (Listed)",
+    "fingerprint": "sha256:e3f44513a3409e48f097ad03282a1f2c89b98833668487737da7531fd2bb8ee7"
+   },
+   {
+    "parameter": "st",
+    "generator": "stores (Listed)",
+    "fingerprint": "sha256:b97e3c0836e41f94b91be33c4fe5271b7af29ee32d9baa60354bda2cfb2514e0,sha256:e7dddc34396ca365c9d815d1de02b464790de0185ce4ec7965cfdb71cd4b7553,sha256:8b8a6d6b868e8fd1170d2b287ebfe6d05ff5375258642a599c25a3305c4c592d"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "K",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ entry : String, cone : String, parameters : (List (_ : String) * Value), accept : Grade, assumes : (List String), delta : ProbabilityLevel, fuel : (Maybe Nat), timeLimit : (Maybe Float64), checked : Bool, lock : (Maybe String), decoration : (Maybe Decoration), strategy : Strategy, fresh : Bool, axioms : Grade, roots : (List String), combine : String, bound : Float64, composition : String }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqRecord"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noRuns"
+      },
+      {
+       "Printed": "threeIdentities"
+      },
+      {
+       "Printed": "runTwice"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 3,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:46:05+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
   "regions": []
  },
  {
