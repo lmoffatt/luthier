@@ -528,16 +528,17 @@ parameter of type `Doubles` to numbers_model.lut's `doubles` (spec 7.R1, 7.R4: a
 infinite domain, or a value of a theory, is drawn from a census of models). The marks are drawn as
 integers in $[-50000, 50000]$ and filtered into `Mark` (spec 7.S3, 7.S6). The tester splits `Tape`
 into its four conjuncts and gives each its entry (spec 7.S22). `luthier certify
-docs/concepts/tape.test.lut` printed, on 2026-10-26, after `MetresWithin` took the `Within` form
-(the `MarkIsAMetric` lines were known from 2026-10-23):
+docs/concepts/tape.test.lut` printed, on 2026-10-26, after each conjunct had its control (the
+`MarkIsAMetric` lines were known from 2026-10-23):
 
 ```
-docs/concepts/tape.test.lut: 2 laws, 3 controls, 3 lines ran, 2 known
-  Tape: sampled; controlled (refuted on its control at ReadingAdds t: t = hooked, p = { a := 36254, b := 41964, c := 44418 })
-  MarkIsAMetric: sampled; controlled (refuted on its control at MetricZeroOnEqual Mark (structural Mark) model: model = hookedMetric, p = { x := 0, y := 0 })
+tape.test.lut: 2 laws, 8 controls, 10 lines ran, 0 known
+  Tape: sampled, ε̂ 0.015 at δ 0.05 in each of 4 conjuncts (200 cases), (0.06, 0.2) composed by the capped sum; controlled (refuted on its controls at ReadingSymmetric t: t = lopsided, a = 25222, b = 709; ReadingAdds t: t = hooked, p = { a := 36254, b := 41964, c := 44418 })
+  MarkIsAMetric: sampled, ε̂ 0.015 at δ 0.05 in each of 5 conjuncts (200 cases), (0.075, 0.25) composed by the capped sum; controlled (refuted on its controls at Triangular Mark (model).d: model = negativeMetric, x = 25222, y = 40956, z = 709; Triangular Mark (model).d: model = squaredMetric, x = 0, y = 7962, z = 26775; Commutative Mark Float64 (structural Float64) (model).d: model = oneWayMetric, x = 25222, y = 40956; MetricIndiscernible Mark (structural Mark) model: model = flatMetric, x = 25222, y = 40956; MetricZeroOnEqual Mark (structural Mark) model: model = hookedMetric, p = { x := 0, y := 0 })
 ```
 
-followed by the three control lines of section 7.
+(run from a copy of the directory, so that the example's own store is untouched; the eight lines
+that follow, one for each control, are left out). The controls are those of section 7.
 
 ### 6.4 What a sample says
 
@@ -686,6 +687,18 @@ against a bound of 0. Each control line is the law's line with `(control <- true
 model in the profile; the tester records a refutation as a control's entry, never as the law's
 failure, and `check -v` then reports each law "controlled".
 
+The other conjuncts have a wrong model each (written 2026-10-26, after D1 listed the ones without). `lopsided` reads a
+longer distance one unit in the last place too large when the first mark is the larger: the readings
+in order are exact, and the bound of `MetresWithin` has room for a relative error of one `epsilon`,
+so only `ReadingSymmetric` sees it, at $a = 25222$, $b = 709$. For the marks as a metric space,
+`flatMetric` is zero between any two marks (refuted at `MetricIndiscernible`), `oneWayMetric`
+doubles the distance when the first mark is the larger (`Commutative`), and `squaredMetric` is the
+square of the difference (`Triangular`, at $x = 0$, $y = 7962$, $z = 26775$). `negativeMetric`, minus
+the distance between distinct marks, is refuted at `MetricNonNegative` and also at `Triangular`:
+no total model breaks non-negativity alone, since with the diagonal, symmetry and the triangle at
+$x, z, x$ a negative distance contradicts them, which is why the text of the core says that it
+"follows" and is stated for this control.
+
 The last control shows that the bound does work: without it the law fails, so the law is not
 satisfied by the doubles for free. It doesn't show that the bound is tight. Two things do. The
 certificate of a numerical law now records the worst ratio of distance to bound it saw (sections
@@ -709,14 +722,20 @@ runs every conjunct, a theory is done when each conjunct has a refuted model, an
 the conjuncts with none (D-2026-10-25-a, question 4: "Yes"; L9.14 (a law is evidence of nothing
 until a wrong model refutes it), its sentence of 2026-10-26) [settled; building: bite D1].
 
-The example shows what this will report [mine: the reading of its entries]. `hooked` is refuted at
+The example shows what this reports [mine: the reading of its entries]. `hooked` is refuted at
 `ReadingAdds`, and it could not have been refuted at `ReadingSymmetric`, since a tape one millimetre
 long at every reading is still symmetric; `noRoom` refutes `MetresWithin`; `hookedMetric` is
 refuted at `MetricZeroOnEqual`, and against it `MetricIndiscernible` is vacuous (its premise, a zero
 distance, never holds for a tape that reads at least one millimetre; report-wave-a-3b.md). Of the
-four conjuncts of `Tape` and the five of `MarkIsAMetric`, three have a refuted model in the
-evidence. Both laws read "controlled" today; under D1 six conjuncts will be listed as having none,
-and the example will need a broken model for each, a skewed tape for `ReadingSymmetric` among them.
+four conjuncts of `Tape` and the five of `MarkIsAMetric`, four had no refuted model in the
+evidence at the count of 2026-10-26 (`ReadingSymmetric`, `MetricIndiscernible`, `Triangular`,
+`MetricNonNegative`; uncontrolled-2026-10-26.tsv, from report-b1-b3-d1.md). Each now has one, and
+`Commutative`, which `hookedMetric` does not see either, has its own, the
+models of section 7 above: with `lopsided`, `flatMetric`, `oneWayMetric`, `squaredMetric` and
+`negativeMetric` every conjunct is refuted by a model, and `check -v` lists no conjunct of the
+example without one. The certificate of `Tape` lists its two controls that refute, and a control
+that refutes at one conjunct is also run at the others, where it records "held" when the conjunct
+does not see the break.
 
 ## 8. The certificate and its cone
 
