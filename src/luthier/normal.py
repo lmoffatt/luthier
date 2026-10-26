@@ -36,9 +36,11 @@ The steps, as the brief numbers them:
    B`, where `o.eq` unfolds to `==`.
 6. `recognize`: the core properties a law is an instance of, with the instantiation of their
    parameters, or nothing. A match is accepted when the property instantiated normalizes to the
-   law's normal form exactly (`_verified`). [proposed] An instance of an exact property at an
-   operation the core claims it of only within a bound (WITHIN: float associativity) is withheld:
-   the law states what the core says the operation does not do.
+   law's normal form exactly (`_verified`), its distinct parameters stand for distinct terms, and
+   a parameter in an argument's position stands for an atom (`_bindable`). [proposed] An instance
+   of an exact property at an operation the core claims it of only within a bound is withheld:
+   a global operator by WITHIN (float `+` is not `Associative`), a model's field by its theory's
+   own conjuncts (`Doubles` claims `PlusAssociativeWithin d`, so `d.plus` is not `Associative`).
 
 Limits. It recognizes what the order decides and claims nothing on the rest: equality of programs
 is undecidable (Richardson's theorem for the elementary functions), equations other than
@@ -53,6 +55,7 @@ from __future__ import annotations
 
 import functools
 import itertools
+import json
 from dataclasses import dataclass, fields, is_dataclass, replace
 from pathlib import Path
 
@@ -257,6 +260,10 @@ class Env:
         except (ElaborationError, RecursionError, KeyError, TypeError, AttributeError):
             return None
         return None if isinstance(ty, t.Hole) else as_type(ty)
+
+    def refines(self, actual, expected):
+        from .elaborate import refines
+        return refines(actual, expected, self._ctx)
 
     def carrier(self, ty):
         """The base type's name (`Mark` is `Int`, `Moderate` is `Float64`), or None."""
@@ -531,13 +538,15 @@ def law_of(act, env, prefix="$"):
 
 
 def is_law(act):
-    """A definition at `Bool` with parameters, no conjunction `&` of laws in its body."""
+    """A law: a definition at `Bool` with parameters whose name is capitalized (the library's
+    convention: `approxMatOf` is a Boolean function, `Commutative` a law), no conjunction `&` of laws
+    in its body."""
     if not isinstance(act, t.Define) or not isinstance(act.body, t.Lam):
         return False
     result = act.type
     while isinstance(result, t.Pi):
         result = result.codomain
-    return result == t.Var("Bool") and "&" not in kernel.free_names(act.body)
+    return result == t.Var("Bool") and act.name[:1].isupper() and "&" not in kernel.free_names(act.body)
 
 
 @dataclass(frozen=True)
@@ -749,14 +758,28 @@ def atom(u):
 def _bindable(name, u, head):
     """Step 4's restriction (Miller's pattern fragment, read on the core's properties): a parameter
     in a head's position stands for a head (an atom, or one applied to atoms: `t.reading`, `dist
-    p`), one in an argument's position for an atom; a projection of a parameter (`o.eq`) never for
-    the structural equality, which the variant at `structural` states."""
-    if ":" in name and isinstance(u, t.Var) and u.name in SYMMETRIC:
-        return False
+    p`), one in an argument's position for an atom."""
     if head:
         h, args = spine(u)
         return atom(h) and all(atom(a) for a in args)
     return atom(u)
+
+
+def _bind_chain(name, u, sigma):
+    """A projection of a parameter (`?o:eq`, `?p:x`) stands for the same projection of one term of
+    the law (`t.eq`, `q.x`), and the parameter for that term: the property's record is the law's,
+    field by field (the structural equality is the variant at `structural`)."""
+    root, *labels = name.split(":")
+    y = u
+    for label in reversed(labels):
+        if not isinstance(y, t.Proj) or y.label != label:
+            return None
+        y = y.record
+    if not atom(y):
+        return None
+    if root in sigma and key(sigma[root]) != key(y):
+        return None
+    return {**sigma, root: y}
 
 
 def match(p, u, sigma, bound=(), head=False):
@@ -769,6 +792,10 @@ def match(p, u, sigma, bound=(), head=False):
             if key(sigma[p.name]) == key(u):
                 yield sigma
             return
+        if ":" in p.name:
+            sigma = _bind_chain(p.name, u, sigma)
+            if sigma is None:
+                return
         yield {**sigma, p.name: u}
         return
     pv, uv = _view(p), _view(u)
@@ -913,6 +940,41 @@ def _unify(pattern, actual, variables, tsub):
         _unify(pattern.argument, actual.argument, variables, tsub)
 
 
+def _quantified(entry, sigma):
+    """The property's last parameter, which the core's files keep for a quantified value (`x` in
+    `Least ... bottom x`, `p` in `Symmetric`), stands for a variable of the law or a projection of
+    one, never a literal or a global name: `n <= 1000000` is no `Least`."""
+    n = entry.params[-1][0]
+    return n not in sigma or any(v.startswith("$") for v in free_vars(sigma[n]))
+
+
+def _typed(entry, sigma, law, tsub):
+    """Each parameter's term has the parameter's type, instantiated (`elaborate.refines`, the elaborator's
+    compatibility, 4.S25): a property whose content is in a parameter's type (`Symmetric`'s pair
+    `p : Related A r`, whose body `r p.y p.x` alone is any application) is an instance only where
+    the law's variable is typed so. A type the typing does not give, or a parameter of the property
+    the match left open, is not compared."""
+    images = {w: sigma[n] for n, w, _ in entry.params if n in sigma}
+    for n, w, ty in entry.params:
+        if n not in sigma or w in entry.type_params:
+            continue
+        actual = law.env.type_of(sigma[n], law.ctx)
+        if actual is None:
+            continue
+        expected = ty
+        for v, a in list(tsub.items()) + list(images.items()):
+            expected = kernel.substitute(v, a, expected)
+        open_ = {w2 for _, w2, _ in entry.params} - set(tsub) - set(images)
+        if open_ & set(kernel.free_names(expected)):
+            continue
+        try:
+            if not law.env.refines(actual, expected):
+                return False
+        except Exception:  # a comparison the typing cannot make decides nothing
+            continue
+    return True
+
+
 def _withheld(entry, sigma, law, tsub):
     """An exact property instantiated at an operation the core claims it of only within a bound: a
     global operator by WITHIN at its carrier, or a model's field (`d.plus`) by its theory's own
@@ -999,8 +1061,8 @@ def _matches(law):
             sigma = {k: to_kernel(v) for k, v in sigma.items()}
             if not _verified(entry, sigma, law, target):
                 continue
-            images = [key(v) for v in sigma.values()]
-            if len(set(images)) != len(images):
+            images = [key(v) for k, v in sigma.items() if ":" not in k]
+            if len(set(images)) != len(images) or not _quantified(entry, sigma):
                 continue
             tsub = {}
             ordered_params = sorted(entry.params, key=lambda p: not (isinstance(p[2], t.Var) and p[2].name in entry.type_params))
@@ -1009,7 +1071,7 @@ def _matches(law):
                     actual = law.env.type_of(sigma[n], law.ctx)
                     if actual is not None:
                         _unify(ty, actual, entry.type_params, tsub)
-            if _withheld(entry, sigma, law, tsub):
+            if not _typed(entry, sigma, law, tsub) or _withheld(entry, sigma, law, tsub):
                 continue
             yield entry, sigma, tsub
             break
@@ -1032,11 +1094,7 @@ def recognize(law):
             elif n in sigma:
                 at.append((w, show(sigma[n], law.written)))
             else:
-                chains = sorted((k.split(":", 1)[1], v) for k, v in sigma.items() if k.startswith(n + ":"))
-                if chains:
-                    at.append((w, "{ " + ", ".join(f"{lab} := {show(v, law.written)}" for lab, v in chains) + " }"))
-                else:
-                    at.append((w, "?"))
+                at.append((w, "?"))
         inst = Instance(law.name, entry.name, entry.file, tuple(at))
         if inst not in seen:
             seen.add(inst)
@@ -1095,7 +1153,9 @@ def show(u, names=None):
         return names.get(u.name, u.name)
     if isinstance(u, t.Lit):
         v = u.constant.value
-        return f'"{v}"' if isinstance(v, str) else repr(v)
+        return json.dumps(v) if isinstance(v, str) else repr(v)
+    if isinstance(u, t.Universe):
+        return "U"
     if isinstance(u, t.Proj):
         return f"{_atom(u.record, names)}.{u.label}"
     if isinstance(u, t.App):
