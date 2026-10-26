@@ -887,6 +887,9 @@ class Runner:
         self.checked, self.tested = checked, {}
         # An opaque kernel leaf stands for the host-owned identity for this run.
         self.token = t.Axiom("host world token")
+        # the actions applied to the token so far (10.S3), so that a run refused after one reached
+        # the world is recorded (`RefusedAfterActing`)
+        self.acted = 0
         self.routes = {}
         # the actions validated at their first application (10.S10): route -> what `validate`
         # (run's `FirstActions`) needs; `validating` while a law runs, `trace` the host's calls then
@@ -1654,6 +1657,8 @@ class Runner:
             if acted is not None:
                 return acted
         given, ty = self.cross_out(head, function, args)
+        if given and given[0] is self.token:
+            self.acted += 1
         result = function(*given)
         value = self.from_host(result, ty, (getattr(head, "name", None), self.key(head, function)))
         if self.trace is not None:
@@ -1946,6 +1951,18 @@ class Refused(RunError):
     def __init__(self, message, refusals):
         super().__init__(message)
         self.refusals = refusals
+
+
+class RefusedAfterActing(Cut, Refused):
+    """A run refused after an action of it reached the world (an action refused at its first
+    application, 10.S10, after `agreement` applied it; a refinement refuted by `--checked` after an
+    action): a `Refused` and a `Cut`, recorded as a run that did not finish (the coordinator's
+    answer to agent P's question, 2026-10-26; P3: the original evidence kept, an action recorded),
+    with reason "refused", what the standard output accepted (`output`) and the refusals."""
+    def __init__(self, message, reason, steps, values=None, state=None, refusals=(), output=None):
+        RunError.__init__(self, message)
+        self.reason, self.steps, self.values, self.state = reason, steps, values, state
+        self.refusals, self.output = list(refusals), output
 
 
 # [proposed] the grade a run accepts when it names none with `--accept`: sampled and above, so an
@@ -3245,7 +3262,7 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
     value = t.Var(entry)
     if isinstance(definition.type, t.Pi) and isinstance(definition.type.domain, t.World):
         value = t.App(value, runner.token)
-    def stopped(kind, reason, message, exc=None):
+    def stopped(kind, reason, message, exc=None, **extra):
         # recorded as a run that did not finish, with its demand, the steps reached and the reason;
         # nothing goes to the store of results
         plan["schedule"] = list(runner.schedule)
@@ -3254,7 +3271,7 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
                          **{"first actions": firsts.done}, files_read=[list(pair) for pair in host.files_read()],
                          plan=plan, stdout=host.place(), **common,
                          result_store={"pure": pure, "fresh": demand.fresh, "written": None})
-        raise kind(message, reason, runner.steps, values, cut_state) from exc
+        raise kind(message, reason, runner.steps, values, cut_state, **extra) from exc
 
     try:
         result = runner.whnf(value)
@@ -3263,6 +3280,11 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
     except host.Rejected as exc:
         # the system rejected what an action wrote: the action failed, and the run with it
         stopped(ActionFailed, "action failed", f"an action failed: {exc} (D-2026-10-16-n)", exc)
+    except Refused as exc:
+        if not runner.acted:
+            raise
+        # refused after an action reached the world: recorded, with what it printed and why
+        stopped(RefusedAfterActing, "refused", str(exc), exc, refusals=exc.refusals, output=host.stdout())
     except Exception as exc:
         if runner.cut is None:
             raise
@@ -3530,9 +3552,14 @@ def record(path, main, values, output, state=None, cut=None):
     item = {"entry": main, "time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "parameters": values, "output": output, "calls": host.calls()}
     if cut is not None:
-        del item["output"]
+        if getattr(cut, "output", None) is None:
+            del item["output"]
+        else:
+            item["output"] = cut.output  # what the standard output accepted before the refusal
         item["finished"] = False
         item["cut"] = {"reason": cut.reason, "steps": cut.steps, "message": str(cut)}
+        if getattr(cut, "refusals", None) is not None:
+            item["refusals"] = cut.refusals
     if state is not None:
         state = dict(state)  # a copy: the entry takes fuel, files_read and lock out of it
         for key in ("demand", "plan", "key", "key_hash", "seed", "certificates", "fuel", "files_read",

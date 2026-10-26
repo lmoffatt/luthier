@@ -1175,9 +1175,10 @@ def _first_action_copy(tmp_path):
 
 def test_a_lying_print_is_refused_at_its_first_action_naming_the_place(tmp_path, capsys):
     # liar.print writes its line twice; HostAgreesPrint (world.lth's agreement) is refuted at the
-    # run's own argument, the place named; nothing is recorded, no entry written. Since
-    # D-2026-10-16-n `print` writes at once, so the lines are in the world before the case is judged:
-    # each of the two runs below printed them
+    # run's own argument, the place named; no entry written. Since D-2026-10-16-n `print` writes at
+    # once, so the lines are in the world before the case is judged: each of the two runs below
+    # printed them, and `luthier run` records its run as one that did not finish, with what it
+    # printed and why it was refused (the coordinator's answer to agent P, 2026-10-26; P3)
     path = _first_action_copy(tmp_path) / "first_action_liar.run.lut"
     with pytest.raises(Refused, match=r"liar\.print disagrees with its description at its first action .*"
                                       r"HostAgreesPrint at s = \"twice\": the place stdout differs"):
@@ -1185,7 +1186,13 @@ def test_a_lying_print_is_refused_at_its_first_action_naming_the_place(tmp_path,
     assert main(["run", str(path)]) == 1
     out, err = capsys.readouterr()
     assert out == "twice\n" * 4 and '(described just "twice\\n", observed just "twice\\ntwice\\n")' in err
-    assert not record_path(path).exists()
+    runs = json.loads(record_path(path).read_text(encoding="utf-8"))
+    assert len(runs) == 1  # run_file records nothing; `luthier run` does
+    rec = runs[0]
+    assert rec["finished"] is False and rec["cut"]["reason"] == "refused"
+    assert "HostAgreesPrint" in rec["cut"]["message"] and rec["output"] == "twice\ntwice\n"
+    assert [(r["name"], r["law"], r["action"]) for r in rec["refusals"]] == [("liar", "HostAgreesPrint", "liar.print")]
+    assert rec["stdout"]["accepted"] == len("twice\ntwice\n") and rec["demand"]["roots"]
     assert not (tmp_path / "first_action_models.cert.json").exists()
 
 
