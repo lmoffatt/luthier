@@ -1311,7 +1311,7 @@ class Runner:
         other value."""
         while isinstance(value, t.Lam):
             if not (isinstance(value.body, t.App) and value.body.argument == t.Var(value.name)
-                    and value.name not in kernel.free_names(value.body.function)):
+                    and value.name not in kernel._cached_free_names(value.body.function)):
                 return None
             value = value.body.function
         args, head = [], value
