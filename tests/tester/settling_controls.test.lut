@@ -118,12 +118,16 @@ bTwoSupported : List Settling := [with noFlaw twoSupportedConfirm]
 
 bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
 ofType (t g : String) : Binding := { parameter := nothing, type := just t, generator := g, coverage := Listed }
+-- [2026-10-26, prompt-controls.md] `WithinIsMeasured`'s `x` and `y` (of type `A`, here Int) are
+-- bound by their type `A`, not by name: a binding by name reached `Commutative`'s and `Associative`'s
+-- `x` and `y` too, which are verdicts, and ran them on integers (the tester does not check a census
+-- against the parameter's type), so no wrong combination could refute them
 profile (m : String) : List Binding := [bind "m" m, ofType "Bool" "bools",
   bind "r" "strings", bind "A" "types", bind "a" "ints", ofType "Law" "laws", bind "body" "quantified",
   ofType "Evidence" "evidences", bind "pts" "points", ofType "Coverage" "coverages", ofType "Verdict" "verdicts",
   bind "S" "scalarTypes", bind "T" "nats", bind "l" "pvalueLaws", bind "draw" "draws",
   ofType "Sequential" "cutoffs", ofType "StatisticalVerdict" "treated", bind "n" "counts",
-  bind "d" "metrics", bind "bound" "floats", bind "x" "ints", bind "y" "ints", bind "dist" "floats", bind "w" "floats"]
+  bind "d" "metrics", bind "bound" "floats", ofType "A" "ints", bind "dist" "floats", bind "w" "floats"]
 
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bCase") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bForallAt") (control <- true)
