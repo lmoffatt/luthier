@@ -1111,8 +1111,11 @@ def _matches(law):
 
 def recognize(law):
     """Step 6: the core properties `law` is an instance of, each with its instantiation; [] when
-    none is found (which claims nothing)."""
+    none is found (which claims nothing). A law `trivial` under the quotient is a claim the order
+    used (`x + y == y + x` at `Int`), an instance of nothing."""
     found, seen = [], set()
+    if trivial(law):
+        return found
     for entry, sigma, tsub in _matches(law):
         at = []
         for n, w, ty in entry.params:
