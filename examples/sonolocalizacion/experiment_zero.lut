@@ -44,7 +44,7 @@ import "tables.lth" Table Codec Cell int real text
 import "tables_model.lut" csv : Codec
 import "probability.lth" Kolmogorov MeanModel ScaledModel Likelihood gaussian profiled normalCdf kolmogorovTail valueSums
 import "probability_model.lut" numpySort : Kolmogorov kolmogorovDistance
-import "belief.lth" GaussianBelief Settings MaxResult Maximizer laplaceMode laplaceAt isConverged
+import "belief.lth" GaussianBelief Settings MaxResult Maximizer laplaceMode laplaceAt isConverged StopReason converged exhausted stalled
 import "belief_model.lut" lm : Maximizer
 import "positions.lut" Design Separated flatten
 import "positions_model.lut" positionsModel nodesOf
@@ -93,7 +93,7 @@ covFloor (n : Int) : RankFloor := toFloat64 n * doubles.epsilon
 -- cannot be excluded ahead for the points the maximizer visits: the Jacobian does not exist there
 -- (positions.lut), so the fit says whether the measured pairs are apart where it ended, and the run
 -- reports it with convergence.
-Fit (n : Int) = { posterior : GaussianBelief n, sigma : Float64, nu : Float64, predicted : Vec Float64, converged : Bool, separated : Bool }
+Fit (n : Int) = { posterior : GaussianBelief n, sigma : Float64, nu : Float64, predicted : Vec Float64, converged : Bool, stop : StopReason, steps : Int, separated : Bool }
 
 -- the fit of a valid graph, with its horizontal prior sds widened by c (1 for the experiment)
 Widening : U := { c : Float64 | 0.0 < c }
@@ -112,7 +112,7 @@ fit (settings : Settings) (g : ValidDistanceGraph) (c : Widening) (st : SigmaTre
   match toFloat64 m.d.n - trace (matMul (lik.info m.d mode.x) (pinvSym (covFloor (3 * m.x0.n)) precision)) { nu ->
     { posterior := { mean := mode.x, precision := precision },
       sigma := (match st { eliminated u -> elementary.sqrt (dot r r / nu) ; known s -> s }), nu := nu,
-      predicted := h, converged := isConverged mode.reason,
+      predicted := h, converged := isConverged mode.reason, stop := mode.reason, steps := mode.steps,
       separated := Separated mode.x (nodesOf d mode.x d.i) (nodesOf d mode.x d.j) } } } } } } }
 
 -- ---------------------------------------------------------------- the transform of the residuals
@@ -229,7 +229,7 @@ fitSummary (settings : Settings) (n : Int) (f : Fit n) (t : Transform) (g : Dist
   <> ", sigma " <> realToString f.sigma <> " m, nu " <> realToString f.nu
   <> ", transform of the residuals: Kolmogorov distance " <> realToString t.distance <> " over " <> intToString t.count
   <> ", tail probability " <> realToString (transformTail t)
-  <> (if f.converged then "" else ", NOT CONVERGED: the maximizer ran out of its " <> intToString settings.maxIter <> " iterations")
+  <> (match f.stop { converged u -> "" ; exhausted u -> ", NOT CONVERGED: the maximizer was exhausted after " <> intToString f.steps <> " steps" ; stalled u -> ", NOT CONVERGED: the maximizer stalled after " <> intToString f.steps <> " steps" })
   <> (if f.separated then "" else ", NOT SEPARATED: two measured nodes coincide where the fit ended")
 
 -- What a run writes and says, from a valid graph: the tables of the positions, the residuals and
