@@ -18,15 +18,17 @@ import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
 import "arrays.lth" Vec vec
-import "belief.lth" Maximizer QuadraticConverges MaximizersAgree
-import "optimization.lth" LMStep dampedStep QuadraticStepAccepts DirectionDescendsOnQuadratic DirectionAgreesOnQuadratic
-  StepRuleOnQuadratic
+import "arrays_model.lut" numpy : Arrays add
+import "belief.lth" Settings Maximizer StopReason exhausted QuadraticConverges MaximizersAgree
+import "optimization.lth" LMStep dampedStep lowered QuadraticStepAccepts DirectionDescendsOnQuadratic DirectionAgreesOnQuadratic
+  StepRuleOnQuadratic LMStepsOnQuadratic
 import "optimization_model.lut" native
-import "fit_cutoffs.lut" tolerance budget cutoffs
-import "../../examples/sonolocalizacion/session_a.lut" nativeLM
+import "fit_cutoffs.lut" tolerance cutoffs
+import "../../examples/sonolocalizacion/session_a.lut" nativeLM settingsA
 
 -- gives up: returns the start and says it did not converge
-giveUp : Maximizer := { maximize := fn s n f g m x0 { { x := x0, converged := false } } }
+giveUp : Maximizer := { maximize := fn s n f g m x0 { { x := x0, reason := exhausted unit, steps := 0 } },
+  quadraticSteps := nativeLM.quadraticSteps }
 -- the direction with its sign flipped, the step as native
 flipped : LMStep := { direction := fn n s o x mu { vec Float64 n (fn k { 0.0 - (dampedStep n s o x mu).f k }) },
   step := native.step }
@@ -37,6 +39,22 @@ onGiveUp : List Binding := [ { parameter := just "mx", type := nothing, generato
 giveUpVsNative : List Binding := [
   { parameter := just "mx", type := nothing, generator := "giveUp", coverage := Listed },
   { parameter := just "my", type := nothing, generator := "nativeLM", coverage := Listed } ]
+-- [2026-10-26] the step that always takes the undamped (Newton) step, accepted when the value falls:
+-- on the quadratic it lands at the minimum in one step, fewer than the damped count
+newtonStep : LMStep := { direction := native.direction,
+  step := fn n s d o st { { xt := add st.x (dampedStep n s o st.x 0.0)
+    pt := o.value xt
+    if pt < st.phi
+    then { x := xt, phi := pt, mu := lowered d st.mu, iter := st.iter + 1, accepted := true }
+    else { x := st.x, phi := st.phi, mu := st.mu * d.factor, iter := st.iter + 1, accepted := false } } } }
+onNewton : List Binding := [ { parameter := just "m", type := nothing, generator := "newtonStep", coverage := Listed } ]
+-- settings with a budget of 20 iterations, above the count on the drawn quadratics (a handful),
+-- for the step that never accepts: the native driver recurses once per iteration, and 500 of them
+-- exceed the evaluator's depth (2026-10-26)
+settingsTwenty : Settings := { tol := settingsA.tol, maxIter := 20, floor := settingsA.floor }
+onNeverTwenty : List Binding := [
+  { parameter := just "m", type := nothing, generator := "neverAccepts", coverage := Listed },
+  { parameter := just "s", type := nothing, generator := "settingsTwenty", coverage := Listed } ]
 onFlipped : List Binding := [ { parameter := just "m", type := nothing, generator := "flipped", coverage := Listed } ]
 onNever : List Binding := [ { parameter := just "m", type := nothing, generator := "neverAccepts", coverage := Listed } ]
 
@@ -52,3 +70,8 @@ test "DirectionDescendsOnQuadratic" (SampledMode linear) (cases <- 20) (seed <- 
 test "DirectionAgreesOnQuadratic" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onFlipped) (profile <- cutoffs) (control <- true)
 -- a step that never accepts, and keeps the damping, breaks the rule where the trial falls and on the damping
 test "StepRuleOnQuadratic" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onNever) (profile <- cutoffs) (control <- true)
+-- [2026-10-26] a step that never accepts never converges: the run is exhausted far beyond the count
+test "LMStepsOnQuadratic" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onNeverTwenty) (profile <- cutoffs) (control <- true)
+-- [2026-10-26] a step faster than the damped one converges in fewer steps than the count: the law
+-- sees a bound padded above what the method takes
+test "LMStepsOnQuadratic" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onNewton) (profile <- cutoffs) (control <- true)

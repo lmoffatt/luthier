@@ -26,10 +26,10 @@ import "arrays.lth" Dim VecOf approxVec
 import "belief.lth" Maximizer Settings MaxResult quadratic QuadraticConverges MaximizersAgree
 import "belief_model.lut" lm
 import "optimization.lth" LMStep Damping LMState quadraticObjective QuadraticStepAccepts DirectionDescends
-  DirectionAgrees StepRule DirectionDescendsOnQuadratic DirectionAgreesOnQuadratic StepRuleOnQuadratic
+  DirectionAgrees StepRule DirectionDescendsOnQuadratic DirectionAgreesOnQuadratic StepRuleOnQuadratic LMStepsOnQuadratic
 import "optimization_model.lut" native hostStep
 import "../../examples/sonolocalizacion/session_a.lut" settingsA dampingA nativeLM
-import "fit_cutoffs.lut" tolerance budget cutoffs
+import "fit_cutoffs.lut" tolerance cutoffs
 
 onLm : List Binding := [ { parameter := just "mx", type := nothing, generator := "lm", coverage := Listed } ]
 onNativeLM : List Binding := [ { parameter := just "mx", type := nothing, generator := "nativeLM", coverage := Listed } ]
@@ -48,7 +48,11 @@ test "QuadraticStepAccepts" (SampledMode linear) (seed <- 20261014) (whereBindin
 test "DirectionDescendsOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onHost) (profile <- cutoffs)
 test "DirectionAgreesOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onHost) (profile <- cutoffs)
 test "StepRuleOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onHost) (profile <- cutoffs)
+-- [2026-10-26, D-2026-10-16-m] the steps of a run driven by the model's step, against the count the
+-- theory derives (optimization.lth §4)
+test "LMStepsOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onHost) (profile <- cutoffs)
 test "QuadraticStepAccepts" (SampledMode linear) (seed <- 20261014) (whereBindings <- onNative) (profile <- cutoffs)
 test "DirectionDescendsOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onNative) (profile <- cutoffs)
 test "DirectionAgreesOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onNative) (profile <- cutoffs)
 test "StepRuleOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onNative) (profile <- cutoffs)
+test "LMStepsOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onNative) (profile <- cutoffs)

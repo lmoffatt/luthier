@@ -14,22 +14,22 @@ import "generators.lth" Binding
 import "laws.lth" Listed
 import "numbers.lth" Tolerance
 import "arrays.lth" Vec vec
-import "belief.lth" Posterior quadratic PrecisionSymmetric DensityPeaksAtMean PosteriorScoreIsGradient
+import "numbers_model.lut" doubles
+import "belief.lth" Settings Posterior quadratic PrecisionSymmetric DensityPeaksAtMean PosteriorScoreIsGradient
   PosteriorInfoSymmetric MaximizerAscends MaximizerStationary MaximizerKeepsDimension QuadraticConverges
 import "belief_model.lut" lm
 import "../../examples/sonolocalizacion/distances.lut" pitResolution
 import "../../examples/sonolocalizacion/session_a.lut" dimA priorA posteriorA settingsA
 
 tolerance : Tolerance := 1.0e-12
--- the iterations the demand grants a maximizer on the quadratic family (QuadraticConverges's
--- `budget`), a census of one, 50, as the probe of record/IA/layer-3-review-2026-10-15/report-fix-BCD.md
--- [proposed]; settingsA's maxIter 500 is above it, so the law is asked
-budget : Nat := 50
+-- [2026-10-26, D-2026-10-16-m] `QuadraticConverges` no longer takes the demand's `budget` (it was 50):
+-- the bound is the maximizer's own, derived from its theory; the format's epsilon (`fp`, the
+-- doubles) draws its domain
 cutoffs : List Binding := [
   { parameter := just "mx", type := nothing, generator := "lm", coverage := Listed },
   { parameter := just "s", type := nothing, generator := "settingsA", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "budget", type := nothing, generator := "budget", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed },
   { parameter := just "r", type := nothing, generator := "pitResolution", coverage := Listed } ]
 
 -- the quadratic family at dimension 3: maximum at (-1, 0, 1), curvature 2, 1e-3 and 1e3
@@ -63,6 +63,16 @@ test "PosteriorScoreIsGradient" (SampledMode linear) (cases <- 20) (seed <- 2026
 test "PosteriorInfoSymmetric" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onSessionA) (profile <- cutoffs)
 -- §2 the maximizer lm: drawn quadratics (QuadraticConverges), the listed quadratics from drawn starts
 test "QuadraticConverges" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
+-- [2026-10-26] and under a budget of one iteration, below lm's bound on every drawn start not
+-- already converged: the law asks that it stop exhausted at the budget (the old law asked nothing)
+settingsOne : Settings := { tol := settingsA.tol, maxIter := 1, floor := settingsA.floor }
+onOne : List Binding := [ { parameter := just "s", type := nothing, generator := "settingsOne", coverage := Listed } ]
+test "QuadraticConverges" (SampledMode linear) (seed <- 20261014) (whereBindings <- onOne) (profile <- cutoffs)
+onOneQuadratics : List Binding := [
+  { parameter := just "s", type := nothing, generator := "settingsOne", coverage := Listed },
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "quadratics3", coverage := Listed } ]
+test "MaximizerStationary" (SampledMode linear) (seed <- 20261014) (whereBindings <- onOneQuadratics) (profile <- cutoffs)
 test "MaximizerAscends" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)
 test "MaximizerStationary" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)
 test "MaximizerKeepsDimension" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)

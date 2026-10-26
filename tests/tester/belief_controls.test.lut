@@ -17,19 +17,21 @@ import "generators.lth" Binding
 import "laws.lth" Listed
 import "numbers.lth" Tolerance
 import "arrays.lth" Vec Mat vec mat
-import "belief.lth" Posterior GaussianBelief Maximizer quadratic PrecisionSymmetric DensityPeaksAtMean PosteriorScoreIsGradient
+import "numbers_model.lut" doubles
+import "optimization.lth" Damping
+import "optimization_model.lut" lmMaximizer
+import "belief.lth" Posterior GaussianBelief Maximizer StopReason converged exhausted stalled quadratic PrecisionSymmetric DensityPeaksAtMean PosteriorScoreIsGradient
   PosteriorInfoSymmetric MaximizerAscends MaximizerStationary MaximizerKeepsDimension QuadraticConverges
 import "belief_model.lut" lm
 import "../../examples/sonolocalizacion/distances.lut" pitResolution
 import "../../examples/sonolocalizacion/session_a.lut" settingsA
 
 tolerance : Tolerance := 1.0e-12
-budget : Nat := 50
 cutoffs : List Binding := [
   { parameter := just "mx", type := nothing, generator := "lm", coverage := Listed },
   { parameter := just "s", type := nothing, generator := "settingsA", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "budget", type := nothing, generator := "budget", coverage := Listed },
+  { parameter := just "fp", type := nothing, generator := "doubles", coverage := Listed },
   { parameter := just "r", type := nothing, generator := "pitResolution", coverage := Listed } ]
 
 centre3 : Vec Float64 := vec Float64 3 (fn k { toFloat64 k - 1.0 })
@@ -64,20 +66,44 @@ onAsymmetricInfo : List Binding := [
   { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
   { parameter := just "p", type := nothing, generator := "asymmetricInfoPs", coverage := Listed } ]
 
--- maximizers, each a record written whole
--- gives up: returns the start and says it did not converge
-giveUp : Maximizer := { maximize := fn s n f g m x0 { { x := x0, converged := false } } }
+-- maximizers, each a record written whole, each declaring lm's bound on the quadratic family
+-- gives up: returns the start and says the budget was spent, having spent none
+giveUp : Maximizer := { maximize := fn s n f g m x0 { { x := x0, reason := exhausted unit, steps := 0 } },
+  quadraticSteps := lm.quadraticSteps }
 -- claims convergence at the start, wherever it is
-claimsAtStart : Maximizer := { maximize := fn s n f g m x0 { { x := x0, converged := true } } }
+claimsAtStart : Maximizer := { maximize := fn s n f g m x0 { { x := x0, reason := converged unit, steps := 0 } },
+  quadraticSteps := lm.quadraticSteps }
 -- jumps far from the start, where the log posterior is lower
-jumpsAway : Maximizer := { maximize := fn s n f g m x0 { { x := vec Float64 n (fn k { 1.0e6 }), converged := false } } }
+jumpsAway : Maximizer := { maximize := fn s n f g m x0 { { x := vec Float64 n (fn k { 1.0e6 }), reason := exhausted unit, steps := s.maxIter } },
+  quadraticSteps := lm.quadraticSteps }
 -- returns a vector one shorter than the dimension
-oneShort : Maximizer := { maximize := fn s n f g m x0 { { x := vec Float64 (n - 1) (fn k { 0.0 }), converged := false } } }
+oneShort : Maximizer := { maximize := fn s n f g m x0 { { x := vec Float64 (n - 1) (fn k { 0.0 }), reason := exhausted unit, steps := s.maxIter } },
+  quadraticSteps := lm.quadraticSteps }
+-- [2026-10-26, D-2026-10-16-m] lm's run with its reason replaced by `stalled`: at the maximum, where
+-- the decrement is within the tolerance
+stallsAtMaximum : Maximizer := { maximize := fn s n f g m x0 {
+    r := lm.maximize s n f g m x0
+    res := { x := r.x, reason := stalled unit, steps := r.steps }
+    res },
+  quadraticSteps := lm.quadraticSteps }
+-- the native Levenberg-Marquardt with a slow damping schedule (it starts at 1e3 and falls by 1.5),
+-- declaring the bound of the fast one: it converges, after more steps than it declares
+slowDamping : Damping := { init := 1000.0, factor := 1.5, least := 1.0e-15, most := 1.0e15 }
+slowLM : Maximizer := { maximize := (lmMaximizer slowDamping).maximize, quadraticSteps := lm.quadraticSteps }
 quadratics3 : List (Posterior 3) := [good3]
 onQuadratics : List Binding := [
   { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
   { parameter := just "p", type := nothing, generator := "quadratics3", coverage := Listed } ]
 onGiveUp : List Binding := [ { parameter := just "mx", type := nothing, generator := "giveUp", coverage := Listed } ]
+onSlow : List Binding := [ { parameter := just "mx", type := nothing, generator := "slowLM", coverage := Listed } ]
+onGiveUpQ : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "quadratics3", coverage := Listed },
+  { parameter := just "mx", type := nothing, generator := "giveUp", coverage := Listed } ]
+onStallsQ : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "quadratics3", coverage := Listed },
+  { parameter := just "mx", type := nothing, generator := "stallsAtMaximum", coverage := Listed } ]
 onClaimsQ : List Binding := [
   { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
   { parameter := just "p", type := nothing, generator := "quadratics3", coverage := Listed },
@@ -101,9 +127,17 @@ test "PosteriorScoreIsGradient" (SampledMode linear) (cases <- 20) (seed <- 2026
 test "PosteriorInfoSymmetric" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onAsymmetricInfo) (profile <- cutoffs) (control <- true)
 -- a maximizer that gives up returns the start unconverged, so it never reaches the quadratic's maximum
 test "QuadraticConverges" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onGiveUp) (profile <- cutoffs) (control <- true)
+-- [2026-10-26] a maximizer that converges after more steps than its bound (D-2026-10-16-m: the alarm
+-- of a run far off its theory)
+test "QuadraticConverges" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onSlow) (profile <- cutoffs) (control <- true)
 -- a maximizer that jumps to a far point ends where the log posterior is lower than at the start
 test "MaximizerAscends" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onJumpsQ) (profile <- cutoffs) (control <- true)
 -- a maximizer that says it converged at the start, where the decrement is not within the tolerance
 test "MaximizerStationary" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onClaimsQ) (profile <- cutoffs) (control <- true)
+-- [2026-10-26] a maximizer that says the budget was spent, having spent none: under the old law,
+-- `else true`, it passed
+test "MaximizerStationary" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onGiveUpQ) (profile <- cutoffs) (control <- true)
+-- [2026-10-26] a maximizer that says it stalled at the maximum, where the decrement is within the tolerance
+test "MaximizerStationary" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onStallsQ) (profile <- cutoffs) (control <- true)
 -- a maximizer that returns a vector one shorter than the dimension
 test "MaximizerKeepsDimension" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onShortQ) (profile <- cutoffs) (control <- true)
