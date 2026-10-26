@@ -78,6 +78,21 @@ extendedTolled (a b : Extended) : Extended :=
   match a { infiniteDistance u -> b ; finiteDistance x ->
   (match b { infiniteDistance v -> a ; finiteDistance y -> finiteDistance (smaller x y + 0.5) }) }
 tolledBase : ErrorBase := { dioid := { bottom := infiniteDistance unit, neutral := finiteDistance 0.0, join := extendedTolled, combine := extendedPlus } }
+-- the sum wrapped modulo 3 on finite distances (∞ absorbing): an associative, commutative monoid
+-- with unit 0 that is not monotone, so it does not distribute over the smaller (1 + min(1, 2) is 2,
+-- min(1 + 1, 1 + 2) is 0); Integral and the combination's Pointwise2 fall with it
+extendedWrapped (a b : Extended) : Extended :=
+  match a { infiniteDistance u -> infiniteDistance unit ; finiteDistance x ->
+  (match b { infiniteDistance v -> infiniteDistance unit ; finiteDistance y -> finiteDistance (if 3.0 <= x + y then x + y - 3.0 else x + y) }) }
+wrappedBase : ErrorBase := { dioid := { bottom := infiniteDistance unit, neutral := finiteDistance 0.0, join := extendedSmaller, combine := extendedWrapped } }
+-- not commutative: the join as the first finite distance (associative, idempotent, ∞ its neutral;
+-- Integral and the join's Pointwise2 fall too), and the combination as the first nonzero distance
+-- (associative, 0 its unit; ∞ no longer absorbs, and it distributes on the left only)
+extendedFirstFinite (a b : Extended) : Extended := match a { infiniteDistance u -> b ; finiteDistance x -> a }
+extendedFirstNonzero (a b : Extended) : Extended :=
+  match a { infiniteDistance u -> a ; finiteDistance x -> (if x == 0.0 then b else a) }
+firstFiniteBase : ErrorBase := { dioid := { bottom := infiniteDistance unit, neutral := finiteDistance 0.0, join := extendedFirstFinite, combine := extendedPlus } }
+firstNonzeroBase : ErrorBase := { dioid := { bottom := infiniteDistance unit, neutral := finiteDistance 0.0, join := extendedSmaller, combine := extendedFirstNonzero } }
 -- Evidence compositions; the join, its bottom (1, 1) and the neutral (0, 0) are evidenceDioid's,
 -- not the model's, so only the tensor's laws can fall. Each tensor acts per part.
 perPart (f : Float64 -> Float64 -> Float64) : EvidenceComposition :=
@@ -122,6 +137,14 @@ test "ErrorIsABase" ExhaustiveMode (seed <- 20261026)
   (profile <- [on "model" "minBase", on "x" "errors", on "y" "errors", on "z" "errors"]) (control <- true)
 test "ErrorIsABase" ExhaustiveMode (seed <- 20261026)
   (profile <- [on "model" "tolledBase", on "x" "errors", on "y" "errors", on "z" "errors"]) (control <- true)
+test "ErrorIsABase" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "wrappedBase", on "x" "errors", on "y" "errors", on "z" "errors"]) (control <- true)
+test "ErrorIsABase" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "firstFiniteBase", on "x" "errors", on "y" "errors", on "z" "errors"]) (control <- true)
+test "ErrorIsABase" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "firstNonzeroBase", on "x" "errors", on "y" "errors", on "z" "errors"]) (control <- true)
+test "CappedSumIsAssumptionFree" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "firstComposition", on "x" "dyadic", on "y" "dyadic", on "z" "dyadic"]) (control <- true)
 test "CappedSumIsAssumptionFree" ExhaustiveMode (seed <- 20261026)
   (profile <- [on "model" "cubicComposition", on "x" "eighths", on "y" "eighths", on "z" "eighths"]) (control <- true)
 test "CappedSumIsAssumptionFree" ExhaustiveMode (seed <- 20261026)

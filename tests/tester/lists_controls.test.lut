@@ -57,6 +57,12 @@ offByOneTabulation : Tabulated (List Int) Int := { build := fn n f { buildList I
 shiftedHamming : Metric (BoolListOf 2) (structural (BoolListOf 2)) := { d := fn xs ys { hammingList 2 xs ys + 1.0 } }
 squaredHamming : Metric (BoolListOf 2) (structural (BoolListOf 2)) := { d := fn xs ys { hammingList 2 xs ys * hammingList 2 xs ys } }
 negatedHamming : Metric (BoolListOf 2) (structural (BoolListOf 2)) := { d := fn xs ys { 0.0 - hammingList 2 xs ys } }
+-- a directed Hamming distance, a position where only the first is true counting 2 and one where only
+-- the second is counting 1: zero exactly on equal lists, triangular (a weighted sum of two
+-- quasi-metrics), not commutative
+directedHamming : Metric (BoolListOf 2) (structural (BoolListOf 2)) := { d := fn xs ys {
+  toFloat64 (countBelow 2 (fn k { atList Bool xs k and not (atList Bool ys k) })) * 2.0
+  + toFloat64 (countBelow 2 (fn k { atList Bool ys k and not (atList Bool xs k) })) } }
 
 -- Left fold and early-stop searches (lists.lut, the list searches brief): a step that does not commute,
 -- and lists with a failing element in first, middle and last place.
@@ -246,7 +252,9 @@ onOffByOne : List Binding := withModel onListIsTabulated "offByOneTabulation"
 onShifted : List Binding := withModel onHammingListIsAMetric "shiftedHamming"
 onSquared : List Binding := withModel onHammingListIsAMetric "squaredHamming"
 onNegated : List Binding := withModel onHammingListIsAMetric "negatedHamming"
+onDirected : List Binding := withModel onHammingListIsAMetric "directedHamming"
 test "ListIsTabulated" ExhaustiveMode (seed <- 20261026) (profile <- onOffByOne) (control <- true)
 test "HammingListIsAMetric" ExhaustiveMode (seed <- 20261026) (profile <- onShifted) (control <- true)
 test "HammingListIsAMetric" ExhaustiveMode (seed <- 20261026) (profile <- onSquared) (control <- true)
 test "HammingListIsAMetric" ExhaustiveMode (seed <- 20261026) (profile <- onNegated) (control <- true)
+test "HammingListIsAMetric" ExhaustiveMode (seed <- 20261026) (profile <- onDirected) (control <- true)
