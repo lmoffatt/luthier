@@ -69,8 +69,21 @@ pullbackWithoutDefect : List (BoundTransformer Float64 Float64) := [{ compose :=
 maxAboveSum : List (BoundTransformer Float64 Float64) := [{ compose := good.compose, pullback := good.pullback, bySum := good.bySum,
   byMax := fn p a b { (p.lipschitzA + p.lipschitzB) * (if a < b then b else a) + p.defect } }]
 
+-- [2026-10-26, prompt-controls.md, L9.14] a composition that adds a slack of 1/8 at each step: sound
+-- (its defect is above the good one's) and not associative, the slack carried through a third step's
+-- sensitivity on one side only (L3 s + s against 2 s)
+slackCompose : List (BoundTransformer Float64 Float64) := [{ compose := fn f a b { { lipschitz := b.lipschitz * a.lipschitz,
+  defect := b.lipschitz * a.defect + b.defect + 0.125, radius := (composeAffine Float64 Float64 f a b).radius,
+  domain := (composeAffine Float64 Float64 f a b).domain } }, pullback := good.pullback, bySum := good.bySum, byMax := good.byMax }]
+-- an unknown sensitivity pulled back to no perturbation at all, just 0, instead of no bound
+unknownPullsBackToZero : List (BoundTransformer Float64 Float64) := [{ compose := good.compose,
+  pullback := fn t eps { match t { nothing -> just 0.0 ; just a -> good.pullback (just a) eps } },
+  bySum := good.bySum, byMax := good.byMax }]
+
 test "OnDoubles" ExhaustiveMode (seed <- 20261025) (whereBindings <- profile "dropsCarried") (control <- true)
 test "OnDoubles" ExhaustiveMode (seed <- 20261025) (whereBindings <- profile "radiusWithoutDefect") (control <- true)
 test "OnDoubles" ExhaustiveMode (seed <- 20261025) (whereBindings <- profile "firstDomainOnly") (control <- true)
 test "OnDoubles" ExhaustiveMode (seed <- 20261025) (whereBindings <- profile "pullbackWithoutDefect") (control <- true)
 test "OnDoubles" ExhaustiveMode (seed <- 20261025) (whereBindings <- profile "maxAboveSum") (control <- true)
+test "OnDoubles" ExhaustiveMode (seed <- 20261026) (whereBindings <- profile "slackCompose") (control <- true)
+test "OnDoubles" ExhaustiveMode (seed <- 20261026) (whereBindings <- profile "unknownPullsBackToZero") (control <- true)
