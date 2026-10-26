@@ -20,6 +20,7 @@ import "laws.lth" Listed Settling Law Evidence Verdict Case Forall Exists Conjun
   EvidencePair Side Cited Assumed NotRun Tested Vacuous Coverage Exhaustive Bounded Drawn Confirmed Refuted Supported Unsettled Cites
   Assumes StatisticalVerdict Rates Holds Fails Unresolved byPValue StatisticalLaw Sequential Within Measured isRefuted isConfirmed isSupported
 import "laws_model.lut" settling settle combineVerdicts
+import "laws.lth" Measuring ratioOf worseRatio
 
 bools : List Bool := [true, false]
 strings : List String := ["a", "b"]
@@ -144,3 +145,20 @@ test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bFi
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bThird") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bStrongest") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bTwoSupported") (control <- true)
+
+-- [2026-10-26, prompt-controls.md, L9.14] `Measuring`'s conjuncts that its two controls in
+-- settling_laws.test.lut leave uncontrolled, each broken alone: a ratio with no case for a zero
+-- distance (nothing at a bound of zero or below, ZeroDistanceIsExact), the worse ratio as the first
+-- (associative, an unbounded first absorbs; not commutative), and the mean of two bounded ratios
+-- (commutative, an unbounded one absorbs; not associative: 0, 0.5, 2 gives 1.125 and 0.625)
+signedFloats : List Float64 := [0.0, 1.0, 2.0, -1.0]
+ratios : List (Maybe Float64) := [nothing, just 0.0, just 0.5, just 2.0]
+zeroNotExact : List Measuring := [{ ratioOf := fn d b { if b <= 0.0 then nothing else just (d / b) }, worseRatio := worseRatio }]
+firstRatio : List Measuring := [{ ratioOf := ratioOf, worseRatio := fn r s { r } }]
+meanRatio : List Measuring := [{ ratioOf := ratioOf, worseRatio := fn r s {
+  match r { nothing -> nothing ; just a -> (match s { nothing -> nothing ; just b -> just ((a + b) * 0.5) }) } } }]
+measuringProfile (m : String) : List Binding := [bind "m" m, bind "bound" "signedFloats", bind "dist" "signedFloats",
+  bind "r" "ratios", bind "s" "ratios", bind "q" "ratios"]
+test "Measuring" ExhaustiveMode (seed <- 20261026) (whereBindings <- measuringProfile "zeroNotExact") (control <- true)
+test "Measuring" ExhaustiveMode (seed <- 20261026) (whereBindings <- measuringProfile "firstRatio") (control <- true)
+test "Measuring" ExhaustiveMode (seed <- 20261026) (whereBindings <- measuringProfile "meanRatio") (control <- true)
