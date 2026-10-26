@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 19b4f0e91155, commit 8a3cdb6) by `scripts/project_principles.py` (project_principles v2) on 2026-10-26; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 de06d052c092, commit 9901865) by `scripts/project_principles.py` (project_principles v2) on 2026-10-26; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -638,13 +638,30 @@ its type).
   bound, the law holding at a ratio of at most one; and every such law states as a premise its range
   of validity, a region sampled on both sides (L9.16), since the bounds hold for small tolerances only
   (D-2026-10-18-j). [proposed]
+- L9.19 (His words) Test the weakest link: in a chain of propositions the effort of evidence goes to
+  the link of least credibility, and what is already demonstrated is not demonstrated again except as
+  a check of Luthier's own machinery; for established mathematics the weak link is Luthier's
+  implementation itself. (The coordinator's reading) This is how the evidence already composes: a
+  chain's failure bound is the capped sum of its links' (L10.8, D-2026-10-25-a), so lowering the
+  largest term is the best use of effort, and a term a theorem puts at zero gains nothing from a run.
+  Two consequences (the coordinator's, D-2026-10-27-b). A law that is an established result (Higham's
+  bounds, a ring's laws on `Int`, IEEE 754's semantics) cites its demonstration as evidence, a
+  reference or a formal proof such as Flocq's, graded proved by that source (clause 7); its tests
+  certify the specimen, that this implementation on this machine meets the law, and not the law.
+  Running an established result again is a regression of the machinery (the tester, the controls, the
+  identity), run when the machinery changes, and not evidence a run needs. (The model's) In clause 7's
+  chain the cited link costs zero (L10.2), so a chain's whole cost is its specimen's and its
+  identities', which is where a run's evidence goes; the regression of the machinery is a record of
+  the kind clause 8 keeps apart from the certificate of the law, and a regression no change in the
+  machinery asks for is bureaucracy (P8). [proposed]
 References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d,
-D-2026-10-13-ad.
+D-2026-10-13-ad, D-2026-10-27-b.
 Rests on: O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r).
 Status: settled; clause 1 proposed (D-2026-10-12-k); clause 7 proposed on his mark; clause 10
 settled (D-2026-10-13-d, -e); clauses 11 and 12 settled (D-2026-10-13-l, -n); clause 13 settled (his
 words, on D-2026-10-13-ad; his ok, chat:52b10bff:5083); clause 14 settled (his words,
-D-2026-10-15-a); clause 15 settled (his words, D-2026-10-15-b).
+D-2026-10-15-a); clause 15 settled (his words, D-2026-10-15-b); clause 19 proposed (his words and
+the coordinator's reading, D-2026-10-27-b; the model's last sentence awaits his mark).
 
 **L10. A certificate records what is known of a law, its domain, its bound and its evidence; it is
 frozen, it serves every demand it meets, and it transports along identity.**
@@ -1029,6 +1046,9 @@ blocks; the done and implemented items are in the record's drafts table.
   beside "derivative" kept whole for the differential; the reading of a derivation as the
   realization read as a value is his, and so is keeping clause 23's requirement as a law over the
   derivation; what waits is his mark on the wording of the five clauses.
+- L9.19, the weakest link (his words, D-2026-10-27-b): the coordinator's reading through the
+  capped sum and the model's last sentence, on where a run's evidence goes and when the
+  regression of the machinery is bureaucracy.
 
 ## Keys
 
