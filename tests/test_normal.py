@@ -84,6 +84,12 @@ def test_a_global_operation_is_matched_as_written(variants):
     assert (found.property, dict(found.at)["op"], dict(found.at)["A"]) == ("Commutative", "-", "Int")
 
 
+def test_a_degenerate_property_is_left_out():
+    # `Least`'s body `leq bottom x` is any application of a relation
+    names = {e.name for e in normal.dictionary()}
+    assert "Least" not in names and "LandsIn" not in names
+
+
 def test_the_dictionary_holds_the_brief_properties():
     names = {e.name for e in normal.dictionary()}
     assert {"Commutative", "Associative", "Neutral", "Symmetric", "Transitive", "Injective", "Involutive",
@@ -94,7 +100,8 @@ def test_the_dictionary_holds_the_brief_properties():
 
 def test_every_core_property_is_itself():
     programs, _ = normal.core_env()
-    entries = {e.name for e in normal.dictionary()}
+    # a property as written is its variant with no equality set to `structural`
+    entries = {e.name for e in normal.dictionary() if e.structural == ()}
     missed, seen = [], 0
     for rel, q, own in programs:
         env = normal.Env(q, normal.core_definitions())

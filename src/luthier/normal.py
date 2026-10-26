@@ -643,6 +643,32 @@ def _chains(u, params):
     return _map(u, lambda x: _chains(x, params))
 
 
+def _degenerate(prepared, names):
+    """A property whose body names no operation of its own and no parameter twice (`Least`'s `leq
+    bottom x`, `LandsIn`'s `p (f x)`): its form is any application, its content only its name and
+    its parameters' types; it is left out of the dictionary [proposed]."""
+    roots = []
+
+    def walk(u):
+        if isinstance(u, AC):
+            roots.append("#global")
+            for a in u.args:
+                walk(a)
+        elif isinstance(u, t.Var):
+            roots.append(u.name.split(":")[0] if u.name.split(":")[0] in names else "#global")
+        elif isinstance(u, t.Lit):
+            roots.append("#global")
+        elif isinstance(u, t.App):
+            walk(u.function)
+            walk(u.argument)
+        elif isinstance(u, t.Proj):
+            walk(u.record)
+        else:
+            roots.append("#global")
+    walk(prepared)
+    return "#global" not in roots and len(roots) == len(set(roots))
+
+
 def _object_param(ty):
     """The carrier `X` of a parameter typed `Object X`, or None."""
     if isinstance(ty, t.App) and ty.function == t.Var("Object"):
@@ -675,7 +701,7 @@ def entries_of(act, env, file=""):
             unfolded = unfold(body, env)
             names = {n for n, _, _ in params}
             prepared = _chains(prepare(unfolded, None, {}), names)
-            if key(prepared) in forms or "&" in free_vars(unfolded):
+            if key(prepared) in forms or "&" in free_vars(unfolded) or _degenerate(prepared, names):
                 continue
             forms.add(key(prepared))
             out.append(Entry(act.name, file, tuple((n, w, ty) for (n, w, _), (_, ty) in zip(params, written_types)),
@@ -940,12 +966,18 @@ def _unify(pattern, actual, variables, tsub):
         _unify(pattern.argument, actual.argument, variables, tsub)
 
 
-def _quantified(entry, sigma):
-    """The property's last parameter, which the core's files keep for a quantified value (`x` in
-    `Least ... bottom x`, `p` in `Symmetric`), stands for a variable of the law or a projection of
-    one, never a literal or a global name: `n <= 1000000` is no `Least`."""
+def _quantified(entry, sigma, law):
+    """The property's last parameter, which the core's files keep for a quantified value (`x`, the
+    pair `p`), stands for the law's last parameter or a projection of it, the library's same
+    convention: `n <= 1000000` is no `Least`, and `IntNeutral`'s `op e x == x and op x e == x`,
+    which reads as `Absorbing` with its roles swapped, is only `Neutral`."""
     n = entry.params[-1][0]
-    return n not in sigma or any(v.startswith("$") for v in free_vars(sigma[n]))
+    if n not in sigma or not law.params:
+        return n not in sigma
+    y = sigma[n]
+    while isinstance(y, t.Proj):
+        y = y.record
+    return isinstance(y, t.Var) and y.name == law.params[-1][0]
 
 
 def _typed(entry, sigma, law, tsub):
@@ -1062,7 +1094,7 @@ def _matches(law):
             if not _verified(entry, sigma, law, target):
                 continue
             images = [key(v) for k, v in sigma.items() if ":" not in k]
-            if len(set(images)) != len(images) or not _quantified(entry, sigma):
+            if len(set(images)) != len(images) or not _quantified(entry, sigma, law):
                 continue
             tsub = {}
             ordered_params = sorted(entry.params, key=lambda p: not (isinstance(p[2], t.Var) and p[2].name in entry.type_params))
