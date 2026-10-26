@@ -5,6 +5,702 @@
   "binding": [
    {
     "parameter": "model",
+    "generator": "nearRowsEquality (Listed)",
+    "fingerprint": "sha256:61c97f252f2624cd31564e1e12828454b3594645681fe45fe90ce37c29f1f273"
+   },
+   {
+    "parameter": "x",
+    "generator": "ofRowCounts (Listed)",
+    "fingerprint": "sha256:768f6b9238c8893b53ffa39e672f40455a718347e3f46f2f329944914d7c060b,sha256:af24ece01cf1ccf8a34c2edea80bd1da94c4cf0f5d9d8bdc19b4c3c263c22206,sha256:b9560af73c0ee6cf70dcb6a4cfa996dad2a4e2eac576daed303eef27b75a4d39"
+   },
+   {
+    "parameter": "p",
+    "generator": "noPairs (Listed)",
+    "fingerprint": "sha256:807043dc3c4010f859334ec1b695426d235704eadc0678922fb949f6de432507"
+   },
+   {
+    "parameter": "c",
+    "generator": "nearRowsChains (Listed)",
+    "fingerprint": "sha256:1bb3360cb0120bf5116b6eb9fdca43e64b5205988f48197209cb8577872e2db4"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := nearRows }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noRowsOfK"
+      },
+      {
+       "Printed": "oneOfK"
+      },
+      {
+       "Printed": "twoRowsOfK"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := oneOfK, y := oneOfK }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := noRowsOfK, y := oneOfK, z := twoRowsOfK }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 5,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Transitive Table (model).eq: model = { eq := nearRows }, c = { x := noRowsOfK, y := oneOfK, z := twoRowsOfK }"
+  },
+  "date": "2026-10-26T04:49:26+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "TableIsAnObject",
+  "cone": "sha256:cb046076decac88ff7c7554fe8e2cee151aa1ac5ff8944c3b3a1081f2c51780e",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "nearRowsEquality (Listed)",
+    "fingerprint": "sha256:61c97f252f2624cd31564e1e12828454b3594645681fe45fe90ce37c29f1f273"
+   },
+   {
+    "parameter": "c",
+    "generator": "nearRowsChains (Listed)",
+    "fingerprint": "sha256:1bb3360cb0120bf5116b6eb9fdca43e64b5205988f48197209cb8577872e2db4"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := nearRows }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := noRowsOfK, y := oneOfK, z := twoRowsOfK }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "model = { eq := nearRows }, c = { x := noRowsOfK, y := oneOfK, z := twoRowsOfK }"
+  },
+  "date": "2026-10-26T04:49:26+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Transitive Table (model).eq",
+  "conjuncts": [
+   "Reflexive Table (model).eq",
+   "Symmetric Table (model).eq",
+   "Transitive Table (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "TableIsAnObject",
+  "cone": "sha256:cb046076decac88ff7c7554fe8e2cee151aa1ac5ff8944c3b3a1081f2c51780e",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "nearRowsEquality (Listed)",
+    "fingerprint": "sha256:61c97f252f2624cd31564e1e12828454b3594645681fe45fe90ce37c29f1f273"
+   },
+   {
+    "parameter": "p",
+    "generator": "noPairs (Listed)",
+    "fingerprint": "sha256:807043dc3c4010f859334ec1b695426d235704eadc0678922fb949f6de432507"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := nearRows }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := oneOfK, y := oneOfK }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:49:26+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Symmetric Table (model).eq",
+  "conjuncts": [
+   "Reflexive Table (model).eq",
+   "Symmetric Table (model).eq",
+   "Transitive Table (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "TableIsAnObject",
+  "cone": "sha256:cb046076decac88ff7c7554fe8e2cee151aa1ac5ff8944c3b3a1081f2c51780e",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "nearRowsEquality (Listed)",
+    "fingerprint": "sha256:61c97f252f2624cd31564e1e12828454b3594645681fe45fe90ce37c29f1f273"
+   },
+   {
+    "parameter": "x",
+    "generator": "ofRowCounts (Listed)",
+    "fingerprint": "sha256:768f6b9238c8893b53ffa39e672f40455a718347e3f46f2f329944914d7c060b,sha256:af24ece01cf1ccf8a34c2edea80bd1da94c4cf0f5d9d8bdc19b4c3c263c22206,sha256:b9560af73c0ee6cf70dcb6a4cfa996dad2a4e2eac576daed303eef27b75a4d39"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := nearRows }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noRowsOfK"
+      },
+      {
+       "Printed": "oneOfK"
+      },
+      {
+       "Printed": "twoRowsOfK"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 3,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:49:26+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Reflexive Table (model).eq",
+  "conjuncts": [
+   "Reflexive Table (model).eq",
+   "Symmetric Table (model).eq",
+   "Transitive Table (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "TableIsAnObject",
+  "cone": "sha256:cb046076decac88ff7c7554fe8e2cee151aa1ac5ff8944c3b3a1081f2c51780e",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "lessRowsEquality (Listed)",
+    "fingerprint": "sha256:74e28931752d0d09dcfd8c6f1e08b5f6c3de27c7eb8bf57182a42543175e4d3a"
+   },
+   {
+    "parameter": "x",
+    "generator": "ofRowCounts (Listed)",
+    "fingerprint": "sha256:768f6b9238c8893b53ffa39e672f40455a718347e3f46f2f329944914d7c060b,sha256:af24ece01cf1ccf8a34c2edea80bd1da94c4cf0f5d9d8bdc19b4c3c263c22206,sha256:b9560af73c0ee6cf70dcb6a4cfa996dad2a4e2eac576daed303eef27b75a4d39"
+   },
+   {
+    "parameter": "p",
+    "generator": "lessRowsPairs (Listed)",
+    "fingerprint": "sha256:898e8a2f076c8ddde3c850eb3857359e5482af2f2df0e6cdc22f46267efa5064"
+   },
+   {
+    "parameter": "c",
+    "generator": "noChains (Listed)",
+    "fingerprint": "sha256:0cf4d7ff066a376adc19fb176a66d9edc6bc789eb2957ce01f41a4e8aa9f52be"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := noMoreRows }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noRowsOfK"
+      },
+      {
+       "Printed": "oneOfK"
+      },
+      {
+       "Printed": "twoRowsOfK"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := oneOfK, y := twoRowsOfK }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := oneOfK, y := oneOfK, z := oneOfK }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 5,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Symmetric Table (model).eq: model = { eq := noMoreRows }, p = { x := oneOfK, y := twoRowsOfK }"
+  },
+  "date": "2026-10-26T04:49:26+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "TableIsAnObject",
+  "cone": "sha256:cb046076decac88ff7c7554fe8e2cee151aa1ac5ff8944c3b3a1081f2c51780e",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "lessRowsEquality (Listed)",
+    "fingerprint": "sha256:74e28931752d0d09dcfd8c6f1e08b5f6c3de27c7eb8bf57182a42543175e4d3a"
+   },
+   {
+    "parameter": "c",
+    "generator": "noChains (Listed)",
+    "fingerprint": "sha256:0cf4d7ff066a376adc19fb176a66d9edc6bc789eb2957ce01f41a4e8aa9f52be"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := noMoreRows }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := oneOfK, y := oneOfK, z := oneOfK }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:49:26+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Transitive Table (model).eq",
+  "conjuncts": [
+   "Reflexive Table (model).eq",
+   "Symmetric Table (model).eq",
+   "Transitive Table (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "TableIsAnObject",
+  "cone": "sha256:cb046076decac88ff7c7554fe8e2cee151aa1ac5ff8944c3b3a1081f2c51780e",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "lessRowsEquality (Listed)",
+    "fingerprint": "sha256:74e28931752d0d09dcfd8c6f1e08b5f6c3de27c7eb8bf57182a42543175e4d3a"
+   },
+   {
+    "parameter": "p",
+    "generator": "lessRowsPairs (Listed)",
+    "fingerprint": "sha256:898e8a2f076c8ddde3c850eb3857359e5482af2f2df0e6cdc22f46267efa5064"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := noMoreRows }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := oneOfK, y := twoRowsOfK }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "model = { eq := noMoreRows }, p = { x := oneOfK, y := twoRowsOfK }"
+  },
+  "date": "2026-10-26T04:49:26+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Symmetric Table (model).eq",
+  "conjuncts": [
+   "Reflexive Table (model).eq",
+   "Symmetric Table (model).eq",
+   "Transitive Table (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "TableIsAnObject",
+  "cone": "sha256:cb046076decac88ff7c7554fe8e2cee151aa1ac5ff8944c3b3a1081f2c51780e",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "lessRowsEquality (Listed)",
+    "fingerprint": "sha256:74e28931752d0d09dcfd8c6f1e08b5f6c3de27c7eb8bf57182a42543175e4d3a"
+   },
+   {
+    "parameter": "x",
+    "generator": "ofRowCounts (Listed)",
+    "fingerprint": "sha256:768f6b9238c8893b53ffa39e672f40455a718347e3f46f2f329944914d7c060b,sha256:af24ece01cf1ccf8a34c2edea80bd1da94c4cf0f5d9d8bdc19b4c3c263c22206,sha256:b9560af73c0ee6cf70dcb6a4cfa996dad2a4e2eac576daed303eef27b75a4d39"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ eq := noMoreRows }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noRowsOfK"
+      },
+      {
+       "Printed": "oneOfK"
+      },
+      {
+       "Printed": "twoRowsOfK"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 3,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:49:26+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Reflexive Table (model).eq",
+  "conjuncts": [
+   "Reflexive Table (model).eq",
+   "Symmetric Table (model).eq",
+   "Transitive Table (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "TableIsAnObject",
+  "cone": "sha256:cb046076decac88ff7c7554fe8e2cee151aa1ac5ff8944c3b3a1081f2c51780e",
+  "binding": [
+   {
+    "parameter": "model",
     "generator": "neverEqual (Listed)",
     "fingerprint": "sha256:1a7d07c03bf15edd9a2e3712ff0bb7807d1d207618c1bbfaa450e90f2236fa08"
    },

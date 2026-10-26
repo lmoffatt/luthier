@@ -1,0 +1,3141 @@
+[
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "knowsNothing (Listed)",
+    "fingerprint": "sha256:28c548fb9b699a212d7ea580eb7ae166f126dc79cfe4d234f1e8d07b89b552ed"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   },
+   {
+    "parameter": "c",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((((bisectionModulus doubles)).need b) f) { sufficient (r) -> (unknown unit); n -> n } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 462,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m: m = { need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((((bisectionModulus doubles)).need b) f) { sufficient (r) -> (unknown unit); n -> n } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }, f = { width := 1.0, scale := 2.0, brackets := true }, b = 0.1"
+  },
+  "date": "2026-10-26T04:46:16+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "knowsNothing (Listed)",
+    "fingerprint": "sha256:28c548fb9b699a212d7ea580eb7ae166f126dc79cfe4d234f1e8d07b89b552ed"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((((bisectionModulus doubles)).need b) f) { sufficient (r) -> (unknown unit); n -> n } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 16
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "m = { need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((((bisectionModulus doubles)).need b) f) { sufficient (r) -> (unknown unit); n -> n } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }, f = { width := 1.0, scale := 2.0, brackets := true }, b = 0.1"
+  },
+  "date": "2026-10-26T04:46:16+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "knowsNothing (Listed)",
+    "fingerprint": "sha256:28c548fb9b699a212d7ea580eb7ae166f126dc79cfe4d234f1e8d07b89b552ed"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((((bisectionModulus doubles)).need b) f) { sufficient (r) -> (unknown unit); n -> n } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:46:16+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "knowsNothing (Listed)",
+    "fingerprint": "sha256:28c548fb9b699a212d7ea580eb7ae166f126dc79cfe4d234f1e8d07b89b552ed"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((((bisectionModulus doubles)).need b) f) { sufficient (r) -> (unknown unit); n -> n } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 8
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:46:16+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "knowsNothing (Listed)",
+    "fingerprint": "sha256:28c548fb9b699a212d7ea580eb7ae166f126dc79cfe4d234f1e8d07b89b552ed"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   },
+   {
+    "parameter": "c",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((((bisectionModulus doubles)).need b) f) { sufficient (r) -> (unknown unit); n -> n } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 363,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 198
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:46:16+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "c boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "noDomain (Listed)",
+    "fingerprint": "sha256:4da5c67ecb45a47784d1d071d8f43c6b8b1432232ff1c6d6dade9a43738a8970"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   },
+   {
+    "parameter": "c",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { ((((bisectionModulus doubles)).need b) { width := (f).width, scale := (f).scale, brackets := true }) } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 462,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m: m = { need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { ((((bisectionModulus doubles)).need b) { width := (f).width, scale := (f).scale, brackets := true }) } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }, f = { width := 1.0, scale := 4.0, brackets := false }, b = 0.1"
+  },
+  "date": "2026-10-26T04:46:12+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "noDomain (Listed)",
+    "fingerprint": "sha256:4da5c67ecb45a47784d1d071d8f43c6b8b1432232ff1c6d6dade9a43738a8970"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { ((((bisectionModulus doubles)).need b) { width := (f).width, scale := (f).scale, brackets := true }) } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 16
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:46:12+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "noDomain (Listed)",
+    "fingerprint": "sha256:4da5c67ecb45a47784d1d071d8f43c6b8b1432232ff1c6d6dade9a43738a8970"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { ((((bisectionModulus doubles)).need b) { width := (f).width, scale := (f).scale, brackets := true }) } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "m = { need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { ((((bisectionModulus doubles)).need b) { width := (f).width, scale := (f).scale, brackets := true }) } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }, f = { width := 1.0, scale := 4.0, brackets := false }, b = 0.1"
+  },
+  "date": "2026-10-26T04:46:12+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "noDomain (Listed)",
+    "fingerprint": "sha256:4da5c67ecb45a47784d1d071d8f43c6b8b1432232ff1c6d6dade9a43738a8970"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { ((((bisectionModulus doubles)).need b) { width := (f).width, scale := (f).scale, brackets := true }) } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 8
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:46:12+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "noDomain (Listed)",
+    "fingerprint": "sha256:4da5c67ecb45a47784d1d071d8f43c6b8b1432232ff1c6d6dade9a43738a8970"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   },
+   {
+    "parameter": "c",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { ((((bisectionModulus doubles)).need b) { width := (f).width, scale := (f).scale, brackets := true }) } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 363,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 198
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:46:12+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "c boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "noFloor (Listed)",
+    "fingerprint": "sha256:4678afb4bdb05eb96fee027049c54becfc87dab451f3823e96873c272e5b0eb8"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   },
+   {
+    "parameter": "c",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match (f).brackets { true -> (sufficient { work := ((halvings (f).width) b), span := ((halvings (f).width) b), memory := 3 }); false -> (infeasible (outsideDomain unit)) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 462,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m: m = { need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match (f).brackets { true -> (sufficient { work := ((halvings (f).width) b), span := ((halvings (f).width) b), memory := 3 }); false -> (infeasible (outsideDomain unit)) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }, f = { width := 1.0, scale := 2.0, brackets := true }, b = 1e-15"
+  },
+  "date": "2026-10-26T04:46:06+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "noFloor (Listed)",
+    "fingerprint": "sha256:4678afb4bdb05eb96fee027049c54becfc87dab451f3823e96873c272e5b0eb8"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match (f).brackets { true -> (sufficient { work := ((halvings (f).width) b), span := ((halvings (f).width) b), memory := 3 }); false -> (infeasible (outsideDomain unit)) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 16
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:46:06+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "noFloor (Listed)",
+    "fingerprint": "sha256:4678afb4bdb05eb96fee027049c54becfc87dab451f3823e96873c272e5b0eb8"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match (f).brackets { true -> (sufficient { work := ((halvings (f).width) b), span := ((halvings (f).width) b), memory := 3 }); false -> (infeasible (outsideDomain unit)) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:46:06+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "noFloor (Listed)",
+    "fingerprint": "sha256:4678afb4bdb05eb96fee027049c54becfc87dab451f3823e96873c272e5b0eb8"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match (f).brackets { true -> (sufficient { work := ((halvings (f).width) b), span := ((halvings (f).width) b), memory := 3 }); false -> (infeasible (outsideDomain unit)) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 8
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "m = { need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match (f).brackets { true -> (sufficient { work := ((halvings (f).width) b), span := ((halvings (f).width) b), memory := 3 }); false -> (infeasible (outsideDomain unit)) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }, f = { width := 1.0, scale := 2.0, brackets := true }, b = 1e-15"
+  },
+  "date": "2026-10-26T04:46:06+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "noFloor (Listed)",
+    "fingerprint": "sha256:4678afb4bdb05eb96fee027049c54becfc87dab451f3823e96873c272e5b0eb8"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   },
+   {
+    "parameter": "c",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match (f).brackets { true -> (sufficient { work := ((halvings (f).width) b), span := ((halvings (f).width) b), memory := 3 }); false -> (infeasible (outsideDomain unit)) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 363,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 198
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:46:06+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "c boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "knownOnlyBelow (Listed)",
+    "fingerprint": "sha256:1d2df121d7fe0c871d58d850789ccdfcdb48b6763c4e190583aee821678e1c13"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   },
+   {
+    "parameter": "c",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((< b) 0.01) { true -> ((((bisectionModulus doubles)).need b) f); false -> (unknown unit) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 462,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m: m = { need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((< b) 0.01) { true -> ((((bisectionModulus doubles)).need b) f); false -> (unknown unit) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }, f = { width := 1.0, scale := 2.0, brackets := true }, b = 0.001, c = 0.1"
+  },
+  "date": "2026-10-26T04:46:04+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "c boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "knownOnlyBelow (Listed)",
+    "fingerprint": "sha256:1d2df121d7fe0c871d58d850789ccdfcdb48b6763c4e190583aee821678e1c13"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((< b) 0.01) { true -> ((((bisectionModulus doubles)).need b) f); false -> (unknown unit) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 16
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "m = { need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((< b) 0.01) { true -> ((((bisectionModulus doubles)).need b) f); false -> (unknown unit) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }, f = { width := 1.0, scale := 2.0, brackets := true }, b = 0.1"
+  },
+  "date": "2026-10-26T04:46:04+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "knownOnlyBelow (Listed)",
+    "fingerprint": "sha256:1d2df121d7fe0c871d58d850789ccdfcdb48b6763c4e190583aee821678e1c13"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((< b) 0.01) { true -> ((((bisectionModulus doubles)).need b) f); false -> (unknown unit) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:46:04+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "knownOnlyBelow (Listed)",
+    "fingerprint": "sha256:1d2df121d7fe0c871d58d850789ccdfcdb48b6763c4e190583aee821678e1c13"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((< b) 0.01) { true -> ((((bisectionModulus doubles)).need b) f); false -> (unknown unit) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 8
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:46:04+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "OnModulus",
+  "cone": "sha256:683386baaffbf53e98007d9893ec951faad940c1d8f521eec4ded43e6ad29029",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "knownOnlyBelow (Listed)",
+    "fingerprint": "sha256:1d2df121d7fe0c871d58d850789ccdfcdb48b6763c4e190583aee821678e1c13"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   },
+   {
+    "parameter": "c",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((< b) 0.01) { true -> ((((bisectionModulus doubles)).need b) f); false -> (unknown unit) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 363,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 198
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "m = { need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((< b) 0.01) { true -> ((((bisectionModulus doubles)).need b) f); false -> (unknown unit) } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }, f = { width := 1.0, scale := 2.0, brackets := true }, b = 0.001, c = 0.1"
+  },
+  "date": "2026-10-26T04:46:04+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } m",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } m",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } m",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } m"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "c boundary"
+    },
+    "n": 0
+   }
+  ]
+ }
+]

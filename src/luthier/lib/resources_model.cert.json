@@ -1,0 +1,2354 @@
+[
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   },
+   {
+    "parameter": "y",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:37+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   },
+   {
+    "parameter": "y",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   },
+   {
+    "parameter": "y",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   },
+   {
+    "parameter": "y",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   },
+   {
+    "parameter": "y",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   },
+   {
+    "parameter": "y",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   },
+   {
+    "parameter": "y",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   },
+   {
+    "parameter": "y",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   },
+   {
+    "parameter": "z",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 64,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   },
+   {
+    "parameter": "y",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   },
+   {
+    "parameter": "y",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   },
+   {
+    "parameter": "z",
+    "generator": "listed (Listed)",
+    "fingerprint": "sha256:6037bd2dc7767400076347c4ed93540738c5bff88efbe9038acb911023e2f55c"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ work := 0, span := 0, memory := 0 }"
+      },
+      {
+       "Printed": "{ work := 3, span := 2, memory := 1 }"
+      },
+      {
+       "Printed": "{ work := 5, span := 5, memory := 4 }"
+      },
+      {
+       "Printed": "{ work := 7, span := 1, memory := 2 }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 64,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261026)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261026)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261026)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261026)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261026)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261026)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261026)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261026)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261026)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261026)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261026)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ },
+ {
+  "law": "WorkSpanMemoryIsAResourceAlgebra",
+  "cone": "sha256:be2d755e9a806cd03a02f799e74a510824ae4aaaad3613d4e7ea8ad55f59521d",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:7ce1f8d7f3ba196b92d2f57b38a66153daacbafa4fb31935298ebf6619656e9b"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over { work : Nat, span : Nat, memory : Nat }",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "workSpanMemory"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261026)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:48:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+  "conjuncts": [
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).sequence (model).none",
+   "Associative { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Commutative { work : Nat, span : Nat, memory : Nat } { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel",
+   "Neutral { work : Nat, span : Nat, memory : Nat } (structural { work : Nat, span : Nat, memory : Nat }) (model).parallel (model).none",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts workOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence addCounts spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel largerCount spanOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).sequence largerCount memoryOf",
+   "Preserving { work : Nat, span : Nat, memory : Nat } Nat (structural Nat) (model).parallel addCounts memoryOf"
+  ],
+  "regions": []
+ }
+]

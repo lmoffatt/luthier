@@ -5,6 +5,1818 @@
   "binding": [
    {
     "parameter": "model",
+    "generator": "distanceOneWay (Listed)",
+    "fingerprint": "sha256:7f519eb6057a35e09b8c01d4f280a4d45e58aa7266a598458a3aeceb5fef17d7"
+   },
+   {
+    "parameter": "p",
+    "generator": "equalDoubles (Listed)",
+    "fingerprint": "sha256:1ca4f9f6b440e93654be7c48478ee8a6aee8329b39c2fa8b05f461c68803a6af"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "distanceOneWay"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := 0.0, y := 0.0 }"
+      },
+      {
+       "Printed": "{ x := ((- 0.0) 2.5), y := ((- 0.0) 2.5) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 300,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "WithinSymmetric Float64 (structural Float64) model: model = distanceOneWay, x = -2.3027031748984284, y = -9.78361755907608"
+  },
+  "date": "2026-10-26T04:47:13+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "AbsDistanceIsAMetricWithin",
+  "cone": "sha256:88db364b93afa94c585348e879bfb7dad15d580de2f5b3040e7614b9a9d3b392",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "distanceOneWay (Listed)",
+    "fingerprint": "sha256:7f519eb6057a35e09b8c01d4f280a4d45e58aa7266a598458a3aeceb5fef17d7"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "distanceOneWay"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "sampled"
+  },
+  "date": "2026-10-26T04:47:13+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "WithinTriangular Float64 (structural Float64) model",
+  "conjuncts": [
+   "WithinZeroOnEqual Float64 (structural Float64) model",
+   "WithinSymmetric Float64 (structural Float64) model",
+   "WithinTriangular Float64 (structural Float64) model"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "AbsDistanceIsAMetricWithin",
+  "cone": "sha256:88db364b93afa94c585348e879bfb7dad15d580de2f5b3040e7614b9a9d3b392",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "distanceOneWay (Listed)",
+    "fingerprint": "sha256:7f519eb6057a35e09b8c01d4f280a4d45e58aa7266a598458a3aeceb5fef17d7"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "distanceOneWay"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "model = distanceOneWay, x = -2.3027031748984284, y = -9.78361755907608"
+  },
+  "date": "2026-10-26T04:47:13+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "WithinSymmetric Float64 (structural Float64) model",
+  "conjuncts": [
+   "WithinZeroOnEqual Float64 (structural Float64) model",
+   "WithinSymmetric Float64 (structural Float64) model",
+   "WithinTriangular Float64 (structural Float64) model"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "AbsDistanceIsAMetricWithin",
+  "cone": "sha256:88db364b93afa94c585348e879bfb7dad15d580de2f5b3040e7614b9a9d3b392",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "distanceOneWay (Listed)",
+    "fingerprint": "sha256:7f519eb6057a35e09b8c01d4f280a4d45e58aa7266a598458a3aeceb5fef17d7"
+   },
+   {
+    "parameter": "p",
+    "generator": "equalDoubles (Listed)",
+    "fingerprint": "sha256:1ca4f9f6b440e93654be7c48478ee8a6aee8329b39c2fa8b05f461c68803a6af"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "distanceOneWay"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := 0.0, y := 0.0 }"
+      },
+      {
+       "Printed": "{ x := ((- 0.0) 2.5), y := ((- 0.0) 2.5) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "sampled"
+  },
+  "date": "2026-10-26T04:47:13+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "WithinZeroOnEqual Float64 (structural Float64) model",
+  "conjuncts": [
+   "WithinZeroOnEqual Float64 (structural Float64) model",
+   "WithinSymmetric Float64 (structural Float64) model",
+   "WithinTriangular Float64 (structural Float64) model"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "p boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "AbsDistanceIsAMetricWithin",
+  "cone": "sha256:88db364b93afa94c585348e879bfb7dad15d580de2f5b3040e7614b9a9d3b392",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "distanceOffDiagonal (Listed)",
+    "fingerprint": "sha256:e15b65e7cc77443959c0561b4448c3f1d84f9c4dfc60a6cbd927b739542a86dc"
+   },
+   {
+    "parameter": "p",
+    "generator": "equalDoubles (Listed)",
+    "fingerprint": "sha256:1ca4f9f6b440e93654be7c48478ee8a6aee8329b39c2fa8b05f461c68803a6af"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "distanceOffDiagonal"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := 0.0, y := 0.0 }"
+      },
+      {
+       "Printed": "{ x := ((- 0.0) 2.5), y := ((- 0.0) 2.5) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 300,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "WithinZeroOnEqual Float64 (structural Float64) model: model = distanceOffDiagonal, p = { x := 0.0, y := 0.0 }"
+  },
+  "date": "2026-10-26T04:47:11+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "p boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "AbsDistanceIsAMetricWithin",
+  "cone": "sha256:88db364b93afa94c585348e879bfb7dad15d580de2f5b3040e7614b9a9d3b392",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "distanceOffDiagonal (Listed)",
+    "fingerprint": "sha256:e15b65e7cc77443959c0561b4448c3f1d84f9c4dfc60a6cbd927b739542a86dc"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "z",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "distanceOffDiagonal"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "z",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "sampled"
+  },
+  "date": "2026-10-26T04:47:11+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "WithinTriangular Float64 (structural Float64) model",
+  "conjuncts": [
+   "WithinZeroOnEqual Float64 (structural Float64) model",
+   "WithinSymmetric Float64 (structural Float64) model",
+   "WithinTriangular Float64 (structural Float64) model"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "AbsDistanceIsAMetricWithin",
+  "cone": "sha256:88db364b93afa94c585348e879bfb7dad15d580de2f5b3040e7614b9a9d3b392",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "distanceOffDiagonal (Listed)",
+    "fingerprint": "sha256:e15b65e7cc77443959c0561b4448c3f1d84f9c4dfc60a6cbd927b739542a86dc"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : Float64) { fn (hi : Float64) { fn (v : Float64) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Float64",
+    "fingerprint": "sha256:6cd60eb7ce5bc41feb8979ed91bb5b3d4a604c24d475f20a5a854c3526bab7fa"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "distanceOffDiagonal"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      -10.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "sampled"
+  },
+  "date": "2026-10-26T04:47:11+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "WithinSymmetric Float64 (structural Float64) model",
+  "conjuncts": [
+   "WithinZeroOnEqual Float64 (structural Float64) model",
+   "WithinSymmetric Float64 (structural Float64) model",
+   "WithinTriangular Float64 (structural Float64) model"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "AbsDistanceIsAMetricWithin",
+  "cone": "sha256:88db364b93afa94c585348e879bfb7dad15d580de2f5b3040e7614b9a9d3b392",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "distanceOffDiagonal (Listed)",
+    "fingerprint": "sha256:e15b65e7cc77443959c0561b4448c3f1d84f9c4dfc60a6cbd927b739542a86dc"
+   },
+   {
+    "parameter": "p",
+    "generator": "equalDoubles (Listed)",
+    "fingerprint": "sha256:1ca4f9f6b440e93654be7c48478ee8a6aee8329b39c2fa8b05f461c68803a6af"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "distanceOffDiagonal"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := 0.0, y := 0.0 }"
+      },
+      {
+       "Printed": "{ x := ((- 0.0) 2.5), y := ((- 0.0) 2.5) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261021)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "model = distanceOffDiagonal, p = { x := 0.0, y := 0.0 }"
+  },
+  "date": "2026-10-26T04:47:11+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "WithinZeroOnEqual Float64 (structural Float64) model",
+  "conjuncts": [
+   "WithinZeroOnEqual Float64 (structural Float64) model",
+   "WithinSymmetric Float64 (structural Float64) model",
+   "WithinTriangular Float64 (structural Float64) model"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "p boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "BisectionScalesAsStated",
+  "cone": "sha256:2d37bc5fc87ffc570cf103ab7e1f8066077357a2e635e9a1da6ceb5a46f74825",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "elementary (Listed)",
+    "fingerprint": "sha256:ade73de0947980f00d764239b4ad5ee3503dd5aecb3ec19837797d1930b38706"
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "s",
+    "generator": "scalings (Listed)",
+    "fingerprint": "sha256:c927bd5080e562d52af948829d08c6a9ae30798d37fb5cfaba2718a0a5a42691"
+   },
+   {
+    "parameter": "solve",
+    "generator": "solvers (Listed)",
+    "fingerprint": "sha256:77a5c07b13849bf5598a55346ea22179a87afdb4bce5a18a531a9c86a674df6c"
+   },
+   {
+    "parameter": "p",
+    "generator": "problems (Listed)",
+    "fingerprint": "sha256:ba29d73a43d435988aad6b0376dc9df46adb4ba8fb357d76d640e128491d43da"
+   },
+   {
+    "parameter": "bounds",
+    "generator": "boundLists (Listed)",
+    "fingerprint": "sha256:38c9dc1c3d777b06f5069146b9e57c3beb50542d680066a6c93b3682888bb2b9"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "elementary"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(bisectionScaling elementary)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "solve",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "bisect"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 1.0, hi := 2.0, root := 1.25, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- ((* x) x)) 2.0) }, lo := 1.0, hi := 2.0, root := ((elementary).sqrt 2.0), blur := ((* ((* 2.0) (doubles).epsilon)) 1.5) }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1000.0) }, lo := ((- 0.0) 1024.0), hi := 3072.0, root := 1000.0, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 3.0, hi := 4.0, root := 1.25, blur := 0.0 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "bounds",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons 0.01) ((cons 0.0001) ((cons 1e-06) ((cons 1e-08) ((cons 1e-10) ((cons 1e-12) nil))))))"
+      },
+      {
+       "Printed": "((cons 0.00390625) ((cons 1.52587890625e-05) ((cons 5.960464477539063e-08) ((cons 2.3283064365386963e-10) ((cons 9.094947017729282e-13) nil)))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 4
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:45:16+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "measured": {
+   "measured": 4,
+   "worst": 0.12850742132058146,
+   "distance": 0.027067407284543266,
+   "bound": 0.21062913726219334
+  },
+  "regions": []
+ },
+ {
+  "law": "BisectionMeets",
+  "cone": "sha256:a5ee8b65ca14866558d86625ca95cbe19e16f969cc4712d2575711cb3497c930",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "solve",
+    "generator": "solvers (Listed)",
+    "fingerprint": "sha256:77a5c07b13849bf5598a55346ea22179a87afdb4bce5a18a531a9c86a674df6c"
+   },
+   {
+    "parameter": "p",
+    "generator": "problems (Listed)",
+    "fingerprint": "sha256:ba29d73a43d435988aad6b0376dc9df46adb4ba8fb357d76d640e128491d43da"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "solve",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "bisect"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 1.0, hi := 2.0, root := 1.25, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- ((* x) x)) 2.0) }, lo := 1.0, hi := 2.0, root := ((elementary).sqrt 2.0), blur := ((* ((* 2.0) (doubles).epsilon)) 1.5) }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1000.0) }, lo := ((- 0.0) 1024.0), hi := 3072.0, root := 1000.0, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 3.0, hi := 4.0, root := 1.25, blur := 0.0 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 44,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 25
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:45:13+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "measured": {
+   "measured": 25,
+   "worst": 0.9999999999972715,
+   "distance": 1.0,
+   "bound": 1.0000000000027285,
+   "regions": [],
+   "scaling": {
+    "parameter": "b",
+    "resource": "fuel",
+    "bounds": [
+     {
+      "bound": 2.0,
+      "cases": 3,
+      "worst": 0.9999999999972715,
+      "fuel": 1269,
+      "least": 416
+     },
+     {
+      "bound": 0.1,
+      "cases": 3,
+      "worst": 0.6249999999999778,
+      "fuel": 1629,
+      "least": 742
+     },
+     {
+      "bound": 0.001,
+      "cases": 3,
+      "worst": 0.9765624999965306,
+      "fuel": 2061,
+      "least": 1174
+     },
+     {
+      "bound": 1e-05,
+      "cases": 3,
+      "worst": 0.7629394528539494,
+      "fuel": 2565,
+      "least": 1678
+     },
+     {
+      "bound": 1e-07,
+      "cases": 3,
+      "worst": 0.5960464265780834,
+      "fuel": 3069,
+      "least": 2182
+     },
+     {
+      "bound": 1e-09,
+      "cases": 3,
+      "worst": 0.9313192659047832,
+      "fuel": 3501,
+      "least": 2614
+     },
+     {
+      "bound": 1e-11,
+      "cases": 3,
+      "worst": 0.727337359279801,
+      "fuel": 4005,
+      "least": 3118
+     },
+     {
+      "bound": 1e-13,
+      "cases": 2,
+      "worst": 0.5489321992770249,
+      "fuel": 4032,
+      "least": 3622
+     },
+     {
+      "bound": 1e-14,
+      "cases": 2,
+      "worst": 0.5242807843506273,
+      "fuel": 4268,
+      "least": 3838
+     }
+    ]
+   }
+  },
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "BisectionModulusIsAModulus",
+  "cone": "sha256:031aac13024a3a6173476ba920fe9a0e2d0c71a8518e0d2e626d60ffcb94d207",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 16
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:45:10+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "BisectionModulusIsAModulus",
+  "cone": "sha256:031aac13024a3a6173476ba920fe9a0e2d0c71a8518e0d2e626d60ffcb94d207",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:45:10+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "BisectionModulusIsAModulus",
+  "cone": "sha256:031aac13024a3a6173476ba920fe9a0e2d0c71a8518e0d2e626d60ffcb94d207",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 33,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 8
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:45:10+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "BisectionModulusIsAModulus",
+  "cone": "sha256:031aac13024a3a6173476ba920fe9a0e2d0c71a8518e0d2e626d60ffcb94d207",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "f",
+    "generator": "brackets (Listed)",
+    "fingerprint": "sha256:869d59aed098aa3a4aea2b7c6c3995103aef5844ba40f0e34397d423337fdb74"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   },
+   {
+    "parameter": "c",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ width := 1.0, scale := 2.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 4096.0, scale := 3072.0, brackets := true }"
+      },
+      {
+       "Printed": "{ width := 1.0, scale := 4.0, brackets := false }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 363,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 198
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:45:10+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+  "conjuncts": [
+   "StrongerNeedsNoLess { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+   "BelowTheFloorIsInfeasible { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+   "OutsideTheDomainPromisesNothing { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)",
+   "InsideTheDomainSuffices { width : Float64, scale : Float64, brackets : Bool } (bisectionModulus d)"
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "c boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "AbsDistanceIsAMetricWithin",
+  "cone": "sha256:88db364b93afa94c585348e879bfb7dad15d580de2f5b3040e7614b9a9d3b392",
+  "binding": [
+   {
+    "parameter": "model",
     "generator": "distanceUnbounded (Listed)",
     "fingerprint": "sha256:2dc8824e90ab008d2d5eb444bd249907510e81deff53ac46604597481fa9f433"
    },

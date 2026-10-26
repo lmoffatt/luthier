@@ -5,6 +5,3458 @@
   "binding": [
    {
     "parameter": "model",
+    "generator": "bumpedInclusion (Listed)",
+    "fingerprint": "sha256:3817d30b3f4ca43cc298f7cc1c8e4fff946e322d236b70c130f92a12bbcf8ff5"
+   },
+   {
+    "parameter": "x",
+    "generator": "symmetricMatrices (Listed)",
+    "fingerprint": "sha256:6db02b4d71fa3751f86916854907a7930c336e915adc17445492d035af1438ad"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "bumpedInclusion"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(identity 3)"
+      },
+      {
+       "Printed": "((((mat Float64) 3) 3) fn (i : (Fin 3)) { fn (j : (Fin 3)) { (toFloat64 ((* ((+ i) 1)) ((+ j) 1))) } })"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Equalizes { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) transposeDef model: model = bumpedInclusion, x = (identity 3)"
+  },
+  "date": "2026-10-26T04:45:02+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "zero"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "0 x 0"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "1 x 1"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "rank deficient"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 2
+   }
+  ]
+ },
+ {
+  "law": "SymmetricIsAnEqualizer",
+  "cone": "sha256:60909783ee42a05aaa811ff505dc1157c63387a3e9aabc9087690ba2ae4ce8e0",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "bumpedInclusion (Listed)",
+    "fingerprint": "sha256:3817d30b3f4ca43cc298f7cc1c8e4fff946e322d236b70c130f92a12bbcf8ff5"
+   },
+   {
+    "parameter": "x",
+    "generator": "symmetricMatrices (Listed)",
+    "fingerprint": "sha256:6db02b4d71fa3751f86916854907a7930c336e915adc17445492d035af1438ad"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "bumpedInclusion"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(identity 3)"
+      },
+      {
+       "Printed": "((((mat Float64) 3) 3) fn (i : (Fin 3)) { fn (j : (Fin 3)) { (toFloat64 ((* ((+ i) 1)) ((+ j) 1))) } })"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:45:02+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "IncludeRestricts { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) transposeDef model",
+  "conjuncts": [
+   "Equalizes { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) transposeDef model",
+   "RestrictIncludes { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) transposeDef model",
+   "IncludeRestricts { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) transposeDef model"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "zero"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "0 x 0"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "1 x 1"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "rank deficient"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 2
+   }
+  ]
+ },
+ {
+  "law": "SymmetricIsAnEqualizer",
+  "cone": "sha256:60909783ee42a05aaa811ff505dc1157c63387a3e9aabc9087690ba2ae4ce8e0",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "bumpedInclusion (Listed)",
+    "fingerprint": "sha256:3817d30b3f4ca43cc298f7cc1c8e4fff946e322d236b70c130f92a12bbcf8ff5"
+   },
+   {
+    "parameter": "x",
+    "generator": "symmetricMatrices (Listed)",
+    "fingerprint": "sha256:6db02b4d71fa3751f86916854907a7930c336e915adc17445492d035af1438ad"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "bumpedInclusion"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(identity 3)"
+      },
+      {
+       "Printed": "((((mat Float64) 3) 3) fn (i : (Fin 3)) { fn (j : (Fin 3)) { (toFloat64 ((* ((+ i) 1)) ((+ j) 1))) } })"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:45:02+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "RestrictIncludes { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) transposeDef model",
+  "conjuncts": [
+   "Equalizes { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) transposeDef model",
+   "RestrictIncludes { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) transposeDef model",
+   "IncludeRestricts { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) transposeDef model"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "zero"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "0 x 0"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "1 x 1"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "rank deficient"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 2
+   }
+  ]
+ },
+ {
+  "law": "SymmetricIsAnEqualizer",
+  "cone": "sha256:60909783ee42a05aaa811ff505dc1157c63387a3e9aabc9087690ba2ae4ce8e0",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "bumpedInclusion (Listed)",
+    "fingerprint": "sha256:3817d30b3f4ca43cc298f7cc1c8e4fff946e322d236b70c130f92a12bbcf8ff5"
+   },
+   {
+    "parameter": "x",
+    "generator": "symmetricMatrices (Listed)",
+    "fingerprint": "sha256:6db02b4d71fa3751f86916854907a7930c336e915adc17445492d035af1438ad"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "bumpedInclusion"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(identity 3)"
+      },
+      {
+       "Printed": "((((mat Float64) 3) 3) fn (i : (Fin 3)) { fn (j : (Fin 3)) { (toFloat64 ((* ((+ i) 1)) ((+ j) 1))) } })"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "model = bumpedInclusion, x = (identity 3)"
+  },
+  "date": "2026-10-26T04:45:02+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Equalizes { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) transposeDef model",
+  "conjuncts": [
+   "Equalizes { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) transposeDef model",
+   "RestrictIncludes { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) transposeDef model",
+   "IncludeRestricts { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 } SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> Float64 }) transposeDef model"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "zero"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "0 x 0"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "1 x 1"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "rank deficient"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 2
+   }
+  ]
+ },
+ {
+  "law": "VecIsTabulated",
+  "cone": "sha256:40a56d5180b9d34a1fcdcca5704068ffb5fdce6224f92a9c6bba1a6f438f711e",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "zeroEntriesTabulation (Listed)",
+    "fingerprint": "sha256:f0a22537518890925dedf2f89f21e4fa76acd9ec968190c5e54795a0c31cb35e"
+   },
+   {
+    "parameter": "n",
+    "generator": "lengths (Listed)",
+    "fingerprint": "sha256:967d017238ae80e3db4422d5ba0b33eb409decd6bef1261a41f584920c4f23ae"
+   },
+   {
+    "parameter": "f",
+    "generator": "oddAt (Listed)",
+    "fingerprint": "sha256:0277984759c3785d26eadc3a491055becee072a3a381c69e4ff91b6c3aa75c7e"
+   },
+   {
+    "parameter": "o",
+    "generator": "intEquality (Listed)",
+    "fingerprint": "sha256:aa9d3a7d7957270f2e04d93dc68b61455a5b08d5143bb084536d43c920ad9c0d"
+   },
+   {
+    "parameter": "k",
+    "generator": "ExhaustiveMode over (Fin n)",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "zeroEntriesTabulation"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      },
+      {
+       "Number": 1.0
+      },
+      {
+       "Number": 3.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "oddAt"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "intEquality"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "k",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 7,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "AtBuild { n : Nat, f : (_ : (Fin n)) -> A } A (vecIndexed A) model: A = entryType, model = zeroEntriesTabulation, o = intEquality, n = 1, f = oddAt, k = 0"
+  },
+  "date": "2026-10-26T04:45:01+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "n boundary"
+    },
+    "n": 1
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "k boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "VecIsTabulated",
+  "cone": "sha256:40a56d5180b9d34a1fcdcca5704068ffb5fdce6224f92a9c6bba1a6f438f711e",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "zeroEntriesTabulation (Listed)",
+    "fingerprint": "sha256:f0a22537518890925dedf2f89f21e4fa76acd9ec968190c5e54795a0c31cb35e"
+   },
+   {
+    "parameter": "o",
+    "generator": "intEquality (Listed)",
+    "fingerprint": "sha256:aa9d3a7d7957270f2e04d93dc68b61455a5b08d5143bb084536d43c920ad9c0d"
+   },
+   {
+    "parameter": "n",
+    "generator": "lengths (Listed)",
+    "fingerprint": "sha256:967d017238ae80e3db4422d5ba0b33eb409decd6bef1261a41f584920c4f23ae"
+   },
+   {
+    "parameter": "f",
+    "generator": "oddAt (Listed)",
+    "fingerprint": "sha256:0277984759c3785d26eadc3a491055becee072a3a381c69e4ff91b6c3aa75c7e"
+   },
+   {
+    "parameter": "k",
+    "generator": "ExhaustiveMode over (Fin n)",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "zeroEntriesTabulation"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "intEquality"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      },
+      {
+       "Number": 1.0
+      },
+      {
+       "Number": 3.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "oddAt"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "k",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = entryType, model = zeroEntriesTabulation, o = intEquality, n = 1, f = oddAt, k = 0"
+  },
+  "date": "2026-10-26T04:45:01+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "AtBuild { n : Nat, f : (_ : (Fin n)) -> A } A (vecIndexed A) model",
+  "conjuncts": [
+   "SizeBuild { n : Nat, f : (_ : (Fin n)) -> A } A (vecIndexed A) model",
+   "AtBuild { n : Nat, f : (_ : (Fin n)) -> A } A (vecIndexed A) model"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "n boundary"
+    },
+    "n": 1
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "k boundary"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "VecIsTabulated",
+  "cone": "sha256:40a56d5180b9d34a1fcdcca5704068ffb5fdce6224f92a9c6bba1a6f438f711e",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "zeroEntriesTabulation (Listed)",
+    "fingerprint": "sha256:f0a22537518890925dedf2f89f21e4fa76acd9ec968190c5e54795a0c31cb35e"
+   },
+   {
+    "parameter": "n",
+    "generator": "lengths (Listed)",
+    "fingerprint": "sha256:967d017238ae80e3db4422d5ba0b33eb409decd6bef1261a41f584920c4f23ae"
+   },
+   {
+    "parameter": "f",
+    "generator": "oddAt (Listed)",
+    "fingerprint": "sha256:0277984759c3785d26eadc3a491055becee072a3a381c69e4ff91b6c3aa75c7e"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "zeroEntriesTabulation"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      },
+      {
+       "Number": 1.0
+      },
+      {
+       "Number": 3.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "oddAt"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 3,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:45:01+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "SizeBuild { n : Nat, f : (_ : (Fin n)) -> A } A (vecIndexed A) model",
+  "conjuncts": [
+   "SizeBuild { n : Nat, f : (_ : (Fin n)) -> A } A (vecIndexed A) model",
+   "AtBuild { n : Nat, f : (_ : (Fin n)) -> A } A (vecIndexed A) model"
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "n boundary"
+    },
+    "n": 2
+   }
+  ]
+ },
+ {
+  "law": "MatIsAFunctor",
+  "cone": "sha256:66500e44d07a3634a327a0f2df7926ff5ea858b90323f8d40ad780426034f0cb",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "reversedMatFunctor (Listed)",
+    "fingerprint": "sha256:095551d898c5a071df2fc2becafa4d4c687565b127d4b6baf582f3ee9baea1fd"
+   },
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "o",
+    "generator": "matEquality (Listed)",
+    "fingerprint": "sha256:a74ec3671819d063b9d29b24b189d16e56c211b32c7a46ba59edbda4d3355821"
+   },
+   {
+    "parameter": "xs",
+    "generator": "sentinelMatrices (Listed)",
+    "fingerprint": "sha256:39b0f0f7cc78a1112426b71a4baac1c0f60984672dafb554caa69476d0a4d3d8"
+   },
+   {
+    "parameter": "B",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "C",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "g",
+    "generator": "twiceInt (Listed)",
+    "fingerprint": "sha256:f0d4cf109235db455a7acc44366a8bd0464f5f46fd4dc10dacc2fd7ff856cbc9"
+   },
+   {
+    "parameter": "h",
+    "generator": "negated (Listed)",
+    "fingerprint": "sha256:6f8d1ce5a6b390203e37490f96524248d986a924684d820b0ae518bf4b3aaaaf"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "reversedMatFunctor"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "matEquality"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "xs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } })"
+      },
+      {
+       "Printed": "((((mat Int) 1) 2) fn (i : (Fin 1)) { fn (j : (Fin 2)) { match ((== j) 0) { true -> 5; false -> ((- 0) 1) } } })"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "C",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "twiceInt"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "negated"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "MapId Mat model: model = reversedMatFunctor, A = entryType, o = matEquality, xs = ((((mat Int) 1) 2) fn (i : (Fin 1)) { fn (j : (Fin 2)) { match ((== j) 0) { true -> 5; false -> ((- 0) 1) } } })"
+  },
+  "date": "2026-10-26T04:45:01+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "MatIsAFunctor",
+  "cone": "sha256:66500e44d07a3634a327a0f2df7926ff5ea858b90323f8d40ad780426034f0cb",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "reversedMatFunctor (Listed)",
+    "fingerprint": "sha256:095551d898c5a071df2fc2becafa4d4c687565b127d4b6baf582f3ee9baea1fd"
+   },
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "B",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "C",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "o",
+    "generator": "matEquality (Listed)",
+    "fingerprint": "sha256:a74ec3671819d063b9d29b24b189d16e56c211b32c7a46ba59edbda4d3355821"
+   },
+   {
+    "parameter": "g",
+    "generator": "twiceInt (Listed)",
+    "fingerprint": "sha256:f0d4cf109235db455a7acc44366a8bd0464f5f46fd4dc10dacc2fd7ff856cbc9"
+   },
+   {
+    "parameter": "h",
+    "generator": "negated (Listed)",
+    "fingerprint": "sha256:6f8d1ce5a6b390203e37490f96524248d986a924684d820b0ae518bf4b3aaaaf"
+   },
+   {
+    "parameter": "xs",
+    "generator": "sentinelMatrices (Listed)",
+    "fingerprint": "sha256:39b0f0f7cc78a1112426b71a4baac1c0f60984672dafb554caa69476d0a4d3d8"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "reversedMatFunctor"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "C",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "matEquality"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "twiceInt"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "negated"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "xs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } })"
+      },
+      {
+       "Printed": "((((mat Int) 1) 2) fn (i : (Fin 1)) { fn (j : (Fin 2)) { match ((== j) 0) { true -> 5; false -> ((- 0) 1) } } })"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "model = reversedMatFunctor, A = entryType, B = entryType, C = entryType, o = matEquality, g = twiceInt, h = negated, xs = ((((mat Int) 1) 2) fn (i : (Fin 1)) { fn (j : (Fin 2)) { match ((== j) 0) { true -> 5; false -> ((- 0) 1) } } })"
+  },
+  "date": "2026-10-26T04:45:01+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MapCompose Mat model",
+  "conjuncts": [
+   "MapId Mat model",
+   "MapCompose Mat model"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "MatIsAFunctor",
+  "cone": "sha256:66500e44d07a3634a327a0f2df7926ff5ea858b90323f8d40ad780426034f0cb",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "reversedMatFunctor (Listed)",
+    "fingerprint": "sha256:095551d898c5a071df2fc2becafa4d4c687565b127d4b6baf582f3ee9baea1fd"
+   },
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "o",
+    "generator": "matEquality (Listed)",
+    "fingerprint": "sha256:a74ec3671819d063b9d29b24b189d16e56c211b32c7a46ba59edbda4d3355821"
+   },
+   {
+    "parameter": "xs",
+    "generator": "sentinelMatrices (Listed)",
+    "fingerprint": "sha256:39b0f0f7cc78a1112426b71a4baac1c0f60984672dafb554caa69476d0a4d3d8"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "reversedMatFunctor"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "matEquality"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "xs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } })"
+      },
+      {
+       "Printed": "((((mat Int) 1) 2) fn (i : (Fin 1)) { fn (j : (Fin 2)) { match ((== j) 0) { true -> 5; false -> ((- 0) 1) } } })"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "model = reversedMatFunctor, A = entryType, o = matEquality, xs = ((((mat Int) 1) 2) fn (i : (Fin 1)) { fn (j : (Fin 2)) { match ((== j) 0) { true -> 5; false -> ((- 0) 1) } } })"
+  },
+  "date": "2026-10-26T04:45:01+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MapId Mat model",
+  "conjuncts": [
+   "MapId Mat model",
+   "MapCompose Mat model"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "VecIsAFunctor",
+  "cone": "sha256:72041bf0983192c4ef8b39fa7bf5eb28681c825792e16dbb27eb0d33dee9f012",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "reversedVecFunctor (Listed)",
+    "fingerprint": "sha256:e70f4a6a2c4b06ba05d78507932a1ccebcd1453ce142225dd0ca69e175f29e01"
+   },
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "o",
+    "generator": "vecEquality (Listed)",
+    "fingerprint": "sha256:5d9f557d9eccb0991782abc6f5a51f123f03067d940ca683c44c731aba89dcde"
+   },
+   {
+    "parameter": "xs",
+    "generator": "sentinelVectors (Listed)",
+    "fingerprint": "sha256:d8176a0dcb05a114b733c21840e71e5daa9f71e4697966aaffa9b654cfced094"
+   },
+   {
+    "parameter": "B",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "C",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "g",
+    "generator": "twiceInt (Listed)",
+    "fingerprint": "sha256:f0d4cf109235db455a7acc44366a8bd0464f5f46fd4dc10dacc2fd7ff856cbc9"
+   },
+   {
+    "parameter": "h",
+    "generator": "negated (Listed)",
+    "fingerprint": "sha256:6f8d1ce5a6b390203e37490f96524248d986a924684d820b0ae518bf4b3aaaaf"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "reversedVecFunctor"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "vecEquality"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "xs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((vec Int) 1) fn (k : (Fin 1)) { 1 })"
+      },
+      {
+       "Printed": "(((vec Int) 2) fn (k : (Fin 2)) { match ((== k) 0) { true -> 5; false -> ((- 0) 1) } })"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "C",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "twiceInt"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "negated"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "MapId Vec model: model = reversedVecFunctor, A = entryType, o = vecEquality, xs = (((vec Int) 2) fn (k : (Fin 2)) { match ((== k) 0) { true -> 5; false -> ((- 0) 1) } })"
+  },
+  "date": "2026-10-26T04:45:01+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "VecIsAFunctor",
+  "cone": "sha256:72041bf0983192c4ef8b39fa7bf5eb28681c825792e16dbb27eb0d33dee9f012",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "reversedVecFunctor (Listed)",
+    "fingerprint": "sha256:e70f4a6a2c4b06ba05d78507932a1ccebcd1453ce142225dd0ca69e175f29e01"
+   },
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "B",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "C",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "o",
+    "generator": "vecEquality (Listed)",
+    "fingerprint": "sha256:5d9f557d9eccb0991782abc6f5a51f123f03067d940ca683c44c731aba89dcde"
+   },
+   {
+    "parameter": "g",
+    "generator": "twiceInt (Listed)",
+    "fingerprint": "sha256:f0d4cf109235db455a7acc44366a8bd0464f5f46fd4dc10dacc2fd7ff856cbc9"
+   },
+   {
+    "parameter": "h",
+    "generator": "negated (Listed)",
+    "fingerprint": "sha256:6f8d1ce5a6b390203e37490f96524248d986a924684d820b0ae518bf4b3aaaaf"
+   },
+   {
+    "parameter": "xs",
+    "generator": "sentinelVectors (Listed)",
+    "fingerprint": "sha256:d8176a0dcb05a114b733c21840e71e5daa9f71e4697966aaffa9b654cfced094"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "reversedVecFunctor"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "B",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "C",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "vecEquality"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "twiceInt"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "negated"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "xs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((vec Int) 1) fn (k : (Fin 1)) { 1 })"
+      },
+      {
+       "Printed": "(((vec Int) 2) fn (k : (Fin 2)) { match ((== k) 0) { true -> 5; false -> ((- 0) 1) } })"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "model = reversedVecFunctor, A = entryType, B = entryType, C = entryType, o = vecEquality, g = twiceInt, h = negated, xs = (((vec Int) 2) fn (k : (Fin 2)) { match ((== k) 0) { true -> 5; false -> ((- 0) 1) } })"
+  },
+  "date": "2026-10-26T04:45:01+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MapCompose Vec model",
+  "conjuncts": [
+   "MapId Vec model",
+   "MapCompose Vec model"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "VecIsAFunctor",
+  "cone": "sha256:72041bf0983192c4ef8b39fa7bf5eb28681c825792e16dbb27eb0d33dee9f012",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "reversedVecFunctor (Listed)",
+    "fingerprint": "sha256:e70f4a6a2c4b06ba05d78507932a1ccebcd1453ce142225dd0ca69e175f29e01"
+   },
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "o",
+    "generator": "vecEquality (Listed)",
+    "fingerprint": "sha256:5d9f557d9eccb0991782abc6f5a51f123f03067d940ca683c44c731aba89dcde"
+   },
+   {
+    "parameter": "xs",
+    "generator": "sentinelVectors (Listed)",
+    "fingerprint": "sha256:d8176a0dcb05a114b733c21840e71e5daa9f71e4697966aaffa9b654cfced094"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "reversedVecFunctor"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "vecEquality"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "xs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((vec Int) 1) fn (k : (Fin 1)) { 1 })"
+      },
+      {
+       "Printed": "(((vec Int) 2) fn (k : (Fin 2)) { match ((== k) 0) { true -> 5; false -> ((- 0) 1) } })"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "model = reversedVecFunctor, A = entryType, o = vecEquality, xs = (((vec Int) 2) fn (k : (Fin 2)) { match ((== k) 0) { true -> 5; false -> ((- 0) 1) } })"
+  },
+  "date": "2026-10-26T04:45:01+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "MapId Vec model",
+  "conjuncts": [
+   "MapId Vec model",
+   "MapCompose Vec model"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "MatIsAnObject",
+  "cone": "sha256:a42c56d1b2ec552d323b9b069ef1fef47debd333371e3fa4d7fed34200bc3440",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "nearRowsMat (Listed)",
+    "fingerprint": "sha256:dac1c3099e5dc0a8f1ff53045e25ca5d450e1ee70f092b89cd7e9f05dd65ed12"
+   },
+   {
+    "parameter": "x",
+    "generator": "matrices (Listed)",
+    "fingerprint": "sha256:5f35c2ea000cc5993ab5404a2c3fd728b995932095942c47b450b21ca19bb8d2"
+   },
+   {
+    "parameter": "p",
+    "generator": "nearRowsMatPairs (Listed)",
+    "fingerprint": "sha256:34f9d4e96fed0826bb66fbf1ac579fe9351ab0e279ec02bafb63418884b83a27"
+   },
+   {
+    "parameter": "c",
+    "generator": "nearRowsMatChains (Listed)",
+    "fingerprint": "sha256:459a0813bfc76b535cf02aa0c62ff700b0fdbd743cb4dd7a1c3c81505759369e"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nearRowsMat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((+ ((* 3) i)) j) } })"
+      },
+      {
+       "Printed": "((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((- i) j) } })"
+      },
+      {
+       "Printed": "((((mat Int) 3) 2) fn (i : (Fin 3)) { fn (j : (Fin 2)) { ((+ ((* 2) i)) j) } })"
+      },
+      {
+       "Printed": "((((mat Int) 1) 6) fn (i : (Fin 1)) { fn (j : (Fin 6)) { j } })"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), y := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := ((((mat Int) 0) 2) fn (i : (Fin 0)) { fn (j : (Fin 2)) { 0 } }), y := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), z := ((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((- i) j) } }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Transitive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq: A = entryType, model = nearRowsMat, c = { x := ((((mat Int) 0) 2) fn (i : (Fin 0)) { fn (j : (Fin 2)) { 0 } }), y := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), z := ((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((- i) j) } }) }"
+  },
+  "date": "2026-10-26T04:45:00+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "MatIsAnObject",
+  "cone": "sha256:a42c56d1b2ec552d323b9b069ef1fef47debd333371e3fa4d7fed34200bc3440",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "nearRowsMat (Listed)",
+    "fingerprint": "sha256:dac1c3099e5dc0a8f1ff53045e25ca5d450e1ee70f092b89cd7e9f05dd65ed12"
+   },
+   {
+    "parameter": "c",
+    "generator": "nearRowsMatChains (Listed)",
+    "fingerprint": "sha256:459a0813bfc76b535cf02aa0c62ff700b0fdbd743cb4dd7a1c3c81505759369e"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nearRowsMat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := ((((mat Int) 0) 2) fn (i : (Fin 0)) { fn (j : (Fin 2)) { 0 } }), y := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), z := ((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((- i) j) } }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = entryType, model = nearRowsMat, c = { x := ((((mat Int) 0) 2) fn (i : (Fin 0)) { fn (j : (Fin 2)) { 0 } }), y := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), z := ((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((- i) j) } }) }"
+  },
+  "date": "2026-10-26T04:45:00+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Transitive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+  "conjuncts": [
+   "Reflexive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+   "Symmetric { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+   "Transitive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "MatIsAnObject",
+  "cone": "sha256:a42c56d1b2ec552d323b9b069ef1fef47debd333371e3fa4d7fed34200bc3440",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "nearRowsMat (Listed)",
+    "fingerprint": "sha256:dac1c3099e5dc0a8f1ff53045e25ca5d450e1ee70f092b89cd7e9f05dd65ed12"
+   },
+   {
+    "parameter": "p",
+    "generator": "nearRowsMatPairs (Listed)",
+    "fingerprint": "sha256:34f9d4e96fed0826bb66fbf1ac579fe9351ab0e279ec02bafb63418884b83a27"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nearRowsMat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), y := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:45:00+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Symmetric { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+  "conjuncts": [
+   "Reflexive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+   "Symmetric { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+   "Transitive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "MatIsAnObject",
+  "cone": "sha256:a42c56d1b2ec552d323b9b069ef1fef47debd333371e3fa4d7fed34200bc3440",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "nearRowsMat (Listed)",
+    "fingerprint": "sha256:dac1c3099e5dc0a8f1ff53045e25ca5d450e1ee70f092b89cd7e9f05dd65ed12"
+   },
+   {
+    "parameter": "x",
+    "generator": "matrices (Listed)",
+    "fingerprint": "sha256:5f35c2ea000cc5993ab5404a2c3fd728b995932095942c47b450b21ca19bb8d2"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nearRowsMat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((+ ((* 3) i)) j) } })"
+      },
+      {
+       "Printed": "((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((- i) j) } })"
+      },
+      {
+       "Printed": "((((mat Int) 3) 2) fn (i : (Fin 3)) { fn (j : (Fin 2)) { ((+ ((* 2) i)) j) } })"
+      },
+      {
+       "Printed": "((((mat Int) 1) 6) fn (i : (Fin 1)) { fn (j : (Fin 6)) { j } })"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:45:00+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Reflexive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+  "conjuncts": [
+   "Reflexive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+   "Symmetric { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+   "Transitive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "MatIsAnObject",
+  "cone": "sha256:a42c56d1b2ec552d323b9b069ef1fef47debd333371e3fa4d7fed34200bc3440",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "noFewerRowsMat (Listed)",
+    "fingerprint": "sha256:ddc07c6a0a4f14fd179b850c75cec3cc3d76584100a8a688e614149d474ef2fb"
+   },
+   {
+    "parameter": "x",
+    "generator": "matrices (Listed)",
+    "fingerprint": "sha256:5f35c2ea000cc5993ab5404a2c3fd728b995932095942c47b450b21ca19bb8d2"
+   },
+   {
+    "parameter": "p",
+    "generator": "noFewerRowsMatPairs (Listed)",
+    "fingerprint": "sha256:02ccd023c9dd1d9cfefe1433c05ff904d30109145343f707e98d8143176282f6"
+   },
+   {
+    "parameter": "c",
+    "generator": "noFewerRowsMatChains (Listed)",
+    "fingerprint": "sha256:079a22d417d319862994df2c8b98c0c9c464fca536ee0cefd086108c984ed3f4"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noFewerRowsMat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((+ ((* 3) i)) j) } })"
+      },
+      {
+       "Printed": "((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((- i) j) } })"
+      },
+      {
+       "Printed": "((((mat Int) 3) 2) fn (i : (Fin 3)) { fn (j : (Fin 2)) { ((+ ((* 2) i)) j) } })"
+      },
+      {
+       "Printed": "((((mat Int) 1) 6) fn (i : (Fin 1)) { fn (j : (Fin 6)) { j } })"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), y := ((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((- i) j) } }) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), y := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), z := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Symmetric { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq: A = entryType, model = noFewerRowsMat, p = { x := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), y := ((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((- i) j) } }) }"
+  },
+  "date": "2026-10-26T04:45:00+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "MatIsAnObject",
+  "cone": "sha256:a42c56d1b2ec552d323b9b069ef1fef47debd333371e3fa4d7fed34200bc3440",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "noFewerRowsMat (Listed)",
+    "fingerprint": "sha256:ddc07c6a0a4f14fd179b850c75cec3cc3d76584100a8a688e614149d474ef2fb"
+   },
+   {
+    "parameter": "c",
+    "generator": "noFewerRowsMatChains (Listed)",
+    "fingerprint": "sha256:079a22d417d319862994df2c8b98c0c9c464fca536ee0cefd086108c984ed3f4"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noFewerRowsMat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), y := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), z := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:45:00+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Transitive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+  "conjuncts": [
+   "Reflexive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+   "Symmetric { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+   "Transitive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "MatIsAnObject",
+  "cone": "sha256:a42c56d1b2ec552d323b9b069ef1fef47debd333371e3fa4d7fed34200bc3440",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "noFewerRowsMat (Listed)",
+    "fingerprint": "sha256:ddc07c6a0a4f14fd179b850c75cec3cc3d76584100a8a688e614149d474ef2fb"
+   },
+   {
+    "parameter": "p",
+    "generator": "noFewerRowsMatPairs (Listed)",
+    "fingerprint": "sha256:02ccd023c9dd1d9cfefe1433c05ff904d30109145343f707e98d8143176282f6"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noFewerRowsMat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), y := ((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((- i) j) } }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = entryType, model = noFewerRowsMat, p = { x := ((((mat Int) 1) 1) fn (i : (Fin 1)) { fn (j : (Fin 1)) { 1 } }), y := ((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((- i) j) } }) }"
+  },
+  "date": "2026-10-26T04:45:00+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Symmetric { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+  "conjuncts": [
+   "Reflexive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+   "Symmetric { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+   "Transitive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "MatIsAnObject",
+  "cone": "sha256:a42c56d1b2ec552d323b9b069ef1fef47debd333371e3fa4d7fed34200bc3440",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "noFewerRowsMat (Listed)",
+    "fingerprint": "sha256:ddc07c6a0a4f14fd179b850c75cec3cc3d76584100a8a688e614149d474ef2fb"
+   },
+   {
+    "parameter": "x",
+    "generator": "matrices (Listed)",
+    "fingerprint": "sha256:5f35c2ea000cc5993ab5404a2c3fd728b995932095942c47b450b21ca19bb8d2"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noFewerRowsMat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((+ ((* 3) i)) j) } })"
+      },
+      {
+       "Printed": "((((mat Int) 2) 3) fn (i : (Fin 2)) { fn (j : (Fin 3)) { ((- i) j) } })"
+      },
+      {
+       "Printed": "((((mat Int) 3) 2) fn (i : (Fin 3)) { fn (j : (Fin 2)) { ((+ ((* 2) i)) j) } })"
+      },
+      {
+       "Printed": "((((mat Int) 1) 6) fn (i : (Fin 1)) { fn (j : (Fin 6)) { j } })"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:45:00+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Reflexive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+  "conjuncts": [
+   "Reflexive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+   "Symmetric { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq",
+   "Transitive { m : Nat, n : Nat, f : (_ : (Fin m)) -> (_ : (Fin n)) -> A } (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "VecIsAnObject",
+  "cone": "sha256:eee7523deb7cbe71cb49c9bf29e9f136a6a0d8aea4b8af7973f27fd90a3f84d9",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "nearLengthVec (Listed)",
+    "fingerprint": "sha256:80fde089581d6db640e2741f8069254012195070a65a0d31500ada2b4ebcac98"
+   },
+   {
+    "parameter": "x",
+    "generator": "vectors (Listed)",
+    "fingerprint": "sha256:80008c74b4b9d446d94d4ded6d23faccb74ee73326b7e30824f4d7d78c8c6f78"
+   },
+   {
+    "parameter": "p",
+    "generator": "nearVecPairs (Listed)",
+    "fingerprint": "sha256:47ea9a3e78c1c41beae56a4d56d63378bc4458d4d4e736249f3b7815bcd01813"
+   },
+   {
+    "parameter": "c",
+    "generator": "nearVecChains (Listed)",
+    "fingerprint": "sha256:8d06d32f379078d4ac8282138dde63d5d996ec13055e30191348fa0138afcd40"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nearLengthVec"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((vec Int) 0) fn (k : (Fin 0)) { 0 })"
+      },
+      {
+       "Printed": "(((vec Int) 1) fn (k : (Fin 1)) { 1 })"
+      },
+      {
+       "Printed": "(((vec Int) 2) fn (k : (Fin 2)) { k })"
+      },
+      {
+       "Printed": "(((vec Int) 2) fn (k : (Fin 2)) { ((- 1) k) })"
+      },
+      {
+       "Printed": "(((vec Int) 3) fn (k : (Fin 3)) { 5 })"
+      },
+      {
+       "Printed": "(((vec Int) 3) fn (k : (Fin 3)) { ((- 0) k) })"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), y := (((vec Int) 1) fn (k : (Fin 1)) { 1 }) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := (((vec Int) 0) fn (k : (Fin 0)) { 0 }), y := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), z := (((vec Int) 2) fn (k : (Fin 2)) { k }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Transitive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq: A = entryType, model = nearLengthVec, c = { x := (((vec Int) 0) fn (k : (Fin 0)) { 0 }), y := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), z := (((vec Int) 2) fn (k : (Fin 2)) { k }) }"
+  },
+  "date": "2026-10-26T04:45:00+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "VecIsAnObject",
+  "cone": "sha256:eee7523deb7cbe71cb49c9bf29e9f136a6a0d8aea4b8af7973f27fd90a3f84d9",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "nearLengthVec (Listed)",
+    "fingerprint": "sha256:80fde089581d6db640e2741f8069254012195070a65a0d31500ada2b4ebcac98"
+   },
+   {
+    "parameter": "c",
+    "generator": "nearVecChains (Listed)",
+    "fingerprint": "sha256:8d06d32f379078d4ac8282138dde63d5d996ec13055e30191348fa0138afcd40"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nearLengthVec"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := (((vec Int) 0) fn (k : (Fin 0)) { 0 }), y := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), z := (((vec Int) 2) fn (k : (Fin 2)) { k }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = entryType, model = nearLengthVec, c = { x := (((vec Int) 0) fn (k : (Fin 0)) { 0 }), y := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), z := (((vec Int) 2) fn (k : (Fin 2)) { k }) }"
+  },
+  "date": "2026-10-26T04:45:00+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Transitive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+  "conjuncts": [
+   "Reflexive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+   "Symmetric { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+   "Transitive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "VecIsAnObject",
+  "cone": "sha256:eee7523deb7cbe71cb49c9bf29e9f136a6a0d8aea4b8af7973f27fd90a3f84d9",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "nearLengthVec (Listed)",
+    "fingerprint": "sha256:80fde089581d6db640e2741f8069254012195070a65a0d31500ada2b4ebcac98"
+   },
+   {
+    "parameter": "p",
+    "generator": "nearVecPairs (Listed)",
+    "fingerprint": "sha256:47ea9a3e78c1c41beae56a4d56d63378bc4458d4d4e736249f3b7815bcd01813"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nearLengthVec"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), y := (((vec Int) 1) fn (k : (Fin 1)) { 1 }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:45:00+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Symmetric { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+  "conjuncts": [
+   "Reflexive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+   "Symmetric { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+   "Transitive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "VecIsAnObject",
+  "cone": "sha256:eee7523deb7cbe71cb49c9bf29e9f136a6a0d8aea4b8af7973f27fd90a3f84d9",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "nearLengthVec (Listed)",
+    "fingerprint": "sha256:80fde089581d6db640e2741f8069254012195070a65a0d31500ada2b4ebcac98"
+   },
+   {
+    "parameter": "x",
+    "generator": "vectors (Listed)",
+    "fingerprint": "sha256:80008c74b4b9d446d94d4ded6d23faccb74ee73326b7e30824f4d7d78c8c6f78"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nearLengthVec"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((vec Int) 0) fn (k : (Fin 0)) { 0 })"
+      },
+      {
+       "Printed": "(((vec Int) 1) fn (k : (Fin 1)) { 1 })"
+      },
+      {
+       "Printed": "(((vec Int) 2) fn (k : (Fin 2)) { k })"
+      },
+      {
+       "Printed": "(((vec Int) 2) fn (k : (Fin 2)) { ((- 1) k) })"
+      },
+      {
+       "Printed": "(((vec Int) 3) fn (k : (Fin 3)) { 5 })"
+      },
+      {
+       "Printed": "(((vec Int) 3) fn (k : (Fin 3)) { ((- 0) k) })"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:45:00+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Reflexive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+  "conjuncts": [
+   "Reflexive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+   "Symmetric { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+   "Transitive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "VecIsAnObject",
+  "cone": "sha256:eee7523deb7cbe71cb49c9bf29e9f136a6a0d8aea4b8af7973f27fd90a3f84d9",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "noLongerVec (Listed)",
+    "fingerprint": "sha256:83deb3e0262d930d161b9148c41ad103190704b70d22215f420db7ea8a855bd3"
+   },
+   {
+    "parameter": "x",
+    "generator": "vectors (Listed)",
+    "fingerprint": "sha256:80008c74b4b9d446d94d4ded6d23faccb74ee73326b7e30824f4d7d78c8c6f78"
+   },
+   {
+    "parameter": "p",
+    "generator": "noLongerVecPairs (Listed)",
+    "fingerprint": "sha256:da3e508b0a43016868b51d144880f24fd4b9548c8a8cfd72f7b3f369a7873cbb"
+   },
+   {
+    "parameter": "c",
+    "generator": "noLongerVecChains (Listed)",
+    "fingerprint": "sha256:4afe478265d4c2f27e3fee342187100699dad66d042338f9bc47891b9d89538c"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noLongerVec"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((vec Int) 0) fn (k : (Fin 0)) { 0 })"
+      },
+      {
+       "Printed": "(((vec Int) 1) fn (k : (Fin 1)) { 1 })"
+      },
+      {
+       "Printed": "(((vec Int) 2) fn (k : (Fin 2)) { k })"
+      },
+      {
+       "Printed": "(((vec Int) 2) fn (k : (Fin 2)) { ((- 1) k) })"
+      },
+      {
+       "Printed": "(((vec Int) 3) fn (k : (Fin 3)) { 5 })"
+      },
+      {
+       "Printed": "(((vec Int) 3) fn (k : (Fin 3)) { ((- 0) k) })"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), y := (((vec Int) 2) fn (k : (Fin 2)) { k }) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), y := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), z := (((vec Int) 1) fn (k : (Fin 1)) { 1 }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Symmetric { n : Nat, f : (_ : (Fin n)) -> A } (model).eq: A = entryType, model = noLongerVec, p = { x := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), y := (((vec Int) 2) fn (k : (Fin 2)) { k }) }"
+  },
+  "date": "2026-10-26T04:44:59+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "VecIsAnObject",
+  "cone": "sha256:eee7523deb7cbe71cb49c9bf29e9f136a6a0d8aea4b8af7973f27fd90a3f84d9",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "noLongerVec (Listed)",
+    "fingerprint": "sha256:83deb3e0262d930d161b9148c41ad103190704b70d22215f420db7ea8a855bd3"
+   },
+   {
+    "parameter": "c",
+    "generator": "noLongerVecChains (Listed)",
+    "fingerprint": "sha256:4afe478265d4c2f27e3fee342187100699dad66d042338f9bc47891b9d89538c"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noLongerVec"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), y := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), z := (((vec Int) 1) fn (k : (Fin 1)) { 1 }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:44:59+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Transitive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+  "conjuncts": [
+   "Reflexive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+   "Symmetric { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+   "Transitive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "VecIsAnObject",
+  "cone": "sha256:eee7523deb7cbe71cb49c9bf29e9f136a6a0d8aea4b8af7973f27fd90a3f84d9",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "noLongerVec (Listed)",
+    "fingerprint": "sha256:83deb3e0262d930d161b9148c41ad103190704b70d22215f420db7ea8a855bd3"
+   },
+   {
+    "parameter": "p",
+    "generator": "noLongerVecPairs (Listed)",
+    "fingerprint": "sha256:da3e508b0a43016868b51d144880f24fd4b9548c8a8cfd72f7b3f369a7873cbb"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noLongerVec"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), y := (((vec Int) 2) fn (k : (Fin 2)) { k }) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = entryType, model = noLongerVec, p = { x := (((vec Int) 1) fn (k : (Fin 1)) { 1 }), y := (((vec Int) 2) fn (k : (Fin 2)) { k }) }"
+  },
+  "date": "2026-10-26T04:44:59+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Symmetric { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+  "conjuncts": [
+   "Reflexive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+   "Symmetric { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+   "Transitive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "VecIsAnObject",
+  "cone": "sha256:eee7523deb7cbe71cb49c9bf29e9f136a6a0d8aea4b8af7973f27fd90a3f84d9",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "entryType (Listed)",
+    "fingerprint": "sha256:da5d9b8525eecdc83026042683eafdf16fb98c50321c34363a183c594eaa6667"
+   },
+   {
+    "parameter": "model",
+    "generator": "noLongerVec (Listed)",
+    "fingerprint": "sha256:83deb3e0262d930d161b9148c41ad103190704b70d22215f420db7ea8a855bd3"
+   },
+   {
+    "parameter": "x",
+    "generator": "vectors (Listed)",
+    "fingerprint": "sha256:80008c74b4b9d446d94d4ded6d23faccb74ee73326b7e30824f4d7d78c8c6f78"
+   }
+  ],
+  "seed": 20261021,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "entryType"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noLongerVec"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((vec Int) 0) fn (k : (Fin 0)) { 0 })"
+      },
+      {
+       "Printed": "(((vec Int) 1) fn (k : (Fin 1)) { 1 })"
+      },
+      {
+       "Printed": "(((vec Int) 2) fn (k : (Fin 2)) { k })"
+      },
+      {
+       "Printed": "(((vec Int) 2) fn (k : (Fin 2)) { ((- 1) k) })"
+      },
+      {
+       "Printed": "(((vec Int) 3) fn (k : (Fin 3)) { 5 })"
+      },
+      {
+       "Printed": "(((vec Int) 3) fn (k : (Fin 3)) { ((- 0) k) })"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlConfirmed": "cases"
+  },
+  "date": "2026-10-26T04:44:59+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Reflexive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+  "conjuncts": [
+   "Reflexive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+   "Symmetric { n : Nat, f : (_ : (Fin n)) -> A } (model).eq",
+   "Transitive { n : Nat, f : (_ : (Fin n)) -> A } (model).eq"
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "SymmetricIsAnEqualizer",
+  "cone": "sha256:60909783ee42a05aaa811ff505dc1157c63387a3e9aabc9087690ba2ae4ce8e0",
+  "binding": [
+   {
+    "parameter": "model",
     "generator": "badSymmetricInclusion (Listed)",
     "fingerprint": "sha256:6dac9b684525981e12eec19229ffebb3178e9948fbe64eb9e681739cfe844582"
    },

@@ -1,0 +1,912 @@
+[
+ {
+  "law": "BisectionMeets",
+  "cone": "sha256:a5ee8b65ca14866558d86625ca95cbe19e16f969cc4712d2575711cb3497c930",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "solve",
+    "generator": "lowEnd (Listed)",
+    "fingerprint": "sha256:8278feb99e568225cb73943a508141758533ab971a9933f13a72b033b2fa3217"
+   },
+   {
+    "parameter": "p",
+    "generator": "problems (Listed)",
+    "fingerprint": "sha256:ba29d73a43d435988aad6b0376dc9df46adb4ba8fb357d76d640e128491d43da"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "solve",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (p : { f : (_ : Float64) -> Float64, lo : Float64, hi : Float64, root : Float64, blur : Float64 }) { fn (b : Bound) { ((((((lowEndFrom (p).f) (p).lo) (p).hi) ((p).f (p).lo)) b) 0) } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 1.0, hi := 2.0, root := 1.25, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- ((* x) x)) 2.0) }, lo := 1.0, hi := 2.0, root := ((elementary).sqrt 2.0), blur := ((* ((* 2.0) (doubles).epsilon)) 1.5) }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1000.0) }, lo := ((- 0.0) 1024.0), hi := 3072.0, root := 1000.0, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 3.0, hi := 4.0, root := 1.25, blur := 0.0 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 44,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 25
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "d = doubles, solve = fn (p : { f : (_ : Float64) -> Float64, lo : Float64, hi : Float64, root : Float64, blur : Float64 }) { fn (b : Bound) { ((((((lowEndFrom (p).f) (p).lo) (p).hi) ((p).f (p).lo)) b) 0) } }, p = { f := fn (x : Float64) { ((- x) 1.25) }, lo := 1.0, hi := 2.0, root := 1.25, blur := 0.0 }, b = 0.1"
+  },
+  "date": "2026-10-26T04:46:02+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "kind": "Control",
+  "measured": {
+   "measured": 25,
+   "worst": 1.999999999994543,
+   "distance": 2.0,
+   "bound": 1.0000000000027285,
+   "regions": [],
+   "scaling": {
+    "parameter": "b",
+    "resource": "fuel",
+    "bounds": [
+     {
+      "bound": 2.0,
+      "cases": 3,
+      "worst": 1.999999999994543,
+      "fuel": 1253,
+      "least": 404
+     },
+     {
+      "bound": 0.1,
+      "cases": 3,
+      "worst": 1.2499999999999556,
+      "fuel": 1613,
+      "least": 726
+     },
+     {
+      "bound": 0.001,
+      "cases": 3,
+      "worst": 1.953124999993061,
+      "fuel": 2045,
+      "least": 1158
+     },
+     {
+      "bound": 1e-05,
+      "cases": 3,
+      "worst": 1.5258789057078987,
+      "fuel": 2549,
+      "least": 1662
+     },
+     {
+      "bound": 1e-07,
+      "cases": 3,
+      "worst": 1.1920928531561668,
+      "fuel": 3053,
+      "least": 2166
+     },
+     {
+      "bound": 1e-09,
+      "cases": 3,
+      "worst": 1.8626385318095664,
+      "fuel": 3485,
+      "least": 2598
+     },
+     {
+      "bound": 1e-11,
+      "cases": 3,
+      "worst": 1.454674718559602,
+      "fuel": 3989,
+      "least": 3102
+     },
+     {
+      "bound": 1e-13,
+      "cases": 2,
+      "worst": 1.0978643985540497,
+      "fuel": 4016,
+      "least": 3606
+     },
+     {
+      "bound": 1e-14,
+      "cases": 2,
+      "worst": 1.0485615687012546,
+      "fuel": 4256,
+      "least": 3822
+     }
+    ]
+   }
+  },
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "BisectionScalesAsStated",
+  "cone": "sha256:2d37bc5fc87ffc570cf103ab7e1f8066077357a2e635e9a1da6ceb5a46f74825",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "elementary (Listed)",
+    "fingerprint": "sha256:ade73de0947980f00d764239b4ad5ee3503dd5aecb3ec19837797d1930b38706"
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "s",
+    "generator": "rootScaling (Listed)",
+    "fingerprint": "sha256:01703103a59984f85cca5cabbc53d2dbe45deeb69537150299d45768ebfd2a76"
+   },
+   {
+    "parameter": "solve",
+    "generator": "solvers (Listed)",
+    "fingerprint": "sha256:77a5c07b13849bf5598a55346ea22179a87afdb4bce5a18a531a9c86a674df6c"
+   },
+   {
+    "parameter": "p",
+    "generator": "problems (Listed)",
+    "fingerprint": "sha256:ba29d73a43d435988aad6b0376dc9df46adb4ba8fb357d76d640e128491d43da"
+   },
+   {
+    "parameter": "bounds",
+    "generator": "boundLists (Listed)",
+    "fingerprint": "sha256:38c9dc1c3d777b06f5069146b9e57c3beb50542d680066a6c93b3682888bb2b9"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "elementary"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ rate := ((bisectionScaling elementary)).rate, exponent := 0.5, grain := 1.0 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "solve",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "bisect"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 1.0, hi := 2.0, root := 1.25, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- ((* x) x)) 2.0) }, lo := 1.0, hi := 2.0, root := ((elementary).sqrt 2.0), blur := ((* ((* 2.0) (doubles).epsilon)) 1.5) }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1000.0) }, lo := ((- 0.0) 1024.0), hi := 3072.0, root := 1000.0, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 3.0, hi := 4.0, root := 1.25, blur := 0.0 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "bounds",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons 0.01) ((cons 0.0001) ((cons 1e-06) ((cons 1e-08) ((cons 1e-10) ((cons 1e-12) nil))))))"
+      },
+      {
+       "Printed": "((cons 0.00390625) ((cons 1.52587890625e-05) ((cons 5.960464477539063e-08) ((cons 2.3283064365386963e-10) ((cons 9.094947017729282e-13) nil)))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 4
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "e = elementary, d = doubles, s = { rate := ((bisectionScaling elementary)).rate, exponent := 0.5, grain := 1.0 }, solve = bisect, p = { f := fn (x : Float64) { ((- x) 1.25) }, lo := 1.0, hi := 2.0, root := 1.25, blur := 0.0 }, bounds = ((cons 0.01) ((cons 0.0001) ((cons 1e-06) ((cons 1e-08) ((cons 1e-10) ((cons 1e-12) nil))))))"
+  },
+  "date": "2026-10-26T04:45:49+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "kind": "Control",
+  "measured": {
+   "measured": 4,
+   "worst": 2.475385887733761,
+   "distance": 0.5,
+   "bound": 0.20198870910496897
+  },
+  "regions": []
+ },
+ {
+  "law": "BisectionScalesAsStated",
+  "cone": "sha256:2d37bc5fc87ffc570cf103ab7e1f8066077357a2e635e9a1da6ceb5a46f74825",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "elementary (Listed)",
+    "fingerprint": "sha256:ade73de0947980f00d764239b4ad5ee3503dd5aecb3ec19837797d1930b38706"
+   },
+   {
+    "parameter": "d",
+    "generator": "doubles (Listed)",
+    "fingerprint": "sha256:e8f03ba0b87a4d352aac5e19b9cf693dd7384eacd3cb3ab198ac508bc1204cb0"
+   },
+   {
+    "parameter": "s",
+    "generator": "squaredScaling (Listed)",
+    "fingerprint": "sha256:d52ec3f943d65073f181edc9988245467ede7138015466100ca4b3ced0107069"
+   },
+   {
+    "parameter": "solve",
+    "generator": "solvers (Listed)",
+    "fingerprint": "sha256:77a5c07b13849bf5598a55346ea22179a87afdb4bce5a18a531a9c86a674df6c"
+   },
+   {
+    "parameter": "p",
+    "generator": "problems (Listed)",
+    "fingerprint": "sha256:ba29d73a43d435988aad6b0376dc9df46adb4ba8fb357d76d640e128491d43da"
+   },
+   {
+    "parameter": "bounds",
+    "generator": "boundLists (Listed)",
+    "fingerprint": "sha256:38c9dc1c3d777b06f5069146b9e57c3beb50542d680066a6c93b3682888bb2b9"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "elementary"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "doubles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ rate := ((bisectionScaling elementary)).rate, exponent := 2.0, grain := 1.0 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "solve",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "bisect"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 1.0, hi := 2.0, root := 1.25, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- ((* x) x)) 2.0) }, lo := 1.0, hi := 2.0, root := ((elementary).sqrt 2.0), blur := ((* ((* 2.0) (doubles).epsilon)) 1.5) }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1000.0) }, lo := ((- 0.0) 1024.0), hi := 3072.0, root := 1000.0, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 3.0, hi := 4.0, root := 1.25, blur := 0.0 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "bounds",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons 0.01) ((cons 0.0001) ((cons 1e-06) ((cons 1e-08) ((cons 1e-10) ((cons 1e-12) nil))))))"
+      },
+      {
+       "Printed": "((cons 0.00390625) ((cons 1.52587890625e-05) ((cons 5.960464477539063e-08) ((cons 2.3283064365386963e-10) ((cons 9.094947017729282e-13) nil)))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 4
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "e = elementary, d = doubles, s = { rate := ((bisectionScaling elementary)).rate, exponent := 2.0, grain := 1.0 }, solve = bisect, p = { f := fn (x : Float64) { ((- x) 1.25) }, lo := 1.0, hi := 2.0, root := 1.25, blur := 0.0 }, bounds = ((cons 0.01) ((cons 0.0001) ((cons 1e-06) ((cons 1e-08) ((cons 1e-10) ((cons 1e-12) nil))))))"
+  },
+  "date": "2026-10-26T04:45:35+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "kind": "Control",
+  "measured": {
+   "measured": 4,
+   "worst": 4.950771775467341,
+   "distance": 1.0,
+   "bound": 0.20198870910497638
+  },
+  "regions": []
+ },
+ {
+  "law": "NeedsNoMoreThanItsModulus",
+  "cone": "sha256:2f50ef1c4627e4b59c7161f997b7136f6a7bf06b9cbac9ad86320e2c656c4753",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "halvedModulus (Listed)",
+    "fingerprint": "sha256:0d62fd272e4aa5c7c989ed4e9948032bff46964b2aaff365a9ebe5627011fa28"
+   },
+   {
+    "parameter": "solve",
+    "generator": "solvers (Listed)",
+    "fingerprint": "sha256:77a5c07b13849bf5598a55346ea22179a87afdb4bce5a18a531a9c86a674df6c"
+   },
+   {
+    "parameter": "p",
+    "generator": "problems (Listed)",
+    "fingerprint": "sha256:ba29d73a43d435988aad6b0376dc9df46adb4ba8fb357d76d640e128491d43da"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((((bisectionModulus doubles)).need b) f) { sufficient (r) -> (sufficient { work := ((/ (r).work) 2), span := ((/ (r).span) 2), memory := (r).memory }); n -> n } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "solve",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "bisect"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 1.0, hi := 2.0, root := 1.25, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- ((* x) x)) 2.0) }, lo := 1.0, hi := 2.0, root := ((elementary).sqrt 2.0), blur := ((* ((* 2.0) (doubles).epsilon)) 1.5) }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1000.0) }, lo := ((- 0.0) 1024.0), hi := 3072.0, root := 1000.0, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 3.0, hi := 4.0, root := 1.25, blur := 0.0 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 44,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 25
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "m = { need := fn (b : Bound) { fn (f : { width : Float64, scale : Float64, brackets : Bool }) { match ((((bisectionModulus doubles)).need b) f) { sufficient (r) -> (sufficient { work := ((/ (r).work) 2), span := ((/ (r).span) 2), memory := (r).memory }); n -> n } } }, floor := ((bisectionModulus doubles)).floor, domain := ((bisectionModulus doubles)).domain }, solve = bisect, p = { f := fn (x : Float64) { ((- x) 1.25) }, lo := 1.0, hi := 2.0, root := 1.25, blur := 0.0 }, b = 0.1"
+  },
+  "date": "2026-10-26T04:45:32+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "NeedsNoMoreThanItsModulus",
+  "cone": "sha256:2f50ef1c4627e4b59c7161f997b7136f6a7bf06b9cbac9ad86320e2c656c4753",
+  "binding": [
+   {
+    "parameter": "m",
+    "generator": "moduli (Listed)",
+    "fingerprint": "sha256:28d93757de9d9efd0714cc5f329667edfea6b75af4e004499c0e8225de4bcbf4"
+   },
+   {
+    "parameter": "solve",
+    "generator": "solvers (Listed)",
+    "fingerprint": "sha256:77a5c07b13849bf5598a55346ea22179a87afdb4bce5a18a531a9c86a674df6c"
+   },
+   {
+    "parameter": "p",
+    "generator": "problems (Listed)",
+    "fingerprint": "sha256:ba29d73a43d435988aad6b0376dc9df46adb4ba8fb357d76d640e128491d43da"
+   },
+   {
+    "parameter": "b",
+    "generator": "bounds (Listed)",
+    "fingerprint": "sha256:cf05368c842274577438f23b547cde4c212b4fd2f521d6325d1a05d9dec72f37"
+   }
+  ],
+  "seed": 20261026,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(bisectionModulus doubles)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "solve",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "bisect"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 1.0, hi := 2.0, root := 1.25, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- ((* x) x)) 2.0) }, lo := 1.0, hi := 2.0, root := ((elementary).sqrt 2.0), blur := ((* ((* 2.0) (doubles).epsilon)) 1.5) }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1000.0) }, lo := ((- 0.0) 1024.0), hi := 3072.0, root := 1000.0, blur := 0.0 }"
+      },
+      {
+       "Printed": "{ f := fn (x : Float64) { ((- x) 1.25) }, lo := 3.0, hi := 4.0, root := 1.25, blur := 0.0 }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.1
+      },
+      {
+       "Number": 0.001
+      },
+      {
+       "Number": 1e-05
+      },
+      {
+       "Number": 1e-07
+      },
+      {
+       "Number": 1e-09
+      },
+      {
+       "Number": 1e-11
+      },
+      {
+       "Number": 1e-13
+      },
+      {
+       "Number": 1e-14
+      },
+      {
+       "Number": 1e-15
+      },
+      {
+       "Number": 3e-16
+      },
+      {
+       "Number": 2.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 44,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 25
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T04:45:14+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.exp",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.log",
+    "python 3.12.9"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.12.9"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "b boundary"
+    },
+    "n": 0
+   }
+  ]
+ }
+]
