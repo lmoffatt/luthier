@@ -99,4 +99,4 @@ Argon when off the VPN. Claude only coordinates, in short turns.
 
 - Claude Team: weekly 49% used, Fable 18%, resetting Wednesday 10:00; the current session 17%. Since 2026-10-26 morning (27% weekly) the night's and the day's agents (C2, C3, V, P, T, the fixes, the kernel, the queue, the normal form, the principles, the floats design) took about 22 points.
 - Codex: weekly 92% left after three read-only reviews (the night's review, the foundations audit, the novelty critique): about 8 points, under 3 each.
-- Gemini (Antigravity, Argon high): weekly 1% used after two runs (related work, 13 min; comparison basis, 11 min). By far the cheapest per report.
+- Gemini (Antigravity, Argon high): weekly 1% shown after two runs (related work, 13 min; comparison basis, 11 min). Not a reliable reading: Luciano notes the runs may have been counted in the previous week's window (its reset falls near the first run), so their cost is unknown; read it again after the next run.
