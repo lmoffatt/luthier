@@ -1,0 +1,71 @@
+-- tests/tester/resources_laws.test.lut: the resources of resources.lth, the record (work, span, peak
+-- memory) with its two compositions, on its model `workSpanMemory`, and the controls: the model broken
+-- in one part each, the span that adds in parallel among them (execution.md C2's acceptance).
+-- Written 2026-10-26 by Claude Opus 5.5 (agent C2), bite C2 of record/plan/audit-algebras-2026-10-22/
+-- execution.md. The resources are drawn (`Nat` parts up to the size), and listed with zeros and ties,
+-- where a `max` read as a `+` or the reverse is seen at once.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "resources.lth" Resources ResourceAlgebra workSpanMemory largerCount
+
+models : List ResourceAlgebra := [workSpanMemory]
+listed : List Resources := [{ work := 0, span := 0, memory := 0 }, { work := 3, span := 2, memory := 1 },
+  { work := 5, span := 5, memory := 4 }, { work := 7, span := 1, memory := 2 }]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+drawn (m : String) : List Binding := [bind "m" m]
+onListed (m : String) : List Binding := [bind "m" m, bind "x" "listed", bind "y" "listed", bind "z" "listed"]
+
+test "ResourceAlgebra" (SampledMode linear) (seed <- 20261026) (whereBindings <- drawn "models")
+test "ResourceAlgebra" ExhaustiveMode (seed <- 20261026) (whereBindings <- onListed "models")
+
+-- the controls, each `workSpanMemory` with one part composed by the other operation
+-- the span adds in parallel, as if the branches waited on each other (the acceptance's control)
+spanAddsInParallel : List ResourceAlgebra := [{ none := workSpanMemory.none, sequence := workSpanMemory.sequence,
+  parallel := fn r s { { work := r.work + s.work, span := r.span + s.span, memory := r.memory + s.memory } } }]
+-- the work takes the larger in parallel, as if a branch's steps cost nothing when the other's are longer
+workLargerInParallel : List ResourceAlgebra := [{ none := workSpanMemory.none, sequence := workSpanMemory.sequence,
+  parallel := fn r s { { work := largerCount r.work s.work, span := largerCount r.span s.span, memory := r.memory + s.memory } } }]
+-- the peak memory adds in sequence, as if nothing were freed between two runs
+memoryAddsInSequence : List ResourceAlgebra := [{ none := workSpanMemory.none,
+  sequence := fn r s { { work := r.work + s.work, span := r.span + s.span, memory := r.memory + s.memory } },
+  parallel := workSpanMemory.parallel }]
+-- the peak memory takes the larger in parallel, as if the branches took turns
+memoryLargerInParallel : List ResourceAlgebra := [{ none := workSpanMemory.none, sequence := workSpanMemory.sequence,
+  parallel := fn r s { { work := r.work + s.work, span := largerCount r.span s.span, memory := largerCount r.memory s.memory } } }]
+-- nothing spent read as one step of each, which neither composition keeps neutral
+oneForNothing : List ResourceAlgebra := [{ none := { work := 1, span := 1, memory := 1 },
+  sequence := workSpanMemory.sequence, parallel := workSpanMemory.parallel }]
+-- the work and the span take the larger in sequence, as if two runs in a row overlapped
+workLargerInSequence : List ResourceAlgebra := [{ none := workSpanMemory.none,
+  sequence := fn r s { { work := largerCount r.work s.work, span := r.span + s.span, memory := largerCount r.memory s.memory } },
+  parallel := workSpanMemory.parallel }]
+spanLargerInSequence : List ResourceAlgebra := [{ none := workSpanMemory.none,
+  sequence := fn r s { { work := r.work + s.work, span := largerCount r.span s.span, memory := largerCount r.memory s.memory } },
+  parallel := workSpanMemory.parallel }]
+-- a composition that keeps its first run's resources: associative, not commutative
+sequenceKeepsTheFirst : List ResourceAlgebra := [{ none := workSpanMemory.none, sequence := fn r s { r },
+  parallel := workSpanMemory.parallel }]
+parallelKeepsTheFirst : List ResourceAlgebra := [{ none := workSpanMemory.none, sequence := workSpanMemory.sequence,
+  parallel := fn r s { r } }]
+-- the memory halved after each composition, rounded down: commutative, not associative
+memoryHalvedInSequence : List ResourceAlgebra := [{ none := workSpanMemory.none,
+  sequence := fn r s { { work := r.work + s.work, span := r.span + s.span, memory := (r.memory + s.memory) / 2 } },
+  parallel := workSpanMemory.parallel }]
+memoryHalvedInParallel : List ResourceAlgebra := [{ none := workSpanMemory.none, sequence := workSpanMemory.sequence,
+  parallel := fn r s { { work := r.work + s.work, span := largerCount r.span s.span, memory := (r.memory + s.memory) / 2 } } }]
+
+test "ResourceAlgebra" ExhaustiveMode (seed <- 20261026) (whereBindings <- onListed "spanAddsInParallel") (control <- true)
+test "ResourceAlgebra" ExhaustiveMode (seed <- 20261026) (whereBindings <- onListed "workLargerInParallel") (control <- true)
+test "ResourceAlgebra" ExhaustiveMode (seed <- 20261026) (whereBindings <- onListed "memoryAddsInSequence") (control <- true)
+test "ResourceAlgebra" ExhaustiveMode (seed <- 20261026) (whereBindings <- onListed "memoryLargerInParallel") (control <- true)
+test "ResourceAlgebra" ExhaustiveMode (seed <- 20261026) (whereBindings <- onListed "oneForNothing") (control <- true)
+test "ResourceAlgebra" ExhaustiveMode (seed <- 20261026) (whereBindings <- onListed "workLargerInSequence") (control <- true)
+test "ResourceAlgebra" ExhaustiveMode (seed <- 20261026) (whereBindings <- onListed "spanLargerInSequence") (control <- true)
+test "ResourceAlgebra" ExhaustiveMode (seed <- 20261026) (whereBindings <- onListed "sequenceKeepsTheFirst") (control <- true)
+test "ResourceAlgebra" ExhaustiveMode (seed <- 20261026) (whereBindings <- onListed "parallelKeepsTheFirst") (control <- true)
+test "ResourceAlgebra" ExhaustiveMode (seed <- 20261026) (whereBindings <- onListed "memoryHalvedInSequence") (control <- true)
+test "ResourceAlgebra" ExhaustiveMode (seed <- 20261026) (whereBindings <- onListed "memoryHalvedInParallel") (control <- true)

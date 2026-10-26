@@ -1,0 +1,176 @@
+-- resources.lth: what an algorithm spends, as a typed record with its two compositions; the modulus
+-- that says what an algorithm needs for a bound, partial (enough, infeasible with its reason, or
+-- nothing known); and the scaling law that compares what was spent across bounds with the rate the
+-- algorithm's theory states.
+--
+-- Written 2026-10-26 by Claude Opus 5.5 (agent C2), bite C2 of record/plan/audit-algebras-2026-10-22/
+-- execution.md, on record/plan/after-core-2026-10-23/prompt-night-2026-10-26.md. Sources: the audit of
+-- 2026-10-22 (record/plan/audit-algebras-2026-10-22/report.md, 5b1a05e), 4.4 (resources need several
+-- compositions) and 6 (a modulus with a domain and an infeasible case; measured, sufficient and
+-- extrapolated distinguished); D-2026-10-18-i with the coordinator's correction of 2026-10-23 (resources
+-- a typed vector: work, span, peak memory; Blumofe and Leiserson, "Scheduling multithreaded
+-- computations by work stealing", 1994); D-2026-10-18-d and L9.17 (the modulus of Bishop's
+-- constructive analysis, 1967; tested by measuring the resource at several bounds, the slope in log
+-- scale part of the law); D-2026-10-16-m (the step bound derived from the theory, never a constant);
+-- L13.5 (the floor below which no budget suffices); L6.2. What is mine is marked [proposed].
+--
+-- Index:
+--   §1 Resources: work, span, peak memory; sequence and parallel, each part a monoid image.   done
+--   §2 The modulus: a bound and the problem's features to what suffices, or why nothing
+--      does, or nothing known; its laws (the audit's list).                                done
+--   §3 Scaling: the least-squares slope of the log of what was spent on the log of the
+--      stated rate, within the bound the spread of a count allows.                         done
+-- No consumer reads these yet (the planner's bite, L6.3); the first is examples/bisection.lut.
+
+import "numbers.lth" Elementary Doubles abs
+import "laws.lth" Law Within Case
+
+-- ---------------------------------------------------------------- §1 Resources
+
+-- The resources of a run (the coordinator's correction to D-2026-10-18-i): the work, every step
+-- counted; the span, the longest chain of steps that wait on each other (the critical path); the peak
+-- memory, the most held at once. Counts, so `Nat`: a sum of counts is exact and so associative, which
+-- a sum of doubles is not. [proposed] The units are the algorithm's (evaluations of a function, values
+-- held); a model says which.
+Resources = { work : Nat, span : Nat, memory : Nat }
+
+-- What composes resources: nothing spent, one run after another, two runs side by side.
+ResourceAlgebra : { none : Resources, sequence : Resources -> Resources -> Resources, parallel : Resources -> Resources -> Resources }
+
+-- the parts, as functions, and the two operations of the counts the parts compose by
+workOf (r : Resources) : Nat := r.work
+spanOf (r : Resources) : Nat := r.span
+memoryOf (r : Resources) : Nat := r.memory
+addCounts (a b : Nat) : Nat := a + b
+largerCount (a b : Nat) : Nat := if a <= b then b else a
+
+-- The laws: each composition a commutative monoid with nothing spent as its neutral, and each part
+-- carried to the counts by its own operation (`Preserving`, the core's homomorphism): work adds in
+-- sequence and in parallel; the span adds in sequence and takes the larger in parallel (the two
+-- branches wait on neither); the peak memory takes the larger in sequence (the first run's memory is
+-- free before the second's starts) and adds in parallel (both are held at once). No one semiring
+-- holds the three (the audit's 4.4: `max` with neutral 0 and `+` has no absorbing zero); the record is
+-- the product of six monoid images, typed by part.
+ResourceAlgebra (m : ResourceAlgebra) :=
+  Associative Resources (structural Resources) m.sequence & Commutative Resources Resources (structural Resources) m.sequence
+  & Neutral Resources (structural Resources) m.sequence m.none
+  & Associative Resources (structural Resources) m.parallel & Commutative Resources Resources (structural Resources) m.parallel
+  & Neutral Resources (structural Resources) m.parallel m.none
+  & Preserving Resources Nat (structural Nat) m.sequence addCounts workOf
+  & Preserving Resources Nat (structural Nat) m.parallel addCounts workOf
+  & Preserving Resources Nat (structural Nat) m.sequence addCounts spanOf
+  & Preserving Resources Nat (structural Nat) m.parallel largerCount spanOf
+  & Preserving Resources Nat (structural Nat) m.sequence largerCount memoryOf
+  & Preserving Resources Nat (structural Nat) m.parallel addCounts memoryOf
+
+-- the model: the compositions the laws state, part by part
+workSpanMemory : ResourceAlgebra := {
+  none := { work := 0, span := 0, memory := 0 },
+  sequence := fn r s { { work := r.work + s.work, span := r.span + s.span, memory := largerCount r.memory s.memory } },
+  parallel := fn r s { { work := r.work + s.work, span := largerCount r.span s.span, memory := r.memory + s.memory } },
+}
+
+-- what is spent is no more than what is spent elsewhere, part by part (the order a sufficient amount
+-- is compared in)
+resourcesBelow (r s : Resources) : Bool := r.work <= s.work and r.span <= s.span and r.memory <= s.memory
+
+-- ---------------------------------------------------------------- §2 The modulus
+
+-- A bound demanded: a positive distance (the tolerance of a root, of a fixed point, of an
+-- approximation), in the units of the law it bounds.
+Bound : U := { b : Float64 | 0.0 < b }
+
+-- Why no amount suffices: the bound is below the floor the rounding sets (L13.5), or the problem is
+-- outside the domain where the algorithm converges.
+Infeasibility = { belowFloor : Unit || outsideDomain : Unit }
+-- What a modulus says of a bound at a problem (the audit's 6: "a partial or extended-valued modulus,
+-- returning a bound, an infeasibility reason or insufficient knowledge"): the resources that suffice,
+-- infeasible with the reason, or nothing known. [proposed] The audit also distinguishes an
+-- extrapolated estimate from a sufficient bound; no constructor for it until the planner extrapolates
+-- (P8): what a run measured is the tester's record (tester.py's scaling record), what suffices is
+-- `sufficient`, and nothing else is claimed.
+Need = { sufficient : Resources || infeasible : Infeasibility || unknown : Unit }
+
+isSufficient (n : Need) : Bool := match n { sufficient r -> true ; _ -> false }
+isInfeasible (n : Need) : Bool := match n { infeasible i -> true ; _ -> false }
+-- the order of what is needed: less is cheaper; a known sufficient amount is below nothing known,
+-- which is below infeasible (a request whose looser form is infeasible is infeasible too, and one
+-- whose stronger form is known to suffice is known at the looser)
+needBelow (a b : Need) : Bool := match a {
+  sufficient r -> (match b { sufficient s -> resourcesBelow r s ; _ -> true }) ;
+  unknown u -> (match b { sufficient s -> false ; _ -> true }) ;
+  infeasible i -> (match b { infeasible j -> true ; _ -> false }) }
+
+-- A modulus over problems described by their features `F` (size, condition, the width of a bracket,
+-- the scale of the values): what a bound needs, the floor below which nothing suffices, and the domain
+-- where the algorithm converges.
+Modulus (F : U) : { need : Bound -> F -> Need, floor : F -> Float64, domain : F -> Bool }
+
+-- the audit's 6, "Missing laws": a stronger bound never needs less (the order above, at two bounds of
+-- one problem)
+StrongerNeedsNoLess (F : U) (m : Modulus F) (f : F) (b c : Bound) : Bool :=
+  if b <= c then needBelow (m.need c f) (m.need b f) else true
+-- below the floor, infeasible (L13.5: the rounding's resolution, which no budget passes)
+BelowTheFloorIsInfeasible (F : U) (m : Modulus F) (f : F) (b : Bound) : Bool :=
+  if b < m.floor f then isInfeasible (m.need b f) else true
+-- outside the convergence domain, no amount is promised
+OutsideTheDomainPromisesNothing (F : U) (m : Modulus F) (f : F) (b : Bound) : Bool :=
+  if m.domain f then true else not (isSufficient (m.need b f))
+-- [proposed] inside its domain and at or above its floor, the modulus promises an amount: the domain is
+-- where it is a modulus, so a modulus states it rather than answering `unknown` there
+InsideTheDomainSuffices (F : U) (m : Modulus F) (f : F) (b : Bound) : Bool :=
+  if m.domain f and m.floor f <= b then isSufficient (m.need b f) else true
+Modulus (F : U) (m : Modulus F) := StrongerNeedsNoLess F m & BelowTheFloorIsInfeasible F m
+  & OutsideTheDomainPromisesNothing F m & InsideTheDomainSuffices F m
+
+-- ---------------------------------------------------------------- §3 Scaling (L9.17)
+
+-- What an algorithm's theory states of how a resource grows as the bound tightens: the resource is a
+-- constant times `rate b f` to the `exponent`, counted in `grain`s (a step, a sample), so that the
+-- count is at least the scaled rate and less than one grain above it. Bisection: `log2 (L / b)`,
+-- exponent one, grain one step (examples/bisection.lut); a sequential test: `log (1 / alpha) / b^2`,
+-- exponent one, grain one sample.
+Scaling (F : U) : { rate : Bound -> F -> Float64, exponent : Float64, grain : Float64 }
+
+sumOf (xs : List Float64) : Float64 := match xs { nil -> 0.0 ; cons x rest -> x + sumOf rest }
+countOf (xs : List Float64) : Float64 := match xs { nil -> 0.0 ; cons x rest -> 1.0 + countOf rest }
+meanOf (xs : List Float64) : Float64 := sumOf xs / countOf xs
+leastOf (xs : List Float64) : Float64 := match xs { nil -> 0.0 ; cons x rest -> (match rest { nil -> x ;
+  cons y more -> (if x <= leastOf rest then x else leastOf rest) }) }
+largestMagnitude (xs : List Float64) : Float64 := match xs { nil -> 0.0 ; cons x rest -> (if abs x <= largestMagnitude rest then largestMagnitude rest else abs x) }
+logs (e : Elementary) (xs : List Float64) : List Float64 := match xs { nil -> nil ; cons x rest -> cons (e.log x) (logs e rest) }
+-- the sums of the least-squares fit of `ys` on `xs`, the lists paired in order: the cross products and
+-- the squares of the deviations from the means, and the deviations' magnitudes
+crossDeviations (xs ys : List Float64) (mx my : Float64) : Float64 := match xs { nil -> 0.0 ;
+  cons x rest -> (match ys { nil -> 0.0 ; cons y more -> (x - mx) * (y - my) + crossDeviations rest more mx my }) }
+squaredDeviations (xs : List Float64) (mx : Float64) : Float64 := match xs { nil -> 0.0 ; cons x rest -> (x - mx) * (x - mx) + squaredDeviations rest mx }
+absoluteDeviations (xs : List Float64) (mx : Float64) : Float64 := match xs { nil -> 0.0 ; cons x rest -> abs (x - mx) + absoluteDeviations rest mx }
+slopeOf (xs ys : List Float64) : Float64 :=
+  crossDeviations xs ys (meanOf xs) (meanOf ys) / squaredDeviations xs (meanOf xs)
+
+-- The scaling law: the slope of `log spent` on `log rate` is the stated exponent, within the bound
+-- the count's grain allows. Write `y = log spent`, `x = log rate`, `p` the exponent: by the statement,
+-- `y_i = log c + p x_i + e_i` with `e_i = log (spent_i / (c rate_i^p))` in `[0, log (n / (n - g))]`,
+-- `n` the least count spent and `g` the grain. The fitted slope is `p + sum (x_i - mx)(e_i - me) / Sxx`,
+-- and `|e_i - me|` is at most the width of that interval, so the slope is within
+-- `E sum |x_i - mx| / Sxx` of `p`, `E = log (n / (n - g))`, `Sxx` the sum of squared deviations of the
+-- `x`. The logarithms and the sums round: a perturbation `dy` of the `y` moves the slope by at most
+-- `max |dy| sum |x_i - mx| / Sxx` by the same argument, and one of the `x` by about `|p|` times that;
+-- with each logarithm within `k` units in the last place (`Elementary.ulps`) and each subtraction and
+-- product one rounding more, `4 k epsilon (1 + max |y| + |p| max |x|)` bounds both [proposed: a
+-- first-order room, many orders below `E` at any count below 2^40]. The law states its range: a
+-- grain below the least count, and two rates at least that differ (`Sxx` positive); outside it,
+-- nothing is claimed. Wrong exponents are what it refutes (the control states 2 for bisection's 1); a
+-- wrong constant it cannot see, the slope being blind to `c`: that is the modulus's law,
+-- `NeedsNoMoreThanItsModulus` at the algorithm.
+ScalesAs (e : Elementary) (d : Doubles Float64) (exponent grain : Float64) (spent rates : List Float64) : Law :=
+  { xs := logs e rates
+    ys := logs e spent
+    least := leastOf spent
+    sxx := squaredDeviations xs (meanOf xs)
+    if grain < least and 0.0 < sxx then
+      Within Float64 (fn a b { abs (a - b) })
+        ((e.log (least / (least - grain)) + 4.0 * e.ulps * d.epsilon * (1.0 + largestMagnitude ys + abs exponent * largestMagnitude xs))
+          * absoluteDeviations xs (meanOf xs) / sxx)
+        (slopeOf xs ys) exponent
+    else Case true }
