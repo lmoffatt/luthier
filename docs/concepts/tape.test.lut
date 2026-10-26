@@ -54,3 +54,50 @@ onNoRoom : List Binding := [
   { parameter := nothing, type := just "Tape", generator := "tape", coverage := Listed },
   { parameter := nothing, type := just "Doubles", generator := "noRoom", coverage := Listed } ]
 test "MetresWithin" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onNoRoom) (control <- true)
+
+-- ---------------------------------------------------------------- controls per conjunct (L9.14)
+-- 2026-10-26, Claude Sonnet 5.5, record/plan/audit-algebras-2026-10-22/prompt-controls.md: the
+-- control of `hooked` is seen by three of Tape's four conjuncts and one of MarkIsAMetric's five, so
+-- each of the others gets a model that breaks it. Same cases, same seed.
+
+-- a tape that reads a longer distance one ulp too large when the first mark is the larger: the
+-- readings in order (ReadingAdds, ReadingSteps) are exact, and MetresWithin's bound has room for a
+-- relative error of one epsilon, so only ReadingSymmetric sees the break
+ulpUp : Float64 := 1.0 + 2.0e-16
+lopsided : Tape := { reading := fn a b { if a <= b then tape.reading a b else tape.reading a b * ulpUp } }
+onLopsided : List Binding := [
+  { parameter := nothing, type := just "Tape", generator := "lopsided", coverage := Listed },
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed } ]
+test "Tape" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onLopsided) (control <- true)
+
+-- a distance that is zero between any two marks: it breaks only the indiscernibility of the
+-- marks, and every pair has its premise (a zero distance)
+flatMetric : Metric Mark (structural Mark) := { d := fn a b { 0.0 } }
+onFlatMetric : List Binding := [
+  { parameter := just "model", type := nothing, generator := "flatMetric", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "equalMarks", coverage := Listed }, byParameter "y" "sameOrNat" ]
+test "MarkIsAMetric" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onFlatMetric) (control <- true)
+
+-- the distance doubled when the first mark is the larger: symmetric nowhere, a quasimetric otherwise
+oneWayMetric : Metric Mark (structural Mark) := { d := fn a b { toFloat64 (if a <= b then b - a else 2 * (a - b)) } }
+onOneWayMetric : List Binding := [
+  { parameter := just "model", type := nothing, generator := "oneWayMetric", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "equalMarks", coverage := Listed }, byParameter "y" "sameOrNat" ]
+test "MarkIsAMetric" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onOneWayMetric) (control <- true)
+
+-- the square of the difference: symmetric, positive, zero only on the diagonal, and the triangle
+-- fails (a half-way mark gives two quarters)
+squaredMetric : Metric Mark (structural Mark) := { d := fn a b { toFloat64 ((a - b) * (a - b)) } }
+onSquaredMetric : List Binding := [
+  { parameter := just "model", type := nothing, generator := "squaredMetric", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "equalMarks", coverage := Listed }, byParameter "y" "sameOrNat" ]
+test "MarkIsAMetric" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onSquaredMetric) (control <- true)
+
+-- minus the difference between distinct marks: non-negativity fails. No total model breaks it
+-- alone (with the diagonal, symmetry and the triangle at x, z, x a negative distance contradicts
+-- them), so this one is refuted also at the triangle
+negativeMetric : Metric Mark (structural Mark) := { d := fn a b { if a == b then 0.0 else 0.0 - toFloat64 (if a <= b then b - a else a - b) } }
+onNegativeMetric : List Binding := [
+  { parameter := just "model", type := nothing, generator := "negativeMetric", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "equalMarks", coverage := Listed }, byParameter "y" "sameOrNat" ]
+test "MarkIsAMetric" (SampledMode linear) (cases <- 200) (size <- 50000) (seed <- 20261021) (profile <- onNegativeMetric) (control <- true)
