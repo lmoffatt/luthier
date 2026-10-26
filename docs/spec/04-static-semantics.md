@@ -428,6 +428,26 @@ operation over a domain (audit section 9, "missing maps"), so a result of one ro
 only where a law says so. And a sampled pointwise pass never stands for extensional equality; it
 stands for what its certificate grade says of its inputs (`spec 6`).
 
+**4.S26. A law recognized as a property of the core.** [proposed] Source: Luciano's idea of
+2026-10-27 (`record/notes/idea-law-normal-form-2026-10-27.md`: a law in a free term algebra, its
+quotient by the properties the operations have, an order with no meaning that picks one
+representative, and a map from those representatives to names), approved as a notice only.
+`luthier check -v` reports, as the `instance` kind, one line per law of the file that is an
+instance of a property of the core: `ReadingSymmetric is Commutative at A = Mark, B = Float64,
+o = structural Float64, op = t.reading, x = a, y = b`. The law's body is unfolded (its laws and
+models, `structural`), the arguments of `==`, `and`, `or` and of an operation the core claims
+commutative exactly are sorted, those it claims associative exactly flattened (floating-point
+`+` is sorted and never flattened), its variables are named by first occurrence, and the result is
+matched against the same form of each property of `core/properties/` and of the structures' single
+laws (`src/luthier/normal.py`). An exact property at an operation the core claims it of only
+within a bound (`Associative` at float `+`, or at `d.plus` when `Doubles` claims
+`PlusAssociativeWithin d`) is not reported. The notice changes no cone, store, grade or result.
+Its limit: it recognizes what the order decides and claims nothing on a law it does not list.
+Equality of programs is undecidable (Richardson's theorem for the elementary functions);
+equations other than commutativity and associativity would need completion (Knuth-Bendix), which
+may not terminate; and a law that is one of the claims the order used (an integer associativity
+written out) becomes `X == X` and is no instance.
+
 ## Open
 
 - O2, which 4.R8 rests on.
