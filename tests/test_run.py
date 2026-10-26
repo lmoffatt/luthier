@@ -1528,6 +1528,21 @@ def test_eval_reduces_a_term_over_the_cores_foldable_model(tmp_path, term, value
     assert result == s_true_false(value)
 
 
+@pytest.mark.parametrize("term, value", [
+    ("finiteDistance 0.0 == infiniteDistance unit", "false"),
+    ("infiniteDistance unit == infiniteDistance", "true"),
+    ("finiteDistance 1.0 == finiteDistance 1.0", "true")])
+def test_eval_of_a_bare_term_reads_the_labels_of_an_aliased_sum(tmp_path, term, value):
+    # report-night-T.md item 3: the term names `Extended`'s labels and no definition typed by it, and
+    # the probe's slice kept no sum to read them from, so `==` stayed stuck
+    from luthier.run import evaluate
+    path = tmp_path / "x.lut"
+    path.write_text('import "core/structures/equality.lth" Extended\nx : Extended := infiniteDistance unit\n',
+                    encoding="utf-8")
+    result, _, _ = evaluate([str(path)], term)
+    assert result == s_true_false(value)
+
+
 def s_true_false(value):
     from luthier import term as t
     return t.Var(value)

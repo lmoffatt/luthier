@@ -3704,6 +3704,35 @@ def evaluate(files, term, fuel=None):
     return value, definition.type, states
 
 
+def _sums_named(acts, kept):
+    """The aliases of a sum whose labels the slice `kept` names and does not hold yet, roots of the
+    probe's slice, each given to the kernel as a datum (`_probed`): `finiteDistance 0.0 == infiniteDistance unit` names `Extended`'s labels and no
+    definition, and without the sum the kernel reads no label and `==` stays stuck
+    (report-night-T.md, item 3). A label is a name no act defines; the probe's alone follows it."""
+    defined = {a.name for a in acts if isinstance(a, (s.Declare, s.Define, s.Alias))}
+    owners = {}
+    for a in acts:
+        if isinstance(a, s.Alias) and isinstance(a.value, s.Sum):
+            for label, _ in a.value.alternatives:
+                if label not in defined:
+                    owners.setdefault(label, []).append(a.name)
+    held = {a.name for a in kept if isinstance(a, (s.Declare, s.Define, s.Alias))}
+    written = set()
+
+    def collect(value):
+        if isinstance(value, s.Name):
+            written.add(value.name)
+        elif isinstance(value, tuple):
+            for item in value:
+                collect(item)
+        elif is_dataclass(value) and not isinstance(value, type):
+            for f in fields(value):
+                collect(getattr(value, f.name))
+
+    collect(tuple(kept))
+    return tuple(dict.fromkeys(o for label in written & owners.keys() for o in owners[label] if o not in held))
+
+
 def _probed(files, term, fuel=None, actions=False):
     """The probe's context, its elaborated program, the term's internal name and definition, the
     demand and the states of the term's cone (`evaluate`). With `actions`, the laws run at a first
@@ -3711,11 +3740,15 @@ def _probed(files, term, fuel=None, actions=False):
     loaded = Probe(files, term)
     entry = loaded.internal(loaded.top, loaded.it)
     kept = runtime_slice(loaded.acts, entry, core_data(loaded))
+    sums = _sums_named(loaded.acts, kept)
+    if sums:
+        kept = runtime_slice(loaded.acts, entry, core_data(loaded) + sums)
     roots = _first_action_roots(loaded, kept) if actions else ()
     if roots:
-        kept = runtime_slice(loaded.acts, entry, core_data(loaded) + roots)
+        kept = runtime_slice(loaded.acts, entry, core_data(loaded) + sums + roots)
     loaded.demand(kept)
-    program = _elaborated(kept)
+    # an alias is inlined where it is used, so the sum reaches the kernel as a datum that names it
+    program = _elaborated(type(kept)(list(kept) + [s.Datum(s.Name(n)) for n in sums]))
     definition = next(a for a in program if isinstance(a, t.Define) and a.name == entry)
     demand = demand_of(loaded.it, fuel)
     try:
