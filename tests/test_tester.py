@@ -130,6 +130,29 @@ test "SquareNonNegative" ExhaustiveMode (whereBindings <- [{ parameter := just "
 '''
 
 
+OVER_A_TYPE = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+SelfEqual (A : U) (eq : A -> A -> Bool) (x : A) : Bool := eq x x
+types : List U := [Bool]
+eqs : List (Bool -> Bool -> Bool) := [fn a b { a == b }]
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+test "SelfEqual" ExhaustiveMode (whereBindings <- [bind "eq" "eqs"])
+test "SelfEqual" ExhaustiveMode (whereBindings <- [bind "A" "types", bind "eq" "eqs"])
+'''
+
+
+def test_a_law_quantified_over_a_type_the_line_does_not_name_is_a_static_error(tmp_path):
+    # D-2026-10-16-l, L5 (7.R2): refused at the line's start, before anything is drawn or looked up,
+    # with the static error's reason; the line that names the instance (a census of types) runs
+    path = tmp_path / "overu.test.lut"
+    path.write_text(OVER_A_TYPE, encoding="utf-8")
+    unnamed, named = tester.run_tests(path)
+    assert isinstance(unnamed.evidence, tester.NotRun)
+    assert "A : U: the law is quantified over a type, a static error (7.R2)" in unnamed.evidence.reason
+    assert (named.verdict, named.evaluated) == ("Supported", 2)
+
+
 def test_every_value_of_a_box_confirmed_is_confirmed_on_that_box(tmp_path):
     # D-2026-10-16-k item 17: `Bounded n` is a domain, not a grade; laws.lth's ForallOnPoints
     # confirms on the box, as on the whole type, and test.lth grades it exhaustive (7.S10)

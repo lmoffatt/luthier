@@ -2480,7 +2480,7 @@ def _run_line(runner, loaded, spec, entry, given, home, stores, deep, store, run
     else run (`run_spec`, or `run` given the statistical start) and recorded there when `store`. A
     line that binds a census of another type than its parameter's is refused at its start, not run
     with the reason (`mistyped_census`), whatever its store knows, and nothing is stored."""
-    refusal = mistyped_census(runner, loaded, spec) if run is None else None
+    refusal = (quantified_over_a_type(runner, loaded, spec) or mistyped_census(runner, loaded, spec)) if run is None else None
     if refusal is not None:
         names = tuple(n for n, _ in parameters(runner, _as_called(loaded, spec.law)) or [])
         outcome = _not_run(spec, refusal, names)
@@ -2526,6 +2526,46 @@ def _run_line(runner, loaded, spec, entry, given, home, stores, deep, store, run
         certify.add_entry(home, entry)
         stores[home] = certify.read_store(home)
     return outcome
+
+
+def is_a_type(runner, ty):
+    """Whether a parameter's type is `U` or a subtype of it (`Concrete`): its values are types."""
+    for _ in range(20):
+        if isinstance(ty, t.Universe):
+            return True
+        if isinstance(ty, t.Subtype):
+            ty = ty.type
+        elif isinstance(ty, t.Var) and ty.name in runner.types and runner.types[ty.name] != ty:
+            ty = runner.types[ty.name]
+        else:
+            return False
+    return False
+
+
+def quantified_over_a_type(runner, loaded, spec):
+    """[D-2026-10-16-l, L5; 7.R2] Why a line's law cannot be tested, or None: it is quantified over a
+    type the line does not name. A parameter whose values are types (`U`, or a subtype of it), that
+    the model does not fix (`fixed_carrier`) and that the line binds to no census, is a static error:
+    no generator gives a type, and a law is tested at the instances its line names (a census of
+    types) or its theory states (`Settling`'s laws at `Int`). Refused at the line's start, whatever
+    its store knows, and nothing stored. [proposed] A census of types names the instances; a
+    generator bound to such a parameter is refused too."""
+    law = _as_called(loaded, spec.law)
+    params = parameters(runner, law) or []
+    fixed = fixed_carrier(runner, law, params)
+    names = [n for n, _ in params]
+    for k, (name, ty) in enumerate(params):
+        if name in fixed or not is_a_type(runner, ty):
+            continue
+        b = resolve_binding(spec, name, _head_name(ty))
+        if b is None:
+            return (f"{name} : {_show(ty)}: the law is quantified over a type, a static error (7.R2): "
+                    f"name the instance it is tested at (a census of types) or state the law at one")
+        called = _as_called(loaded, b.generator)
+        if generator_of(runner, called, names[:k]) is not None:
+            return (f"{name} : {_show(ty)} is bound to the generator {b.generator}: no generator gives a "
+                    f"type (7.R2); bind a census of the types it is tested at")
+    return None
 
 
 def mistyped_census(runner, loaded, spec):

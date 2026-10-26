@@ -6,6 +6,8 @@
 -- bite A3 (record/plan/audit-algebras-2026-10-22/prompt-wave-a.md).
 -- `WithinIsMeasured` with its metric, distances and bounds added 2026-10-25 by Claude Opus 5.5, wave C
 -- bite C1 (record/plan/audit-algebras-2026-10-22/prompt-wave-bc.md).
+-- The type bindings (`A`, `S`, `T` to censuses of types) removed 2026-10-26 by Claude Opus 5.5:
+-- `Settling` claims its laws at `Int` and `Nat` (D-2026-10-16-l, L5; 7.R2).
 
 import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
@@ -19,7 +21,6 @@ settlings : List Settling := [settling]
 bools : List Bool := [true, false]
 strings : List String := ["a", "b"]
 ints : List Int := [0, 1]
-types : List U := [Int]
 laws : List Law := [Case true, Case false, Not (Case true), Conjunction (Case true) (Case false), Either (Case false) (Case true)]
 quantified : List (Int -> Law) := [fn n { Case (n == 0) }, fn n { Case true }, fn n { Not (Case (n == 0)) }]
 points : List (List (Int * Evidence)) := [nil, [(0, Evaluated true)], [(0, Evaluated true), (1, Evaluated true)],
@@ -34,8 +35,6 @@ verdicts : List Verdict := [Confirmed, Refuted, Supported, Unsettled, Cites "c",
 cutoffs : List Sequential := [{ alpha := 0.05, beta := 0.05, delta := 0.5, initial := 1, budget := 10 }]
 pvalueLaws : List (StatisticalLaw Int) := [byPValue Int (fn n { 0.5 })]
 draws : List (Nat -> Nat -> Int * Nat) := [fn n t { (0, t + 1) }]
-scalarTypes : List U := [Int]
-nats : List U := [Nat]
 aRate : Rates := { alpha := 0.05, beta := 0.05, delta := 0.5, spent := 1 }
 treated : List StatisticalVerdict := [Holds aRate, Fails aRate, Unresolved aRate]
 counts : List Nat := [0, 3]
@@ -46,16 +45,16 @@ floats : List Float64 := [0.0, 1.0, 2.0]
 bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
 ofType (t g : String) : Binding := { parameter := nothing, type := just t, generator := g, coverage := Listed }
 
--- [2026-10-26, prompt-controls.md] `WithinIsMeasured`'s `x` and `y` (of type `A`, here Int) are
--- bound by their type `A`, not by name: a binding by name reached `Commutative`'s and `Associative`'s
+-- [2026-10-26, prompt-controls.md] `WithinIsMeasured`'s `x` and `y` (of type `A`, `Int` in `Settling`
+-- since L5) are bound by their type, not by name: a binding by name reached `Commutative`'s and `Associative`'s
 -- `x` and `y` too, which are verdicts, and ran them on integers (the tester does not check a census
 -- against the parameter's type), so no wrong combination could refute them
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- [bind "m" "settlings", ofType "Bool" "bools",
-  bind "r" "strings", bind "A" "types", bind "a" "ints", ofType "Law" "laws", bind "body" "quantified",
+  bind "r" "strings", bind "a" "ints", ofType "Law" "laws", bind "body" "quantified",
   ofType "Evidence" "evidences", bind "pts" "points", ofType "Coverage" "coverages", ofType "Verdict" "verdicts",
-  bind "S" "scalarTypes", bind "T" "nats", bind "l" "pvalueLaws", bind "draw" "draws",
+  bind "l" "pvalueLaws", bind "draw" "draws",
   ofType "Sequential" "cutoffs", ofType "StatisticalVerdict" "treated", bind "n" "counts",
-  bind "d" "metrics", bind "bound" "floats", ofType "A" "ints", bind "dist" "floats", bind "w" "floats"])
+  bind "d" "metrics", bind "bound" "floats", ofType "Int" "ints", bind "dist" "floats", bind "w" "floats"])
 
 -- [bite C1] what the certifier computes of a numerical law's evidence (laws.lth §5): the ratio of a
 -- distance to its bound and the worse of two, on listed distances, bounds (a negative one among them)

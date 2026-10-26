@@ -263,9 +263,16 @@ CombineAbsorbs (m : Settling) (v : Verdict) : Bool :=
 CombineNeverConfirmsMore (m : Settling) (u v : Verdict) : Bool :=
   isConfirmed (m.combine u v) == (isConfirmed u and isConfirmed v)
 
-Settling (m : Settling) := CaseIsEvaluated m & ForallAtOnePoint m & ForallOnPoints m & ExistsAtOnePoint m & ExistsOnPoints m
+-- [D-2026-10-16-l, L5, 2026-10-26] A law quantified over a type is a static error (7.R2), so the
+-- laws over the quantified type `A` (and a statistical law's `S` and `T`) are claimed at an instance,
+-- `Int` (and `Nat` for the stream's state): the settling of a `forall`, an `exists` or a measured law
+-- reads the type only through the law's body, so one instance stands for all of them (parametricity;
+-- Bernardy, Jansson and Claessen 2010). [proposed] `Int`, the instance the test lines had named.
+Settling (m : Settling) := CaseIsEvaluated m & ForallAtOnePoint m Int & ForallOnPoints m Int & ExistsAtOnePoint m Int
+  & ExistsOnPoints m Int
   & ConjunctionByPair m & EitherBySide m & EitherRefutedByBoth m & NotFlips m & ThenIsMaterial m & CitedWhole m
-  & AssumedWhole m & NotRunIsUnsettled m & VacuousIsUnsettled m & StatisticalByTest m & WithinIsMeasured m & Commutative Verdict Verdict (structural Verdict) m.combine
+  & AssumedWhole m & NotRunIsUnsettled m & VacuousIsUnsettled m & StatisticalByTest m Int Nat & WithinIsMeasured m Int
+  & Commutative Verdict Verdict (structural Verdict) m.combine
   & Associative Verdict (structural Verdict) m.combine & CombineAbsorbs m & CombineNeverConfirmsMore m
 
 -- ---------------------------------------------------------------- §4 Statistical laws
