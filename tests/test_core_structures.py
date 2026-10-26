@@ -95,14 +95,18 @@ def test_the_two_bases_are_graded_on_their_listed_cases(bases):
 
 
 def test_every_base_control_is_refuted(base_controls):
-    assert {o.spec.law for o in base_controls} == BASE_CLAIMS
-    assert len(base_controls) == 6
+    # B2's six lines, and since 480e92c a wrong model per uncontrolled conjunct (21 lines, four of
+    # them on the product's axiom `ProductIsIndependent`)
+    assert {o.spec.law for o in base_controls} == BASE_CLAIMS | {'ProductIsIndependent'}
+    assert len(base_controls) == 27
     assert all(o.verdict == 'Refuted' for o in base_controls), [
         (o.spec.law, (o.verdict, o.raised[:1], o.conjunct)) for o in base_controls if o.verdict != 'Refuted']
 
 
 def test_the_product_composition_is_below_the_union_bound(base_controls):
-    refuted = [o for o in base_controls if o.spec.law == 'CappedSumIsAssumptionFree']
+    # the product's line among the five controls of the claim (480e92c added one per other conjunct)
+    refuted = [o for o in base_controls if o.spec.law == 'CappedSumIsAssumptionFree'
+               and o.spec.profile[0].generator == 'badProduct']
     assert len(refuted) == 1 and refuted[0].conjunct.startswith('AtLeastTheUnionBound')
     assert '0.1' in str(refuted[0].refuting)
 
