@@ -1394,7 +1394,7 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
 # subtype (`c : Chain A r`) is met by every case drawn, and the regions count it (`Classifier`). One
 # stated in the law's body is not: `p -> q` (`implies`, L12.7: `then` is material), `if p then q else
 # true` or `q or not p` (bite A3b), at the top of the body, under its lets (`{ r := ... ; if
-# r.converged then ... else true }`), or in the body of a law it applies, unfolded. Such a law held at every case where `p` was false, so with
+# p r then ... else true }`; tables' `RoundTrip` is one: `if nCols t > 0 then ... else true`), or in the body of a law it applies, unfolded. Such a law held at every case where `p` was false, so with
 # `p` never true it passed with no evidence. `judged` counts the cases where every premise held; none
 # is laws.lth's `Vacuous n`, not run with the count as its reason (D-2026-10-16-m), never a pass. A run
 # that evaluated no case and raised none is an empty experiment, not run with its reason (7.S12;
@@ -1440,7 +1440,7 @@ def measured_record(measures, points, members, regions):
 # subtype (`c : Chain A r`) is met by every case drawn, and the regions count it (`Classifier`). One
 # stated in the law's body is not: `p -> q` (`implies`, L12.7: `then` is material), `if p then q else
 # true` or `q or not p` (bite A3b), at the top of the body, under its lets (`{ r := ... ; if
-# r.converged then ... else true }`), or in the body of a law it applies, unfolded. Such a law held at every case where `p` was false, so with
+# p r then ... else true }`; tables' `RoundTrip` is one: `if nCols t > 0 then ... else true`), or in the body of a law it applies, unfolded. Such a law held at every case where `p` was false, so with
 # `p` never true it passed with no evidence. `judged` counts the cases where every premise held; none
 # is laws.lth's `Vacuous n`, not run with the count as its reason (D-2026-10-16-m), never a pass. A run
 # that evaluated no case and raised none is an empty experiment, not run with its reason (7.S12;
