@@ -41,6 +41,59 @@ firstComposition : EvidenceComposition := { tensor := fn x y { x } }
 levelPairs : List (Related ProbabilityLevel (fn x y { x <= y })) := [ { x := 0.0, y := 0.5 } ]
 fallingLog : Float64 -> Float64 := fn x { 0.0 - x }
 
+-- [2026-10-26, prompt-controls.md, L9.14] a wrong model per uncontrolled conjunct, each breaking the
+-- conjunct it names and as few others as the theory allows; the censuses are inside the conjunct's
+-- domain (pairs and chains related by the wrong equality).
+-- Equalities: the order read as equality (reflexive, transitive, not symmetric), and nearness within
+-- a half (reflexive, symmetric, not transitive).
+leqEqual : Object Extended := { eq := extendedLeq }
+nearEqual : Object Extended := { eq := fn a b {
+  match a { infiniteDistance u -> (match b { infiniteDistance v -> true ; finiteDistance y -> false }) ;
+            finiteDistance x -> (match b { infiniteDistance v -> false ; finiteDistance y -> (x - y) <= 0.5 and (y - x) <= 0.5 }) } } }
+leqPairs : List (Related Extended leqEqual.eq) := [ { x := finiteDistance 0.0, y := finiteDistance 1.0 } ]
+leqChains : List (Chain Extended leqEqual.eq) := [ { x := finiteDistance 0.0, y := finiteDistance 0.5, z := finiteDistance 1.0 } ]
+nearPairs : List (Related Extended nearEqual.eq) := [ { x := finiteDistance 0.0, y := finiteDistance 0.5 } ]
+nearChains : List (Chain Extended nearEqual.eq) := [ { x := finiteDistance 0.0, y := finiteDistance 0.5, z := finiteDistance 1.0 } ]
+-- Error bases. The join as the mean of two finite distances (∞ its neutral): commutative and
+-- idempotent, not associative; Integral and the join's Pointwise2 fall with it.
+extendedMean (a b : Extended) : Extended :=
+  match a { infiniteDistance u -> b ; finiteDistance x ->
+  (match b { infiniteDistance v -> a ; finiteDistance y -> finiteDistance ((x + y) * 0.5) }) }
+meanBase : ErrorBase := { dioid := { bottom := infiniteDistance unit, neutral := finiteDistance 0.0, join := extendedMean, combine := extendedPlus } }
+-- the combination a + b + ab(a + b): commutative, monotone (so it distributes over the smaller), 0
+-- its unit, ∞ absorbing, never below either part; not associative (1, 1, 2 gives 54 and 100)
+extendedCubic (a b : Extended) : Extended :=
+  match a { infiniteDistance u -> infiniteDistance unit ; finiteDistance x ->
+  (match b { infiniteDistance v -> infiniteDistance unit ; finiteDistance y -> finiteDistance (x + y + x * y * (x + y)) }) }
+cubicBase : ErrorBase := { dioid := { bottom := infiniteDistance unit, neutral := finiteDistance 0.0, join := extendedSmaller, combine := extendedCubic } }
+-- the unit of the combination read as 1, the rest the base's: Neutral alone
+shiftedUnitBase : ErrorBase := { dioid := { bottom := infiniteDistance unit, neutral := finiteDistance 1.0, join := extendedSmaller, combine := extendedPlus } }
+-- the combination as the smaller distance with ∞ its unit, so unit and bottom coincide: Absorbing
+-- and Distinct (and Integral, and the combination's Pointwise2); one cannot fall without another,
+-- since a unit equal to the bottom would be the top, and ∞ is no top here
+minBase : ErrorBase := { dioid := { bottom := infiniteDistance unit, neutral := infiniteDistance unit, join := extendedSmaller, combine := extendedSmaller } }
+-- the join as the smaller distance plus a toll of a half: associative, commutative, ∞ its neutral,
+-- the sum distributes over it; not idempotent (Integral and the join's Pointwise2 fall too)
+extendedTolled (a b : Extended) : Extended :=
+  match a { infiniteDistance u -> b ; finiteDistance x ->
+  (match b { infiniteDistance v -> a ; finiteDistance y -> finiteDistance (smaller x y + 0.5) }) }
+tolledBase : ErrorBase := { dioid := { bottom := infiniteDistance unit, neutral := finiteDistance 0.0, join := extendedTolled, combine := extendedPlus } }
+-- Evidence compositions; the join, its bottom (1, 1) and the neutral (0, 0) are evidenceDioid's,
+-- not the model's, so only the tensor's laws can fall. Each tensor acts per part.
+perPart (f : Float64 -> Float64 -> Float64) : EvidenceComposition :=
+  { tensor := fn x y { { failure := f x.failure y.failure, risk := f x.risk y.risk } } }
+-- min(1, a + b + ab(a + b)): above the union bound, monotone, (0, 0) its unit, (1, 1) absorbing;
+-- not associative
+cubicComposition : EvidenceComposition := perPart (fn a b { smaller 1.0 (a + b + a * b * (a + b)) })
+-- min(1, a + b + 1/8): associative, monotone, above the union bound; (0, 0) is no unit
+tolledComposition : EvidenceComposition := perPart (fn a b { smaller 1.0 (a + b + 0.125) })
+-- the sum wrapped into (0, 1] (a sum above 1 loses 1; 0 only for 0 + 0): an associative,
+-- commutative monoid with unit 0 that is not monotone, so it does not distribute over the smaller,
+-- 1 does not absorb, and a composition can know more than a part (Integral)
+wrappedComposition : EvidenceComposition := perPart (fn a b { if 1.0 < a + b then a + b - 1.0 else a + b })
+eighths : List EvidenceBound := [ { failure := 0.0, risk := 0.0 }, { failure := 0.125, risk := 0.25 }, { failure := 0.25, risk := 0.125 },
+  { failure := 0.75, risk := 0.5 }, { failure := 1.0, risk := 1.0 } ]
+
 -- ---------------------------------------------------------------- the lines
 test "ExtendedIsAnObject" ExhaustiveMode (seed <- 20261025)
   (profile <- [on "model" "nothingEqual", on "x" "errors", on "p" "errors", on "c" "errors"]) (control <- true)
@@ -53,3 +106,39 @@ test "CappedSumIsAssumptionFree" ExhaustiveMode (seed <- 20261025)
 test "ProductIsAComposition" ExhaustiveMode (seed <- 20261025)
   (profile <- [on "model" "firstComposition", on "x" "dyadic", on "y" "dyadic", on "z" "dyadic"]) (control <- true)
 test "NatsIsAConversion" ExhaustiveMode (seed <- 20261025) (profile <- [on "log" "fallingLog", on "p" "levelPairs"]) (control <- true)
+
+-- [2026-10-26, prompt-controls.md] one line per wrong model above
+test "ExtendedIsAnObject" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "leqEqual", on "x" "errors", on "p" "leqPairs", on "c" "leqChains"]) (control <- true)
+test "ExtendedIsAnObject" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "nearEqual", on "x" "errors", on "p" "nearPairs", on "c" "nearChains"]) (control <- true)
+test "ErrorIsABase" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "meanBase", on "x" "errors", on "y" "errors", on "z" "errors"]) (control <- true)
+test "ErrorIsABase" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "cubicBase", on "x" "errors", on "y" "errors", on "z" "errors"]) (control <- true)
+test "ErrorIsABase" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "shiftedUnitBase", on "x" "errors", on "y" "errors", on "z" "errors"]) (control <- true)
+test "ErrorIsABase" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "minBase", on "x" "errors", on "y" "errors", on "z" "errors"]) (control <- true)
+test "ErrorIsABase" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "tolledBase", on "x" "errors", on "y" "errors", on "z" "errors"]) (control <- true)
+test "CappedSumIsAssumptionFree" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "cubicComposition", on "x" "eighths", on "y" "eighths", on "z" "eighths"]) (control <- true)
+test "CappedSumIsAssumptionFree" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "tolledComposition", on "x" "eighths", on "y" "eighths", on "z" "eighths"]) (control <- true)
+test "CappedSumIsAssumptionFree" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "wrappedComposition", on "x" "eighths", on "y" "eighths", on "z" "eighths"]) (control <- true)
+test "ProductIsAComposition" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "cubicComposition", on "x" "eighths", on "y" "eighths", on "z" "eighths"]) (control <- true)
+test "ProductIsAComposition" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "tolledComposition", on "x" "eighths", on "y" "eighths", on "z" "eighths"]) (control <- true)
+test "ProductIsAComposition" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "wrappedComposition", on "x" "eighths", on "y" "eighths", on "z" "eighths"]) (control <- true)
+test "ProductIsIndependent" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "cubicComposition", on "x" "eighths", on "y" "eighths", on "z" "eighths"]) (control <- true)
+test "ProductIsIndependent" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "tolledComposition", on "x" "eighths", on "y" "eighths", on "z" "eighths"]) (control <- true)
+test "ProductIsIndependent" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "wrappedComposition", on "x" "eighths", on "y" "eighths", on "z" "eighths"]) (control <- true)
+test "ProductIsIndependent" ExhaustiveMode (seed <- 20261026)
+  (profile <- [on "model" "firstComposition", on "x" "dyadic", on "y" "dyadic", on "z" "dyadic"]) (control <- true)
