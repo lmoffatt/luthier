@@ -576,3 +576,334 @@ test "KernelImplication" ExhaustiveMode (profile <- onKernelImplication) (contro
 coreEntrywise : ((c : List Bool) -> List Bool -> Fin (lengthList Bool c) -> Float64) -> List Bool -> List Bool -> Bool := fn radius xs ys { not (entrywiseBall (List Bool) Bool coreListIndex coreListDistance radius xs ys) }
 onKernelEntrywise : List Binding := [ { parameter := just "candidate", type := nothing, generator := "coreEntrywise", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreListBoolType", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "i", type := nothing, generator := "coreListIndex", coverage := Listed }, { parameter := just "d", type := nothing, generator := "coreListDistance", coverage := Listed }, { parameter := just "radius", type := nothing, generator := "coreRadius", coverage := Listed }, { parameter := just "c", type := nothing, generator := "coreBoolLists", coverage := Listed }, { parameter := just "e", type := nothing, generator := "coreBoolLists", coverage := Listed } ]
 test "KernelEntrywise" ExhaustiveMode (seed <- 20261020) (profile <- onKernelEntrywise) (control <- true)
+
+-- ---------------------------------------------------------------- a refuted model per conjunct
+-- L9.14 read per conjunct (D1, D-2026-10-25-a q4): every conjunct of core_laws.test.lut gets a
+-- broken model that refutes it, on prompt-controls.md (record/plan/audit-algebras-2026-10-22/,
+-- 03d45eb), Agent K, Claude Opus 5.5, 2026-10-26. Each model below breaks the conjunct it is
+-- named after, and only it where the theory allows (said where it does not). A premise is given
+-- a listed census inside the broken relation's domain (a related pair, a chain), so that the
+-- conjunct runs and its refutation does not hang on a rare draw.
+
+-- relations at Int: an equivalence failing reflexivity at 0 only, and a tournament (total,
+-- antisymmetric, reflexive) whose odd steps go up and even steps go down, so 0 r 1 r 2 but 2 r 0
+parityAwayFromZero : Int -> Int -> Bool := fn a b { a mod 2 == b mod 2 and not (a == 0) and not (b == 0) }
+cyclicStrict : Int -> Int -> Bool := fn a b { (a < b and (b - a) mod 2 == 1) or (b < a and (a - b) mod 2 == 0) }
+cyclic : Int -> Int -> Bool := fn a b { a == b or cyclicStrict a b }
+cyclicChains : List (Chain Int cyclic) := [{ x := 0, y := 1, z := 2 }]
+cyclicStrictChains : List (Chain Int cyclicStrict) := [{ x := 0, y := 1, z := 2 }]
+onParityAwayFromZero : List Binding := [ { parameter := just "r", type := nothing, generator := "parityAwayFromZero", coverage := Listed } ]
+onCyclic : List Binding := [
+  { parameter := just "r", type := nothing, generator := "cyclic", coverage := Listed },
+  { parameter := just "c", type := nothing, generator := "cyclicChains", coverage := Listed } ]
+onCyclicStrict : List Binding := [
+  { parameter := just "r", type := nothing, generator := "cyclicStrict", coverage := Listed },
+  { parameter := just "c", type := nothing, generator := "cyclicStrictChains", coverage := Listed } ]
+-- `half` has `double` as a section, so only injectivity fails
+halfWithDouble : List Binding := [
+  { parameter := just "f", type := nothing, generator := "half", coverage := Listed },
+  { parameter := just "s", type := nothing, generator := "double", coverage := Listed } ]
+
+test "IntEquivalence" (SampledMode linear) (profile <- onParityAwayFromZero) (control <- true)
+test "IntEquivalence" (SampledMode linear) (profile <- onNear) (control <- true)
+test "IntPreorder" (SampledMode linear) (profile <- onNear) (control <- true)
+test "IntPartialOrder" (SampledMode linear) (profile <- onLess) (control <- true)
+test "IntPartialOrder" (SampledMode linear) (profile <- onCyclic) (control <- true)
+test "IntTotalOrder" (SampledMode linear) (profile <- onLess) (control <- true)
+test "IntTotalOrder" (SampledMode linear) (profile <- onCyclic) (control <- true)
+test "IntTotalOrder" (SampledMode linear) (profile <- onAlways) (control <- true)
+test "IntStrictOrder" (SampledMode linear) (profile <- onCyclicStrict) (control <- true)
+test "IntBijective" (SampledMode linear) (profile <- halfWithDouble) (control <- true)
+
+-- Object: an order (reflexive, transitive, not symmetric) and a tolerance (reflexive, symmetric,
+-- not transitive) per carrier; on Bool no reflexive symmetric relation fails transitivity, so its
+-- break is inequality, which fails reflexivity too
+leqIntObject : Object Int := { eq := fn x y { x <= y } }
+nearIntObject : Object Int := { eq := fn x y { x - y <= 1 and y - x <= 1 } }
+leqIntPairs : List (Related Int leqIntObject.eq) := [{ x := 0, y := 1 }]
+leqIntChains : List (Chain Int leqIntObject.eq) := [{ x := 0, y := 1, z := 2 }]
+nearIntPairs : List (Related Int nearIntObject.eq) := [{ x := 0, y := 1 }]
+nearIntChains : List (Chain Int nearIntObject.eq) := [{ x := 0, y := 1, z := 2 }]
+onLeqIntObject : List Binding := [ { parameter := just "model", type := nothing, generator := "leqIntObject", coverage := Listed }, { parameter := just "p", type := nothing, generator := "leqIntPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "leqIntChains", coverage := Listed } ]
+onNearIntObject : List Binding := [ { parameter := just "model", type := nothing, generator := "nearIntObject", coverage := Listed }, { parameter := just "p", type := nothing, generator := "nearIntPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "nearIntChains", coverage := Listed } ]
+test "IntIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onLeqIntObject) (control <- true)
+test "IntIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onNearIntObject) (control <- true)
+
+leqNatObject : Object Nat := { eq := fn x y { x <= y } }
+nearNatObject : Object Nat := { eq := fn x y { x <= y + 1 and y <= x + 1 } }
+leqNatPairs : List (Related Nat leqNatObject.eq) := [{ x := 0, y := 1 }]
+leqNatChains : List (Chain Nat leqNatObject.eq) := [{ x := 0, y := 1, z := 2 }]
+nearNatPairs : List (Related Nat nearNatObject.eq) := [{ x := 0, y := 1 }]
+nearNatChains : List (Chain Nat nearNatObject.eq) := [{ x := 0, y := 1, z := 2 }]
+onLeqNatObject : List Binding := [ { parameter := just "model", type := nothing, generator := "leqNatObject", coverage := Listed }, { parameter := just "p", type := nothing, generator := "leqNatPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "leqNatChains", coverage := Listed } ]
+onNearNatObject : List Binding := [ { parameter := just "model", type := nothing, generator := "nearNatObject", coverage := Listed }, { parameter := just "p", type := nothing, generator := "nearNatPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "nearNatChains", coverage := Listed } ]
+test "NatIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onLeqNatObject) (control <- true)
+test "NatIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onNearNatObject) (control <- true)
+
+leqBoolObject : Object Bool := { eq := fn x y { not x or y } }
+neqBoolObject : Object Bool := { eq := fn x y { not (x == y) } }
+leqBoolPairs : List (Related Bool leqBoolObject.eq) := [{ x := false, y := true }]
+leqBoolChains : List (Chain Bool leqBoolObject.eq) := [{ x := false, y := true, z := true }]
+neqBoolPairs : List (Related Bool neqBoolObject.eq) := [{ x := false, y := true }]
+neqBoolChains : List (Chain Bool neqBoolObject.eq) := [{ x := true, y := false, z := true }]
+onLeqBoolObject : List Binding := [ { parameter := just "model", type := nothing, generator := "leqBoolObject", coverage := Listed }, { parameter := just "p", type := nothing, generator := "leqBoolPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "leqBoolChains", coverage := Listed } ]
+onNeqBoolObject : List Binding := [ { parameter := just "model", type := nothing, generator := "neqBoolObject", coverage := Listed }, { parameter := just "p", type := nothing, generator := "neqBoolPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "neqBoolChains", coverage := Listed } ]
+test "BoolIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onLeqBoolObject) (control <- true)
+test "BoolIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onNeqBoolObject) (control <- true)
+
+-- on strings the tolerance is "equal, or one of the two empty": "" is near everything
+leqStringObject : Object String := { eq := fn x y { stringIsOrderedModel.leq x y } }
+hubStringObject : Object String := { eq := fn x y { x == y or x == "" or y == "" } }
+leqStringPairs : List (Related String leqStringObject.eq) := [{ x := "a", y := "b" }]
+leqStringChains : List (Chain String leqStringObject.eq) := [{ x := "a", y := "b", z := "c" }]
+hubStringPairs : List (Related String hubStringObject.eq) := [{ x := "a", y := "" }]
+hubStringChains : List (Chain String hubStringObject.eq) := [{ x := "a", y := "", z := "b" }]
+onLeqStringObject : List Binding := [ { parameter := just "model", type := nothing, generator := "leqStringObject", coverage := Listed }, { parameter := just "p", type := nothing, generator := "leqStringPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "leqStringChains", coverage := Listed } ]
+onHubStringObject : List Binding := [ { parameter := just "model", type := nothing, generator := "hubStringObject", coverage := Listed }, { parameter := just "p", type := nothing, generator := "hubStringPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "hubStringChains", coverage := Listed } ]
+test "StringIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onLeqStringObject) (control <- true)
+test "StringIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onHubStringObject) (control <- true)
+
+leqFloatObject : Object Float64 := { eq := fn x y { x <= y } }
+nearFloatObject : Object Float64 := { eq := fn x y { x - y <= 1.0 and y - x <= 1.0 } }
+leqFloatPairs : List (Related Float64 leqFloatObject.eq) := [{ x := 0.0, y := 1.0 }]
+leqFloatChains : List (Chain Float64 leqFloatObject.eq) := [{ x := 0.0, y := 1.0, z := 2.0 }]
+nearFloatPairs : List (Related Float64 nearFloatObject.eq) := [{ x := 0.0, y := 1.0 }]
+nearFloatChains : List (Chain Float64 nearFloatObject.eq) := [{ x := 0.0, y := 1.0, z := 2.0 }]
+onLeqFloatObject : List Binding := [ { parameter := just "model", type := nothing, generator := "leqFloatObject", coverage := Listed }, { parameter := just "p", type := nothing, generator := "leqFloatPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "leqFloatChains", coverage := Listed } ]
+onNearFloatObject : List Binding := [ { parameter := just "model", type := nothing, generator := "nearFloatObject", coverage := Listed }, { parameter := just "p", type := nothing, generator := "nearFloatPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "nearFloatChains", coverage := Listed } ]
+test "FloatIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onLeqFloatObject) (control <- true)
+test "FloatIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onNearFloatObject) (control <- true)
+
+leqListObject : Object (List Bool) := { eq := fn xs ys { lengthList Bool xs <= lengthList Bool ys } }
+nearListObject : Object (List Bool) := { eq := fn xs ys { lengthList Bool xs <= lengthList Bool ys + 1 and lengthList Bool ys <= lengthList Bool xs + 1 } }
+leqListPairs : List (Related (List Bool) leqListObject.eq) := [{ x := nil, y := [true] }]
+leqListChains : List (Chain (List Bool) leqListObject.eq) := [{ x := nil, y := [true], z := [true, false] }]
+nearListPairs : List (Related (List Bool) nearListObject.eq) := [{ x := nil, y := [true] }]
+nearListChains : List (Chain (List Bool) nearListObject.eq) := [{ x := nil, y := [true], z := [true, false] }]
+onLeqListObject : List Binding := [ { parameter := just "model", type := nothing, generator := "leqListObject", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "x", type := nothing, generator := "coreBoolLists", coverage := Listed }, { parameter := just "p", type := nothing, generator := "leqListPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "leqListChains", coverage := Listed } ]
+onNearListObject : List Binding := [ { parameter := just "model", type := nothing, generator := "nearListObject", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "x", type := nothing, generator := "coreBoolLists", coverage := Listed }, { parameter := just "p", type := nothing, generator := "nearListPairs", coverage := Listed }, { parameter := just "c", type := nothing, generator := "nearListChains", coverage := Listed } ]
+test "ListIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onLeqListObject) (control <- true)
+test "ListIsAnObject" (SampledMode linear) (seed <- 20261020) (profile <- onNearListObject) (control <- true)
+
+-- Order: `less` fails reflexivity (and totality), the tournament transitivity only, `always`
+-- antisymmetry only; on Bool every total antisymmetric reflexive relation is an order, so its
+-- break of transitivity is inequality
+lessIntOrder : Order Int (structural Int) := { leq := fn x y { x < y } }
+cyclicIntOrder : Order Int (structural Int) := { leq := cyclic }
+alwaysIntOrder : Order Int (structural Int) := { leq := fn x y { x <= y or y <= x } }
+cyclicIntOrderChains : List (Chain Int cyclicIntOrder.leq) := [{ x := 0, y := 1, z := 2 }]
+onCyclicIntOrder : List Binding := [ { parameter := just "model", type := nothing, generator := "cyclicIntOrder", coverage := Listed }, { parameter := just "c", type := nothing, generator := "cyclicIntOrderChains", coverage := Listed } ]
+onAlwaysIntOrder : List Binding := [ { parameter := just "model", type := nothing, generator := "alwaysIntOrder", coverage := Listed } ]
+test "IntIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCyclicIntOrder) (control <- true)
+test "IntIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onAlwaysIntOrder) (control <- true)
+
+cyclicNatOrder : Order Nat (structural Nat) := { leq := fn a b { a == b or (a < b and (b - a) mod 2 == 1) or (b < a and (a - b) mod 2 == 0) } }
+alwaysNatOrder : Order Nat (structural Nat) := { leq := fn x y { x <= y or y <= x } }
+cyclicNatOrderChains : List (Chain Nat cyclicNatOrder.leq) := [{ x := 0, y := 1, z := 2 }]
+onCyclicNatOrder : List Binding := [ { parameter := just "model", type := nothing, generator := "cyclicNatOrder", coverage := Listed }, { parameter := just "c", type := nothing, generator := "cyclicNatOrderChains", coverage := Listed } ]
+onAlwaysNatOrder : List Binding := [ { parameter := just "model", type := nothing, generator := "alwaysNatOrder", coverage := Listed } ]
+test "NatIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCyclicNatOrder) (control <- true)
+test "NatIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onAlwaysNatOrder) (control <- true)
+
+neqBoolOrder : Order Bool (structural Bool) := { leq := fn x y { not (x == y) } }
+alwaysBoolOrder : Order Bool (structural Bool) := { leq := fn x y { x == y or not (x == y) } }
+neqBoolOrderChains : List (Chain Bool neqBoolOrder.leq) := [{ x := true, y := false, z := true }]
+onNeqBoolOrder : List Binding := [ { parameter := just "model", type := nothing, generator := "neqBoolOrder", coverage := Listed }, { parameter := just "c", type := nothing, generator := "neqBoolOrderChains", coverage := Listed } ]
+onAlwaysBoolOrder : List Binding := [ { parameter := just "model", type := nothing, generator := "alwaysBoolOrder", coverage := Listed } ]
+test "BoolIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onNeqBoolOrder) (control <- true)
+test "BoolIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onAlwaysBoolOrder) (control <- true)
+
+-- the lexicographic order with "" moved: below "a" only, above every other string
+cyclicStringOrder : Order String (structural String) := { leq := fn x y { if x == y then true else if x == "" then y == "a" else if y == "" then not (x == "a") else stringIsOrderedModel.leq x y } }
+alwaysStringOrder : Order String (structural String) := { leq := fn x y { x == y or not (x == y) } }
+cyclicStringOrderChains : List (Chain String cyclicStringOrder.leq) := [{ x := "", y := "a", z := "b" }]
+onCyclicStringOrder : List Binding := [ { parameter := just "model", type := nothing, generator := "cyclicStringOrder", coverage := Listed }, { parameter := just "c", type := nothing, generator := "cyclicStringOrderChains", coverage := Listed }, byParameter "y" "sameOrString" ]
+onAlwaysStringOrder : List Binding := [ { parameter := just "model", type := nothing, generator := "alwaysStringOrder", coverage := Listed }, byParameter "y" "sameOrString" ]
+test "StringIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCyclicStringOrder) (control <- true)
+test "StringIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onAlwaysStringOrder) (control <- true)
+
+-- up within a unit, down beyond it
+cyclicFloatOrder : Order Float64 (structural Float64) := { leq := fn a b { a == b or (a < b and b - a <= 1.0) or (b < a and a - b > 1.0) } }
+alwaysFloatOrder : Order Float64 (structural Float64) := { leq := fn x y { x <= y or y <= x } }
+cyclicFloatOrderChains : List (Chain Float64 cyclicFloatOrder.leq) := [{ x := 0.0, y := 1.0, z := 2.0 }]
+onCyclicFloatOrder : List Binding := [ { parameter := just "model", type := nothing, generator := "cyclicFloatOrder", coverage := Listed }, { parameter := just "c", type := nothing, generator := "cyclicFloatOrderChains", coverage := Listed }, byParameter "y" "sameOrFloat" ]
+onAlwaysFloatOrder : List Binding := [ { parameter := just "model", type := nothing, generator := "alwaysFloatOrder", coverage := Listed }, byParameter "y" "sameOrFloat" ]
+test "FloatIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onCyclicFloatOrder) (control <- true)
+test "FloatIsOrdered" (SampledMode linear) (seed <- 20261020) (profile <- onAlwaysFloatOrder) (control <- true)
+
+-- Semiring and ring at Int: `-` as the product fails its associativity, neutral, distributivity
+-- and absorption (and commutativity); `-` as the sum fails the sum's associativity and neutral
+-- (and commutativity, inverses); one equal to zero fails Distinct (and the product's neutral)
+minusTimesSemiring : Semiring Int (structural Int) := { zero := 0, one := 1, plus := intPlus, times := intMinus }
+oneIsZeroSemiring : Semiring Int (structural Int) := { zero := 0, one := 0, plus := intPlus, times := intTimes }
+onMinusTimesSemiring : List Binding := [ { parameter := just "model", type := nothing, generator := "minusTimesSemiring", coverage := Listed } ]
+onOneIsZeroSemiring : List Binding := [ { parameter := just "model", type := nothing, generator := "oneIsZeroSemiring", coverage := Listed } ]
+test "IntIsASemiring" (SampledMode linear) (seed <- 20261020) (profile <- onMinusTimesSemiring) (control <- true)
+test "IntIsASemiring" (SampledMode linear) (seed <- 20261020) (profile <- onOneIsZeroSemiring) (control <- true)
+
+minusPlusRing : CommutativeRing Int (structural Int) := { zero := 0, one := 1, plus := intMinus, times := intTimes, negate := fn x { 0 - x } }
+minusTimesRing : CommutativeRing Int (structural Int) := { zero := 0, one := 1, plus := intPlus, times := intMinus, negate := fn x { 0 - x } }
+oneIsZeroRing : CommutativeRing Int (structural Int) := { zero := 0, one := 0, plus := intPlus, times := intTimes, negate := fn x { 0 - x } }
+onMinusPlusRing : List Binding := [ { parameter := just "model", type := nothing, generator := "minusPlusRing", coverage := Listed } ]
+onMinusTimesRing : List Binding := [ { parameter := just "model", type := nothing, generator := "minusTimesRing", coverage := Listed } ]
+onOneIsZeroRing : List Binding := [ { parameter := just "model", type := nothing, generator := "oneIsZeroRing", coverage := Listed } ]
+test "IntIsACommutativeRing" (SampledMode linear) (seed <- 20261020) (profile <- onMinusPlusRing) (control <- true)
+test "IntIsACommutativeRing" (SampledMode linear) (seed <- 20261020) (profile <- onMinusTimesRing) (control <- true)
+test "IntIsACommutativeRing" (SampledMode linear) (seed <- 20261020) (profile <- onOneIsZeroRing) (control <- true)
+
+-- The ordered semiring of Nat, one break per line. PositiveClosed cannot fail where Least holds
+-- (zero below every value makes its conclusion true), so it is broken with Least, by the reversed
+-- order and a product that never gives zero.
+natStandard : Semiring Nat (structural Nat) := { zero := 0, one := 1, plus := fn a b { a + b }, times := fn a b { a * b } }
+natLeq : Order Nat (structural Nat) := { leq := fn a b { a <= b } }
+skewPlusNat : OrderedSemiring Nat (structural Nat) := { semiring := { zero := 0, one := 1, plus := fn a b { a + 2 * b }, times := fn a b { a * b } }, order := natLeq }
+squareTimesNat : OrderedSemiring Nat (structural Nat) := { semiring := { zero := 0, one := 1, plus := fn a b { a + b }, times := fn a b { a * b * b } }, order := natLeq }
+shiftedTimesNat : OrderedSemiring Nat (structural Nat) := { semiring := { zero := 0, one := 1, plus := fn a b { a + b }, times := fn a b { a * b + 1 } }, order := natLeq }
+oneIsZeroNat : OrderedSemiring Nat (structural Nat) := { semiring := { zero := 0, one := 0, plus := fn a b { a + b }, times := fn a b { a * b } }, order := natLeq }
+oneIsTwoNat : OrderedSemiring Nat (structural Nat) := { semiring := { zero := 0, one := 2, plus := fn a b { a + b }, times := fn a b { a * b } }, order := natLeq }
+lessNat : OrderedSemiring Nat (structural Nat) := { semiring := natStandard, order := { leq := fn a b { a < b } } }
+cyclicNat : OrderedSemiring Nat (structural Nat) := { semiring := natStandard, order := cyclicNatOrder }
+alwaysNat : OrderedSemiring Nat (structural Nat) := { semiring := natStandard, order := alwaysNatOrder }
+equalNat : OrderedSemiring Nat (structural Nat) := { semiring := natStandard, order := { leq := fn a b { a == b } } }
+-- the evens first, then the odds: 2 before 1, but 3 after 2
+evensFirstNat : OrderedSemiring Nat (structural Nat) := { semiring := natStandard, order := { leq := fn a b { a mod 2 < b mod 2 or (a mod 2 == b mod 2 and a <= b) } } }
+reversedNat : OrderedSemiring Nat (structural Nat) := { semiring := natStandard, order := { leq := fn a b { b <= a } } }
+reversedShiftedNat : OrderedSemiring Nat (structural Nat) := { semiring := { zero := 0, one := 1, plus := fn a b { a + b }, times := fn a b { a * b + 1 } }, order := { leq := fn a b { b <= a } } }
+cyclicNatChains : List (Chain Nat cyclicNat.order.leq) := [{ x := 0, y := 1, z := 2 }]
+onSkewPlusNat : List Binding := [ { parameter := just "model", type := nothing, generator := "skewPlusNat", coverage := Listed } ]
+onSquareTimesNat : List Binding := [ { parameter := just "model", type := nothing, generator := "squareTimesNat", coverage := Listed } ]
+onShiftedTimesNat : List Binding := [ { parameter := just "model", type := nothing, generator := "shiftedTimesNat", coverage := Listed } ]
+onOneIsZeroNat : List Binding := [ { parameter := just "model", type := nothing, generator := "oneIsZeroNat", coverage := Listed } ]
+onOneIsTwoNat : List Binding := [ { parameter := just "model", type := nothing, generator := "oneIsTwoNat", coverage := Listed } ]
+onLessNat : List Binding := [ { parameter := just "model", type := nothing, generator := "lessNat", coverage := Listed } ]
+onCyclicNat : List Binding := [ { parameter := just "model", type := nothing, generator := "cyclicNat", coverage := Listed }, { parameter := just "c", type := nothing, generator := "cyclicNatChains", coverage := Listed } ]
+onAlwaysNat : List Binding := [ { parameter := just "model", type := nothing, generator := "alwaysNat", coverage := Listed } ]
+onEqualNat : List Binding := [ { parameter := just "model", type := nothing, generator := "equalNat", coverage := Listed } ]
+onEvensFirstNat : List Binding := [ { parameter := just "model", type := nothing, generator := "evensFirstNat", coverage := Listed } ]
+onReversedNat : List Binding := [ { parameter := just "model", type := nothing, generator := "reversedNat", coverage := Listed } ]
+onReversedShiftedNat : List Binding := [ { parameter := just "model", type := nothing, generator := "reversedShiftedNat", coverage := Listed } ]
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onSkewPlusNat) (control <- true)
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onSquareTimesNat) (control <- true)
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onShiftedTimesNat) (control <- true)
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onOneIsZeroNat) (control <- true)
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onOneIsTwoNat) (control <- true)
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onLessNat) (control <- true)
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onCyclicNat) (control <- true)
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onAlwaysNat) (control <- true)
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onEqualNat) (control <- true)
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onEvensFirstNat) (control <- true)
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onReversedNat) (control <- true)
+test "NatIsAnOrderedSemiring" (SampledMode linear) (seed <- 20261020) (profile <- onReversedShiftedNat) (control <- true)
+
+-- String monoid: concatenation with a mark after each join is not associative (nor neutral)
+markedStringMonoid : Monoid String (structural String) := { neutral := "", combine := fn x y { x <> y <> "x" } }
+onMarkedStringMonoid : List Binding := [ { parameter := just "model", type := nothing, generator := "markedStringMonoid", coverage := Listed } ]
+test "StringIsAMonoid" (SampledMode linear) (seed <- 20261020) (profile <- onMarkedStringMonoid) (control <- true)
+
+-- Boolean algebra: implication as the meet, or as the join, fails the lattice laws, a neutral,
+-- the two distributive laws; top equal to bottom fails Distinct
+impliesMeetAlgebra : BooleanAlgebra Bool (structural Bool) := { top := true, bottom := false, complement := not, meet := fn a b { not a or b }, join := disj }
+impliesJoinAlgebra : BooleanAlgebra Bool (structural Bool) := { top := true, bottom := false, complement := not, meet := conj, join := fn a b { not a or b } }
+topIsBottomAlgebra : BooleanAlgebra Bool (structural Bool) := { top := true, bottom := true, complement := not, meet := conj, join := disj }
+onImpliesMeetAlgebra : List Binding := [ { parameter := just "model", type := nothing, generator := "impliesMeetAlgebra", coverage := Listed } ]
+onImpliesJoinAlgebra : List Binding := [ { parameter := just "model", type := nothing, generator := "impliesJoinAlgebra", coverage := Listed } ]
+onTopIsBottomAlgebra : List Binding := [ { parameter := just "model", type := nothing, generator := "topIsBottomAlgebra", coverage := Listed } ]
+test "BoolIsABooleanAlgebra" (SampledMode linear) (seed <- 20261020) (profile <- onImpliesMeetAlgebra) (control <- true)
+test "BoolIsABooleanAlgebra" (SampledMode linear) (seed <- 20261020) (profile <- onImpliesJoinAlgebra) (control <- true)
+test "BoolIsABooleanAlgebra" (SampledMode linear) (seed <- 20261020) (profile <- onTopIsBottomAlgebra) (control <- true)
+impliesMeetBooleans : TheBooleans := { algebra := impliesMeetAlgebra }
+impliesJoinBooleans : TheBooleans := { algebra := impliesJoinAlgebra }
+topIsBottomBooleans : TheBooleans := { algebra := topIsBottomAlgebra }
+onImpliesMeetBooleans : List Binding := [ { parameter := just "model", type := nothing, generator := "impliesMeetBooleans", coverage := Listed } ]
+onImpliesJoinBooleans : List Binding := [ { parameter := just "model", type := nothing, generator := "impliesJoinBooleans", coverage := Listed } ]
+onTopIsBottomBooleans : List Binding := [ { parameter := just "model", type := nothing, generator := "topIsBottomBooleans", coverage := Listed } ]
+test "BoolIsTheBooleans" (SampledMode linear) (seed <- 20261020) (profile <- onImpliesMeetBooleans) (control <- true)
+test "BoolIsTheBooleans" (SampledMode linear) (seed <- 20261020) (profile <- onImpliesJoinBooleans) (control <- true)
+test "BoolIsTheBooleans" (SampledMode linear) (seed <- 20261020) (profile <- onTopIsBottomBooleans) (control <- true)
+
+-- Metrics. At Int: a unit added off nothing fails the diagonal only; zero everywhere fails
+-- indiscernibility only; a step down costing twice a step up fails symmetry only (it is a
+-- quasimetric); the negated distance fails non-negativity, and the triangle with it, since the
+-- other laws imply non-negativity (equality.lth's comment).
+diagonalIntMetric : Metric MetricInteger (structural MetricInteger) := { d := fn x y { 1.0 + floatAbs (toFloat64 (x - y)) } }
+zeroIntMetric : Metric MetricInteger (structural MetricInteger) := { d := fn x y { 0.0 * toFloat64 (x - y) } }
+skewIntMetric : Metric MetricInteger (structural MetricInteger) := { d := fn x y { if x <= y then toFloat64 (y - x) else 2.0 * toFloat64 (x - y) } }
+negatedIntMetric : Metric MetricInteger (structural MetricInteger) := { d := fn x y { 0.0 - floatAbs (toFloat64 (x - y)) } }
+onDiagonalIntMetric : List Binding := [ { parameter := just "p", type := nothing, generator := "coreMetricPairs", coverage := Listed }, { parameter := just "model", type := nothing, generator := "diagonalIntMetric", coverage := Listed }, byParameter "y" "sameOrInt" ]
+onZeroIntMetric : List Binding := [ { parameter := just "p", type := nothing, generator := "coreMetricPairs", coverage := Listed }, { parameter := just "model", type := nothing, generator := "zeroIntMetric", coverage := Listed }, byParameter "y" "sameOrInt" ]
+onSkewIntMetric : List Binding := [ { parameter := just "p", type := nothing, generator := "coreMetricPairs", coverage := Listed }, { parameter := just "model", type := nothing, generator := "skewIntMetric", coverage := Listed }, byParameter "y" "sameOrInt" ]
+onNegatedIntMetric : List Binding := [ { parameter := just "p", type := nothing, generator := "coreMetricPairs", coverage := Listed }, { parameter := just "model", type := nothing, generator := "negatedIntMetric", coverage := Listed }, byParameter "y" "sameOrInt" ]
+test "IntIsAMetric" (SampledMode linear) (seed <- 20261020) (profile <- onDiagonalIntMetric) (control <- true)
+test "IntIsAMetric" (SampledMode linear) (seed <- 20261020) (profile <- onZeroIntMetric) (control <- true)
+test "IntIsAMetric" (SampledMode linear) (seed <- 20261020) (profile <- onSkewIntMetric) (control <- true)
+test "IntIsAMetric" (SampledMode linear) (seed <- 20261020) (profile <- onNegatedIntMetric) (control <- true)
+
+-- At Bool, two points: the triangle holds whenever the diagonal is zero, so it is broken with a
+-- negative diagonal; a negative off-diagonal fails non-negativity and the triangle through it.
+diagonalBoolMetric : Metric Bool (structural Bool) := { d := fn x y { if x == y then 1.0 else 2.0 } }
+skewBoolMetric : Metric Bool (structural Bool) := { d := fn x y { if x == y then 0.0 else if x then 1.0 else 2.0 } }
+negativeDiagonalBoolMetric : Metric Bool (structural Bool) := { d := fn x y { if x == y then -1.0 else 1.0 } }
+negativeBoolMetric : Metric Bool (structural Bool) := { d := fn x y { if x == y then 0.0 else -1.0 } }
+onDiagonalBoolMetric : List Binding := [ { parameter := just "model", type := nothing, generator := "diagonalBoolMetric", coverage := Listed } ]
+onSkewBoolMetric : List Binding := [ { parameter := just "model", type := nothing, generator := "skewBoolMetric", coverage := Listed } ]
+onNegativeDiagonalBoolMetric : List Binding := [ { parameter := just "model", type := nothing, generator := "negativeDiagonalBoolMetric", coverage := Listed } ]
+onNegativeBoolMetric : List Binding := [ { parameter := just "model", type := nothing, generator := "negativeBoolMetric", coverage := Listed } ]
+test "BoolIsAMetric" (SampledMode linear) (seed <- 20261020) (profile <- onDiagonalBoolMetric) (control <- true)
+test "BoolIsAMetric" (SampledMode linear) (seed <- 20261020) (profile <- onSkewBoolMetric) (control <- true)
+test "BoolIsAMetric" (SampledMode linear) (seed <- 20261020) (profile <- onNegativeDiagonalBoolMetric) (control <- true)
+test "BoolIsAMetric" (SampledMode linear) (seed <- 20261020) (profile <- onNegativeBoolMetric) (control <- true)
+
+-- Coproducts. Bool: both injections true fails CaseRight. Maybe: `nothing` sent to the second
+-- branch at false fails CaseLeft.
+trueTwiceCoproduct : Coproduct Unit Unit Bool (structural Bool) := { left := fn u { true }, right := fn u { true }, cases := fn (C : U) f g b { if b then f unit else g unit } }
+onTrueTwiceCoproduct : List Binding := [ { parameter := just "model", type := nothing, generator := "trueTwiceCoproduct", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "c", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreUnitTrue", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreUnitFalse", coverage := Listed } ]
+test "BoolIsACoproduct" (SampledMode linear) (seed <- 20261020) (profile <- onTrueTwiceCoproduct) (control <- true)
+nothingToSecondMaybe : Coproduct Unit Bool (Maybe Bool) (structural (Maybe Bool)) := { left := fn u { nothing }, right := fn b { just b }, cases := fn (C : U) f g m { match m { nothing -> g false ; just b -> g b } } }
+onNothingToSecondMaybe : List Binding := [ { parameter := just "model", type := nothing, generator := "nothingToSecondMaybe", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "c", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreUnitTrue", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed } ]
+test "MaybeIsACoproduct" (SampledMode linear) (seed <- 20261020) (profile <- onNothingToSecondMaybe) (control <- true)
+
+-- The free monoid on Bool: a marked join fails associativity; [false] as the neutral fails
+-- FoldNeutral and NilIsNeutral; injecting the negation fails FoldInject
+markedListFree : Lists Bool (structural (List Bool)) := { free := { monoid := { neutral := nil, combine := fn xs ys { combineList Bool (combineList Bool xs ys) [true] } }, inject := fn b { cons b nil }, foldable := { fold := foldList } } }
+falseNeutralListFree : Lists Bool (structural (List Bool)) := { free := { monoid := { neutral := [false], combine := combineList Bool }, inject := fn b { cons b nil }, foldable := { fold := foldList } } }
+negatedInjectListFree : Lists Bool (structural (List Bool)) := { free := { monoid := { neutral := nil, combine := combineList Bool }, inject := fn b { cons (not b) nil }, foldable := { fold := foldList } } }
+onMarkedListFree : List Binding := [ { parameter := just "model", type := nothing, generator := "markedListFree", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "N", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "nO", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "n", type := nothing, generator := "coreBoolMonoid", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := nothing, type := just "List", generator := "coreBoolLists", coverage := Listed } ]
+onFalseNeutralListFree : List Binding := [ { parameter := just "model", type := nothing, generator := "falseNeutralListFree", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "N", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "nO", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "n", type := nothing, generator := "coreBoolMonoid", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := nothing, type := just "List", generator := "coreBoolLists", coverage := Listed } ]
+onNegatedInjectListFree : List Binding := [ { parameter := just "model", type := nothing, generator := "negatedInjectListFree", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "N", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "nO", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "n", type := nothing, generator := "coreBoolMonoid", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := nothing, type := just "List", generator := "coreBoolLists", coverage := Listed } ]
+test "ListIsTheFreeMonoid" ExhaustiveMode (seed <- 20261020) (profile <- onMarkedListFree) (control <- true)
+test "ListIsTheFreeMonoid" ExhaustiveMode (seed <- 20261020) (profile <- onFalseNeutralListFree) (control <- true)
+test "ListIsTheFreeMonoid" ExhaustiveMode (seed <- 20261020) (profile <- onNegatedInjectListFree) (control <- true)
+
+-- Named products: a first projection reading the second field fails PairFst, and Pairing with
+-- it (a pair of the record's own fields is the record, so Pairing cannot fail alone)
+secondAsFirstRecords : NamedProduct Bool Bool { x : Bool, y : Bool } (structural Bool) (structural Bool) (structural { x : Bool, y : Bool }) := { pair := fn a b { { x := a, y := b } }, first := fn r { r.y }, second := fn r { r.y }, firstName := "x", secondName := "y", select := fn n r { if n == "x" then just (one r.x) else just (two r.y) } }
+firstAsSecondRecords : NamedProduct Bool Bool { x : Bool, y : Bool } (structural Bool) (structural Bool) (structural { x : Bool, y : Bool }) := { pair := fn a b { { x := a, y := b } }, first := fn r { r.x }, second := fn r { r.x }, firstName := "x", secondName := "y", select := fn n r { if n == "x" then just (one r.x) else just (two r.y) } }
+onSecondAsFirstRecords : List Binding := [ { parameter := just "model", type := nothing, generator := "secondAsFirstRecords", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed } ]
+onFirstAsSecondRecords : List Binding := [ { parameter := just "model", type := nothing, generator := "firstAsSecondRecords", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed } ]
+test "RecordsAreNamedProducts" (SampledMode linear) (seed <- 20261020) (profile <- onSecondAsFirstRecords) (control <- true)
+test "RecordsAreNamedProducts" (SampledMode linear) (seed <- 20261020) (profile <- onFirstAsSecondRecords) (control <- true)
+
+-- Named coproducts: a case negating the first branch fails CaseLeft (and CasesAreAll), one
+-- negating the second CaseRight; swapped injections, with their names swapped too, fail
+-- CasesAreAll only at this census, where f and g are both the identity
+coreSumCensus : List { one : Bool || two : Bool } := [one false, two false, one true, two true]
+negatedLeftSums : NamedCoproduct Bool Bool ({ one : Bool || two : Bool }) (structural ({ one : Bool || two : Bool })) := { left := fn u { one u }, right := fn v { two v }, cases := fn (C : U) f g s { match s { one a -> f (not a) ; two b -> g b } }, leftName := "one", rightName := "two", labelOf := fn s { match s { one a -> "one" ; two b -> "two" } } }
+negatedRightSums : NamedCoproduct Bool Bool ({ one : Bool || two : Bool }) (structural ({ one : Bool || two : Bool })) := { left := fn u { one u }, right := fn v { two v }, cases := fn (C : U) f g s { match s { one a -> f a ; two b -> g (not b) } }, leftName := "one", rightName := "two", labelOf := fn s { match s { one a -> "one" ; two b -> "two" } } }
+swappedSums : NamedCoproduct Bool Bool ({ one : Bool || two : Bool }) (structural ({ one : Bool || two : Bool })) := { left := fn u { two u }, right := fn v { one v }, cases := fn (C : U) f g s { match s { one a -> f a ; two b -> g b } }, leftName := "two", rightName := "one", labelOf := fn s { match s { one a -> "one" ; two b -> "two" } } }
+onNegatedLeftSums : List Binding := [ { parameter := just "model", type := nothing, generator := "negatedLeftSums", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "c", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "v", type := nothing, generator := "coreSumCensus", coverage := Listed } ]
+onNegatedRightSums : List Binding := [ { parameter := just "model", type := nothing, generator := "negatedRightSums", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "c", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "v", type := nothing, generator := "coreSumCensus", coverage := Listed } ]
+onSwappedSums : List Binding := [ { parameter := just "model", type := nothing, generator := "swappedSums", coverage := Listed }, { parameter := just "A", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "C", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "c", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "g", type := nothing, generator := "coreBoolIdentity", coverage := Listed }, { parameter := just "v", type := nothing, generator := "coreSumCensus", coverage := Listed } ]
+test "SumsAreNamedCoproducts" (SampledMode linear) (seed <- 20261020) (profile <- onNegatedLeftSums) (control <- true)
+test "SumsAreNamedCoproducts" (SampledMode linear) (seed <- 20261020) (profile <- onNegatedRightSums) (control <- true)
+test "SumsAreNamedCoproducts" (SampledMode linear) (seed <- 20261020) (profile <- onSwappedSums) (control <- true)
+
+-- The quotient of Int by parity: a projection flipping the negatives fails ProjectsRelated (-1
+-- and 1 are related, projected apart); its lift fails with it, since lift after project is f
+flippedNegativesFin : Coequalizer Int (Fin 2) (structural (Fin 2)) (fn x y { x mod 2 == y mod 2 }) := { project := fn x { if x < 0 then 1 - x mod 2 else x mod 2 }, representative := fn x { x }, lift := fn (B : U) b f respect x { f x } }
+onFlippedNegativesFin : List Binding := [ { parameter := just "model", type := nothing, generator := "flippedNegativesFin", coverage := Listed }, { parameter := just "n", type := nothing, generator := "coreTwo", coverage := Listed }, { parameter := just "B", type := nothing, generator := "coreType", coverage := Listed }, { parameter := just "b", type := nothing, generator := "boolEq", coverage := Listed }, { parameter := just "f", type := nothing, generator := "coreModuloPredicate", coverage := Listed }, { parameter := just "respect", type := nothing, generator := "coreModuloRespect", coverage := Listed } ]
+test "FinIsACoequalizer" (SampledMode linear) (seed <- 20261020) (profile <- onFlippedNegativesFin) (control <- true)
+
+-- Finite quantifiers: `pairs` false everywhere, `every` and `some` right, fails QuantifiersPairs only
+falsePairsQuantifiers : FiniteQuantifiers 1 := { every := forallBelow 1, some := existsBelow 1, pairs := fn p { false } }
+onFalsePairsQuantifiers : List Binding := [ { parameter := just "model", type := nothing, generator := "falsePairsQuantifiers", coverage := Listed }, { parameter := just "n", type := nothing, generator := "coreOne", coverage := Listed }, { parameter := just "p", type := nothing, generator := "coreFinPredicate", coverage := Listed }, { parameter := just "relation", type := nothing, generator := "coreFinRelation", coverage := Listed } ]
+test "KernelFiniteQuantifiers" (SampledMode linear) (seed <- 20261020) (profile <- onFalsePairsQuantifiers) (control <- true)
