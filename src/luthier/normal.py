@@ -1161,8 +1161,11 @@ def notices(typing, own):
     env = Env(typing, core_definitions())
     out = []
     for law in laws_of(env, own):
-        for inst in recognize(law):
-            out.append((law.name, inst.notice()))
+        try:
+            found = recognize(law)
+        except Exception:  # a notice only: a law the normal form cannot read is not reported
+            continue
+        out.extend((law.name, inst.notice()) for inst in found)
     return out
 
 
