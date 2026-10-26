@@ -2795,7 +2795,8 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line 
             export)
 Kind:       spec 10.S10, 7.S10, 8.S8, 8.S1, 2.S1; world.lth, laws.lth, test.lth, demand.lth,
             plan.lth; grammar.lth
-Status:     current
+Status:     current; items 9, 17 and 20 implemented 2026-10-26 (5b8dd91; 68d515a, dc187cb; c853b61),
+            report record/plan/after-core-2026-10-23/report-queue-kl.md; items 19 and 25 not in that bite
 
 D-2026-10-16-l  Item 24 (a) for the three rules, written into chapter 7: G6, the most specific
                 binding wins (a parameter named over its type; at equal specificity the test line
@@ -2808,7 +2809,9 @@ Quote:      "24->ok, a para las tres"
 Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line unknown until the
             export)
 Kind:       spec 7.R1, 7.R2; generators.lth `Resolution`; the theory of `Settling`
-Status:     current
+Status:     current; G6 and L5 implemented 2026-10-26 (395cd93, ed003db; L5 for a type the test line
+            does not name, a census of types left as naming the instance, the report's question); P8
+            not in that bite
 
 D-2026-10-16-m  Item 23 (a): a law all of whose cases are vacuous (no premise held) is not run, its
                 premise count the reason (L9.14: nothing can refute an empty run). And an iterative
@@ -3469,3 +3472,26 @@ Author:     the coordinator (one commit undoes it; Luciano told the next morning
 Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-26 night)
 Kind:       elaborate.py (`comparison`, `operator_use`), spec 4.R9
 Status:     current; comparisons in 444973f, arithmetic in 6142e9d (`numeric_literals`, 2026-10-27)
+
+D-2026-10-27-a  The kernel's identity in a cone, granular and transportable (Codex's review of the
+                night, finding 2: a kernel change kept the cone; record/plan/review-night-2026-10-27/
+                report.md). (1) The kernel is identified in a cone by a hash of its content, not by
+                the interpreter's tag. (2) Each change of the kernel is compared with the previous
+                kernel (the old code taken from git, P6) by running the test programs under both;
+                the result is stored as evidence, an edge H_old -> H_new with its grade and its
+                domain (the programs compared), and certificates under H_old are served under H_new
+                through it (transport, as the planner's identities: the kernel is a specimen of the
+                semantics); edges compose. Where the comparison shows a difference, only the cones
+                where it shows are re-certified. (3) A certificate under a kernel hash with no edge
+                to the current one and no recoverable code is stale. Later, before the kernel changes
+                often: the kernel split into rule families (reduction and substitution, match,
+                structural equality, arithmetic, strings), each with its hash, a cone recording the
+                families its elaborated terms reach (a safe over-approximation).
+Author:     Luciano, on the coordinator's proposal ("Luthier tiene que ser granular, no puede ser
+            que cambiando un bit se tenga que recalibrar todo"; the risk he raised: "el hash
+            original puede ser sobre un código que no existe más")
+Quote:      "Sí, va."
+Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-27)
+Kind:       certify.py (cone, host_hash), kernel.py, a store of kernel edges; spec 6.S8 and 12.S13;
+            principles L10.4 (the key is the cone)
+Status:     current
