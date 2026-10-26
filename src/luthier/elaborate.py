@@ -1669,6 +1669,8 @@ def walk(v, c, expected=None):
             if ty is None or is_type(left, ty, c):
                 # a left operand the context does not name (4.R2 refuses it)
                 return apps(t.Var(op), [left, right])
+            if op in ARITHMETIC:
+                left, right, ty = numeric_literals(a, b, left, right, ty, c)
             return operator_use(op, a, left, right, ty, c)
         case s.Neg(x):
             value = walk(x, c)
@@ -1831,6 +1833,25 @@ def _float_literal(v):
     if isinstance(v, s.Neg) and (x := _float_literal(v.value)) is not None:
         return apps(t.Var('-'), [t.Lit(t.FloatConst(0.0)), x])
     return None
+
+
+def numeric_literals(a, b, left, right, ty, c):
+    """The operands of an arithmetic operator (`+`, `-`, `*`, `/`, `mod`) with an integer literal
+    read at the other operand's numeric type: `x + 0` and `0 + x` with `x : Float64` are `x + 0.0`
+    and `0.0 + x`, as `comparison` reads `x < 0` (D-2026-10-26-a; a literal read through
+    `fromInteger`, L7.6). Any other pair is returned as it came, for `operator_use` to judge."""
+    if _is_float(ty, c):
+        if (x := _float_literal(b)) is not None:
+            right = x
+        return left, right, ty
+    if (x := _float_literal(a)) is not None:
+        try:
+            rty = infer(right, c)
+        except Untyped:
+            rty = None
+        if _is_float(rty, c):
+            return x, right, t.Var('Float64')
+    return left, right, ty
 
 
 def comparison(op, a, b, left, ty, c):

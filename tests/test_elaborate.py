@@ -663,6 +663,23 @@ def test_a_comparison_types_its_operands_and_an_integer_literal_takes_float64():
             term(text, ctx)
 
 
+def test_an_integer_literal_in_arithmetic_takes_the_other_operand_s_float64():
+    # D-2026-10-26-a: as in comparisons, an integer literal beside a Float64 in arithmetic is the
+    # Float64 it denotes, on either side; two Ints stay Ints, and a named Int is not converted
+    ctx = 'x : Float64\nn : Int'
+    op = lambda o, a, b: apps(t.Var(o), [a, b])
+    zero, one = t.Lit(t.FloatConst(0.0)), t.Lit(t.FloatConst(1.0))
+    eq('x + 0', op('+', t.Var('x'), zero), ctx)
+    eq('0 + x', op('+', zero, t.Var('x')), ctx)
+    eq('x - 1', op('-', t.Var('x'), one), ctx)
+    eq('1 / x', op('/', one, t.Var('x')), ctx)
+    eq('x * -1', op('*', t.Var('x'), op('-', zero, one)), ctx)
+    eq('n + 1', op('+', t.Var('n'), t.Lit(t.IntConst(1))), ctx)
+    for text in ('x + n', 'n + x'):
+        with pytest.raises(TypingError, match='takes'):
+            term(text, ctx)
+
+
 def test_a_claim_s_binder_is_solved_by_a_type_parameter_of_the_same_name():
     # night bite T (report-wave-a-3b.md, "For others"): `size xs` with `xs : List A` resolved
     # ListIsIndexed's binder `A` by an equal pattern and left it unsolved; swapped names (`B * A`
