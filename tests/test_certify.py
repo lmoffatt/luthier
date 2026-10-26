@@ -1320,8 +1320,10 @@ def test_the_union_holds_on_the_reference_and_its_controls_refute_the_broken_one
 
 # core bite 12a, item 5: about 1 s an exhaustive case at HEAD (TheThreeSourcesGrade alone, 270 cases,
 # 277 s at 8ef6389, 147 s just before it; 132 s at 3e523d5, which wrote the test), most of it
-# kernel.substitute on fresh terms; the two files run without a store, so half an hour or more
-@pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="half an hour or more; set LUTHIER_SLOW=1")
+# kernel.substitute on fresh terms; the two files run without a store, so half an hour or more.
+# Kernel 2026-10-27 (abc85ac, report-kernel-2026-10-27.md): about three times faster per case; this
+# test 41 min wall, 25 min of CPU on a loaded machine, still above the 10 minutes that would unmark it
+@pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="about 25 minutes; set LUTHIER_SLOW=1")
 def test_the_regions_hold_on_the_references_and_their_controls_refute_the_broken_ones():
     # record/IA/regions-2026-10-17/prompt-theory.md (D-2026-10-16-i, D-2026-10-16-j): generators.lth's
     # `Degeneracies` on the declared cases of List, Mat and Symmetric; certification.lth's `Regioning`
