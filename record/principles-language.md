@@ -1301,7 +1301,25 @@ L9.18  (His words) A numerical law relates an input tolerance to an output toler
        the largest ratio of error to bound, the law holding at a ratio of at most one; and every
        such law states as a premise its range of validity, a region sampled on both sides (L9.16),
        since the bounds hold for small tolerances only (D-2026-10-18-j). [proposed]
-References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d, D-2026-10-13-ad
+L9.19  (His words) Test the weakest link: in a chain of propositions the effort of evidence goes to
+       the link of least credibility, and what is already demonstrated is not demonstrated again
+       except as a check of Luthier's own machinery; for established mathematics the weak link is
+       Luthier's implementation itself. (The coordinator's reading) This is how the evidence
+       already composes: a chain's failure bound is the capped sum of its links' (L10.8,
+       D-2026-10-25-a), so lowering the largest term is the best use of effort, and a term a
+       theorem puts at zero gains nothing from a run. Two consequences (the coordinator's,
+       D-2026-10-27-b). A law that is an established result (Higham's bounds, a ring's laws on
+       `Int`, IEEE 754's semantics) cites its demonstration as evidence, a reference or a formal
+       proof such as Flocq's, graded proved by that source (clause 7); its tests certify the
+       specimen, that this implementation on this machine meets the law, and not the law. Running
+       an established result again is a regression of the machinery (the tester, the controls, the
+       identity), run when the machinery changes, and not evidence a run needs. (The model's) In
+       clause 7's chain the cited link costs zero (L10.2), so a chain's whole cost is its
+       specimen's and its identities', which is where a run's evidence goes; the regression of the
+       machinery is a record of the kind clause 8 keeps apart from the certificate of the law, and
+       a regression no change in the machinery asks for is bureaucracy (P8). [proposed]
+References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d,
+            D-2026-10-13-ad, D-2026-10-27-b
 Rests on:   O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r)
 Quote:      (L5) "La idea en realidad es buscar el objeto matematico que mejor lo represente y
             decirlo" (chat, 2026-10-05) (L11) "verificacion externa por teoremas o por delegacion
@@ -1313,7 +1331,12 @@ Quote:      (L5) "La idea en realidad es buscar el objeto matematico que mejor l
             que correspondan." (chat, 2026-10-15) (L9.15) "hay una forma recursiva donde fijamos
             tres áreas con probabilidad de error alfa o beta muy bajo y otra área gris donde se
             aumenta la resolución generando más samples ... acepto lo que decías de los alfa y
-            betas y deltas." (chat, 2026-10-15)
+            betas y deltas." (chat, 2026-10-15) (L9.19) "No tiene sentido demostrar lo ya
+            demostrado más que como verificación de la maquinaria de Luthier." "Creo que debería
+            casi ser un principio de Luthier. No hacer trabajo de más. O digamos que en una cadena
+            de proposiciones se testea el eslabón más débil (el de menos credibilidad?). En el caso
+            de leyes matemáticas establecidas, el eslabón débil es la implementación misma de
+            Luthier." (chat, 2026-10-27)
 Source:     (L5) Luciano, 2026-10-05 (chat:52d3e68e:2760); the puzzle 2026-10-10 (WhatsApp Ptt
             2026-10-10 at 10.12.21.md, 11:38 to 18:20) (L11) Luciano, 2022-08-03 and 2023-02-22
             (written:2023-02-22_tapp-wish-list:untested-a- tested); the grades by samples 2026-10-10
@@ -1323,11 +1346,13 @@ Source:     (L5) Luciano, 2026-10-05 (chat:52d3e68e:2760); the puzzle 2026-10-10
             draft 8 (bcdac41) (L9.13) Luciano, 2026-10-13 (chat:52b10bff:5037) (L9.14) Luciano,
             2026-10-15 (chat:luthier-3e:0, relayed by that session's message; the line unknown
             until the export) (L9.15) Luciano, 2026-10-15 (chat:luthier-3e:0, D-2026-10-15-b)
+            (L9.19) Luciano, 2026-10-27 (chat:luthier-3e:0, the coordinating session; D-2026-10-27-b)
 Status:     settled; clause 1 proposed (D-2026-10-12-k); clause 7 proposed on his mark; clause 10
             settled (D-2026-10-13-d, -e); clauses 11 and 12 settled (D-2026-10-13-l, -n); clause 13
             settled (his words, on D-2026-10-13-ad; his ok, chat:52b10bff:5083); clause 14 settled (his words,
             D-2026-10-15-a); clause 15 settled (his words,
-            D-2026-10-15-b)
+            D-2026-10-15-b); clause 19 proposed (his words and the coordinator's reading,
+            D-2026-10-27-b; the model's last sentence awaits his mark)
 History:    (L5) draft 1 (5769005): stated. draft 3 (c085ba4), on D-2026-10-11-d: laws accumulate
             and need not determine the operation. (L11) draft 0 (6d9dbd3): stated. draft 4
             (c7c6396): the four methods and the grade in the certificate; the dependence on the
@@ -1358,6 +1383,12 @@ History:    (L5) draft 1 (5769005): stated. draft 3 (c085ba4), on D-2026-10-11-d
             4 of the algebra audit, his "Yes"): the clause predated D-2026-10-18-f's split of a
             conjunction into conjuncts with one entry each, and a control that stopped at the
             first refutation left the rest unread.
+            2026-10-27: clause 19 added, proposed (D-2026-10-27-b): his remark that what is
+            demonstrated is not demonstrated again, the coordinator's reading of it through the
+            capped sum of D-2026-10-25-a and the two consequences stated in the decision; placed in
+            L9 and not L10 because it chooses a law's certifier (clause 5), rests on citation
+            (clause 7) and on the identity kept apart from the description (clause 8), and only
+            cites L10.8 for the sum; the last sentence is the model's.
 
 L10 A certificate records what is known of a law, its domain, its bound and its evidence; it is
     frozen, it serves every demand it meets, and it transports along identity.
@@ -1909,6 +1940,9 @@ blocks; the done and implemented items are in the record's drafts table.
   beside "derivative" kept whole for the differential; the reading of a derivation as the
   realization read as a value is his, and so is keeping clause 23's requirement as a law over the
   derivation; what waits is his mark on the wording of the five clauses.
+- L9.19, the weakest link (his words, D-2026-10-27-b): the coordinator's reading through the
+  capped sum and the model's last sentence, on where a run's evidence goes and when the
+  regression of the machinery is bureaucracy.
 
 ## Keys
 
