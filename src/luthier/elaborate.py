@@ -41,7 +41,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from . import surface as s, term as t
-from .kernel import alpha_equal, pattern_names, substitute
+from .kernel import _all_names, alpha_equal, free_names, pattern_names, substitute
 
 
 class ElaborationError(ValueError):
@@ -384,11 +384,31 @@ def widen(ty, c, fuel=12):
     return ty
 
 
+def substitute_all(sigma, x):
+    """`x` with each name of `sigma` (an unknown aside) replaced by its value at once, capture-
+    avoiding: a value that names another key (`A := B, B := Int`, a binder of a claim and a type
+    parameter of the caller sharing a name) is not replaced again. [night bite T, 2026-10-26;
+    report-wave-a-3b.md, "For others"]"""
+    names = [k for k, v in sigma.items() if not k.startswith('?') and v != t.Var(k)]
+    if any(k in free_names(sigma[j]) for j in names for k in names):
+        taken = _all_names(x) | set(sigma) | {n for k in names for n in _all_names(sigma[k])}
+        fresh = {}
+        for k in names:
+            n = 0
+            while f'{k}%{n}' in taken:
+                n += 1
+            fresh[k] = f'{k}%{n}'; taken.add(fresh[k])
+        for k in names:
+            x = substitute(k, t.Var(fresh[k]), x)
+        sigma = {fresh[k]: sigma[k] for k in names}; names = list(sigma)
+    for k in names:
+        x = substitute(k, sigma[k], x)
+    return x
+
+
 def instantiate(ty, sigma):
-    """`ty` with each name or unknown of `sigma` replaced (names capture-avoiding)."""
-    for k, v in sigma.items():
-        if not k.startswith('?'):
-            ty = substitute(k, v, ty)
+    """`ty` with each name or unknown of `sigma` replaced (names capture-avoiding, at once)."""
+    ty = substitute_all(sigma, ty)
     metas = {k: v for k, v in sigma.items() if k.startswith('?')}
     return _replace_metas(ty, metas) if metas else ty
 
@@ -418,12 +438,15 @@ def solve(pattern, actual, vars, sigma, c, fuel=8, strict=False):
         key = pattern.name
         if key in sigma:
             return True if is_meta(sigma[key]) or is_meta(actual) else fits(actual, sigma[key], c) and fits(sigma[key], actual, c)
-        if actual != pattern:
+        if actual != pattern or not is_meta(pattern):
+            # a binder of the pattern is solved even by a name of `actual` it shares (a claim's `A`
+            # at a caller's `A`, night bite T; report-wave-a-3b.md): left out, it was taken unsolved
             sigma[key] = actual
         return True
     if isinstance(actual, t.Hole):
         return not strict
-    if pattern == actual or alpha_equal(pattern, actual):
+    if (pattern == actual or alpha_equal(pattern, actual)) and not (vars and _free(pattern) & vars):
+        # an equal pattern that names a binder to solve is walked, so that the binder is solved
         return True
     if type(pattern) is type(actual):
         match pattern, actual:
@@ -1153,9 +1176,7 @@ def claim_matches(S, pattern_of, dty, extra_vars, c):
     # Keep every exact match, so two models declared at the same carrier remain an error.
     exact = []
     for claim, sigma in found:
-        pattern = pattern_of(claim)
-        for name, value in sigma.items():
-            pattern = substitute(name, value, pattern)
+        pattern = substitute_all(sigma, pattern_of(claim))
         if alpha_equal(pattern, dty):
             exact.append((claim, sigma))
     selected = exact or found
@@ -1172,8 +1193,7 @@ def sibling_subtype(pattern, sigma, dty, c):
     so without this a claim at `MetricInteger` served `Mark`, a sibling subtype of `Int`."""
     if isinstance(dty, t.Hole) or is_meta(dty):
         return False
-    for name, value in sigma.items():
-        pattern = substitute(name, value, pattern)
+    pattern = substitute_all(sigma, pattern)
     if not any(isinstance(x, t.Subtype) for x in bases(pattern, c)):
         return False
     return not any(alpha_equal(pattern, x) for x in bases(dty, c))
@@ -1183,11 +1203,9 @@ def model_of(claim, sigma, c, where):
     """The claim's model at the solution `sigma` of its binders."""
     model = claim.model
     for b in claim.binders:
-        if b in sigma:
-            model = substitute(b, sigma[b], model)
-        elif b in _free(model):
+        if b not in sigma and b in _free(model):
             raise TypingError(f'{where}: the model {claim.name} gives depends on {b}, which the type does not fix', '4.R13')
-    return model
+    return substitute_all({b: sigma[b] for b in claim.binders if b in sigma}, model)
 
 
 def structure_param_pattern(S, claim, d, c):

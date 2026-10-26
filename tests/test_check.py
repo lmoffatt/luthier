@@ -782,3 +782,11 @@ def test_a_refutable_arrow_pattern_is_an_elaboration_error():
     assert 'refutable pattern' in (c.elaboration_error(bad) or '')
     ok = program('act (w : World) : World * Maybe Int := (w, nothing)\nf (w : World) : World := { (w, x) <- act w ; w }')
     assert c.elaboration_error(ok) is None
+
+
+def test_a_type_parameter_named_as_a_claim_s_binder_resolves_the_claim():
+    """Night bite T (report-wave-a-3b.md, "For others"): a function whose type parameter is `A`
+    got "the model ListIsIndexed gives depends on A" from `size` on a `List A`."""
+    for name in ('A', 'T'):
+        assert not c.check(program(f'f ({name} : U) (xs : List {name}) : Int := size xs\n')), name
+    assert not c.check(program('h (A B : Concrete) (p : B * A) : B := first p\n'))

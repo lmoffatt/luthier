@@ -647,3 +647,14 @@ def test_a_refutable_pattern_on_an_arrow_is_refused():
         with pytest.raises(ElaborationError, match='refutable pattern on `<-`'):
             term(text, ctx)
     term('{ (w, x) <- both w0 ; w }', ctx)
+
+
+def test_a_claim_s_binder_is_solved_by_a_type_parameter_of_the_same_name():
+    # night bite T (report-wave-a-3b.md, "For others"): `size xs` with `xs : List A` resolved
+    # ListIsIndexed's binder `A` by an equal pattern and left it unsolved; swapped names (`B * A`
+    # against a claim's `A * B`) were substituted one after the other, giving `pairs A A`
+    from luthier.elaborate import show
+    r = elaborate_program(program('f (A : U) (xs : List A) : Int := size xs'))
+    assert '(lengthList A)' in show(r[-1].body), show(r[-1].body)
+    r = elaborate_program(program('h (A B : Concrete) (p : B * A) : B := first p'))
+    assert '((pairs B) A)' in show(r[-1].body), show(r[-1].body)
