@@ -20,26 +20,26 @@ import "test.lth" Grade Cases
 on (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
 
 sizes : List Nat := [0, 1, 2, 3, 10, 200, 100000]
-levels : List ProbabilityLevel := [0.01, 0.05, 0.5, 1.0]
+confidences : List ProbabilityLevel := [0.01, 0.05, 0.5, 1.0]
 goodBound : SampledBound := ruleOfThree
 test "RuleOfThreeIsSound" ExhaustiveMode (seed <- 20261026)
-  (profile <- [on "model" "goodBound", on "n" "sizes", on "delta" "levels"])
+  (profile <- [on "model" "goodBound", on "n" "sizes", on "delta" "confidences"])
 
 -- the control: one over n, the bound a reader might take for "one failure in n", which is sound only
 -- at δ = 1/e and above; at n = 10, δ = 0.05, (1 − 0.1)^10 = 0.35 is far above 0.05
 oneOverN : SampledBound := { log := elementary.log,
   bound := fn n delta { if n == 0 then 1.0 else smaller 1.0 (1.0 / toFloat64 n) } }
 test "RuleOfThreeIsSound" ExhaustiveMode (seed <- 20261026)
-  (profile <- [on "model" "oneOverN", on "n" "sizes", on "delta" "levels"]) (control <- true)
+  (profile <- [on "model" "oneOverN", on "n" "sizes", on "delta" "confidences"]) (control <- true)
 
 -- [bite B3] the projection of (domain, cost) to the five grades (L10.2)
-counts : List Nat := [0, 3]
+boxSizes : List Nat := [0, 3]
 citations : List String := ["a theorem"]
 goodProjection : StrengthProjection := projection
 test "GradeIsAProjection" ExhaustiveMode (seed <- 20261026)
-  (profile <- [on "model" "goodProjection", on "n" "counts", on "r" "citations"])
+  (profile <- [on "model" "goodProjection", on "n" "boxSizes", on "r" "citations"])
 -- the control: a sample read as listed cases, the grade the audit's 1.2 found the chain could give a
 -- run at an input no case listed
 sampleAsCases : StrengthProjection := { project := fn s { match s.cost { StatisticalCost -> Cases ; _ -> projection.project s } } }
 test "GradeIsAProjection" ExhaustiveMode (seed <- 20261026)
-  (profile <- [on "model" "sampleAsCases", on "n" "counts", on "r" "citations"]) (control <- true)
+  (profile <- [on "model" "sampleAsCases", on "n" "boxSizes", on "r" "citations"]) (control <- true)

@@ -246,3 +246,6 @@ RuleOfThreeIsSound (model : SampledBound <- ruleOfThree) : Bool := SampledBound 
 -- its specimen.
 projection : StrengthProjection := { project := gradeOfStrength }
 GradeIsAProjection (model : StrengthProjection <- projection) : Bool := StrengthProjection model
+-- the two claims of bites B1 and B3, gathered so that this file claims them (4.S14), a conjunction no
+-- run roots
+EvidenceClaims := RuleOfThreeIsSound & GradeIsAProjection

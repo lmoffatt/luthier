@@ -87,7 +87,9 @@ def base_controls():
 
 
 def test_the_two_bases_are_graded_on_their_listed_cases(bases):
-    assert {o.spec.law for o in bases} == BASE_CLAIMS
+    # and the product under its axiom, graded assumed (prompt-b1-b3-d1.md item 4), which no control refutes
+    assert {o.spec.law for o in bases} == BASE_CLAIMS | {'ProductIsIndependent'}
+    assert next(o for o in bases if o.spec.law == 'ProductIsIndependent').grade == 'AssumedGrade'
     assert all(o.grade is not None and o.verdict != 'Refuted' for o in bases), [
         (o.spec.law, o.verdict, o.raised[:1]) for o in bases if o.grade is None or o.verdict == 'Refuted']
 
