@@ -1,0 +1,71 @@
+-- Scratch test of bite C3's declarations (equality.lth: JointDistribution, Independent,
+-- CoupledAbove, DistanceSum), outside the tree, run with `luthier test --no-cert`. Two exponential
+-- distances of rate 1 under the product joint, their sum the Gamma(2, 1); the controls break each
+-- law once. Not a model of the tree (P8: no model until the sequential test consumes it).
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers_model.lut" elementary
+import "core/structures/equality.lth" JointDistribution JointGrounded JointRectangle JointFrechet Independent CoupledAbove DistanceSum SumDominatesRectangle DistanceDistribution TNorm larger smaller
+
+on (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+
+expCdf (rate : Float64) (t : Float64) : Float64 := if t <= 0.0 then 0.0 else 1.0 - elementary.exp (0.0 - rate * t)
+expQuantile (rate : Float64) (p : Float64) : Float64 := (0.0 - elementary.log (1.0 - p)) / rate
+exponential (rate : Float64) : DistanceDistribution :=
+  { cdf := expCdf rate, tail := fn p { expQuantile rate ((1.0 + p) / 2.0) }, below := fn t p { (expQuantile rate p + t) / 2.0 } }
+-- the sum of two exponentials of rate 1: Gamma(2, 1); its tail bounds the quantile from above by
+-- twice the exponential's at sqrt of the level, and `below` halves toward t from that bound
+gammaCdf (t : Float64) : Float64 := if t <= 0.0 then 0.0 else 1.0 - elementary.exp (0.0 - t) * (1.0 + t)
+gamma2 : DistanceDistribution :=
+  { cdf := gammaCdf, tail := fn p { 2.0 * expQuantile 1.0 (elementary.sqrt ((1.0 + p) / 2.0)) }, below := fn t p { (2.0 * expQuantile 1.0 (elementary.sqrt p) + t) / 2.0 } }
+unitExp : DistanceDistribution := exponential 1.0
+productJoint : JointDistribution := { cdf := fn s u { expCdf 1.0 s * expCdf 1.0 u }, first := unitExp, second := unitExp }
+minJoint : JointDistribution := { cdf := fn s u { smaller (expCdf 1.0 s) (expCdf 1.0 u) }, first := unitExp, second := unitExp }
+lukasiewicz : TNorm := { tensor := fn a b { larger (a + b - 1.0) 0.0 } }
+productNorm : TNorm := { tensor := fn a b { a * b } }
+minNorm : TNorm := { tensor := fn a b { smaller a b } }
+
+points : List Float64 := [ -1.0, 0.0, 0.5, 1.0, 2.0, 3.0 ]
+axisPoints : List { s u : Float64 | s <= 0.0 or u <= 0.0 } := [ { s := 0.0, u := 1.0 }, { s := 2.0, u := -1.0 }, { s := 0.0, u := 0.0 } ]
+rectangles : List { s1 s2 u1 u2 : Float64 | s1 <= s2 and u1 <= u2 } :=
+  [ { s1 := 0.5, s2 := 3.0, u1 := 0.5, u2 := 3.0 }, { s1 := -1.0, s2 := 1.0, u1 := 0.0, u2 := 2.0 }, { s1 := 1.0, s2 := 1.0, u1 := 2.0, u2 := 2.0 } ]
+
+ProductIsGrounded (p : { s u : Float64 | s <= 0.0 or u <= 0.0 }) : Bool := JointGrounded productJoint p
+ProductIsRectangle (r : { s1 s2 u1 u2 : Float64 | s1 <= s2 and u1 <= u2 }) : Bool := JointRectangle productJoint r
+ProductIsWithinFrechet (s u : Float64) : Bool := JointFrechet productJoint s u
+MinIsWithinFrechet (s u : Float64) : Bool := JointFrechet minJoint s u
+ProductJointIsIndependent (s u : Float64) : Bool := Independent productJoint s u
+ProductCoupledAboveLukasiewicz (s u : Float64) : Bool := CoupledAbove lukasiewicz productJoint s u
+ProductCoupledAboveProduct (s u : Float64) : Bool := CoupledAbove productNorm productJoint s u
+MinCoupledAboveMin (s u : Float64) : Bool := CoupledAbove minNorm minJoint s u
+GammaDominatesTheRectangle (s u : Float64) : Bool := SumDominatesRectangle productJoint { sum := gamma2 } s u
+
+test "ProductIsGrounded" ExhaustiveMode (seed <- 20261026) (profile <- [on "p" "axisPoints"])
+test "ProductIsRectangle" ExhaustiveMode (seed <- 20261026) (profile <- [on "r" "rectangles"])
+test "ProductIsWithinFrechet" ExhaustiveMode (seed <- 20261026) (profile <- [on "s" "points", on "u" "points"])
+test "MinIsWithinFrechet" ExhaustiveMode (seed <- 20261026) (profile <- [on "s" "points", on "u" "points"])
+test "ProductJointIsIndependent" ExhaustiveMode (seed <- 20261026) (profile <- [on "s" "points", on "u" "points"])
+test "ProductCoupledAboveLukasiewicz" ExhaustiveMode (seed <- 20261026) (profile <- [on "s" "points", on "u" "points"])
+test "ProductCoupledAboveProduct" ExhaustiveMode (seed <- 20261026) (profile <- [on "s" "points", on "u" "points"])
+test "MinCoupledAboveMin" ExhaustiveMode (seed <- 20261026) (profile <- [on "s" "points", on "u" "points"])
+test "GammaDominatesTheRectangle" ExhaustiveMode (seed <- 20261026) (profile <- [on "s" "points", on "u" "points"])
+
+-- the controls: each law broken once
+halfJoint : JointDistribution := { cdf := fn s u { 0.5 * expCdf 1.0 s * expCdf 1.0 u }, first := unitExp, second := unitExp }
+maxJoint : JointDistribution := { cdf := fn s u { larger (expCdf 1.0 s) (expCdf 1.0 u) }, first := unitExp, second := unitExp }
+liftedJoint : JointDistribution := { cdf := fn s u { 1.0 }, first := unitExp, second := unitExp }
+RefuteJointGrounded : Bool := JointGrounded liftedJoint { s := 0.0, u := 1.0 }
+RefuteJointRectangle : Bool := JointRectangle maxJoint { s1 := 0.5, s2 := 3.0, u1 := 0.5, u2 := 3.0 }
+RefuteJointFrechetBelow : Bool := JointFrechet halfJoint 3.0 3.0
+RefuteJointFrechetAbove : Bool := JointFrechet liftedJoint 1.0 1.0
+RefuteIndependent : Bool := Independent minJoint 1.0 2.0
+RefuteCoupledAbove : Bool := CoupledAbove minNorm productJoint 1.0 2.0
+RefuteSumDominates : Bool := SumDominatesRectangle productJoint { sum := exponential 0.1 } 3.0 3.0
+test "RefuteJointGrounded" ExhaustiveMode (seed <- 20261026) (control <- true)
+test "RefuteJointRectangle" ExhaustiveMode (seed <- 20261026) (control <- true)
+test "RefuteJointFrechetBelow" ExhaustiveMode (seed <- 20261026) (control <- true)
+test "RefuteJointFrechetAbove" ExhaustiveMode (seed <- 20261026) (control <- true)
+test "RefuteIndependent" ExhaustiveMode (seed <- 20261026) (control <- true)
+test "RefuteCoupledAbove" ExhaustiveMode (seed <- 20261026) (control <- true)
+test "RefuteSumDominates" ExhaustiveMode (seed <- 20261026) (control <- true)
