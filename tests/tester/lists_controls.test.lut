@@ -47,6 +47,16 @@ noFilter : List Int -> List Int := id (List Int)
 noSort : List Int -> List Int := id (List Int)
 uniqueSort (xs : List Int) : List Int := sortBy Int ordered (foldList Int (List Int) (fn front tail { if member List Int (atList Int front 0) tail then tail else combineList Int front tail }) nil (singleton Int) xs)
 badHamming : Metric (BoolListOf 2) (structural (BoolListOf 2)) := { d := fn xs ys { 0.0 } }
+-- [2026-10-26, prompt-controls.md, L9.14] wrong models for the conjuncts the two above leave
+-- uncontrolled: a tabulation of the right length whose entries are one off (AtBuild alone; the
+-- empty build gets stuck at `at`, so it refutes only SizeBuild); Hamming's distance plus one
+-- (MetricZeroOnEqual alone), squared (Triangular alone) and negated (MetricNonNegative, with
+-- Triangular: non-negativity follows from the diagonal, symmetry and the triangle, so it cannot fall
+-- alone)
+offByOneTabulation : Tabulated (List Int) Int := { build := fn n f { buildList Int n (fn k { f k + 1 }) } }
+shiftedHamming : Metric (BoolListOf 2) (structural (BoolListOf 2)) := { d := fn xs ys { hammingList 2 xs ys + 1.0 } }
+squaredHamming : Metric (BoolListOf 2) (structural (BoolListOf 2)) := { d := fn xs ys { hammingList 2 xs ys * hammingList 2 xs ys } }
+negatedHamming : Metric (BoolListOf 2) (structural (BoolListOf 2)) := { d := fn xs ys { 0.0 - hammingList 2 xs ys } }
 
 -- Left fold and early-stop searches (lists.lut, the list searches brief): a step that does not commute,
 -- and lists with a failing element in first, middle and last place.
@@ -228,3 +238,15 @@ onFindIsHeadOfFilter : List Binding := [
   { parameter := just "candidate", type := nothing, generator := "badFind", coverage := Listed },
   { parameter := just "xs", type := nothing, generator := "searchValues", coverage := Listed } ]
 test "FindIsHeadOfFilter" ExhaustiveMode (seed <- 20261021) (profile <- onFindIsHeadOfFilter) (control <- true)
+
+-- [2026-10-26, prompt-controls.md] the lines of the wrong models above
+withModel (b : List Binding) (g : String) : List Binding :=
+  map Binding Binding (fn (x : Binding) { if x.parameter == just "model" then { parameter := just "model", type := nothing, generator := g, coverage := Listed } else x }) b
+onOffByOne : List Binding := withModel onListIsTabulated "offByOneTabulation"
+onShifted : List Binding := withModel onHammingListIsAMetric "shiftedHamming"
+onSquared : List Binding := withModel onHammingListIsAMetric "squaredHamming"
+onNegated : List Binding := withModel onHammingListIsAMetric "negatedHamming"
+test "ListIsTabulated" ExhaustiveMode (seed <- 20261026) (profile <- onOffByOne) (control <- true)
+test "HammingListIsAMetric" ExhaustiveMode (seed <- 20261026) (profile <- onShifted) (control <- true)
+test "HammingListIsAMetric" ExhaustiveMode (seed <- 20261026) (profile <- onSquared) (control <- true)
+test "HammingListIsAMetric" ExhaustiveMode (seed <- 20261026) (profile <- onNegated) (control <- true)
