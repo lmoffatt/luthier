@@ -1230,22 +1230,26 @@ def test_a_first_action_is_validated_once_recorded_and_then_served(tmp_path, cap
     assert len(entries) == 2
     entry = next(e for e in entries if e["law"] == "HostAgreesPrint")
     assert (entry["law"], entry["grade"], entry["outcome"], entry["cases"]) == ("HostAgreesPrint", "Cases", "Passed", 1)
-    # the places the certifier adds: the standard output and the files read so far (none)
-    assert [(b["parameter"], b["generator"]) for b in entry["binding"]] == [
-        ("o", "honest (the run's model)"), ("s", '"once" (the run\'s argument)'),
-        ("extra", '["stdout"] (the certifier\'s places)')]
+    # D-2026-10-16-k item 9: the binding is the model alone, at the hash of its cone; the run's
+    # argument and the places the certifier adds (the standard output and the files read so far,
+    # none) are the case's evidence
+    assert [(b["parameter"], b["generator"]) for b in entry["binding"]] == [("o", "honest (the run's model)")]
+    assert [(c["parameter"], c["value"], c["what"]) for c in entry["evidence"]["case"]] == [
+        ("s", {"Printed": '"once"'}, "the run's argument"), ("extra", {"Printed": '["stdout"]'}, "the certifier's places")]
     frame = next(e for e in entries if e["law"] == "HostChangesOnlyDeclared")
-    assert [(b["parameter"], b["generator"]) for b in frame["binding"]] == [
-        ("o", "honest (the run's model)"), ("h", 'honest.print at s = "once" (the action held)'),
-        ("extra", '["stdout"] (the certifier\'s places)')]
+    assert [(b["parameter"], b["generator"]) for b in frame["binding"]] == [("o", "honest (the run's model)")]
+    assert [(c["parameter"], c["what"]) for c in frame["evidence"]["case"]] == [
+        ("h", "the action held"), ("extra", "the certifier's places")]
     assert ["python:luthier.host.print_line", certify.host_hash("python:luthier.host.print_line")] in entry["hosts"]
     before = store.read_bytes()
     assert main(["run", str(path)]) == 0 and store.read_bytes() == before
-    # another argument is another case, validated again
+    # D-2026-10-16-k item 9: another argument at the same hash of the model's cone is served by the
+    # entry confirmed at the first, its arguments evidence and not part of the demand
     other = tmp_path / "first_action_other.run.lut"
     other.write_text(path.read_text(encoding="utf-8").replace('"once"', '"again"'), encoding="utf-8")
-    assert main(["run", str(other)]) == 0
-    assert json.loads(record_path(other).read_text(encoding="utf-8"))[-1]["certification"]["first actions"][0]["outcome"] == "confirmed"
+    assert main(["run", str(other)]) == 0 and store.read_bytes() == before
+    again = json.loads(record_path(other).read_text(encoding="utf-8"))[-1]["certification"]["first actions"]
+    assert [(f["outcome"], f["arguments"], f["entry"]) for f in again][0] == ("served", {"s": '"again"'}, firsts[0][0]["entry"])
     # the host's code changed: the model's cone is at another hash, so validated again (10.S9)
     monkeypatch.setattr(certify, "host_hash", lambda route: "changed " + route)
     assert main(["run", str(path)]) == 0

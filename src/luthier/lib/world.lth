@@ -310,10 +310,11 @@ observeDescription (S : Concrete) (c : Console S) (ps : List String) : Described
 -- `luthier test` does not draw it. Where such a law sits in certification: at the first
 -- application of an action in a run, the runner gathers one case with the run's own arguments by
 -- `agreement` and evaluates the law on it (10.S10, L11.2); the entry is that case, graded cases,
--- its binding the model, the arguments and the places added, kept by the hash of the model's cone,
--- which holds the host's code (10.S9, 6.S8), so a changed host is validated again. Whether the one
--- case at the first application serves the rest of the run, at other arguments, is Luciano's
--- question (10.S10 says it does today; the review's W10), left as it stands.
+-- its binding the model, kept by the hash of the model's cone, which holds the host's code (10.S9,
+-- 6.S8), so a changed host is validated again. [D-2026-10-16-k item 9, the review's W10 answered]
+-- The action is validated once per hash of the model's cone: the case at the first application
+-- serves the rest of the run and later runs, at other arguments, while the cone is unchanged; the
+-- arguments and the places added are kept as the entry's evidence, not as its binding.
 Observed (S : Concrete) (A : Concrete) = { before : S, result : A, after : S }
 Held (S : Concrete) (A : Concrete) (m : ReadableWorld S) = { act : Action A, described : Described S A m }
 held (S : Concrete) (A : Concrete) (m : ReadableWorld S) (act : Action A) (d : Described S A m) : Held S A m :=

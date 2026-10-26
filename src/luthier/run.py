@@ -2870,9 +2870,11 @@ class FirstActions:
     """The validation of a host action at its first application in a run (10.S10, L11.2): run's
     model of world.lth's `Host` laws over observed cases (`_Theories.action_law`, `frame_law`). At
     the first application of an action whose model's theory holds it to a law over its case, with
-    the run's own arguments: if entries of the model file's store serve the law and the frame law at
-    those arguments and the places added (the laws' cones, the model's cone with its hosts' code,
-    the grade accepted; certify.serves), the action is applied as usual. [proposed] Only an entry a
+    the run's own arguments: if entries of the model file's store serve the law and the frame law
+    (the laws' cones, the model's cone with its hosts' code, the grade accepted; certify.serves), the
+    action is applied as usual. [D-2026-10-16-k item 9] An action is validated once per hash of the
+    model's cone: the arguments and the places are the case's evidence, not part of the demand, so
+    an entry confirmed at other arguments serves while the model and its hosts' code are unchanged. [proposed] Only an entry a
     first action wrote serves (its kind, `certify.FIRST_ACTION`, as a control has its own): a
     tester's entry of listed cases on the same model is never the run's own case. Otherwise the Runner
     gathers one case by world.lth's `agreement` (observe the declared places and the places added,
@@ -2882,11 +2884,11 @@ class FirstActions:
     gives back with the case's result: the action is applied once (10.S6). A refuted law refuses the
     run naming the action and the place that differed; confirmed, each law is recorded in the store
     of the file that defines the model (grade `cases`, one case, the binding the model, the run's
-    arguments and the places added, 7.S9) and in the run's record (`done`).
+    arguments and the places added kept as its evidence's `case`) and in the run's record (`done`).
 
     [proposed] The places the certifier adds (world.lth's `extra`, the frame law's parameter): the
     model's standard output (`console.stdout`) and the files the run has read so far
-    (host.files_read), in that order, each once; recorded in the entries' binding. A refuted law
+    (host.files_read), in that order, each once; recorded in the entries' evidence. A refuted law
     writes no entry; the observations of the protocol pass the token on and change no place
     (`HostObserveChangesNothing`)."""
 
@@ -2933,15 +2935,19 @@ class FirstActions:
         shown = {p: certify._shown_value(v) for p, v in printed}
         at = ", ".join(f"{p} = {v}" for p, v in shown.items())
         # each validation is an inner action whose entry is the law: it receives the run's demand
-        # with every cutoff kept (demand.lth's `inner`, L12.3)
+        # with every cutoff kept (demand.lth's `inner`, L12.3). [D-2026-10-16-k item 9] It is
+        # validated once per hash of the model's cone, the host's code inside (6.S8): the demand
+        # gives the law the model alone, and the run's arguments, the action held and the places
+        # added are the case's evidence, kept in the entry (`entry`), never part of what serves
         demands = [(spec["law"], spec["law cone"], self.demand.inner(spec["law"]).law(
-            spec["law"], spec["law cone"], [model] + printed + [places], {spec["model"]: spec["model hash"]}))]
+            spec["law"], spec["law cone"], [model], {spec["model"]: spec["model hash"]}))]
+        cases = {spec["law"]: printed + [places]}
         if frame is not None:
             held_name = next(n for n, r in frame["between"] if r == "held")
             held_shown = {"Printed": f"{spec['action']} at {at or 'no argument'}"}
             demands.append((frame["law"], frame["cone"], self.demand.inner(frame["law"]).law(
-                frame["law"], frame["cone"], [model, (held_name, held_shown), places],
-                {spec["model"]: spec["model hash"]})))
+                frame["law"], frame["cone"], [model], {spec["model"]: spec["model hash"]})))
+            cases[frame["law"]] = [(held_name, held_shown), places]
         # [proposed] a first action's demand is served only by an entry a first action wrote: a
         # tester's entry of listed cases on the same model never stands for the run's own case
         # (10.S10; report-e.md, finding 2)
@@ -3003,32 +3009,32 @@ class FirstActions:
                 self.done.append({"action": spec["action"], "law": law, "arguments": shown,
                                   "outcome": "served", "entry": e["date"]})
                 continue
-            entry = self.entry(spec, law, cone, demand)
+            entry = self.entry(spec, law, cone, demand, cases[law])
             where = certify.add_entry(spec["home"], entry) if spec["home"] is not None else None
             self.done.append({"action": spec["action"], "law": law, "arguments": shown,
                               "outcome": "confirmed", "entry": entry["date"],
                               "store": str(where) if where is not None else None})
         return t.Pair(pair.left, result)
 
-    def entry(self, spec, law, cone, demand):
+    def entry(self, spec, law, cone, demand, case):
         """certification.lth's `Entry` of a law confirmed at a first action, of its own kind
-        (`certify.FIRST_ACTION`): one case, grade `cases`;
-        each parameter the run gives a census of one, its value printed in the generator so that two
-        arguments are two groups of the store (certify.prune) and its hash its fingerprint; the
-        places the certifier added last."""
+        (`certify.FIRST_ACTION`): one case, grade `cases`; its binding and reach the model alone, its
+        fingerprint the hash of the model's cone, so the entry serves every later first action of the
+        model at that hash (D-2026-10-16-k item 9); the case it was confirmed on (`case`: the run's
+        arguments, or the action held, then the places the certifier added), each value printed, kept
+        as evidence under `case`."""
         from . import certify
         binding = [{"parameter": spec["model"], "generator": f"{spec['name']} (the run's model)",
                     "fingerprint": spec["model hash"]}]
-        given = demand["given"]
-        for k, (p, v) in enumerate(given[1:], 1):
-            what = "the certifier's places" if k == len(given) - 1 else \
+        shown = []
+        for k, (p, v) in enumerate(case):
+            what = "the certifier's places" if k == len(case) - 1 else \
                 "the action held" if law != spec["law"] else "the run's argument"
-            binding.append({"parameter": p, "generator": f"{certify._shown_value(v)} ({what})",
-                            "fingerprint": certify._sha(json.dumps(v, sort_keys=True, ensure_ascii=False))})
+            shown.append({"parameter": p, "value": v, "what": what})
         return {"law": law, "cone": cone, "binding": binding, "seed": None, "cases": 1, "kind": certify.FIRST_ACTION,
                 "budgets": {}, "reach": [{"parameter": p, "reach": {"Members": [v]}} for p, v in demand["given"]],
                 "evidence": {"Points": {"evaluated": 1, "raised": 0, "coverage": "Listed", "verdict": "Supported"},
-                             "protocol": "first action (10.S10)", "route": spec["route"]},
+                             "protocol": "first action (10.S10)", "route": spec["route"], "case": shown},
                 "grade": "Cases", "outcome": "Passed", "date": certify.now(),
                 "interpreter": certify.interpreter_revision(), "hosts": [list(h) for h in spec["hosts"]]}
 
