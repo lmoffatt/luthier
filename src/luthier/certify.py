@@ -794,13 +794,16 @@ def _negative(entry):
 
 def prune(entries, current=None, keep=KEEP):
     """The store bounded [proposed, 6.S8 "up to four" and 12.S11]: per (law, binding without
-    fingerprints), the `keep` most recent entries at the current cone hash and fingerprints (by date,
-    the store's order breaking ties), and no stale entry once a current one exists; a group with no
-    current entry keeps its most recent entry only. A current failure or confirmed control, and the
-    two entries of a current disagreement, stay beyond the `keep` (bite 13c: pruning preserves
-    refusal and unresolved conflict, 6.S15). `current` maps a group's key to a `_stamp`, and a
-    group not in it takes the stamp of its most recent entry. What stays keeps the store's order
-    (latest in front)."""
+    fingerprints), no entry at a stale cone hash once one at the current hash exists (a group with
+    none at the current hash keeps its most recent entry only); at the current hash, per set of
+    fingerprints, the `keep` most recent entries (by date, the store's order breaking ties). Two
+    sets of fingerprints at one hash are two bindings that share their generators' names, as two
+    test programs defining one name with two bodies (2026-10-27): each keeps its own entries, so
+    neither program's write evicts the other's. A current failure or confirmed control, and the two
+    entries of a current disagreement, stay beyond the `keep` (bite 13c: pruning preserves refusal
+    and unresolved conflict, 6.S15). `current` maps a group's key to a `_stamp`, whose cone hash is
+    the group's current one, and a group not in it takes the hash of its most recent entry. What
+    stays keeps the store's order (latest in front)."""
     current = dict(current or {})
     order = sorted(range(len(entries)), key=lambda k: (entries[k].get("date", ""), -k), reverse=True)
     # [D-2026-10-15-f] the two entries of a disagreement at the current stamp stay until it is resolved
@@ -811,16 +814,19 @@ def prune(entries, current=None, keep=KEEP):
     dropped = set()
     for g, ks in groups.items():
         stamp = current.get(g)
-        if stamp is None:
-            stamp = _stamp(entries[ks[0]])
-        at = [k for k in ks if _stamp(entries[k]) == stamp]
-        if at:
+        cone = json.loads(stamp)[0] if stamp is not None else entries[ks[0]]["cone"]
+        at = [k for k in ks if entries[k]["cone"] == cone]
+        if not at:
+            dropped.update(ks[1:])
+            continue
+        dropped.update(k for k in ks if entries[k]["cone"] != cone)
+        bindings = {}
+        for k in at:
+            bindings.setdefault(_stamp(entries[k]), []).append(k)
+        for kept in bindings.values():
             # [bite 13c, audit 1.4 A] a current refutation stays too: a failure refuses the law
             # whatever passes follow (6.S15), and a confirmed control fails the law's control
-            dropped.update(k for k in at[keep:] if id(entries[k]) not in disputing and not _negative(entries[k]))
-            dropped.update(k for k in ks if _stamp(entries[k]) != stamp)
-        else:
-            dropped.update(ks[1:])
+            dropped.update(k for k in kept[keep:] if id(entries[k]) not in disputing and not _negative(entries[k]))
     return [e for k, e in enumerate(entries) if k not in dropped]
 
 

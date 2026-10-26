@@ -729,6 +729,34 @@ def test_stale_entries_go_once_a_current_one_exists_and_the_latest_stays_before(
     assert certify.known(store, certify.identity(_entry(cone="sha256:a", seed=0))) is None
 
 
+TWIN_TEST = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "small_model.lut" Small FixesBool
+mine : Small := {body}
+models : List Binding := [ { parameter := just "m", type := nothing, generator := "mine", coverage := Listed } ]
+test "FixesBool" ExhaustiveMode (whereBindings <- models)
+'''
+
+
+def test_two_programs_binding_one_name_to_two_bodies_keep_both_entries(tmp_path, capsys):
+    # [2026-10-27] belief_controls and fit_controls each define a `giveUp` and write one law's entry
+    # into one store: the pruning kept apart the bindings whose fingerprints differ, so neither
+    # program's write evicts the other's and each is known on its second pass
+    _small(tmp_path)
+    one, two = tmp_path / "one.test.lut", tmp_path / "two.test.lut"
+    one.write_text(TWIN_TEST.replace("{body}", "{ f := fn b { b } }"), encoding="utf-8")
+    two.write_text(TWIN_TEST.replace("{body}", "{ f := fn b { if b then true else false } }"), encoding="utf-8")
+    for test in (one, two):
+        assert main(["certify", str(test)]) == 0
+        assert "1 lines ran, 0 known" in capsys.readouterr().out
+    for test in (one, two):
+        assert main(["certify", str(test)]) == 0
+        assert "0 lines ran, 1 known" in capsys.readouterr().out
+    prints = {e["binding"][0]["fingerprint"] for e in certify.read_store(tmp_path / "small_model.lut")}
+    assert len(prints) == 2
+
+
 def test_prune_stores_rewrites_a_store_and_runs_nothing(tmp_path):
     entries = [_entry(seed=k, date=f"2026-10-15T00:00:0{k}+00:00") for k in range(6)][::-1]
     entries.append(_entry(cone="sha256:z", seed=9, date="2026-10-13T00:00:00+00:00"))
