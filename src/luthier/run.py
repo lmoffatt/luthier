@@ -756,6 +756,33 @@ class HostRecord(dict):
             raise AttributeError(label) from None
 
 
+# [kernel 2026-10-27] The Runner's demands (whnf, force, a pattern's, an operator's operands, value)
+# are generators: one asks for another's result by yielding it, and `_evaluated` runs them on a
+# list, so a demand nested n deep holds n generators on the heap and a constant depth of the Python
+# stack (report-night-V.md, findings 1 and 2: session A's 30 by 30 matrices and a 500-iteration
+# run of the native driver passed Python's recursion limit). EVALUATION_DEPTH bounds the list: a
+# value that demands itself, which the Python stack stopped at about a thousand frames, stops
+# there with the same RecursionError instead of filling the memory.
+EVALUATION_DEPTH = 1_000_000
+
+
+def _evaluated(work):
+    stack = [work]
+    value = None
+    while stack:
+        try:
+            child = stack[-1].send(value)
+        except StopIteration as done:
+            stack.pop()
+            value = done.value
+        else:
+            stack.append(child)
+            value = None
+            if len(stack) > EVALUATION_DEPTH:
+                raise RecursionError(f"evaluation deeper than {EVALUATION_DEPTH} demands (EVALUATION_DEPTH)")
+    return value
+
+
 @dataclass(frozen=True, eq=False, repr=False)
 class Shared(t.Axiom):
     """A bound value demanded once (8.S4, call by need): a closed term the Runner reduces to weak
@@ -1524,16 +1551,20 @@ class Runner:
     def demanded_pattern(self, pattern, value):
         """`value` with what `pattern` inspects in weak head normal form, and what it binds to a
         name shared (8.S4), so an arm that uses the name twice computes it once."""
+        return _evaluated(self._demanded_pattern(pattern, value))
+
+    def _demanded_pattern(self, pattern, value):
         if isinstance(pattern, t.PVar):
             return self.share(value)
         if isinstance(pattern, t.PWild):
             return value
-        value = self.whnf(value)
+        value = yield self._whnf(value)
         if isinstance(pattern, t.PPair) and isinstance(value, t.Pair):
-            return t.Pair(self.demanded_pattern(pattern.left, value.left),
-                          self.demanded_pattern(pattern.right, value.right))
+            left = yield self._demanded_pattern(pattern.left, value.left)
+            right = yield self._demanded_pattern(pattern.right, value.right)
+            return t.Pair(left, right)
         if isinstance(pattern, t.PInj) and isinstance(value, t.Inj) and pattern.label == value.label:
-            return t.Inj(value.label, self.demanded_pattern(pattern.pattern, value.value))
+            return t.Inj(value.label, (yield self._demanded_pattern(pattern.pattern, value.value)))
         if isinstance(pattern, t.PCon):
             args = []
             head = value
@@ -1542,8 +1573,10 @@ class Runner:
                 head = head.function
             args.reverse()
             if head == t.Var(pattern.name) and len(args) == len(pattern.patterns):
-                return self.apply(head, [self.demanded_pattern(p, a)
-                                         for p, a in zip(pattern.patterns, args)])
+                parts = []
+                for p, a in zip(pattern.patterns, args):
+                    parts.append((yield self._demanded_pattern(p, a)))
+                return self.apply(head, parts)
         return value
 
     def share(self, term):
@@ -1565,19 +1598,31 @@ class Runner:
 
     def force(self, shared):
         """The value of a `Shared`: reduced at the first demand, kept for every later one."""
+        return _evaluated(self._force(shared))
+
+    def _force(self, shared):
         cell = shared.cell
         if not cell[1]:
-            cell[0] = self.whnf(cell[0])
+            cell[0] = yield self._whnf(cell[0])
             cell[1] = True
             if len(cell) > 2:
                 self.schedule.append(cell[2])
         return cell[0]
 
     def whnf(self, value):
+        """`value` in weak head normal form. The evaluation is a generator for each demand, run on
+        an explicit stack (`_evaluated`), so a deep demand (a right fold over a long list, a
+        recursion of many steps whose argument is demanded at the end) uses no Python stack in
+        proportion to its depth."""
+        return _evaluated(self._whnf(value))
+
+    def _whnf(self, value):
         while True:
             self.spend()
             if isinstance(value, Shared):
-                return self.force(value)
+                if value.cell[1]:
+                    return value.cell[0]
+                return (yield self._force(value))
             if isinstance(value, t.Var) and value.name in self.constants:
                 # Delta, the constant's body shared (8.S4)
                 value = self.constants[value.name]
@@ -1593,7 +1638,7 @@ class Runner:
                     args.append(head.argument)
                     head = head.function
                 args.reverse()
-                head = self.whnf(head)
+                head = yield self._whnf(head)
                 if isinstance(head, t.Lam):
                     # Beta with the arguments shared: a parameter used twice computes once
                     args = [self.share(a) for a in args]
@@ -1614,7 +1659,7 @@ class Runner:
                         raise
                     except Exception as exc:
                         raise RunError(f"extern {head.route} failed: {exc}") from exc
-                value = self.apply(head, self.operands(head, args))
+                value = self.apply(head, (yield self._operands(head, args)))
             elif isinstance(value, t.Extern):
                 try:
                     function = self.route(value)
@@ -1627,12 +1672,12 @@ class Runner:
                 except Exception as exc:
                     raise RunError(f"extern {value.route} failed: {exc}") from exc
             elif isinstance(value, t.Proj):
-                value = t.Proj(self.whnf(value.record), value.label)
+                value = t.Proj((yield self._whnf(value.record)), value.label)
             elif isinstance(value, t.Match):
-                scrutinee = self.whnf(value.value)
+                scrutinee = yield self._whnf(value.value)
                 # Try arms in order; only demand what that pattern inspects.
                 for pattern, body in value.arms:
-                    scrutinee = self.demanded_pattern(pattern, scrutinee)
+                    scrutinee = yield self._demanded_pattern(pattern, scrutinee)
                     candidate = t.Match(scrutinee, ((pattern, body),))
                     reduced = kernel.step(self.program, candidate)
                     if reduced is not None:
@@ -1670,30 +1715,47 @@ class Runner:
         form by the Runner, with the host, before kernel.step takes the operator's step: the
         kernel alone neither calls the host nor reads a pattern the host must first give. `==`
         compares parts, so its operands are reduced in every concrete part (value)."""
+        return _evaluated(self._operands(head, args))
+
+    def _operands(self, head, args):
         if isinstance(head, t.Primitive):
             count = 1 if head.name == "toFloat64" else 2
-            reduce = self.value if head.name == "==" else self.whnf
-            return [reduce(a) for a in args[:count]] + list(args[count:])
+            reduce = self._value if head.name == "==" else self._whnf
+            reduced = []
+            for a in args[:count]:
+                reduced.append((yield reduce(a)))
+            return reduced + list(args[count:])
         if isinstance(head, t.Var) and head.name in ("and", "or") and head.name not in self.defined and args:
-            return [self.whnf(args[0])] + list(args[1:])
+            return [(yield self._whnf(args[0]))] + list(args[1:])
         return args
 
     def value(self, v):
         """`v` in weak head normal form, and so each part of a pair, a record, an injection or a
         constructor applied (a head no act defines)."""
-        v = self.whnf(v)
+        return _evaluated(self._value(v))
+
+    def _value(self, v):
+        v = yield self._whnf(v)
         if isinstance(v, t.Pair):
-            return t.Pair(self.value(v.left), self.value(v.right))
+            left = yield self._value(v.left)
+            right = yield self._value(v.right)
+            return t.Pair(left, right)
         if isinstance(v, t.RecordValue):
-            return t.RecordValue(tuple((label, self.value(f)) for label, f in v.fields))
+            fields_ = []
+            for label, f in v.fields:
+                fields_.append((label, (yield self._value(f))))
+            return t.RecordValue(tuple(fields_))
         if isinstance(v, t.Inj):
-            return t.Inj(v.label, self.value(v.value))
+            return t.Inj(v.label, (yield self._value(v.value)))
         args, head = [], v
         while isinstance(head, t.App):
             args.append(head.argument)
             head = head.function
         if args and isinstance(head, t.Var) and head.name not in self.defined:
-            return self.apply(head, [self.value(a) for a in reversed(args)])
+            parts = []
+            for a in reversed(args):
+                parts.append((yield self._value(a)))
+            return self.apply(head, parts)
         return v
 
     @staticmethod

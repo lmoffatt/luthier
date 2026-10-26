@@ -2,9 +2,8 @@
 
 record/plan/after-core-2026-10-23/report-night-V.md, findings 1 and 2: session A's 30 by 30
 matrices (a right fold of 900 terms) and the native driver's 500 iterations passed Python's
-recursion limit in the Runner's whnf, force and operands. These cases raise RecursionError while
-the Runner's demands recurse on the Python stack; they are expected to fail (strict) until run.py's
-demands run on an explicit stack (report-kernel-2026-10-27.md), and that change removes the mark.
+recursion limit in the Runner's whnf, force and operands. These cases raised RecursionError
+before the Runner's demands ran on an explicit stack (run.py's `_evaluated`).
 """
 
 from __future__ import annotations
@@ -25,9 +24,6 @@ countUp (k : Int) (acc : Int) : Int := if k <= 0 then acc else countUp (k - 1) (
 """
 
 
-RUNNER = pytest.mark.xfail(strict=True, reason="the Runner's whnf recurses on the Python stack (run.py)")
-
-
 @pytest.fixture
 def deep(tmp_path):
     path = tmp_path / "deep.lut"
@@ -44,26 +40,22 @@ def _value(path, term):
     return value
 
 
-@RUNNER
 def test_a_right_fold_over_a_long_list(deep):
     # foldList's `op (f x) (foldList ... rest)`: each `+` demands the rest of the fold first
     assert _value(deep, f"total (ones {DEEP})") == Lit(IntConst(DEEP))
 
 
-@RUNNER
 def test_a_recursion_whose_accumulator_is_demanded_at_the_end(deep):
     # the argument `acc + 1` is shared, not reduced, at each call: the last demand forces a chain
     # of DEEP sums, as the native driver's state after 500 iterations
     assert _value(deep, f"countUp {DEEP} 0") == Lit(IntConst(DEEP))
 
 
-@RUNNER
 def test_the_cores_finite_fold(deep):
     # sumTo, foldWith over Fin n, as the 30 by 30 matrices' symmetry checks fold 900 entries
     assert _value(deep, f"sumTo {DEEP} (fn k {{ 1.0 }})").constant.value == float(DEEP)
 
 
-@RUNNER
 def test_the_depth_is_a_parameter(deep, monkeypatch):
     # P11 (every criterion is a parameter): the explicit stack's bound, EVALUATION_DEPTH, stops a
     # demand deeper than it with the RecursionError the Python stack gave
