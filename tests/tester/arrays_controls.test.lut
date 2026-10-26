@@ -946,3 +946,101 @@ test "DotStable" ExhaustiveMode (seed <- 20261022) (profile <- pthirdDot) (contr
 test "MatVecAgrees" ExhaustiveMode (seed <- 20261022) (profile <- pthirdMatVec) (control <- true)
 test "MatMulAgrees" ExhaustiveMode (seed <- 20261022) (profile <- pthirdMatMul) (control <- true)
 test "TraceAgrees" ExhaustiveMode (seed <- 20261022) (profile <- pthirdTrace) (control <- true)
+
+-- [2026-10-26, Claude Sonnet 5.5, record/plan/audit-algebras-2026-10-22/prompt-controls.md] The
+-- conjuncts of the container claims that `badVecEquality` and `badMatEquality` do not reach, since
+-- they relate no pair (L9.14). Equalities by length (by number of rows) that relate some pairs: one
+-- vector is equal to another when it is no longer (reflexive and transitive, not symmetric), and
+-- when the lengths differ by at most one (reflexive and symmetric, not transitive). The pair and the
+-- chain are drawn from vectors and matrices of those sizes, inside each equality's relation.
+noLongerVec : Object (Vec Int) := { eq := fn x y { x.n <= y.n } }
+nearLengthVec : Object (Vec Int) := { eq := fn x y { x.n <= y.n + 1 and y.n <= x.n + 1 } }
+noLongerVecPairs : List (Related (Vec Int) noLongerVec.eq) := [
+  { x := vec Int 1 (fn k { 1 }), y := vec Int 2 (fn k { k }) } ]
+noLongerVecChains : List (Chain (Vec Int) noLongerVec.eq) := [
+  { x := vec Int 1 (fn k { 1 }), y := vec Int 1 (fn k { 1 }), z := vec Int 1 (fn k { 1 }) } ]
+nearVecPairs : List (Related (Vec Int) nearLengthVec.eq) := [
+  { x := vec Int 1 (fn k { 1 }), y := vec Int 1 (fn k { 1 }) } ]
+nearVecChains : List (Chain (Vec Int) nearLengthVec.eq) := [
+  { x := vec Int 0 (fn k { 0 }), y := vec Int 1 (fn k { 1 }), z := vec Int 2 (fn k { k }) } ]
+noFewerRowsMat : Object (Mat Int) := { eq := fn a b { a.m <= b.m } }
+nearRowsMat : Object (Mat Int) := { eq := fn a b { a.m <= b.m + 1 and b.m <= a.m + 1 } }
+noFewerRowsMatPairs : List (Related (Mat Int) noFewerRowsMat.eq) := [
+  { x := mat Int 1 1 (fn i j { 1 }), y := mat Int 2 3 (fn i j { i - j }) } ]
+noFewerRowsMatChains : List (Chain (Mat Int) noFewerRowsMat.eq) := [
+  { x := mat Int 1 1 (fn i j { 1 }), y := mat Int 1 1 (fn i j { 1 }), z := mat Int 1 1 (fn i j { 1 }) } ]
+nearRowsMatPairs : List (Related (Mat Int) nearRowsMat.eq) := [
+  { x := mat Int 1 1 (fn i j { 1 }), y := mat Int 1 1 (fn i j { 1 }) } ]
+nearRowsMatChains : List (Chain (Mat Int) nearRowsMat.eq) := [
+  { x := mat Int 0 2 (fn i j { 0 }), y := mat Int 1 1 (fn i j { 1 }), z := mat Int 2 3 (fn i j { i - j }) } ]
+bindVec (model p c : String) : List Binding := [
+  { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := model, coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "vectors", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := p, coverage := Listed },
+  { parameter := just "c", type := nothing, generator := c, coverage := Listed } ]
+onNoLonger : List Binding := bindVec "noLongerVec" "noLongerVecPairs" "noLongerVecChains"
+onNearLength : List Binding := bindVec "nearLengthVec" "nearVecPairs" "nearVecChains"
+test "VecIsAnObject" ExhaustiveMode (seed <- 20261021) (profile <- onNoLonger) (control <- true)
+test "VecIsAnObject" ExhaustiveMode (seed <- 20261021) (profile <- onNearLength) (control <- true)
+bindMat (model p c : String) : List Binding := [
+  { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := model, coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "matrices", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := p, coverage := Listed },
+  { parameter := just "c", type := nothing, generator := c, coverage := Listed } ]
+onNoFewerRows : List Binding := bindMat "noFewerRowsMat" "noFewerRowsMatPairs" "noFewerRowsMatChains"
+onNearRows : List Binding := bindMat "nearRowsMat" "nearRowsMatPairs" "nearRowsMatChains"
+test "MatIsAnObject" ExhaustiveMode (seed <- 20261021) (profile <- onNoFewerRows) (control <- true)
+test "MatIsAnObject" ExhaustiveMode (seed <- 20261021) (profile <- onNearRows) (control <- true)
+
+-- MapCompose: a map is a functor by the free theorem of its type once it fixes identities, so a
+-- total model that breaks only the second law must look at the values (a map that reads the value 1
+-- as "the first entry"). It keeps `map id`, on vectors whose 1 is the first entry or absent, and
+-- loses `map (g . h)` against `map g . map h`, where `h` turns an entry into a 1: (5, -1) goes by
+-- `negated` to (-5, 1), and `twiceInt` then gives (-10, -10), not (-10, 2).
+valueOneVecFunctor : Functor Vec := { map := fn (A B : U) g v { vec B v.n (fn k { if v.f k == 1 then g (v.f 0) else g (v.f k) }) } }
+valueOneMatFunctor : Functor Mat := { map := fn (A B : U) g a { mat B a.m a.n (fn i j { if a.f i j == 1 then g (a.f 0 0) else g (a.f i j) }) } }
+sentinelVectors : List (Vec Int) := [ vec Int 1 (fn k { 1 }), vec Int 2 (fn k { if k == 0 then 5 else 0 - 1 }) ]
+sentinelMatrices : List (Mat Int) := [ mat Int 1 1 (fn i j { 1 }), mat Int 1 2 (fn i j { if j == 0 then 5 else 0 - 1 }) ]
+onVecMapCompose : List Binding := [
+  { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "B", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "C", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "valueOneVecFunctor", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "vecEquality", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "twiceInt", coverage := Listed },
+  { parameter := just "h", type := nothing, generator := "negated", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "sentinelVectors", coverage := Listed } ]
+test "VecIsAFunctor" ExhaustiveMode (seed <- 20261021) (profile <- onVecMapCompose) (control <- true)
+onMatMapCompose : List Binding := [
+  { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "B", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "C", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "valueOneMatFunctor", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "matEquality", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "twiceInt", coverage := Listed },
+  { parameter := just "h", type := nothing, generator := "negated", coverage := Listed },
+  { parameter := just "xs", type := nothing, generator := "sentinelMatrices", coverage := Listed } ]
+test "MatIsAFunctor" ExhaustiveMode (seed <- 20261021) (profile <- onMatMapCompose) (control <- true)
+
+-- AtBuild: a build that keeps the length and forgets the entries (the length is SizeBuild's)
+zeroEntriesTabulation : Tabulated (Vec Int) Int := { build := fn n f { vec Int n (fn k { 0 }) } }
+onZeroEntries : List Binding := [
+  { parameter := just "A", type := nothing, generator := "entryType", coverage := Listed },
+  { parameter := just "model", type := nothing, generator := "zeroEntriesTabulation", coverage := Listed },
+  { parameter := just "n", type := nothing, generator := "lengths", coverage := Listed },
+  { parameter := just "f", type := nothing, generator := "oddAt", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "intEquality", coverage := Listed } ]
+test "VecIsTabulated" ExhaustiveMode (seed <- 20261021) (profile <- onZeroEntries) (control <- true)
+
+-- Equalizes: an inclusion that sends a symmetric matrix to one with 1 added at (0, 1), which is not
+-- symmetric, and a restriction that takes it off, so that the inclusion of the restriction (the
+-- second conjunct) and the restriction of the inclusion (the third) stay what they should
+bumpedInclusion : Equalizer (Mat Float64) (Mat Float64) SymmetricMatrix (matObject Float64) (matObject Float64) (matObject Float64) (id (Mat Float64)) transposeDef :=
+  { include := fn s { mat Float64 s.m s.n (fn i j { if i == 0 and j == 1 then s.f i j + 1.0 else s.f i j }) },
+    restrict := fn a { mat Float64 a.m a.n (fn i j { if i == 0 and j == 1 then a.f i j - 1.0 else a.f i j }) } }
+onBumpedInclusion : List Binding := [
+  { parameter := just "model", type := nothing, generator := "bumpedInclusion", coverage := Listed },
+  { parameter := just "x", type := nothing, generator := "symmetricMatrices", coverage := Listed } ]
+test "SymmetricIsAnEqualizer" ExhaustiveMode (seed <- 20261021) (profile <- onBumpedInclusion) (control <- true)
