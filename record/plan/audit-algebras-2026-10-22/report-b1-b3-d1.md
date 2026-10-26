@@ -110,7 +110,7 @@ bases_laws.test.lut certifies it: assumed, its eleven algebraic conjuncts at cas
 ## Uncontrolled conjuncts (D1), read over every store of the tree
 
 162 conjuncts of 56 laws have no refuted model. Why: held on every broken model (119); the
-control's census is outside the conjunct's domain, so the control did not run it (24: e.g. the
+control's census is outside the conjunct's domain, so the control did not run it (25: e.g. the
 `Object` laws' controls bind `p` to related pairs, and `Symmetric`, `Transitive` need others);
 vacuous (6); no control line at all (10: `ProductIsIndependent`'s, which has none, and
 `EmptyIsInitial`'s `NoValue`); stuck matches (2). Per law, the conjuncts by the law each applies:
