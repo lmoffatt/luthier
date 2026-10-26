@@ -18,7 +18,7 @@ import pytest
 
 from luthier import arrays, host, surface as s
 from luthier.cli import main
-from luthier.run import Loaded, Refused, RunError, parameter, record_path, run_file
+from luthier.run import Loaded, Refused, RunError, parameter, record_path, run, run_file
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -969,7 +969,9 @@ def test_hellos_cone_runs_and_records_its_state(tmp_path, capsys):
     assert [(f["action"], f["law"]) for f in state["first actions"]] == [
         ("host.print", "HostAgreesPrint"), ("host.print", "HostChangesOnlyDeclared")]
     assert {f["outcome"] for f in state["first actions"]} <= {"served", "confirmed"}
-    assert [(a["name"], a["law"], a["accept"]) for a in state["assumed"]] == [("host", "ObserverIsFaithful", "assumed")]
+    # its roots of trust (world.lth §5, D-2026-10-16-n; ObserverIsFaithful until 2026-10-26)
+    assert [(a["name"], a["law"], a["accept"]) for a in state["assumed"]] == [
+        ("host", "FileSystemKeeps", "assumed"), ("host", "SystemDelivers", "assumed")]
     assert state["cone"].startswith("sha256:")
 
 
@@ -1128,9 +1130,11 @@ def test_the_lock_is_written_when_absent_matches_and_warns_when_it_differs(tmp_p
     from luthier import certify
     path = _hello(tmp_path)
     lock = tmp_path / "luthier.lock"
-    # absent: written beside the program, with the current revision
+    # absent: written beside the program, with the current revision and, since D-2026-10-16-n, the
+    # roots of trust the run used
     assert main(["run", str(path)]) == 0
-    assert json.loads(lock.read_text(encoding="utf-8")) == {"interpreter": certify.interpreter_revision()}
+    assert json.loads(lock.read_text(encoding="utf-8")) == {"interpreter": certify.interpreter_revision(),
+                                                            "roots": ["FileSystemKeeps", "SystemDelivers"]}
     first = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["lock"]
     assert first["status"] == "written" and first["pinned"] == certify.interpreter_revision()
     capsys.readouterr()
@@ -1171,14 +1175,16 @@ def _first_action_copy(tmp_path):
 
 def test_a_lying_print_is_refused_at_its_first_action_naming_the_place(tmp_path, capsys):
     # liar.print writes its line twice; HostAgreesPrint (world.lth's agreement) is refuted at the
-    # run's own argument, the place named; nothing is recorded, no entry written
+    # run's own argument, the place named; nothing is recorded, no entry written. Since
+    # D-2026-10-16-n `print` writes at once, so the lines are in the world before the case is judged:
+    # each of the two runs below printed them
     path = _first_action_copy(tmp_path) / "first_action_liar.run.lut"
     with pytest.raises(Refused, match=r"liar\.print disagrees with its description at its first action .*"
                                       r"HostAgreesPrint at s = \"twice\": the place stdout differs"):
         run_file(path)
     assert main(["run", str(path)]) == 1
     out, err = capsys.readouterr()
-    assert out == "" and '(described just "twice\\n", observed just "twice\\ntwice\\n")' in err
+    assert out == "twice\n" * 4 and '(described just "twice\\n", observed just "twice\\ntwice\\n")' in err
     assert not record_path(path).exists()
     assert not (tmp_path / "first_action_models.cert.json").exists()
 
@@ -1334,12 +1340,12 @@ def test_the_demand_records_every_policy(tmp_path, capsys):
     # (demand_model.lut's `theDemand`), and the run's record lists them
     from luthier.run import demand_of
     d = demand_of()
-    assert (d.axioms, d.roots, d.combine) == ("AssumedGrade", ("ObserverIsFaithful",), "weakest")
+    assert (d.axioms, d.roots, d.combine) == ("AssumedGrade", ("FileSystemKeeps", "SystemDelivers"), "weakest")
     rec = demand_of(axioms="Cases", roots=["R"], combine="strongest").record("sha256:c")
     assert (rec["axioms"], rec["roots"], rec["combine"]) == ("cases", ["R"], "strongest")
     # an axiom is accepted as assumed under a stricter cutoff only when its law is named
     strict = demand_of(accept="Cases")
-    assert strict.law("ObserverIsFaithful", "sha256:c", [], {}, axiom=True)["accepts"] == "AssumedGrade"
+    assert strict.law("SystemDelivers", "sha256:c", [], {}, axiom=True)["accepts"] == "AssumedGrade"
     assert strict.law("OtherAxiom", "sha256:c", [], {}, axiom=True)["accepts"] == "Cases"
     assert demand_of(accept="Cases", assumes=["OtherAxiom"]).law(
         "OtherAxiom", "sha256:c", [], {}, axiom=True)["accepts"] == "AssumedGrade"
@@ -1348,7 +1354,7 @@ def test_the_demand_records_every_policy(tmp_path, capsys):
     path.write_text(HOLES.read_text(encoding="utf-8"), encoding="utf-8")
     assert main(["run", str(path), "--set", "graphDir=a", "--set", "loud=false"]) == 0
     state = json.loads((tmp_path / "holes.run.json").read_text(encoding="utf-8"))[-1]
-    assert state["demand"]["axioms"] == "assumed" and state["demand"]["roots"] == ["ObserverIsFaithful"]
+    assert state["demand"]["axioms"] == "assumed" and state["demand"]["roots"] == ["FileSystemKeeps", "SystemDelivers"]
     assert state["demand"]["combine"] == "weakest"
 
 
@@ -1394,7 +1400,7 @@ def test_the_record_holds_the_demand_the_plan_and_the_key(tmp_path, capsys):
                  "parameters": {"usedHole": 1, "unusedHole": 7}, "accept": "sampled", "assumes": [], "delta": 0.05,
                  "fuel": 5000, "timeLimit": None, "checked": False, "lock": None, "decoration": None,
                  "strategy": "ForwardOnDemand", "fresh": False,
-                 "axioms": "assumed", "roots": ["ObserverIsFaithful"], "combine": "weakest", "bound": 1.0,
+                 "axioms": "assumed", "roots": ["FileSystemKeeps", "SystemDelivers"], "combine": "weakest", "bound": 1.0,
                  "composition": "cappedSumComposition"}
     # the fields kept beside it say the same
     assert (first["entry"], first["parameters"], first["checked"], first["fuel"]["given"],
@@ -1553,3 +1559,142 @@ def test_the_runtime_slice_keeps_implies(tmp_path, capsys):
     assert main(["eval", str(path), "main"]) == 0
     out = capsys.readouterr().out
     assert out.startswith("true") and "implies" not in out
+
+
+# D-2026-10-16-n, night agent P (2026-10-26): `print` writes at once and checks what `write()`
+# returns, failing the action when the system rejects the bytes; the standard output is observed by
+# what it is connected to (a file re-read, a pipe by its tee, a terminal or a device by the bytes it
+# accepted); a file is checked by re-reading it; the roots of trust are declared once per project
+# (luthier.lock's `roots`) and listed in every run's record.
+
+TWO_LINES = ('import "world_model.lut" HostConsole host : HostConsole\n\n'
+             'main (w : W) : W * Unit := match host.print w "first line" { (w1, u) -> host.print w1 "second line" }\n')
+
+
+def _run_into(path, out, *args):
+    """`luthier run path args` in a process whose standard output is the file `out` (a path, such as
+    /dev/full); its standard error and the run's last record."""
+    env = dict(os.environ)
+    env["PYTHONPATH"] = os.pathsep.join((str(ROOT / "src"), str(ROOT / "tests")))
+    with open(out, "wb") as f:
+        result = subprocess.run([sys.executable, "-m", "luthier.cli", "run", str(path), *args], stdout=f,
+                                stderr=subprocess.PIPE, text=True, env=env, cwd=path.parent)
+    runs = json.loads(record_path(path).read_text(encoding="utf-8")) if record_path(path).exists() else []
+    return result, (runs[-1] if runs else None)
+
+
+@pytest.mark.skipif(not Path("/dev/full").exists(), reason="no /dev/full on this system")
+def test_a_print_the_system_rejects_fails_the_run(tmp_path):
+    # `luthier run hello.run.lut > /dev/full` was recorded as a finished run with output "hello, world"
+    # (D-2026-10-16-n's case): now the write fails, the run with it, and the record says so
+    result, rec = _run_into(_hello(tmp_path), "/dev/full")
+    assert result.returncode == 1 and "No space left on device" in result.stderr
+    assert rec["finished"] is False and rec["cut"]["reason"] == "action failed" and "output" not in rec
+    assert rec["stdout"] == {"kind": "device", "observed": "accepted", "root": "SystemDelivers", "accepted": 0}
+
+
+def test_stdout_is_observed_by_what_it_is_connected_to(tmp_path):
+    path = _hello(tmp_path)
+    out = tmp_path / "out.txt"
+    result, rec = _run_into(path, out)
+    assert result.returncode == 0, result.stderr
+    assert out.read_text(encoding="utf-8") == "hello, world\n" and rec["output"] == "hello, world\n"
+    assert rec["stdout"] == {"kind": "file", "observed": "re-read", "root": "FileSystemKeeps", "accepted": 13}
+    piped = command(path, record=True)
+    assert piped.returncode == 0 and piped.stdout == "hello, world\n"
+    assert piped.record["stdout"] == {"kind": "pipe", "observed": "tee", "root": "SystemDelivers", "accepted": 13}
+
+
+def _corrupting(monkeypatch, which=lambda k: True):
+    """The system's `write` as a file system that says it took every byte and kept other ones (each
+    'l' an 'X'), on the writes `which` picks by their order."""
+    real, seen = os.write, []
+
+    def write(fd, data):
+        seen.append(fd)
+        data = bytes(data)
+        return real(fd, data.replace(b"l", b"X")) if which(len(seen)) else real(fd, data)
+    monkeypatch.setattr(host.os, "write", write)
+
+
+def test_a_file_that_keeps_other_bytes_is_seen_by_rereading_it(tmp_path, monkeypatch):
+    # the observation of a file is its re-read, so a write accepted and not kept refuses the run at the
+    # first action (or, if an entry served that action, at the end of the run); before, the host
+    # observed its own copy and the run passed
+    path = _hello(tmp_path)
+    _corrupting(monkeypatch)
+    with open(tmp_path / "out.txt", "w", encoding="utf-8") as out:
+        with pytest.raises(RunError, match="stdout"):
+            run_file(path, stream=out)
+    assert (tmp_path / "out.txt").read_text(encoding="utf-8") == "heXXo, worXd\n"
+
+
+def test_a_later_print_is_checked_at_the_end_of_the_run(tmp_path, monkeypatch):
+    # the first print is validated at its first action; the second is not, and the file's re-read at
+    # the end of the run sees that it kept other bytes
+    path = tmp_path / "two.run.lut"
+    path.write_text(TWO_LINES, encoding="utf-8")
+    _corrupting(monkeypatch, which=lambda k: k == 2)
+    with open(tmp_path / "out.txt", "w", encoding="utf-8") as out:
+        with pytest.raises(RunError, match=r"stdout, a file, reads back 'Xine\\n' at character 18"):
+            run_file(path, stream=out)
+    assert (tmp_path / "out.txt").read_text(encoding="utf-8") == "first line\nsecond Xine\n"
+
+
+def test_a_pipe_is_observed_by_its_tee_and_trusts_the_system(tmp_path, monkeypatch):
+    # what a pipe's reader got cannot be read back: the run observes the bytes the pipe accepted, and
+    # the record names the root of trust that rests on (world.lth's `SystemDelivers`)
+    path = _hello(tmp_path)
+    _corrupting(monkeypatch)
+    r, w = os.pipe()
+    with os.fdopen(w, "w") as out:
+        output, _, state = run(path, stream=out)
+    with os.fdopen(r, "rb") as got:
+        assert got.read() == b"heXXo, worXd\n"
+    assert output == "hello, world\n"
+    assert state["stdout"] == {"kind": "pipe", "observed": "tee", "root": "SystemDelivers", "accepted": 13}
+
+
+def test_the_roots_of_trust_are_the_projects(tmp_path, capsys):
+    from luthier import certify
+    path = _hello(tmp_path)
+    lock = tmp_path / "luthier.lock"
+    # no lock: the run writes it, declaring the roots it used, and its record lists them
+    assert main(["run", str(path)]) == 0
+    roots = ["FileSystemKeeps", "SystemDelivers"]
+    assert json.loads(lock.read_text(encoding="utf-8")) == {"interpreter": certify.interpreter_revision(), "roots": roots}
+    rec = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]
+    assert rec["lock"]["roots"] == roots and rec["demand"]["roots"] == roots
+    # a project that declares none trusts nothing below its laws: the host's roots are refused
+    lock.write_text(json.dumps({"interpreter": certify.interpreter_revision(), "roots": []}), encoding="utf-8")
+    with pytest.raises(Refused, match="FileSystemKeeps"):
+        run_file(path)
+    # one it declares is accepted, and the other is refused
+    lock.write_text(json.dumps({"interpreter": certify.interpreter_revision(), "roots": ["FileSystemKeeps"]}),
+                    encoding="utf-8")
+    with pytest.raises(Refused, match="SystemDelivers") as refusal:
+        run_file(path)
+    assert "FileSystemKeeps" not in str(refusal.value)
+    # a lock with no `roots` leaves the demand's defaults, and the record says the lock declared none
+    lock.write_text(json.dumps({"interpreter": certify.interpreter_revision()}), encoding="utf-8")
+    assert main(["run", str(path)]) == 0
+    rec = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]
+    assert rec["lock"]["roots"] is None and rec["demand"]["roots"] == roots
+    lock.write_text(json.dumps({"interpreter": certify.interpreter_revision(), "roots": "FileSystemKeeps"}),
+                    encoding="utf-8")
+    with pytest.raises(RunError, match="not a list of names"):
+        run_file(path)
+
+
+def test_the_record_is_checked_by_rereading_it(tmp_path, monkeypatch, capsys):
+    # a file system that keeps one byte less than it was given: the record's write is seen to fail
+    path = _hello(tmp_path)
+    assert main(["run", str(path)]) == 0
+    real = Path.write_bytes
+
+    def short(self, data):
+        return real(self, data[:-1])
+    monkeypatch.setattr(Path, "write_bytes", short)
+    from luthier.run import record
+    with pytest.raises(RunError, match="does not read back what was written"):
+        record(path, "main", {}, "hello, world\n")

@@ -38,11 +38,13 @@ console : Console WorldState := {
 -- The host's actions, routes to Python. The token comes first and a token goes back (10.S5: a new
 -- one each time, in the abstraction; the Python hands back the object it was given, which is one
 -- implementation of it, since no program compares tokens). `observe w places` reads the files at
--- `places` from the disk and the standard output when "stdout" is among them, from the text
--- `print` has written so far (host.py): the observer reads what the host itself wrote there, and
--- the terminal gets that text when the run ends. That is what world.lth's `ObserverIsFaithful`
--- assumes of this model, an entry of its store that is an assumption or a citation of host.py,
--- never a case. `Host`'s laws hold each action to the console's description; run.py validates an
+-- `places` from the disk and the standard output when "stdout" is among them. [2026-10-26,
+-- D-2026-10-16-n] `print` writes at once, failing when the system rejects the bytes, and the
+-- standard output is observed by what it is connected to (host.py): a file re-read, a pipe or a
+-- terminal by the copy of the bytes it accepted. That the re-read gives what the file system keeps,
+-- and that the accepted bytes are delivered, is what world.lth's `FileSystemKeeps` and
+-- `SystemDelivers` assume of this model, entries of its store that are assumptions or citations of
+-- host.py, never cases. `Host`'s laws hold each action to the console's description; run.py validates an
 -- action at its first application in a run (10.S10, L11.2), the case gathered by `agreement`, and
 -- keeps the entry in world_model.cert.json.
 HostConsole = Host WorldState

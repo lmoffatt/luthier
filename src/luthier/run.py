@@ -47,6 +47,13 @@ application `FirstActions` gathers the case by world.lth's `agreement` with the 
 builds and the places the certifier adds, evaluates the law and the frame law
 (`HostChangesOnlyDeclared`) on it, and gives the program the token and the case's result; a law
 whose body is an axiom (`ObserverIsFaithful`) is accepted as assumed by default (`AXIOMS`).
+2026-10-26, night agent P (Claude Opus 5.5), D-2026-10-16-n: `run` gives the host the standard
+output, which `print` writes at once, failing the run as `ActionFailed` when the system rejects the
+bytes; the standard output is observed by what it is connected to and the record says how
+(`stdout`); a file is checked by re-reading it, the standard output at the end of the run and the
+record, the store of results and the lock after they are written (`write_checked`); the roots of
+trust (world.lth's `FileSystemKeeps` and `SystemDelivers`, which replace `ObserverIsFaithful`) are
+declared once per project in luthier.lock's `roots` and listed in every run's record.
 """
 from __future__ import annotations
 
@@ -82,6 +89,12 @@ class Cut(RunError):
     def __init__(self, message, reason, steps, values=None, state=None):
         super().__init__(message)
         self.reason, self.steps, self.values, self.state = reason, steps, values, state
+
+
+class ActionFailed(Cut):
+    """A run whose action failed (D-2026-10-16-n): the system rejected the bytes an action wrote
+    (`host.Rejected`), or the standard output, a file, does not read back what the run wrote there.
+    Recorded as a run that did not finish, with the reason "action failed", as a `Cut` is."""
 
 
 # The three kinds of file (D-2026-10-16-e, spec 12.R2): a theory (`.lth`), a model or library
@@ -1593,7 +1606,8 @@ class Runner:
                             continue
                         value = self.apply(self.act(head, function, args[:arity]), args[arity:])
                         continue
-                    except RunError:
+                    except (RunError, host.Rejected):
+                        # a rejection is the action's failure, kept as such for the run (D-2026-10-16-n)
                         raise
                     except Exception as exc:
                         raise RunError(f"extern {head.route} failed: {exc}") from exc
@@ -1945,7 +1959,7 @@ ACCEPT = "Sampled"
 # provisional run as assumed (D-2026-10-16-c).
 DEMAND_DEFAULTS = {"entry": "main", "accepts": ACCEPT, "assumes": (), "fuel": None, "timeLimit": None, "sets": (),
                    "checked": False, "strategy": "ForwardOnDemand", "fresh": False,
-                   "axioms": "AssumedGrade", "roots": ("ObserverIsFaithful",), "combine": "weakest", "bound": 1.0,
+                   "axioms": "AssumedGrade", "roots": ("FileSystemKeeps", "SystemDelivers"), "combine": "weakest", "bound": 1.0,
                    "delta": 0.05, "composition": "cappedSumComposition"}
 
 # the strategy that computes a demand, by the strategy it asks (demand.lth's `Ran`,
@@ -1962,6 +1976,9 @@ RAN = {"ForwardOnDemand": "CallByNeed", "CallByNeed": "CallByNeed"}
 # [2026-10-23, audit II.2, L5.18] Now the demand's `axioms` field, its default declared in
 # demand_model.lut's `theDemand` and mirrored in DEMAND_DEFAULTS; the axiom laws it applies to are
 # the demand's `roots` (the host-root exception, by name), or any named by `--accept assumed:NAME`.
+# [2026-10-26, D-2026-10-16-n] The roots are declared once per project, in luthier.lock's `roots`
+# (`lock_status`), which `record` writes with these defaults when it writes the lock; world.lth's
+# `FileSystemKeeps` and `SystemDelivers` replace `ObserverIsFaithful`.
 
 
 @dataclass(frozen=True)
@@ -3127,7 +3144,7 @@ def refuse_provisional(kept, entry, assumes=()):
 
 
 def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=None, assumes=None,
-        time_limit=None, strategy=None, combine=None, bound=None, delta=None, composition=None):
+        time_limit=None, strategy=None, combine=None, bound=None, delta=None, composition=None, stream=None):
     """Run `main` of the file at `path` with its holes filled by `sets`, once the store certifies
     its cone at the grade `accept` (12.S17; `Refused` otherwise, before anything is evaluated);
     gives the standard output, the values set and the certification state of the cone. `checked`
@@ -3161,14 +3178,22 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
     a run (`x.run.lut`, 12.R2), refused otherwise before anything is read.
 
     A run cut by its time limit or its fuel raises `Cut`, which carries the values and the state
-    `record` appends as a run that did not finish; it writes nothing to `x.results.json`."""
+    `record` appends as a run that did not finish; it writes nothing to `x.results.json`.
+
+    The world's standard output is `stream`, `sys.stdout` when none is given (D-2026-10-16-n):
+    `print` writes there at once, and a rejected write fails the run as `ActionFailed`, a `Cut`
+    recorded as a run that did not finish; the standard output is observed by what it is connected
+    to (host.py's `place`, in the state as `stdout`), and a file that does not read back at the end
+    what the run wrote there fails it too. What is returned is the standard output as observed. The
+    roots of trust are the project's, luthier.lock's `roots` (`lock_status`), the defaults when the
+    lock declares none; the demand carries them and the record lists them."""
     require_kind(path, "run")
-    host.reset()
+    host.reset(sys.stdout if stream is None else stream)
     lock = lock_status(path)
     loaded = Loaded(path)
     values, empty = fill(loaded, sets)
     demand = demand_of(main, fuel, values, accept, checked, lock["pinned"], assumes, time_limit, strategy, fresh,
-                       combine, bound=bound, delta=delta, composition=composition)
+                       combine, roots=lock["roots"], bound=bound, delta=delta, composition=composition)
     entry = loaded.name(loaded.top, demand.entry) or demand.entry
     kept = runtime_slice(loaded.acts, entry, core_data(loaded))
     roots = _first_action_roots(loaded, kept)
@@ -3204,7 +3229,7 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
             state.pop("_firsts", None)
             plan["hash"] = plan_hash(plan)
             return "", values, dict(state, fuel={"given": demand.fuel, "spent": 0}, **{"first actions": []},
-                                    files_read=[], plan=plan, **common,
+                                    files_read=[], plan=plan, stdout=host.place(), **common,
                                     result_store={"pure": True, "fresh": False, "served": {
                                         "store": str(results_path(path)), "entry": i,
                                         "key hash": results[i]["key hash"], "time": results[i]["time"]}})
@@ -3220,22 +3245,32 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
     value = t.Var(entry)
     if isinstance(definition.type, t.Pi) and isinstance(definition.type.domain, t.World):
         value = t.App(value, runner.token)
-    try:
-        result = runner.whnf(value)
-        if isinstance(result, t.Pair):
-            runner.whnf(result.left)  # Demand the final world chain, even for a lazy pair.
-    except Exception as exc:
-        if runner.cut is None:
-            raise
-        # cut by its time limit or its fuel: recorded as a run that did not finish, with its demand,
-        # the steps reached and the reason; nothing goes to the store of results
-        reason, message = runner.cut
+    def stopped(kind, reason, message, exc=None):
+        # recorded as a run that did not finish, with its demand, the steps reached and the reason;
+        # nothing goes to the store of results
         plan["schedule"] = list(runner.schedule)
         plan["hash"] = plan_hash(plan)
         cut_state = dict(state, fuel={"given": demand.fuel, "spent": runner.steps},
                          **{"first actions": firsts.done}, files_read=[list(pair) for pair in host.files_read()],
-                         plan=plan, **common, result_store={"pure": pure, "fresh": demand.fresh, "written": None})
-        raise Cut(message, reason, runner.steps, values, cut_state) from exc
+                         plan=plan, stdout=host.place(), **common,
+                         result_store={"pure": pure, "fresh": demand.fresh, "written": None})
+        raise kind(message, reason, runner.steps, values, cut_state) from exc
+
+    try:
+        result = runner.whnf(value)
+        if isinstance(result, t.Pair):
+            runner.whnf(result.left)  # Demand the final world chain, even for a lazy pair.
+    except host.Rejected as exc:
+        # the system rejected what an action wrote: the action failed, and the run with it
+        stopped(ActionFailed, "action failed", f"an action failed: {exc} (D-2026-10-16-n)", exc)
+    except Exception as exc:
+        if runner.cut is None:
+            raise
+        # cut by its time limit or its fuel
+        stopped(Cut, *runner.cut, exc)
+    differs = host.check_stdout()
+    if differs is not None:
+        stopped(ActionFailed, "action failed", f"an action failed: {differs} (D-2026-10-16-n)")
     plan["schedule"] = list(runner.schedule)
     plan["hash"] = plan_hash(plan)
     spent = runner.steps
@@ -3245,10 +3280,10 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
         store.update(key=key, value=_type_shown(runner.value(result), sys.maxsize))
     state = dict(state, fuel={"given": demand.fuel, "spent": spent},
                  **{"first actions": firsts.done}, files_read=[list(pair) for pair in host.files_read()],
-                 plan=plan, **common, result_store=store)
+                 plan=plan, stdout=host.place(), **common, result_store=store)
     if demand.checked:
         state["refinements"] = dict(runner.tested)
-    return host.stdout(), values, state
+    return host.observed_stdout(), values, state
 
 
 def live_cone(kept):
@@ -3377,9 +3412,7 @@ def store_result(path, store, key_h, time):
     if agree:
         return {"agrees": agree[0]}
     results.append({"key hash": key_h, "key": store["key"], "value": store["value"], "time": time})
-    tmp = where.with_name(where.name + ".tmp")
-    tmp.write_text(json.dumps(results, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-    tmp.replace(where)
+    write_checked(where, json.dumps(results, indent=1, ensure_ascii=False) + "\n")
     said = {"written": len(results) - 1}
     if same:
         said["disagrees"] = same
@@ -3399,9 +3432,14 @@ LOCK = "luthier.lock"
 
 def lock_status(path):
     """12.S13: the `luthier.lock` found in the directory of the program or the one above, which
-    pins the interpreter's revision. Gives {"path", "pinned", "status"}: `matches`, `differs` (a
-    warning on standard error: the run goes on, 12.S13 names no refusal and no flag that turns the
-    lock off), or `absent` (`record` then writes it beside the program)."""
+    pins the interpreter's revision. Gives {"path", "pinned", "status", "roots"}: `matches`,
+    `differs` (a warning on standard error: the run goes on, 12.S13 names no refusal and no flag
+    that turns the lock off), or `absent` (`record` then writes it beside the program).
+
+    `roots` (D-2026-10-16-n, L11.9): the roots of trust the project declares, once, in the lock's
+    `roots`, a list of the names of axiom laws accepted at the demand's grade for axioms; None when
+    the lock declares none (the demand's defaults then, which `record` writes into a lock it
+    writes; a lock that exists is never rewritten)."""
     from . import certify
     here = Path(path).resolve().parent
     current = certify.interpreter_revision()
@@ -3409,19 +3447,39 @@ def lock_status(path):
         lock = directory / LOCK
         if lock.exists():
             try:
-                pinned = json.loads(lock.read_text(encoding="utf-8"))["interpreter"]
-            except (ValueError, KeyError, TypeError):
+                held = json.loads(lock.read_text(encoding="utf-8"))
+                pinned = held["interpreter"]
+                roots = held.get("roots")
+            except (ValueError, KeyError, TypeError, AttributeError):
                 raise RunError(f"{lock}: not a lock (a JSON object with an `interpreter`)")
+            if roots is not None and not (isinstance(roots, list) and all(isinstance(r, str) for r in roots)):
+                raise RunError(f"{lock}: `roots` is not a list of names of laws (D-2026-10-16-n)")
             if pinned != current:
                 import sys
                 print(f"warning: {lock} pins interpreter {pinned}, this is {current} (12.S13)", file=sys.stderr)
-            return {"path": str(lock), "pinned": pinned, "status": "matches" if pinned == current else "differs"}
-    return {"path": str(here / LOCK), "pinned": None, "status": "absent"}
+            return {"path": str(lock), "pinned": pinned, "status": "matches" if pinned == current else "differs",
+                    "roots": roots}
+    return {"path": str(here / LOCK), "pinned": None, "status": "absent", "roots": None}
+
+
+def write_checked(where, text):
+    """Write `text` at the file `where` and check it by re-reading it (D-2026-10-16-n: a file is
+    checked by re-reading it; 10.S6: Luthier's own store verified by reading it back), through a
+    temporary file beside it that replaces it, so that a reader never sees half of it. A file that
+    does not read back what was written raises RunError naming it, and the temporary is removed."""
+    where = Path(where)
+    data = text.encode("utf-8")
+    tmp = where.with_name(where.name + ".tmp")
+    tmp.write_bytes(data)
+    tmp.replace(where)
+    if where.read_bytes() != data:
+        raise RunError(f"{where}: does not read back what was written (D-2026-10-16-n)")
+    return where
 
 
 def run_file(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=None, assumes=None,
-             time_limit=None, strategy=None):
-    return run(path, main, fuel, sets, accept, checked, fresh, assumes, time_limit, strategy)[0]
+             time_limit=None, strategy=None, stream=None):
+    return run(path, main, fuel, sets, accept, checked, fresh, assumes, time_limit, strategy, stream=stream)[0]
 
 
 def record_path(path):
@@ -3441,6 +3499,11 @@ def record(path, main, values, output, state=None, cut=None):
     with the hash of their bytes (`files_read`) and the lock (`lock`: its path, the revision it
     pins and whether the run `matches` it, `differs`, or found it `absent` and wrote it), whether
     it ran `--checked` (`checked`) and then the refinements tested per route (`refinements`).
+    [2026-10-26, D-2026-10-16-n] What the standard output was connected to and how it was observed
+    (`stdout`: kind, observed, the root of trust that observation rests on, the bytes accepted);
+    the roots of trust the project declares are in `lock` (`roots`) and the ones the run used in
+    `demand` (`roots`). The record, the lock and the store of results are checked by re-reading
+    them once written (`write_checked`).
 
     The demand as one object (`demand`, demand.lth's `RunRecord`: entry, cone, parameters, accept,
     assumes, delta, fuel, timeLimit, checked, lock, decoration, strategy, fresh), the plan (`plan`,
@@ -3473,7 +3536,7 @@ def record(path, main, values, output, state=None, cut=None):
     if state is not None:
         state = dict(state)  # a copy: the entry takes fuel, files_read and lock out of it
         for key in ("demand", "plan", "key", "key_hash", "seed", "certificates", "fuel", "files_read",
-                    "stores_read", "lock", "checked", "refinements", "result_store"):
+                    "stores_read", "lock", "checked", "refinements", "result_store", "stdout"):
             if key in state:
                 item[key] = state.pop(key)
         store = item.get("result_store")
@@ -3482,13 +3545,15 @@ def record(path, main, values, output, state=None, cut=None):
             _say_store(path, store, item)
         lock = item.get("lock")
         if lock and lock["status"] == "absent":
+            # the project's lock, with the roots of trust the run used declared in it (D-2026-10-16-n)
             from . import certify
-            Path(lock["path"]).write_text(json.dumps({"interpreter": certify.interpreter_revision()}) + "\n",
-                                          encoding="utf-8")
-            lock["pinned"], lock["status"] = certify.interpreter_revision(), "written"
+            roots = list(item.get("demand", {}).get("roots", DEMAND_DEFAULTS["roots"]))
+            write_checked(lock["path"], json.dumps({"interpreter": certify.interpreter_revision(),
+                                                    "roots": roots}) + "\n")
+            lock["pinned"], lock["status"], lock["roots"] = certify.interpreter_revision(), "written", roots
         item["certification"] = state
     runs.append(item)
-    where.write_text(json.dumps(runs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    write_checked(where, json.dumps(runs, indent=2, ensure_ascii=False) + "\n")
     if cut is not None:
         print(f"{where.name}: recorded as a run that did not finish ({cut.reason}, {cut.steps} steps); "
               f"nothing stored in {results_path(path).name}", file=sys.stderr)

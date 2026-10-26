@@ -134,13 +134,15 @@ def main(argv: list[str] | None = None) -> int:
         try:
             grade, assumes = _accepts(ns.accept)
             strategy = {"forward-on-demand": "ForwardOnDemand", "call-by-need": "CallByNeed"}.get(ns.strategy)
+            # `print` writes at once, checked (D-2026-10-16-n); `output` is the standard output as
+            # observed, for the record
             output, values, state = run(ns.file, ns.main, ns.fuel, ns.set, grade, ns.checked, ns.fresh, assumes,
                                         ns.time_limit, strategy, ns.combine, ns.bound, ns.delta, ns.composition)
-            print(output, end="")
             record(ns.file, state["demand"]["entry"], values, output, state)
             return 0
         except Cut as cut:
-            # cut by its time limit or its fuel: said, and recorded as a run that did not finish
+            # cut by its time limit or its fuel, or an action failed (`ActionFailed`): said, and
+            # recorded as a run that did not finish
             import sys
             print(f"{ns.file}: {cut}", file=sys.stderr)
             record(ns.file, cut.state["demand"]["entry"], cut.values, None, cut.state, cut=cut)

@@ -19,6 +19,10 @@
 -- code-follows-2026-10-16/prompt-modes.md (D-2026-10-16-c): a provisional extern is refused by
 -- default; the demand names the ones it runs as assumed; a route carries the reason it is
 -- provisional (§3).
+-- 2026-10-26, by Claude Opus 5.5, night agent P, on D-2026-10-16-n (what is trusted and what is
+-- checked): `ObserverIsFaithful` becomes the two roots of trust the host's observation rests on,
+-- `FileSystemKeeps` and `SystemDelivers` (§5); the host writes at once and fails when the system
+-- rejects the bytes, and observes the standard output by what it is connected to (host.py).
 -- Sources: spec 10.S1
 -- to 10.S13; L11; L4.5; D4 and D8 of record/plan/archive/plan-implementation-2026-10-13-decisions.md
 -- (the token used exactly once; `W` optional in `main`); D-2026-10-13-a (one world; an action is a
@@ -40,7 +44,8 @@
 -- (D-2026-10-13-a); that protocol is `agreement`, an action (10.S3, 12.S23) that threads the
 -- token and gathers the case, and `Host`'s laws are predicates over the case, which the runner
 -- evaluates at an action's first application in a run (10.S10). What cannot be tested (the disk
--- persists while the program is off; the observer reads the world) is assumed (10.S13, 6.S10).
+-- persists while the program is off; the observer reads the world) is assumed (10.S13, 6.S10), and
+-- named: the roots of trust (§5, L11.9).
 --
 -- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
 -- this file takes the first todo, writes it in the pattern of the done ones, checks it with
@@ -63,8 +68,8 @@
 --      tokens: `agreement`, the action that gathers the case (D-2026-10-13-a); `Host` a
 --      theory over the `Console` model whose laws are predicates over the case: each
 --      action agrees with its description, no place not declared changes, the observation
---      reads what is there and changes nothing; the observer's fidelity an assumption
---      (10.S7, 10.S10, 10.S13, L11.2).                                                 done
+--      reads what is there and changes nothing; the roots of trust the observation rests
+--      on, assumptions (10.S7, 10.S10, 10.S13, L11.2, L11.9).                           done
 --   §6 Named worlds: an extern with no law runs in one, priced as an assumption (10.S12,
 --      L11.6). Waits for evidence (certification.lth).                                 todo
 --   §7 The externs of sonolocalización (numpy and its data formats). Waits for the
@@ -372,17 +377,30 @@ HostObserveChangesNothing (S : Concrete) (o : Host S) (ps : List String) (c : Ob
 HostChangesOnlyDeclared (S : Concrete) (o : Host S) (A : Concrete) (h : Held S A o.console.world) (extra : List String) (c : Observed S A) : Bool :=
   readsAlike S o.console.world c.before c.after (undeclared h.described.places extra)
 
--- [assumed] The root of trust. Every law above compares the host's observation with the host's
--- observation; none can say that `observe` reads the world rather than the host's own memory (in
--- the specimen, `print` appends to a Python string and `observe` reads that string back; the
--- terminal gets the text from `run` at the end, outside every law). That the observation at a
--- place is what is at the place outside the program is a function of no value Luthier holds
--- (10.S1), so it is an axiom (11.R3: stated, never tested, its obligations graded assumed,
--- listed by `check -v`), and `ObserverIsFaithful` is the law of `Host` that asserts it. Its
--- evidence is a citation (the host's source read and vouched for, 6.S9) or an assumption, graded
--- assumed (6.S10), never a sample; a run that uses the host accepts that grade or is refused, so
--- that its certificate says under what hypothesis it holds (10.S13).
-readsTheWorld (S : Concrete) (o : Host S) (p : String) : Bool :=
-  axiom "the host's observation at a place is what is at the place outside the program"
-ObserverIsFaithful (S : Concrete) (o : Host S) (p : String) : Bool := readsTheWorld S o p
-Host (S : Concrete) := HostAgreesPrint S & HostAgreesReadFile S & HostObserveChangesNothing S & HostChangesOnlyDeclared S & ObserverIsFaithful S
+-- [assumed] The roots of trust (L11.9, D-2026-10-16-n). Every law above compares the host's
+-- observation with the host's observation; what makes it an observation of the world is what the
+-- place is connected to, and below that there is no feedback. The host writes at once and fails
+-- when the system rejects the bytes (host.py's `print_line`, which checks what each `write()`
+-- returns), and observes the standard output by what it is connected to: a file by re-reading it,
+-- so that a write the system accepted and the file does not keep is seen; a pipe by its own copy of
+-- the bytes the pipe accepted (a tee), a terminal by the bytes it accepted, since neither can be read
+-- back. What the re-read rests on is the file system: that a file read again gives what it keeps.
+-- What the copy rests on is the system's delivery: that the bytes it accepted reach what the place
+-- is connected to (a terminal shows them, a pipe's reader gets them). Neither is a function of a
+-- value Luthier holds (10.S1), so each is an axiom (11.R3: stated, never tested, its obligations
+-- graded assumed, listed by `check -v`), and `FileSystemKeeps` and `SystemDelivers` are the laws of
+-- `Host` that assert them (they replace `ObserverIsFaithful`, which asserted both at once). Their
+-- evidence is a citation or an assumption, graded assumed (6.S10), never a sample. A project
+-- declares the roots it accepts once, in its luthier.lock's `roots` (the demand's `roots`,
+-- demand.lth §1), and every run's record lists them, with the root the run's observation of its
+-- standard output rested on (run.py's `stdout`), so that its certificate says under what
+-- hypotheses it holds (10.S13). L11.9 names two more roots, the interpreter and the floating-point
+-- hardware, which no law of this file states: the run's record holds the interpreter's revision
+-- and the Python's version, and their laws wait for a library that owns them.
+keepsWhatIsWritten (S : Concrete) (o : Host S) (p : String) : Bool :=
+  axiom "a file read again gives the bytes the file system keeps at its place"
+deliversWhatItAccepts (S : Concrete) (o : Host S) (p : String) : Bool :=
+  axiom "the bytes the system accepted at a terminal or a pipe reach what the place is connected to"
+FileSystemKeeps (S : Concrete) (o : Host S) (p : String) : Bool := keepsWhatIsWritten S o p
+SystemDelivers (S : Concrete) (o : Host S) (p : String) : Bool := deliversWhatItAccepts S o p
+Host (S : Concrete) := HostAgreesPrint S & HostAgreesReadFile S & HostObserveChangesNothing S & HostChangesOnlyDeclared S & FileSystemKeeps S & SystemDelivers S
