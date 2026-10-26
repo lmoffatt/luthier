@@ -97,3 +97,48 @@ MengerTriangle (A : U) (o : Object A) (t : TNorm) (m : ProbabilisticMetric A o t
 MengerDistributions (A : U) (o : Object A) (t : TNorm) (m : ProbabilisticMetric A o t) (x y : A) := DistanceDistribution (m.distribution x y)
 ProbabilisticMetric (A : U) (o : Object A) (t : TNorm) :=
   MengerDiagonal A o t & MengerSeparated A o t & MengerSymmetric A o t & MengerTriangle A o t & MengerDistributions A o t
+
+-- ---------------------------------------------------------------- uncertainty's composition
+-- [proposed, bite C3 of record/plan/audit-algebras-2026-10-22/execution.md, 2026-10-26, Claude
+-- Fable 5.1] Marginals do not determine the distribution of a sum, a product or any function of
+-- two quantities (the audit's 4.3, report.md 5b1a05e; D-2026-10-18-i's "a t-norm or convolution"
+-- names two different things): the composition needs a joint, or a hypothesis that supplies one.
+-- So it is declared over a joint, and the hypotheses are laws of the joint a theory states as
+-- premises: `Independent` (the product; the sum's distribution is then the convolution) and
+-- `CoupledAbove t` (the joint at least the t-norm of its marginals: Schweizer and Sklar (1983),
+-- chapters 6 and 7, the copula bounded below by a t-norm). Every joint is coupled above by
+-- Lukasiewicz's t-norm, larger (a + b - 1) 0, the Frechet lower bound, so that hypothesis is
+-- free; the product is independence; the minimum is comonotone dependence, one draw reused.
+-- That is what `t` in `ProbabilisticMetric A o t` is: the theory's hypothesis on how the
+-- uncertainties of two links of a chain depend on each other, named per theory as the evidence
+-- base's composition is named per theory or demand (algebraic.lth, D-2026-10-25-a question 1),
+-- the free choice the default. `MengerTriangle` is its consequence: with d x z <= d x y + d y z
+-- pointwise and the joint of (d x y, d y z) coupled above by t,
+-- t.tensor (F_xy s) (F_yz u) <= J s u <= F_sum (s + u) <= F_xz (s + u).
+-- What a finite law can state: a joint is grounded, 2-increasing and within the Frechet bounds
+-- of its marginals (the marginals are the joint's limits, which no finite law reaches, so they
+-- are fields, tied to the joint by the bounds); the sum's distribution dominates the joint on
+-- every rectangle, {D1 < s, D2 < u} within {D1 + D2 < s + u}; the sum's exact value, the integral
+-- of the joint over a triangle, is a model's. Through a general function, the pushforward is
+-- probability.lth's `Pushforward` (D-2026-10-17-g) of a `Gen` of pairs, the joint as a sampler,
+-- draw by draw; nothing is declared for it here. First consumer: the sequential test at the
+-- probabilistic level (D-2026-10-18-c, D-2026-10-15-b), when a value's distance distribution is
+-- composed along a cone as `Affine` is at the metric level (functions.lth); no model until then (P8).
+JointDistribution : { cdf : Float64 -> Float64 -> ProbabilityLevel, first second : DistanceDistribution }
+JointGrounded (j : JointDistribution) (p : { s u : Float64 | s <= 0.0 or u <= 0.0 }) : Bool := j.cdf p.s p.u == 0.0
+JointRectangle (j : JointDistribution) (r : { s1 s2 u1 u2 : Float64 | s1 <= s2 and u1 <= u2 }) : Bool :=
+  0.0 <= j.cdf r.s2 r.u2 - j.cdf r.s1 r.u2 - j.cdf r.s2 r.u1 + j.cdf r.s1 r.u1
+JointFrechet (j : JointDistribution) (s u : Float64) : Bool :=
+  larger (j.first.cdf s + j.second.cdf u - 1.0) 0.0 <= j.cdf s u and j.cdf s u <= smaller (j.first.cdf s) (j.second.cdf u)
+JointMarginals (j : JointDistribution) := DistanceDistribution j.first & DistanceDistribution j.second
+JointDistribution (j : JointDistribution) := JointMarginals j & JointGrounded j & JointRectangle j & JointFrechet j
+-- The two hypotheses: laws of a joint, each the premise of a theory of the joint (as `Lipschitz`
+-- is of `LipschitzMap`, functions.lth), which a theory that composes under it takes as its parameter.
+Independent (j : JointDistribution) (s u : Float64) : Bool := j.cdf s u == j.first.cdf s * j.second.cdf u
+CoupledAbove (t : TNorm) (j : JointDistribution) (s u : Float64) : Bool := t.tensor (j.first.cdf s) (j.second.cdf u) <= j.cdf s u
+IndependentJoint (j : JointDistribution) := JointDistribution j & Independent j
+CoupledJoint (t : TNorm) (j : JointDistribution) := JointDistribution j & CoupledAbove t j
+-- The sum of two distances under their joint: the composition of uncertainty along a chain.
+DistanceSum (j : JointDistribution) : { sum : DistanceDistribution }
+SumDominatesRectangle (j : JointDistribution) (d : DistanceSum j) (s u : Float64) : Bool := j.cdf s u <= d.sum.cdf (s + u)
+DistanceSum (j : JointDistribution) (d : DistanceSum j) := DistanceDistribution d.sum & SumDominatesRectangle j d
