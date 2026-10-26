@@ -18,6 +18,10 @@ on (p g : String) : Binding := { parameter := just p, type := nothing, generator
 -- ---------------------------------------------------------------- the wrong models
 errors : List Extended := [ finiteDistance 0.0, finiteDistance 0.5, finiteDistance 1.0, finiteDistance 2.0, infiniteDistance unit ]
 nothingEqual : Object Extended := { eq := fn a b { false } }
+-- [2026-10-27] the pairs and chains it relates: none, so `Symmetric` and `Transitive` hold on it
+-- vacuously and `Reflexive` alone is refuted
+nothingPairs : List (Related Extended nothingEqual.eq) := []
+nothingChains : List (Chain Extended nothingEqual.eq) := []
 extendedTimes (a b : Extended) : Extended :=
   match a { infiniteDistance u -> infiniteDistance unit ; finiteDistance x ->
   (match b { infiniteDistance v -> infiniteDistance unit ; finiteDistance y -> finiteDistance (x * y) }) }
@@ -111,7 +115,7 @@ eighths : List EvidenceBound := [ { failure := 0.0, risk := 0.0 }, { failure := 
 
 -- ---------------------------------------------------------------- the lines
 test "ExtendedIsAnObject" ExhaustiveMode (seed <- 20261025)
-  (profile <- [on "model" "nothingEqual", on "x" "errors", on "p" "errors", on "c" "errors"]) (control <- true)
+  (profile <- [on "model" "nothingEqual", on "x" "errors", on "p" "nothingPairs", on "c" "nothingChains"]) (control <- true)
 test "ErrorIsABase" ExhaustiveMode (seed <- 20261025)
   (profile <- [on "model" "productBase", on "x" "errors", on "y" "errors", on "z" "errors"]) (control <- true)
 test "ErrorIsABase" ExhaustiveMode (seed <- 20261025)
