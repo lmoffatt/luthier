@@ -5,7 +5,7 @@
 -- are maximize_quadratic.run.lut's, and so is the output.
 import "world_model.lut" HostConsole host : HostConsole
 import "arrays.lth" VecOf vec
-import "belief.lth" Settings MaxResult quadratic
+import "belief.lth" Settings MaxResult quadratic isConverged
 import "belief_model.lut" lm
 showFloat (x : Float64) : String := extern "python:builtins.repr" x
 showBool (x : Bool) : String := extern "python:builtins.repr" x
@@ -14,12 +14,12 @@ b : VecOf 2 := vec Float64 2 (fn k { if k == 0 then 1.0 else 0.0 - 2.0 })
 x0 : VecOf 2 := vec Float64 2 (fn k { 0.0 })
 q := quadratic 2 b 2.0
 report (w : W) (r : MaxResult 2) : W * Unit :=
-  match host.print w (showBool r.converged) { (w1, u1) ->
+  match host.print w (showBool (isConverged r.reason)) { (w1, u1) ->
   match host.print w1 (showFloat (r.x.f 0)) { (w2, u2) ->
   host.print w2 (showFloat (r.x.f 1)) } }
 main (w : W) : W * Unit := {
   r := lm.maximize settings 2 q.logp q.score q.info x0 ;
-  match host.print w (showBool r.converged) { (w1, u1) ->
+  match host.print w (showBool (isConverged r.reason)) { (w1, u1) ->
   match host.print w1 (showFloat (r.x.f 0)) { (w2, u2) ->
   host.print w2 (showFloat (r.x.f 1)) } } }
 byArgument (w : W) : W * Unit := report w (lm.maximize settings 2 q.logp q.score q.info x0)

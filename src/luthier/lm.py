@@ -20,7 +20,9 @@ matrix whole (belief.lth §2, [proposed] 6 and 8 of the report); the damping rea
 the source took `tol` and `max_iter` apart ([proposed] 7).
 
 Stopping reasons are coded as integers, as in the source: 0 running, 1 converged, 2 exhausted,
-3 stalled (optimization.lth `Reason`, in the order of its alternatives).
+3 stalled (optimization.lth `finished`: 0 is its `nothing`, the others belief.lth's `StopReason`
+in the order of its alternatives). `maximize` gives the reason back as belief.lth's `StopReason`
+crosses, a pair of its label and unit, and the iterations as `steps` (2026-10-26, D-2026-10-16-m).
 """
 from __future__ import annotations
 
@@ -38,6 +40,7 @@ from luthier.arrays import add, dot, madd, mat_vec, mscale, pinv_sym_at, scale
 DAMPING = SimpleNamespace(init=0.001, factor=3.0, least=1e-15, most=1e15)
 
 RUNNING, CONVERGED, EXHAUSTED, STALLED = 0, 1, 2, 3
+REASONS = {CONVERGED: "converged", EXHAUSTED: "exhausted", STALLED: "stalled"}
 
 # A trace of the iterations on the standard error, when the environment sets LUTHIER_LM_TRACE
 # (a probe's instrument, record/IA/fit-convergence-2026-10-15/prompt.md): it reads values the
@@ -130,9 +133,10 @@ def minimize(n, settings, damping, o, s):
 
 def maximize(settings, n, f, g, m, x0) -> dict:
     """belief.lth's `Maximizer`: the maximum of f on the vectors of dimension n, by minimizing its
-    negative (optimization.lth `negate`) from x0 with the module's damping."""
+    negative (optimization.lth `asObjective`) from x0 with the module's damping; where it stopped,
+    why (`MaxResult`'s `reason`) and after how many iterations (`steps`)."""
     o = SimpleNamespace(value=lambda x: 0.0 - float(f(x)),
                         grad=lambda x: scale(0.0 - 1.0, _vec(g(x))),
                         stepMatrix=lambda x: _vec(m(x)))
     s, code = minimize(n, settings, DAMPING, o, start(n, o, DAMPING, x0))
-    return {"x": s["x"], "converged": code == CONVERGED}
+    return {"x": s["x"], "reason": (REASONS[code], None), "steps": int(s["iter"])}

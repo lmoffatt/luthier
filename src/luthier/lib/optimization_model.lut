@@ -14,7 +14,7 @@
 -- the step from the direction, so agreement of the steps is a corollary, 4.R10).
 
 import "belief.lth" Maximizer Settings MaxResult
-import "optimization.lth" LMStep Objective Damping LMState Run dampedStep lmStep minimize start asObjective posteriorOf isConverged
+import "optimization.lth" LMStep Objective Damping LMState Run dampedStep lmStep minimize start asObjective posteriorOf lmQuadraticBound
 import "arrays.lth" Vec Mat VecOf
 
 -- the native definitions, as one model
@@ -27,12 +27,14 @@ hostStep : LMStep := {
 }
 
 -- the native driver as a maximizer of belief.lth: the negative of the log posterior minimized
--- from the start, with the damping given (P11); converged when the run's reason says so
--- (v0.1 optimization.lut:112-115)
+-- from the start, with the damping given (P11); the run's reason and its iterations given back
+-- (v0.1 optimization.lut:112-115), and the bound on the quadratic family the theory derives for
+-- this damping (optimization.lth `lmQuadraticBound`, D-2026-10-16-m)
 lmMaximizer (d : Damping) : Maximizer := {
   maximize := fn s n f g m x0 {
     o := asObjective n (posteriorOf n f g m)
     r := minimize n s d o (start n o d x0)
-    res := { x := r.state.x, converged := isConverged r.reason }
+    res := { x := r.state.x, reason := r.reason, steps := r.state.iter }
     res },
+  quadraticSteps := lmQuadraticBound d,
 }

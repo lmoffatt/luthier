@@ -70,7 +70,7 @@ def test_quadratic_converges_and_the_decrement_is_the_beliefs():
     for n, b, c, x0 in cases():
         p = quadratic(b, c)
         r = lm.maximize(SETTINGS, n, p.logp, p.score, p.info, x0)
-        assert r["converged"] is True
+        assert r["reason"] == ("converged", None) and 0 <= r["steps"] <= SETTINGS["maxIter"]
         d = r["x"] - b
         assert 0.5 * c * dot(d, d) <= SETTINGS["tol"]
         assert belief_decrement(SETTINGS, p, r["x"]) <= SETTINGS["tol"]
@@ -80,9 +80,10 @@ def test_quadratic_converges_and_the_decrement_is_the_beliefs():
 
 
 def test_a_budget_spent_is_not_converged():
+    # belief.lth's MaxResult: the reason crosses as a pair of its label and unit, the steps an int
     p = quadratic(np.array([1.0, -2.0]), 2.0)
     r = lm.maximize({"tol": 1e-12, "maxIter": 1, "floor": 1e-12}, 2, p.logp, p.score, p.info, np.zeros(2))
-    assert r["converged"] is False
+    assert r["reason"] == ("exhausted", None) and r["steps"] == 1
 
 
 def test_the_damped_step_descends_and_agrees():
@@ -174,7 +175,13 @@ def test_with_the_exact_information_the_method_takes_few_steps():
         o = negate(quadratic(b, c))
         s, code = lm.minimize(n, SETTINGS, lm.DAMPING, o, lm.start(n, o, lm.DAMPING, x0))
         assert code == lm.CONVERGED
-        assert s["iter"] <= 3
+        # optimization.lth's lmQuadraticSteps, the count the theory derives (D-2026-10-16-m), within
+        # one step for rounding (LMStepsOnQuadratic); before 2026-10-26 the bound was the constant 3
+        k, dec, mu = 0, lm.decrement(SETTINGS, o, x0), lm.DAMPING.init
+        while not dec < SETTINGS["tol"]:
+            r = mu / (1.0 + mu)
+            dec, mu, k = dec * r * r, max(mu / lm.DAMPING.factor, lm.DAMPING.least), k + 1
+        assert k - 1 <= s["iter"] <= k + 1
 
 
 def test_the_trace_changes_nothing(monkeypatch, capsys):
@@ -185,5 +192,5 @@ def test_the_trace_changes_nothing(monkeypatch, capsys):
     monkeypatch.setattr(lm, "_TRACE", True)
     traced = lm.maximize(SETTINGS, n, p.logp, p.score, p.info, x0)
     err = capsys.readouterr().err
-    assert np.array_equal(quiet["x"], traced["x"]) and quiet["converged"] == traced["converged"]
+    assert np.array_equal(quiet["x"], traced["x"]) and quiet["reason"] == traced["reason"]
     assert "decrement=" in err and "mu=" in err and "step=" in err

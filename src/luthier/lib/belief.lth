@@ -19,6 +19,12 @@
 -- information not negative, so that optimization.lth's `negate` is total; `QuadraticConverges`
 -- over the settings whose budget is at least the demand's budget for the family, the law that
 -- refutes a maximizer that gives up everywhere.
+-- 2026-10-26, by Claude Opus 5.5 (night Agent V), on record/plan/after-core-2026-10-23/
+-- prompt-night-2026-10-26.md and D-2026-10-16-m: a maximizer says why it stopped (`StopReason`,
+-- moved here from optimization.lth) and after how many iterations (`MaxResult`'s `steps`), and
+-- declares its bound on the quadratic family (`quadraticSteps`); `MaximizerStationary` checks every
+-- reason, no `else true`; `QuadraticConverges` owes convergence on a domain drawn from the problem
+-- (`quadraticReachable`) within the maximizer's bound, no demand's `budget`.
 --
 -- What this file states. A Gaussian belief on the vectors of dimension n is a mean and a
 -- precision, the inverse covariance; zero precision along a direction is a belief that knows
@@ -26,12 +32,12 @@
 -- precision is symmetric and its log density is greatest at the mean (the precision is not
 -- negative on any direction). A maximizer is a theory of one function: given the settings, the
 -- objective with its score and its information on the vectors of a dimension and a start, it
--- gives where it stopped and whether it converged there (v0.1's `Maximizer` was a bare function
+-- gives where it stopped, why and after how many steps (v0.1's `Maximizer` was a bare function
 -- type with its laws in optimization.lut; here the laws are the type's, so that 10.S10 can
 -- validate the host's `lm.maximize`, belief_model.lut, at its first action). The laws: the
--- objective does not fall from the start; where it says it converged the Newton decrement, half
--- of g^T M^+ g at the settings' floor, is within the settings' tolerance; the dimension is kept;
--- and on a concave quadratic, whose maximum is known, it converges. The first three are stated
+-- objective does not fall from the start; the reason it gives is the one the Newton decrement,
+-- half of g^T M^+ g at the settings' floor, and the budget show; the dimension is kept; and on a
+-- concave quadratic, whose maximum is known, it converges within the steps its theory bounds. The first three are stated
 -- over any `Posterior`, a record of functions with no generator, so they are certified per
 -- problem (7.R4, listed cases); the quadratic family has the generators of `VecOf n` and
 -- `Positive`, so it is sampled. Laplace's update is then a definition on the parts: the new mean
@@ -40,12 +46,12 @@
 --
 -- Index (all sections written in this draft):
 --   §1 `GaussianBelief`, `gaussianLogDensity`, the laws of a belief (v0.1 belief.lut:110-116). done
---   §2 `Settings`, `MaxResult`, `Posterior`, `Maximizer` and the laws a maximizer must meet
+--   §2 `Settings`, `StopReason`, `MaxResult`, `Posterior`, `Maximizer` and the laws a maximizer must meet
 --      (v0.1 belief.lut:118-122, optimization.lut:118-128).                                   done
 --   §3 Laplace's update: `laplacePosterior`, `laplaceMode`, `laplaceAt`, `laplaceUpdate`
 --      (v0.1 belief.lut:124-136).                                                              done
 
-import "numbers.lth" Tolerance Positive within withinOf abs
+import "numbers.lth" Tolerance Positive within withinOf abs Doubles
 import "arrays.lth" Vec Mat VecOf MatOf Dim vec mat identity approxVec approxMat exact RankFloor
 import "arrays_model.lut" numpy : Arrays add sub scale dot norm matVec matMul madd mscale transpose pinvSym
 import "probability.lth" Likelihood StepResolution IsGradient
@@ -79,9 +85,20 @@ GaussianBelief (n : Nat) := PrecisionSymmetric n & DensityPeaksAtMean n
 -- `solve` inverted the matrix whole, and raised where it was singular).
 Settings : U := { tol : Positive, maxIter : Nat, floor : RankFloor | 0.0 < tol and 0 < maxIter and 0.0 <= floor }
 
--- where a maximizer stopped on the vectors of dimension n, and whether it converged there (a
--- method with a budget can run out of it before the gradient vanishes, and says so)
-MaxResult (n : Nat) = { x : VecOf n, converged : Bool }
+-- why a maximizer stopped (D-2026-10-16-m, BE2): converged, the decrement within the settings'
+-- tolerance; exhausted, the budget of iterations spent first; stalled, the method could make no
+-- more progress before either (for Levenberg-Marquardt, the damping beyond its most). A run that
+-- has not stopped has no reason, so `running` is no alternative here (optimization.lth's `finished`
+-- gives `Maybe StopReason`). Moved here from optimization.lth on 2026-10-26, so that `MaxResult`
+-- carries it.
+StopReason = { converged : Unit || exhausted : Unit || stalled : Unit }
+isConverged (r : StopReason) : Bool := match r { converged u -> true ; _ -> false }
+
+-- where a maximizer stopped on the vectors of dimension n, why, and after how many iterations
+-- (D-2026-10-16-m): the step count is the algorithm's resource, recorded for the planner (L6.3)
+-- and the first alarm of a run taking far more steps than its theory says. [2026-10-26] It was
+-- `{ x, converged }`; `isConverged r.reason` is the old field.
+MaxResult (n : Nat) = { x : VecOf n, reason : StopReason, steps : Nat }
 
 -- What a maximizer is given: a log posterior with its score and its information on the vectors
 -- of dimension n, as three functions (what crosses to the host, each a callback, D-2026-10-14-a).
@@ -107,50 +124,83 @@ decrement (n : Nat) (s : Settings) (g : VecOf n -> Vec Float64) (m : VecOf n -> 
     0.5 * dot gx (matVec (pinvSym s.floor (m x)) gx) }
 
 -- A maximizer: the settings, the dimension, the log posterior, its score, its information and a
--- start in; where it stopped and whether it converged out. It evaluates the functions only at
--- vectors of that dimension, which their types say (v0.1 belief.lut:122).
+-- start in; where it stopped, why and after how many iterations out. It evaluates the functions
+-- only at vectors of that dimension, which their types say (v0.1 belief.lut:122). With it, its
+-- theory of cost on the one family whose maximum is known (D-2026-10-16-m, D-2026-10-18-d: the laws
+-- of an algorithm say how its budget scales): `quadraticSteps s dec`, the iterations within which
+-- it stops converged on a concave quadratic whose decrement at the start is `dec`, under settings
+-- `s`. It is a function of the problem derived from the method's theory, never a constant (P11):
+-- Newton's method 1 (0 when the start is within the tolerance); Levenberg-Marquardt a handful
+-- (optimization.lth `lmQuadraticSteps`); gradient ascent about kappa log(dec / tol), kappa the
+-- condition number, 1 on this family. [proposed] The bound is a field of the model, so that each
+-- method states its own (2026-10-26, Agent V).
 Maximizer : {
   maximize : Settings -> (n : Nat) -> (VecOf n -> Float64) -> (VecOf n -> Vec Float64) -> (VecOf n -> Mat Float64) -> VecOf n -> MaxResult n,
+  quadraticSteps : Settings -> Float64 -> Nat,
 }
 
 -- what any maximizer must meet, on any posterior (v0.1 optimization.lut:118-128): the log
--- posterior does not fall from the start; where it says it converged, the decrement there,
--- recomputed from the posterior and not from the run, is within the settings' tolerance; and
--- the dimension is kept. That it converges within its budget is a quality of the method on a
--- problem, not a law, except where the maximum is known: a concave quadratic, below.
--- `MaximizerStationary` says nothing where the maximizer says it did not converge, so a maximizer
--- that gives up everywhere passes it; `QuadraticConverges` is the law that refutes that one.
+-- posterior does not fall from the start; the reason it gives is the one the posterior shows,
+-- recomputed from the posterior and not from the run: converged, the decrement there within the
+-- settings' tolerance; exhausted, the budget spent and the decrement not within the tolerance;
+-- stalled, the budget not spent and the decrement not within it; and never more iterations than
+-- the budget; and the dimension is kept. Whether it converges is a quality of the method on a
+-- problem, not a law, except on the domain where its theory says it must: a concave quadratic,
+-- below. [2026-10-26, D-2026-10-16-m] `MaximizerStationary` was `if r.converged then decrement
+-- <= tol else true`: a maximizer that gave up everywhere passed it vacuously. Now every reason is
+-- checked, and no case is vacuous. The strict `<` of not converging is `finished`'s test.
 -- spec 10.S10, P11
 MaximizerAscends (mx : Maximizer) (s : Settings) (n : Dim) (p : Posterior n) (x0 : VecOf n) : Bool :=
   p.logp (mx.maximize s n p.logp p.score p.info x0).x >= p.logp x0
 MaximizerStationary (mx : Maximizer) (s : Settings) (n : Dim) (p : Posterior n) (x0 : VecOf n) : Bool :=
   { r := mx.maximize s n p.logp p.score p.info x0
-    if r.converged then decrement n s p.score p.info r.x <= s.tol else true }
+    dec := decrement n s p.score p.info r.x
+    r.steps <= s.maxIter
+    and (match r.reason {
+           converged u -> dec <= s.tol ;
+           exhausted u -> r.steps == s.maxIter and not (dec < s.tol) ;
+           stalled u -> r.steps < s.maxIter and not (dec < s.tol) }) }
 MaximizerKeepsDimension (mx : Maximizer) (s : Settings) (n : Dim) (p : Posterior n) (x0 : VecOf n) : Bool :=
   (mx.maximize s n p.logp p.score p.info x0).x.n == n
 
 -- the concave quadratic with its maximum at b and curvature c on every direction: the family
--- with generators (`VecOf n`, `Positive`), on which a maximizer converges within any budget that
--- is not tiny (Levenberg-Marquardt takes a handful of accepted steps on it) and ends at b within
--- the decrement's tolerance, c |x - b|^2 / 2 <= tol. "Not tiny" is a criterion, so a parameter
--- (P11, D-2026-10-14-c): `budget`, the iterations the demand grants a maximizer on this family;
--- under settings with fewer (`maxIter = 1`, where a correct Levenberg-Marquardt ends with
--- `converged = false`) the law asks nothing. [proposed] The budget is the demand's, bound by the
--- test with the settings; drawn, a small budget with drawn settings of a small `maxIter` would
--- refute a correct maximizer again (summary-BCD.md, item 4 and its contradiction).
+-- with generators (`VecOf n`, `Positive`), the domain where a maximizer's convergence is a law
+-- (D-2026-10-16-m). Its decrement at x is c |x - b|^2 / 2, so ending at b within the decrement's
+-- tolerance is c |x - b|^2 / 2 <= tol.
 quadratic (n : Nat) (b : VecOf n) (c : Positive) : Posterior n := {
   logp := fn x { d := sub x b
                  0.0 - 0.5 * c * dot d d },
   score := fn x { scale (0.0 - c) (sub x b) },
   info := fn x { mscale c (identity n) },
 }
-QuadraticConverges (mx : Maximizer) (s : Settings) (budget : Nat) (n : Dim) (b : VecOf n) (c : Positive) (x0 : VecOf n) : Bool :=
-  if s.maxIter < budget then true
-  else {
-    q := quadratic n b c
-    r := mx.maximize s n q.logp q.score q.info x0
-    d := sub r.x b
-    r.converged and 0.5 * c * dot d d <= s.tol }
+-- [proposed, 2026-10-26] The quadratics on which convergence is owed: those whose decrement, at
+-- the points within one unit in the last place of b in every coordinate, is below the tolerance.
+-- A run in floating point ends at best there (the unit at b_i is at most epsilon |b_i|, numbers.lth
+-- `Doubles`), so where c epsilon^2 |b|^2 / 2 reaches the tolerance not converging is the right
+-- answer. The bound is the format's, not a criterion (P11).
+quadraticReachable (fp : Doubles Float64) (s : Settings) (n : Nat) (b : VecOf n) (c : Positive) : Bool :=
+  0.5 * c * (fp.epsilon * fp.epsilon) * dot b b < s.tol
+-- On that domain a maximizer stops within its own bound, `mx.quadraticSteps` at the decrement of
+-- the start, and either converges at b within the tolerance, or the settings' budget is below the
+-- bound and it stopped exhausted at the budget. Not converging within the bound is a failure, not
+-- a vacuous case (D-2026-10-16-m); a stall is a failure. Outside the domain the law asks nothing:
+-- the premise is on the problem, drawn, not on what the maximizer says, so the tester's count of
+-- the cases where it held (report-wave-a-3.md, A3) says how much the law was asked. [2026-10-26]
+-- It was `if s.maxIter < budget then true else (converged and at b)`, `budget` a census of the
+-- demand (50): a constant, and vacuous at every budget below it.
+QuadraticConverges (mx : Maximizer) (fp : Doubles Float64) (s : Settings) (n : Dim) (b : VecOf n) (c : Positive) (x0 : VecOf n) : Bool :=
+  { q := quadratic n b c
+    if quadraticReachable fp s n b c
+    then {
+      bound := mx.quadraticSteps s (decrement n s q.score q.info x0)
+      r := mx.maximize s n q.logp q.score q.info x0
+      d := sub r.x b
+      r.steps <= bound
+      and (match r.reason {
+             converged u -> 0.5 * c * dot d d <= s.tol ;
+             exhausted u -> s.maxIter < bound and r.steps == s.maxIter ;
+             stalled u -> false }) }
+    else true }
 Maximizer := MaximizerAscends & MaximizerStationary & MaximizerKeepsDimension & QuadraticConverges
 -- [proposed] Two maximizers end at the same point of the quadratic family, within the tolerance,
 -- and say the same about convergence: no law of the theory, the question of
@@ -160,7 +210,7 @@ MaximizersAgree (mx my : Maximizer) (tol : Tolerance) (s : Settings) (n : Dim) (
   { q := quadratic n b c
     r1 := mx.maximize s n q.logp q.score q.info x0
     r2 := my.maximize s n q.logp q.score q.info x0
-    r1.converged == r2.converged and approxVec tol r1.x r2.x }
+    isConverged r1.reason == isConverged r2.reason and approxVec tol r1.x r2.x }
 
 -- ---------------------------------------------------------------- §3 Laplace's update
 

@@ -16,6 +16,10 @@
 -- layer-3-review-2026-10-15/prompt-fix-BCD.md (items 1 and 4 of its summary-BCD.md): the gradient
 -- of an objective along a drawn direction; `StepRule` determines the step from the direction: the
 -- trial point and its value, accepted exactly when the value falls.
+-- 2026-10-26, by Claude Opus 5.5 (night Agent V), on D-2026-10-16-m: `StopReason` moved to
+-- belief.lth and `finished` gives `Maybe StopReason`; `minimizeBy` drives a model's step; §4, the
+-- steps on the quadratic family derived from the definitions, the bound a Levenberg-Marquardt
+-- maximizer declares, and the law that a run takes that many.
 --
 -- What this file states. An objective is what is minimized: a value on the vectors of a
 -- dimension, its gradient and a positive step matrix (the information, or Gauss-Newton); its
@@ -34,16 +38,17 @@
 --
 -- Index (all sections written in this draft):
 --   §1 `Objective`, its laws, `asObjective`, `posteriorOf` (v0.1 optimization.lut:16-24, 108-110). done
---   §2 `Damping`, `LMState`, `start`, `dampedStep`, `lmStep`, `StopReason`, `finished`, `Run`,
+--   §2 `Damping`, `LMState`, `start`, `dampedStep`, `lmStep`, `finished`, `Run`, `minimizeBy`,
 --      `minimize` (v0.1 optimization.lut:27-73).                                              done
 --   §3 `LMStep`, the laws of a step: descent, the damping, the decrease; the quadratic family
 --      (v0.1 optimization.lut:76-92).                                                         done
+--   §4 `lmQuadraticSteps`, `lmQuadraticBound`, `LMStepsOnQuadratic` (2026-10-26).             done
 
-import "numbers.lth" Tolerance Positive within withinOf abs
+import "numbers.lth" Tolerance Positive within withinOf abs Doubles
 import "arrays.lth" Vec Mat VecOf MatOf Dim vec mat identity approxVec approxMat exact RankFloor
 import "arrays_model.lut" numpy : Arrays add sub scale dot norm matVec matMul madd mscale transpose pinvSym
 import "probability.lth" StepResolution IsGradient
-import "belief.lth" Settings Posterior decrement quadratic
+import "belief.lth" Settings Posterior decrement quadratic quadraticReachable StopReason converged exhausted stalled isConverged
 
 -- ---------------------------------------------------------------- §1 The objective (D-2026-10-14-a)
 
@@ -107,25 +112,25 @@ lmStep (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState n)
     then { x := xt, phi := pt, mu := lowered d st.mu, iter := st.iter + 1, accepted := true }
     else { x := st.x, phi := st.phi, mu := st.mu * d.factor, iter := st.iter + 1, accepted := false } }
 
--- why a run stops (`StopReason`; core bite 12: `Reason` is also checks.lth's): converged when the
--- decrement is below the settings' tolerance, exhausted by
--- the budget, stalled by the damping beyond its most; running otherwise (v0.1
--- optimization.lut:63-69)
-StopReason = { running : Unit || converged : Unit || exhausted : Unit || stalled : Unit }
-isConverged (r : StopReason) : Bool := match r { converged u -> true ; _ -> false }
-finished (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState n) : StopReason :=
-  if decrement n s o.grad o.stepMatrix st.x < s.tol then converged unit
-  else if st.iter >= s.maxIter then exhausted unit
-  else if st.mu > d.most then stalled unit
-  else running unit
+-- why a run stops, `StopReason` (belief.lth since 2026-10-26; core bite 12: `Reason` is also
+-- checks.lth's): converged when the decrement is below the settings' tolerance, exhausted by the
+-- budget, stalled by the damping beyond its most; nothing while it is running (v0.1
+-- optimization.lut:63-69, where `running` was a fourth reason)
+finished (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState n) : Maybe StopReason :=
+  if decrement n s o.grad o.stepMatrix st.x < s.tol then just (converged unit)
+  else if st.iter >= s.maxIter then just (exhausted unit)
+  else if st.mu > d.most then just (stalled unit)
+  else nothing
 
 Run (n : Nat) = { state : LMState n, reason : StopReason }
 
--- the native driver: the step iterated until the run is finished (v0.1 optimization.lut:72-73)
-minimize (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState n) : Run n :=
+-- the driver: a step iterated until the run is finished (v0.1 optimization.lut:72-73); `minimize`
+-- with the native step, `minimizeBy` with a model's (§3, `LMStepsOnQuadratic`)
+minimizeBy (step : (n : Nat) -> Settings -> Damping -> Objective n -> LMState n -> LMState n) (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState n) : Run n :=
   match finished n s d o st {
-    running u -> minimize n s d o (lmStep n s d o st) ;
-    r -> { state := st, reason := r } }
+    nothing -> minimizeBy step n s d o (step n s d o st) ;
+    just r -> { state := st, reason := r } }
+minimize (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState n) : Run n := minimizeBy lmStep n s d o st
 
 -- ---------------------------------------------------------------- §3 The laws of a step (10.S10)
 
@@ -179,6 +184,40 @@ DirectionAgreesOnQuadratic (m : LMStep) (tol : Tolerance) (s : Settings) (n : Di
   DirectionAgrees m tol s n (quadraticObjective n b c) x mu
 StepRuleOnQuadratic (m : LMStep) (s : Settings) (d : Damping) (n : Dim) (b : VecOf n) (c : Positive) (st : LMState n) : Bool :=
   StepRule m s d n (quadraticObjective n b c) st
--- [core bite 12] the three laws on the quadratic family, gathered so that this file claims them
--- (4.S14), as arrays.lth gathers `ArrayContainers`
-LMStepOnQuadratic := DirectionDescendsOnQuadratic & DirectionAgreesOnQuadratic & StepRuleOnQuadratic
+
+-- ---------------------------------------------------------------- §4 The steps on the quadratic (D-2026-10-16-m)
+
+-- [proposed, 2026-10-26, Agent V] How many steps the method takes on the concave quadratic of
+-- belief.lth, derived from the definitions above, never a constant (P11). There the step matrix is
+-- c I, so the damped direction is -(x - b) / (1 + mu) and every trial falls: the distance to the
+-- maximum is multiplied by mu / (1 + mu) at each step, the decrement by its square, and the
+-- damping is lowered by the schedule. From a decrement `dec` at the start the run stops converged
+-- at the first k where the product brings it below the tolerance (`finished`'s strict test):
+-- with v0.1's damping about six orders of magnitude at the first step and one more at each
+-- following, a handful.
+lmQuadraticSteps (d : Damping) (tol : Float64) (dec : Float64) (mu : Float64) (k : Nat) : Nat :=
+  if dec < tol then k
+  else { r := mu / (1.0 + mu)
+         lmQuadraticSteps d tol (dec * r * r) (lowered d mu) (k + 1) }
+-- the bound a Levenberg-Marquardt maximizer declares (belief.lth `Maximizer`'s `quadraticSteps`):
+-- the count in exact arithmetic plus one step for rounding. In floating point the distance after
+-- the count's k steps may exceed the exact one by the rounding of the last points, a unit in the
+-- last place of b per coordinate; on belief.lth's `quadraticReachable` that leftover is within
+-- the tolerance after one more step, whose factor mu / (1 + mu) is below one.
+lmQuadraticBound (d : Damping) (s : Settings) (dec : Float64) : Nat := lmQuadraticSteps d s.tol dec d.init 0 + 1
+-- The bound is the theory's only if a run takes that many: a model of the step, driven on the
+-- quadratic family where convergence is owed and the budget is above the bound, stops converged
+-- within one step of the count, the rounding either way: never fewer (a padded bound would hide
+-- the alarm of D-2026-10-16-m) nor more. Over `LMStep`, so that the host's step is driven too and a step that
+-- never accepts is refuted.
+LMStepsOnQuadratic (m : LMStep) (fp : Doubles Float64) (s : Settings) (d : Damping) (n : Dim) (b : VecOf n) (c : Positive) (x0 : VecOf n) : Bool :=
+  { o := quadraticObjective n b c
+    dec := decrement n s o.grad o.stepMatrix x0
+    k := lmQuadraticSteps d s.tol dec d.init 0
+    if quadraticReachable fp s n b c and k + 1 <= s.maxIter
+    then { r := minimizeBy m.step n s d o (start n o d x0)
+           isConverged r.reason and k <= r.state.iter + 1 and r.state.iter <= k + 1 }
+    else true }
+-- [core bite 12] the three laws on the quadratic family, and since 2026-10-26 the steps of §4,
+-- gathered so that this file claims them (4.S14), as arrays.lth gathers `ArrayContainers`
+LMStepOnQuadratic := DirectionDescendsOnQuadratic & DirectionAgreesOnQuadratic & StepRuleOnQuadratic & LMStepsOnQuadratic

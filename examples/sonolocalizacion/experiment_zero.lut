@@ -44,7 +44,7 @@ import "tables.lth" Table Codec Cell int real text
 import "tables_model.lut" csv : Codec
 import "probability.lth" Kolmogorov MeanModel ScaledModel Likelihood gaussian profiled normalCdf kolmogorovTail valueSums
 import "probability_model.lut" numpySort : Kolmogorov kolmogorovDistance
-import "belief.lth" GaussianBelief Settings MaxResult Maximizer laplaceMode laplaceAt
+import "belief.lth" GaussianBelief Settings MaxResult Maximizer laplaceMode laplaceAt isConverged
 import "belief_model.lut" lm : Maximizer
 import "positions.lut" Design Separated flatten
 import "positions_model.lut" positionsModel nodesOf
@@ -112,7 +112,7 @@ fit (settings : Settings) (g : ValidDistanceGraph) (c : Widening) (st : SigmaTre
   match toFloat64 m.d.n - trace (matMul (lik.info m.d mode.x) (pinvSym (covFloor (3 * m.x0.n)) precision)) { nu ->
     { posterior := { mean := mode.x, precision := precision },
       sigma := (match st { eliminated u -> elementary.sqrt (dot r r / nu) ; known s -> s }), nu := nu,
-      predicted := h, converged := mode.converged,
+      predicted := h, converged := isConverged mode.reason,
       separated := Separated mode.x (nodesOf d mode.x d.i) (nodesOf d mode.x d.j) } } } } } } }
 
 -- ---------------------------------------------------------------- the transform of the residuals
