@@ -3495,3 +3495,27 @@ Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-27)
 Kind:       certify.py (cone, host_hash), kernel.py, a store of kernel edges; spec 6.S8 and 12.S13;
             principles L10.4 (the key is the cone)
 Status:     current
+
+D-2026-10-27-b  Test the weakest link; what is established is not demonstrated again. In a chain of
+                propositions, the evidence effort goes to the link of least credibility. A law that
+                is an established mathematical result (Higham's bounds, a ring's laws on Int, IEEE
+                754's semantics) cites its demonstration as evidence (a reference, a formal proof
+                such as Flocq's), graded as proved by that source; its tests certify the specimen
+                (that this implementation, on this machine, meets the law), not the law. Re-testing
+                established results is a regression of Luthier's own machinery (the tester, the
+                controls, the identity), run when the machinery changes, not evidence a run needs:
+                for established mathematics the weakest link is Luthier's implementation. To be
+                proposed as a principle clause (the coordinator's reading: it is how the evidence
+                algebra already composes, a chain's failure bound being the capped sum of its links'
+                (D-2026-10-25-a), so lowering the largest term is the best use of effort).
+Author:     Luciano, on the coordinator's reading of his remark
+Quote:      "No tiene sentido demostrar lo ya demostrado más que como verificación de la maquinaria
+            de Luthier." "Creo que debería casi ser un principio de Luthier. No hacer trabajo de
+            más. O digamos que en una cadena de proposiciones se testea el eslabón más débil (el de
+            menos credibilidad?). En el caso de leyes matemáticas establecidas, el eslabón débil es
+            la implementación misma de Luthier."
+Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-27)
+Kind:       principles (a clause to propose, near L9 and L10); the grades (proved by a cited
+            source); the comparisons with antecedents (only those that change a claim); the
+            platform question (Within laws portable: the law cited, the specimen sampled)
+Status:     current
