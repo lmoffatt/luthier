@@ -586,3 +586,46 @@ def test_a_census_of_another_type_than_its_parameter_is_refused(tmp_path):
     assert isinstance(stored.evidence, tester.NotRun) and stored.known is None
     entries = json.loads((tmp_path / "mistyped.test.cert.json").read_text(encoding="utf-8"))
     assert entries and all("NotRun" not in e["evidence"] for e in entries)
+
+
+# [bite C2, record/plan/audit-algebras-2026-10-22/execution.md; L9.17, D-2026-10-18-d] A numerical law
+# whose bound is a parameter of type `Bound` (resources.lth), run at a list of bounds the line gives:
+# the tester records, per bound, the cases, the worst ratio and the fuel each case spent, the measured
+# resource the scaling law of the algorithm's theory is read against.
+SCALING = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Law Within Case Listed
+import "resources.lth" Bound
+gap (a b : Float64) : Float64 := if a < b then b - a else a - b
+halvings (w t : Float64) : Nat := if w <= t then 0 else 1 + halvings (w / 2.0) t
+-- one halved down to the bound and back: exact, so the ratio is zero; its cost grows as log2 (1 / b)
+Halves (b : Bound) (x : Int) : Law := Within Float64 gap b (toFloat64 x) (toFloat64 x + 0.0 * toFloat64 (halvings 1.0 b))
+-- the same with an integer in place of the bound: no scaling record
+Plain (k : Int) (x : Int) : Law := Within Float64 gap 1.0 (toFloat64 x) (toFloat64 (x + 0 * halvings 1.0 (toFloat64 k)))
+bounds : List Bound := [0.5, 1.0e-3, 1.0e-6, 1.0e-9]
+one : List Bound := [1.0e-3]
+xs : List Int := [1, 2, 3]
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+test "Halves" ExhaustiveMode (whereBindings <- [bind "b" "bounds", bind "x" "xs"])
+test "Halves" ExhaustiveMode (whereBindings <- [bind "b" "one", bind "x" "xs"])
+test "Plain" ExhaustiveMode (whereBindings <- [bind "k" "xs", bind "x" "xs"])
+'''
+
+
+def test_a_numerical_law_run_at_a_list_of_bounds_records_the_fuel_per_bound(tmp_path):
+    path = tmp_path / "scaling.test.lut"
+    path.write_text(SCALING, encoding="utf-8")
+    halves, single, plain = tester.run_tests(path)
+    assert halves.verdict == "Supported" and halves.measured["worst"] == 0.0
+    scaling = halves.measured["scaling"]
+    assert scaling["parameter"] == "b" and scaling["resource"] == "fuel"
+    # the bounds from the loosest down, each with its three cases, its worst ratio, and what it spent
+    assert [s["bound"] for s in scaling["bounds"]] == [0.5, 1.0e-3, 1.0e-6, 1.0e-9]
+    assert all(s["cases"] == 3 and s["worst"] == 0.0 for s in scaling["bounds"])
+    fuel = [s["fuel"] for s in scaling["bounds"]]
+    assert all(isinstance(f, int) and f > 0 for f in fuel) and fuel == sorted(fuel) and fuel[0] < fuel[-1]
+    assert all(s["least"] <= s["fuel"] for s in scaling["bounds"])
+    assert halves.entry["measured"]["scaling"] == scaling  # kept in the entry
+    assert "fuel per case" in tester.line(halves) and "4 bounds" in tester.line(halves)
+    # one bound is no scaling, and a parameter that is not a `Bound` is none either
+    assert "scaling" not in single.measured and "scaling" not in plain.measured

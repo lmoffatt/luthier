@@ -881,7 +881,9 @@ def evaluate(runner, law, case, fuel):
     appended to the runner's `MEASURES` list when `run_measured` set one; or `Case b` outside its
     range, held as `b`, with nothing measured. [proposed] The measures pass by the runner and not by an
     argument so that `run_spec`, part of the drawing code whose source is every sampled entry's
-    fingerprint (`drawing_revision`), keeps its text: a numerical law changes no draw."""
+    fingerprint (`drawing_revision`), keeps its text: a numerical law changes no draw. [bite C2] Each
+    measure also keeps the fuel the case spent, law and distance and bound, the resource a scaling run
+    records per bound (`scaling_record`)."""
     measured = getattr(runner, MEASURES, None)
     runner.fuel = fuel
     r = runner.whnf(Runner.apply(t.Var(law), list(case)))
@@ -899,7 +901,7 @@ def evaluate(runner, law, case, fuel):
             distance = _float_value(runner, Runner.apply(d, [a, b]))
             w = _float_value(runner, bound)
             if measured is not None:
-                measured.append((case, distance, w))
+                measured.append((case, distance, w, None if fuel is None else fuel - runner.fuel))
             return distance <= w
         raise RunError(f"the law gave {_show(r)}, not a Bool")
 
@@ -947,7 +949,60 @@ def run_measured(runner, spec, fuel, loaded=None, start=None):
         return outcome
     points = outcome.evidence.cases
     members = _case_regions(runner, loaded, spec, law, fuel, [c for c, _ in points]) if outcome.regions else None
-    return replace(outcome, measured=measured_record(measures, points, members, outcome.regions))
+    measured = measured_record(measures, points, members, outcome.regions)
+    scaling = scaling_record(runner, law, measures)
+    if scaling is not None:
+        measured["scaling"] = scaling
+    return replace(outcome, measured=measured)
+
+
+# [bite C2, record/plan/audit-algebras-2026-10-22/execution.md; L9.17, D-2026-10-18-d; the audit of
+# 2026-10-22, section 6] The scaling mode: a numerical law whose bound is a parameter of one of these
+# types (resources.lth's `Bound`), bound by its line to a census of two bounds or more, is run at each
+# (as any census) and the tester records per bound what the cases cost, the measured resource: the
+# reduction fuel each case spent (the interpreter's count, so this host's and this interpreter's). A
+# record, never a verdict: what an algorithm needs is its theory's modulus, and whether what it spent
+# scales as stated is its theory's law (`ScalesAs`), which counts the algorithm's own steps; the fuel
+# is the tester's measure of the same run, kept beside them (the audit's "measured, sufficient and
+# extrapolated distinguished": measured here, sufficient in the modulus, extrapolated by nobody yet).
+# [proposed] The type a law's bound is recognized by, a module default as `CUTOFF_TYPES`.
+SCALING_TYPES = ("Bound",)
+
+
+def scaling_record(runner, law, measures, scaling_types=SCALING_TYPES):
+    """Per bound, loosest first: the bound, the cases measured there, their worst ratio, and the fuel
+    the costliest and the cheapest case spent (`fuel`, `least`); None when the law has no parameter
+    of a scaling type, or its cases took fewer than two bounds, or a case's fuel was not counted."""
+    params = parameters(runner, law) or []
+    at = next((k for k, (_, ty) in enumerate(params) if is_cutoff(runner, ty, scaling_types)), None)
+    if at is None or not measures or any(m[3] is None for m in measures):
+        return None
+    per = {}
+    for case, distance, bound, spent in measures:
+        value = _value(runner, case[at]).get("Number")
+        if value is None:
+            return None
+        r = ratio_of(distance, bound)
+        if value not in per:
+            per[value] = {"bound": value, "cases": 0, "worst": r, "fuel": spent, "least": spent}
+        p = per[value]
+        p["cases"] += 1
+        p["worst"] = worse_ratio(p["worst"], r)
+        p["fuel"], p["least"] = max(p["fuel"], spent), min(p["least"], spent)
+    if len(per) < 2:
+        return None
+    return {"parameter": params[at][0], "resource": "fuel",
+            "bounds": [per[b] for b in sorted(per, reverse=True)]}
+
+
+def scaling_text(measured):
+    """A scaling record as a line shows it: the fuel per case at the loosest and at the tightest bound."""
+    scaling = (measured or {}).get("scaling")
+    if not scaling:
+        return ""
+    first, last = scaling["bounds"][0], scaling["bounds"][-1]
+    return (f", fuel per case {first['fuel']} at {scaling['parameter']} = {first['bound']:g} to {last['fuel']} at "
+            f"{last['bound']:g} ({len(scaling['bounds'])} bounds)")
 
 
 def _case_regions(runner, loaded, spec, law, fuel, cases):
@@ -1360,7 +1415,7 @@ def measured_record(measures, points, members, regions):
     (the regions' order, D-2026-10-16-i), each region's worst over the measured cases it counted.
     The verdict is the comparison at each case; the ratio records how tight the bound was."""
     worst, at = 0.0, None
-    for _, distance, bound in measures:
+    for _, distance, bound, *_ in measures:
         r = ratio_of(distance, bound)
         if at is None or (worst is not None and (r is None or r > worst)):
             worst, at = r, (distance, bound)
@@ -1369,7 +1424,7 @@ def measured_record(measures, points, members, regions):
     if members is not None and regions is not None and len(members) == len(points):
         by_case = {id(case): k for k, (case, _) in enumerate(points)}
         per = {}
-        for case, distance, bound in measures:
+        for case, distance, bound, *_ in measures:
             for key in members[by_case[id(case)]]:
                 r = ratio_of(distance, bound)
                 per[key] = worse_ratio(per[key], r) if key in per else r
@@ -2266,7 +2321,7 @@ def ratio_text(measured):
     if not measured or not measured.get("measured"):
         return ""
     worst = measured["worst"]
-    return ", worst ratio " + ("unbounded" if worst is None else f"{worst:.6g}")
+    return ", worst ratio " + ("unbounded" if worst is None else f"{worst:.6g}") + scaling_text(measured)
 
 
 def _tested_tail(outcome):
