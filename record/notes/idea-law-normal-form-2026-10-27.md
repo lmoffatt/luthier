@@ -47,3 +47,22 @@ have its two arguments sorted and may not be flattened. Parameters are ordered b
 in the normalized body. Equations that are not commutativity or associativity need completion
 (Knuth–Bendix), which may not terminate: the normal form recognizes what an order decides and claims
 nothing on the rest.
+
+## His formulation: free algebra, quotient, order, dictionary
+
+His words: "La ley la definís en un monoide libre (o un magma o lo que sea) y de acuerdo a las
+propiedades que tengan (asociatividad, simetría, etc.) y a una regla externa por comodidad (una
+relación alfabética de orden que no cambia la semántica pero que unifica las representaciones)
+lográs una expresión única para cada cociente de fórmulas equivalentes y luego tenés un mapa de
+expresiones ordenadas y nombres."
+
+The coordinator's reading: this is canonicalization modulo an equational theory. The free term
+algebra over the operations and the variables; its quotient by the declared equations (in Luthier,
+the certified properties of the specimen); a representative chosen per class by a total order with
+no meaning (the normal form); a dictionary from normal forms to names, where recognizing a law is a
+lookup. Three refinements: canonicalizing (a unique representative, for comparison) is not
+simplifying (a preferred one, by a cost), and recognition needs only the first; when no canonical
+form exists, e-graphs (equality saturation) keep every equivalent form and extract by cost; the
+variables need a canonical naming that depends on the order that depends on the names, the problem
+of canonical graph labelling, solved by iterative refinement; and the quotient has a computable
+representative for commutativity and associativity, not for arbitrary equations.
