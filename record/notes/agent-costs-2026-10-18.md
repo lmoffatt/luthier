@@ -94,3 +94,9 @@ Argon when off the VPN. Claude only coordinates, in short turns.
 ## The algebra audit, 2026-10-22
 
 - Codex, gpt-6.1-sol, reasoning high, sandbox read-only, the audit of `record/plan/audit-algebras-2026-10-22/prompt.md`: 14:16 to 14:54 (38 min); input 7,818,837 tokens of which 7,412,480 cached, output 31,769, reasoning 9,554. Plan limits read by Luciano (shared by Codex, Work and ChatGPT): at 14:21, five hours after start, 89% left of the 5-hour window and 67% of the week; at 15:10, 74% and 64%. So the audit used about 15 points of the 5-hour window after 14:21 (up to 11 more before, if nothing else ran) and about 3 points of the week. The week stood at 90% left after bite 7's run was never read, so the drop to 67% before the audit mixes bite 7 and his other use.
+
+## Readings of 2026-10-27 (Luciano's screenshots)
+
+- Claude Team: weekly 49% used, Fable 18%, resetting Wednesday 10:00; the current session 17%. Since 2026-10-26 morning (27% weekly) the night's and the day's agents (C2, C3, V, P, T, the fixes, the kernel, the queue, the normal form, the principles, the floats design) took about 22 points.
+- Codex: weekly 92% left after three read-only reviews (the night's review, the foundations audit, the novelty critique): about 8 points, under 3 each.
+- Gemini (Antigravity, Argon high): weekly 1% used after two runs (related work, 13 min; comparison basis, 11 min). By far the cheapest per report.
