@@ -10,7 +10,7 @@ REPO = Path(__file__).resolve().parent.parent
 TAPE = REPO / "docs" / "concepts" / "tape.lth"
 
 # the tape's laws written other ways, and laws that are no core property
-VARIANTS = """
+VARIANTS = """import "numbers.lth" Doubles Moderate
 Mark : U := { k : Int | 0 <= k and k <= 50000 }
 Tape : { reading : Mark -> Mark -> Float64 }
 ReadingSymmetric (t : Tape) (a b : Mark) : Bool := t.reading a b == t.reading b a
@@ -20,6 +20,8 @@ FloatAssociative (a b c : Float64) : Bool := (a + b) + c == a + (b + c)
 IntAssociative (a b c : Int) : Bool := (a + b) + c == a + (b + c)
 ReadingSteps (t : Tape) (a : Mark) : Bool := t.reading a (a + 1) == 1.0
 MinusCommutes (a b : Int) : Bool := a - b == b - a
+PlusAssociates (d : Doubles Float64) (x y z : Moderate) : Bool := d.plus (d.plus x y) z == d.plus x (d.plus y z)
+PlusCommutes (d : Doubles Float64) (x y : Moderate) : Bool := d.plus y x == d.plus x y
 """
 
 
@@ -56,6 +58,13 @@ def test_a_float_associativity_is_not_associative(variants):
     # its sums are sorted, never flattened: the two sides stay distinct
     assert not normal.trivial(law)
     assert all(i.property != "Associative" for i in normal.recognize(law))
+
+
+def test_a_models_float_associativity_is_withheld_by_its_theory(variants):
+    # `Doubles` claims `PlusAssociativeWithin d`, `AssociativeWithin` at `d.plus`, and no `Associative`
+    assert normal.recognize(variants["PlusAssociates"]) == []
+    [found] = normal.recognize(variants["PlusCommutes"])
+    assert (found.property, dict(found.at)["op"]) == ("Commutative", "d.plus")
 
 
 def test_an_integer_associativity_is_true_by_the_quotient(variants):

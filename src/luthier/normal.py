@@ -914,17 +914,74 @@ def _unify(pattern, actual, variables, tsub):
 
 
 def _withheld(entry, sigma, law, tsub):
-    """An exact property instantiated at an operator the core claims it of only within a bound."""
+    """An exact property instantiated at an operation the core claims it of only within a bound: a
+    global operator by WITHIN at its carrier, or a model's field (`d.plus`) by its theory's own
+    laws (`Doubles` claims `PlusAssociativeWithin d`, `AssociativeWithin` at `d.plus`, and no
+    `Associative`)."""
     for n, w, ty in entry.params:
         image = sigma.get(n)
-        if not isinstance(image, t.Var) or image.name.startswith("$"):
-            continue
-        op = ALIASES.get(image.name, image.name)
-        ty = _subst_types(ty, tsub)
-        carrier = law.env.carrier(ty.domain) if isinstance(ty, t.Pi) else None
-        if entry.name in WITHIN.get((op, carrier), ()) and entry.name not in EXACT.get((op, carrier), ()):
-            return True
+        if isinstance(image, t.Var) and not image.name.startswith("$"):
+            op = ALIASES.get(image.name, image.name)
+            ty = _subst_types(ty, tsub)
+            carrier = law.env.carrier(ty.domain) if isinstance(ty, t.Pi) else None
+            if entry.name in WITHIN.get((op, carrier), ()) and entry.name not in EXACT.get((op, carrier), ()):
+                return True
+        elif isinstance(image, t.Proj) and isinstance(image.record, t.Var) and image.record.name.startswith("$"):
+            claims = _theory_claims(law, image.record.name)
+            mine = {p for p, k in claims if k == key(image)}
+            if entry.name + "Within" in mine and entry.name not in mine:
+                return True
     return False
+
+
+def _theory_claims(law, var):
+    """The properties a law's model parameter's theory claims of its fields: each conjunct of the
+    theory's definition at the model, unfolded until its head names a core property (the claim as
+    the library writes it, `PlusAssociativeWithin d` is `AssociativeWithin ... d.plus ...`), as
+    (property, the key of each argument it is claimed at)."""
+    ty = law.ctx.get(var)
+    head, targs = spine(ty) if ty is not None else (None, [])
+    theory = law.env.defs.get(head.name) if isinstance(head, t.Var) else None
+    if theory is None:
+        return set()
+    body, names = theory.body, []
+    while isinstance(body, t.Lam):
+        names.append(body.name)
+        body = body.body
+    if len(names) != len(targs) + 1 or "&" not in kernel.free_names(body):
+        return set()
+    for n, a in zip(names, list(targs) + [t.Var(var)]):
+        body = kernel.substitute(n, a, body)
+    conjuncts, stack = [], [body]
+    while stack:
+        u = stack.pop()
+        h, args = spine(u)
+        if isinstance(h, t.Var) and h.name == "&" and len(args) == 2:
+            stack.extend(args)
+        else:
+            conjuncts.append(u)
+    names = {e.name for e in dictionary()}
+    out = set()
+    for c in conjuncts:
+        # unfold the conjunct's head until it names a property of the core: the claim as written
+        for _ in range(8):
+            h, args = spine(c)
+            if not isinstance(h, t.Var):
+                break
+            if h.name in names:
+                out.update((h.name, key(a)) for a in args)
+                break
+            body = law.env.unfoldable(h.name)
+            if body is None:
+                break
+            for a in args:
+                if not isinstance(body, t.Lam):
+                    break
+                body = kernel.substitute(body.name, a, body.body)
+            while isinstance(body, t.Lam):
+                body = body.body
+            c = body
+    return out
 
 
 def _subst_types(ty, tsub):
@@ -933,11 +990,10 @@ def _subst_types(ty, tsub):
     return ty
 
 
-def recognize(law):
-    """Step 6: the core properties `law` is an instance of, each with its instantiation; [] when
-    none is found (which claims nothing)."""
+def _matches(law):
+    """Each dictionary entry `law` is an instance of, with the substitution of its parameters and
+    of its types: the first verified match per entry."""
     target = sort(ordered(law), None)
-    found, seen = [], set()
     for entry in dictionary():
         for sigma in match(entry.prepared, target, {}):
             sigma = {k: to_kernel(v) for k, v in sigma.items()}
@@ -955,28 +1011,36 @@ def recognize(law):
                         _unify(ty, actual, entry.type_params, tsub)
             if _withheld(entry, sigma, law, tsub):
                 continue
-            at = []
-            for n, w, ty in entry.params:
-                if w in entry.type_params:
-                    value = tsub.get(w, sigma.get(n))
-                    at.append((w, show(value, law.written) if value is not None else "?"))
-                elif w in entry.structural:
-                    carrier = _object_param(ty)
-                    carrier = _subst_types(carrier, tsub) if carrier is not None else None
-                    at.append((w, "structural " + _atom(carrier, law.written) if carrier is not None else "structural ?"))
-                elif n in sigma:
-                    at.append((w, show(sigma[n], law.written)))
-                else:
-                    chains = sorted((k.split(":", 1)[1], v) for k, v in sigma.items() if k.startswith(n + ":"))
-                    if chains:
-                        at.append((w, "{ " + ", ".join(f"{lab} := {show(v, law.written)}" for lab, v in chains) + " }"))
-                    else:
-                        at.append((w, "?"))
-            inst = Instance(law.name, entry.name, entry.file, tuple(at))
-            if inst not in seen:
-                seen.add(inst)
-                found.append(inst)
+            yield entry, sigma, tsub
             break
+
+
+def recognize(law):
+    """Step 6: the core properties `law` is an instance of, each with its instantiation; [] when
+    none is found (which claims nothing)."""
+    found, seen = [], set()
+    for entry, sigma, tsub in _matches(law):
+        at = []
+        for n, w, ty in entry.params:
+            if w in entry.type_params:
+                value = tsub.get(w, sigma.get(n))
+                at.append((w, show(value, law.written) if value is not None else "?"))
+            elif w in entry.structural:
+                carrier = _object_param(ty)
+                carrier = _subst_types(carrier, tsub) if carrier is not None else None
+                at.append((w, "structural " + _atom(carrier, law.written) if carrier is not None else "structural ?"))
+            elif n in sigma:
+                at.append((w, show(sigma[n], law.written)))
+            else:
+                chains = sorted((k.split(":", 1)[1], v) for k, v in sigma.items() if k.startswith(n + ":"))
+                if chains:
+                    at.append((w, "{ " + ", ".join(f"{lab} := {show(v, law.written)}" for lab, v in chains) + " }"))
+                else:
+                    at.append((w, "?"))
+        inst = Instance(law.name, entry.name, entry.file, tuple(at))
+        if inst not in seen:
+            seen.add(inst)
+            found.append(inst)
     return found
 
 
