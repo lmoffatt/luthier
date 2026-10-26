@@ -1239,6 +1239,13 @@ def report(program, path=None) -> list[Report]:
             if pred(program, n):
                 if kind == 'provisional': message = f'Provisional extern: {provisional_reasons(program, n)}; run refuses it unless named by --accept assumed:{n}.'
                 result.append(Report(kind, n, message))
+    # [proposed, 4.S26] each law of the file that is an instance of a property of the core, by its
+    # normal form (normal.py): a notice only, no cone, store or result changes
+    try:
+        from .normal import notices
+        result += [Report('instance', n, line) for n, line in notices(q, own)]
+    except Exception as e:  # the core's dictionary did not read: the notice is missing, said once
+        result.append(Report('instance', '-', f'not computed: {type(e).__name__}: {e}'))
     return result
 
 
