@@ -163,7 +163,7 @@ decision-assistant fork, now luthier-8c), in this order after j2a:
   `write()` returns, failing the action when the system rejects bytes; a file checked by re-reading
   it; stdout observed according to what it is connected to (file re-read, pipe with an own tee,
   terminal the bytes accepted); the roots of trust declared once per project and listed in every
-  run's record. Later: each place's kind of feedback grades its actions.
+  run's record. Later: each place's kind of feedback grades its actions. Done 2026-10-26 (night agent P, 79a5649).
 - convergence and vacuity (D-2026-10-16-m): a law whose cases are all vacuous is not run, its premise
   count the reason; `MaximizerStationary`'s `else true` and `QuadraticConverges`'s
   `if s.maxIter < budget then true` go; convergence as a domain plus a step bound derived from the
