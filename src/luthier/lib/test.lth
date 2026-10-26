@@ -143,6 +143,10 @@ Tester := RunIsPointsOrNotRun & CoverageIsTheWeakest & CountsCases
 -- proved and exhaustive on their domain, none on the cases listed and everything outside, finite
 -- for sampled, an assumption's price for assumed), so that the weakest of several is defined and
 -- no operation raises a grade without new evidence (L10.9).
+-- [D-2026-10-16-k item 17, 2026-10-26] `Bounded n` is a domain, not a grade: a run confirmed on the
+-- box is exhaustive there, graded as a run on the whole type, and the box goes into the
+-- certificate's domain (certify.py's `BoxDomain`); a run on the box only supported (a point whose
+-- own evidence is a sample) is graded as one on the whole type would be, never exhaustive.
 Grade : U := data {
   Proved : Grade ;
   ExhaustiveGrade : Grade ;
@@ -150,13 +154,16 @@ Grade : U := data {
   Sampled : Grade ;
   AssumedGrade : Grade ;
 }
+-- [D-2026-10-16-k item 17] `gradeRank`, a fixed order of the five grades, is the Boolean slice's
+-- stand-in: L10.2 orders evidence by its domain and its cost, which the cost types will carry
+-- (D-2026-10-13-m); until then the grade alone is compared, with the domain beside it.
 gradeRank (g : Grade) : Nat := match g { Proved -> 4 ; ExhaustiveGrade -> 3 ; Cases -> 2 ; Sampled -> 1 ; AssumedGrade -> 0 }
 weakest (g h : Grade) : Grade := if gradeRank g <= gradeRank h then g else h
 grade (v : Verdict) (c : Maybe Coverage) : Maybe Grade := match v {
   Confirmed -> (match c { just k -> (match k { Exhaustive -> just ExhaustiveGrade ; Bounded n -> just ExhaustiveGrade ;
                                                Listed -> just Cases ; Drawn s -> just Cases }) ;
                           nothing -> just Cases }) ;
-  Supported -> (match c { just k -> (match k { Bounded n -> just ExhaustiveGrade ; Drawn s -> just Sampled ; _ -> just Cases }) ;
+  Supported -> (match c { just k -> (match k { Drawn s -> just Sampled ; _ -> just Cases }) ;
                           nothing -> just Cases }) ;
   Cites r -> just Proved ;
   Assumes -> just AssumedGrade ;
@@ -165,7 +172,8 @@ grade (v : Verdict) (c : Maybe Coverage) : Maybe Grade := match v {
 -- with proved above exhaustive above cases above sampled above assumed
 Grading : { gradeOf : Verdict -> Maybe Coverage -> Maybe Grade, below : Grade -> Grade -> Bool }
 GradesAsTerms (g : Grading) (s n : Nat) (r : String) : Bool :=
-  g.gradeOf Confirmed (just Exhaustive) == just ExhaustiveGrade and g.gradeOf Supported (just (Bounded n)) == just ExhaustiveGrade
+  g.gradeOf Confirmed (just Exhaustive) == just ExhaustiveGrade and g.gradeOf Confirmed (just (Bounded n)) == just ExhaustiveGrade
+  and g.gradeOf Supported (just (Bounded n)) == g.gradeOf Supported (just Exhaustive)
   and g.gradeOf Supported (just Listed) == just Cases and g.gradeOf Supported (just (Drawn s)) == just Sampled
   and g.gradeOf Confirmed (just (Drawn s)) == just Cases and g.gradeOf (Cites r) nothing == just Proved
   and g.gradeOf Assumes nothing == just AssumedGrade and g.gradeOf Refuted (just Exhaustive) == nothing

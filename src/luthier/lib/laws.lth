@@ -194,13 +194,17 @@ ForallAtOnePoint (m : Settling) (A : U) (body : A -> Law) (a : A) (e : Evidence)
 -- with two parameters is `Forall A (fn a { Forall B ... })`, its evidence points of `A` each with
 -- points of `B`: when the inner points are a sample each inner verdict is `Supported`, and
 -- requiring every point confirmed left the outer `Unsettled`, so no sampled law of more than one
--- parameter was settled, where 7.S10 grades it by the weakest reach.
+-- parameter was settled, where 7.S10 grades it by the weakest reach. [D-2026-10-16-k item 17]
+-- `Bounded n` is a domain, not a grade: every point of the box the domain names confirmed is
+-- confirmed on that box (7.S10: bounded is exhaustive on the box; L10.2), as `Exhaustive` on the
+-- whole type; the certificate carries the box (certify.py's `BoxDomain`). An `exists` is still
+-- refuted only on the whole type (`existsVerdict`): no witness in a box says nothing outside it.
 isSupported (v : Verdict) : Bool := match v { Supported -> true ; _ -> false }
 isConfirmedOrSupported (v : Verdict) : Bool := isConfirmed v or isSupported v
 ForallOnPoints (m : Settling) (A : U) (body : A -> Law) (pts : List (A * Evidence)) (c : Coverage) : Bool :=
   m.settles (Forall A body) (Points A pts c)
     == (if any List Verdict isRefuted (pointVerdicts m A body pts) then Refuted
-        else if all List Verdict isConfirmed (pointVerdicts m A body pts) then (match c { Exhaustive -> Confirmed ; _ -> Supported })
+        else if all List Verdict isConfirmed (pointVerdicts m A body pts) then (match c { Exhaustive -> Confirmed ; Bounded n -> Confirmed ; _ -> Supported })
         else if all List Verdict isConfirmedOrSupported (pointVerdicts m A body pts) then Supported
         else Unsettled)
 -- an `exists` is confirmed by a witness, and a failing instance does not refute it

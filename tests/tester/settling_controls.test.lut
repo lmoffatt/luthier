@@ -13,6 +13,8 @@
 -- (record/plan/audit-algebras-2026-10-22/prompt-wave-a.md; laws.lth's `VacuousIsUnsettled`).
 -- A measurement that confirms whatever the bound (`measuredIgnoresTheBound`) added 2026-10-25 by Claude
 -- Opus 5.5, wave C bite C1 (record/plan/audit-algebras-2026-10-22/prompt-wave-bc.md; `WithinIsMeasured`).
+-- A box that only supports a `forall` (`boxOnlySupports`) added 2026-10-26 by Claude Opus 5.5
+-- (D-2026-10-16-k item 17; laws.lth's `ForallOnPoints` under `Bounded n`).
 
 import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
@@ -81,6 +83,10 @@ notRunRefutes (l : Law) (e : Evidence) : Maybe Verdict := match e { NotRun r -> 
 vacuousSupports (l : Law) (e : Evidence) : Maybe Verdict := match e { Vacuous n -> just Supported ; _ -> nothing }
 testConfirms (l : Law) (e : Evidence) : Maybe Verdict :=
   match l { Statistical S T sl draw c -> (match e { Tested v -> (match v { Holds r -> just Confirmed ; _ -> nothing }) ; _ -> nothing }) ; _ -> nothing }
+-- [D-2026-10-16-k item 17, 2026-10-26] a box confirmed point by point only supports a `forall`, as a
+-- sample would (the reading before `Bounded n` became a domain)
+boxOnlySupports (l : Law) (e : Evidence) : Maybe Verdict :=
+  match l { Forall A body -> (match e { Points B pts cov -> (match cov { Bounded n -> (match settle l e { Confirmed -> just Supported ; _ -> nothing }) ; _ -> nothing }) ; _ -> nothing }) ; _ -> nothing }
 measuredIgnoresTheBound (l : Law) (e : Evidence) : Maybe Verdict :=
   match l { Within A d w a b -> (match e { Measured dist bound -> just Confirmed ; _ -> nothing }) ; _ -> nothing }
 
@@ -111,6 +117,7 @@ bNotRun : List Settling := [with notRunRefutes good]
 bVacuous : List Settling := [with vacuousSupports good]
 bTest : List Settling := [with testConfirms good]
 bMeasured : List Settling := [with measuredIgnoresTheBound good]
+bBox : List Settling := [with boxOnlySupports good]
 bFirst : List Settling := [with noFlaw firstArgument]
 bThird : List Settling := [with noFlaw thirdOfThree]
 bStrongest : List Settling := [with noFlaw strongest]
@@ -145,6 +152,7 @@ test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bNo
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bVacuous") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bTest") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bMeasured") (control <- true)
+test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bBox") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bFirst") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bThird") (control <- true)
 test "Settling" ExhaustiveMode (seed <- 20261022) (whereBindings <- profile "bStrongest") (control <- true)

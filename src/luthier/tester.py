@@ -1374,13 +1374,14 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
             regions, labels = regions_record(found), labels_record(named, len(points))
         except _RAISES:
             pass
-    # laws.lth's ForallOnPoints; a case that raised settles nothing (its evidence is NotRun)
+    # laws.lth's ForallOnPoints; a case that raised settles nothing (its evidence is NotRun); every
+    # value of a box (`Bounded n`) confirms on that box, the box the domain (D-2026-10-16-k item 17)
     if refuting is not None:
         verdict = "Refuted"
     elif raised:
         verdict = "Unsettled"
     else:
-        verdict = "Confirmed" if _base(coverage) == "Exhaustive" else "Supported"
+        verdict = "Confirmed" if _base(coverage) in ("Exhaustive", "Bounded") else "Supported"
     # a refutation stands at any fuel; a run cut by its fuel otherwise settles nothing (D-2026-10-15-g)
     return Outcome(spec, evidence, verdict, grade_of(runner, verdict, coverage, loaded), len(points), refuting,
                    raised, names, out_of_fuel=spent if verdict != "Refuted" else None, regions=regions,

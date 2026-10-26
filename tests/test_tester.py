@@ -121,6 +121,25 @@ def test_an_exhaustive_run_is_the_whole_type_weakened_by_its_bindings():
     assert tester._base(listed.evidence.coverage) == "Listed" and listed.verdict == "Supported"
 
 
+BOX = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Bounded
+SquareNonNegative (x : Int) : Bool := x * x >= 0
+box : List Int := [-1, 0, 1]
+test "SquareNonNegative" ExhaustiveMode (whereBindings <- [{ parameter := just "x", type := nothing, generator := "box", coverage := Bounded 1 }])
+'''
+
+
+def test_every_value_of_a_box_confirmed_is_confirmed_on_that_box(tmp_path):
+    # D-2026-10-16-k item 17: `Bounded n` is a domain, not a grade; laws.lth's ForallOnPoints
+    # confirms on the box, as on the whole type, and test.lth grades it exhaustive (7.S10)
+    path = tmp_path / "box.test.lut"
+    path.write_text(BOX, encoding="utf-8")
+    outcome, = tester.run_tests(path)
+    assert tester._base(outcome.evidence.coverage) == "Bounded"
+    assert (outcome.verdict, outcome.grade) == ("Confirmed", "ExhaustiveGrade")
+
+
 SHAPES = '''import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear
 import "generators.lth" Binding

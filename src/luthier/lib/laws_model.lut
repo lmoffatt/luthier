@@ -15,9 +15,12 @@
 --
 -- `Within` is settled by `Measured` as a case by its value (laws.lth's `WithinIsMeasured`; wave C,
 -- bite C1, by Claude Opus 5.5 on record/plan/audit-algebras-2026-10-22/prompt-wave-bc.md, 2026-10-25).
+--
+-- A `forall` whose points are every value of a box (`Bounded n`) and each confirms is confirmed on
+-- that box (laws.lth's `ForallOnPoints`; D-2026-10-16-k item 17, by Claude Opus 5.5, 2026-10-26).
 
 import "laws.lth" Settling Law Evidence Verdict Case Forall Exists Conjunction Either Not Then Statistical Within
-  Evaluated At Points EvidencePair Side Cited Assumed NotRun Tested Vacuous Measured Coverage Exhaustive StatisticalVerdict
+  Evaluated At Points EvidencePair Side Cited Assumed NotRun Tested Vacuous Measured Coverage Exhaustive Bounded StatisticalVerdict
   Confirmed Refuted Supported Unsettled Cites Assumes Holds Fails Unresolved
   isRefuted isConfirmed isSupported isConfirmedOrSupported reversedVerdict existsVerdict
 
@@ -46,7 +49,7 @@ settle (l : Law) (e : Evidence) : Verdict := match e {
       Points B pts cov ->
         (if any List Verdict isRefuted (pointSettles A B p pts) then Refuted
          else if all List Verdict isConfirmed (pointSettles A B p pts)
-           then (match cov { Exhaustive -> Confirmed ; _ -> Supported })
+           then (match cov { Exhaustive -> Confirmed ; Bounded n -> Confirmed ; _ -> Supported })
          else if all List Verdict isConfirmedOrSupported (pointSettles A B p pts)
            then Supported
          else Unsettled) ;
