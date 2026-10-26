@@ -1,0 +1,115 @@
+-- bisection.lut: the bisection of a bracketed root on the doubles, its modulus (how many halvings a
+-- bound needs, the floor the rounding sets, the domain where it converges), and its laws: the root
+-- within its bound, no more steps than the modulus says, the steps scaling as log2 (L / b).
+--
+-- Written 2026-10-26 by Claude Opus 5.5 (agent C2), bite C2 of record/plan/audit-algebras-2026-10-22/
+-- execution.md ("bisection's modulus log2(L/tol) certified against measured steps and a wrong exponent
+-- refuted"), on record/plan/after-core-2026-10-23/prompt-night-2026-10-26.md. Sources: D-2026-10-18-d
+-- (its list of moduli: "bisection, log2(L/tol)"), L9.17, L13.5 (the floor), D-2026-10-16-m (the step
+-- bound derived from the theory, never a constant), resources.lth (`Modulus`, `Scaling`, `ScalesAs`);
+-- the rounding of each operation is the standard model, `fl(a op b) = (a op b)(1 + delta)`, `|delta| <=
+-- u`, `u = epsilon / 2` (Higham, Accuracy and Stability of Numerical Algorithms, 2002, section 2.2).
+-- What is mine is marked [proposed]. The first consumer of resources.lth; its laws run in
+-- tests/tester/bisection_laws.test.lut.
+
+import "numbers.lth" Doubles Elementary abs absDistance
+import "laws.lth" Law Within Case
+import "resources.lth" Resources Bound Need Modulus Scaling ScalesAs sufficient infeasible belowFloor outsideDomain
+  isSufficient
+
+-- ---------------------------------------------------------------- the problem and the algorithm
+
+-- A problem: a function, a bracket, and, for the laws, its root as a double with `blur`, how far the
+-- true root and the zone where the computed sign of `f` may be wrong reach from it (the problem's own
+-- property: zero for `x - c` with `c` a double, about `epsilon` times the root for `x * x - 2`).
+Problem = { f : Float64 -> Float64, lo : Float64, hi : Float64, root : Float64, blur : Float64 }
+-- What the modulus reads of a problem: the bracket's width, the magnitude of its ends (the scale the
+-- rounding is relative to), and whether it brackets a root (the domain: the ends in order, the signs
+-- of `f` at them opposite).
+Bracket = { width : Float64, scale : Float64, brackets : Bool }
+signsDiffer (a b : Float64) : Bool := (a < 0.0 and 0.0 < b) or (b < 0.0 and 0.0 < a)
+featuresOf (p : Problem) : Bracket :=
+  { width := p.hi - p.lo, scale := (if abs p.lo <= abs p.hi then abs p.hi else abs p.lo),
+    brackets := p.lo < p.hi and signsDiffer (p.f p.lo) (p.f p.hi) }
+
+-- The algorithm: halve the bracket, keeping the half where the sign changes, until its computed width
+-- is at most the bound; the root is the last midpoint. `steps` counts the halvings, each one
+-- evaluation of `f` (the resource the modulus speaks of).
+Bisected = { root : Float64, steps : Nat }
+bisectFrom (f : Float64 -> Float64) (lo hi flo tol : Float64) (steps : Nat) : Bisected :=
+  if hi - lo <= tol then { root := lo + (hi - lo) / 2.0, steps := steps }
+  else { mid := lo + (hi - lo) / 2.0
+         fm := f mid
+         if (flo < 0.0 and fm < 0.0) or (0.0 <= flo and 0.0 <= fm) then bisectFrom f mid hi fm tol (steps + 1)
+         else bisectFrom f lo mid flo tol (steps + 1) }
+bisect (p : Problem) (b : Bound) : Bisected := bisectFrom p.f p.lo p.hi (p.f p.lo) b 0
+
+-- ---------------------------------------------------------------- the modulus
+
+-- How the rounding moves each step: the computed width is `(hi - lo)(1 + d1)` and the midpoint
+-- `(lo + w / 2)(1 + d2)`, so the new bracket is at most half the old one plus `u w / 2 + u |lo + w / 2|`,
+-- and with `w <= 2 scale` at most half plus `a = epsilon scale (1 + u)`. Over `n` steps the exact width
+-- is at most `L / 2^n + 2 a` (a geometric sum), and the computed one a factor `1 + u` above: the loop
+-- stops once `L / 2^n <= b / (1 + u) - 2 a`. So `n` halvings of `L` down to that suffice.
+stepRoom (d : Doubles Float64) (f : Bracket) : Float64 := d.epsilon * f.scale * (1.0 + d.epsilon / 2.0)
+-- [proposed] The floor: below `2 a (1 + u)` the target above is not positive and no count suffices (two
+-- adjacent doubles are about `epsilon scale` apart); the floor is twice that, so that the modulus is
+-- finite at its floor (resources.lth's `InsideTheDomainSuffices` asks a promise there).
+bisectionFloor (d : Doubles Float64) (f : Bracket) : Float64 := 4.0 * stepRoom d f * (1.0 + d.epsilon / 2.0)
+-- the least `n` with `width / 2^n <= target`: log2 (width / target) rounded up, exact (halving is exact)
+halvings (width target : Float64) : Nat := if width <= target then 0 else 1 + halvings (width / 2.0) target
+-- [proposed] memory: three values held (the bracket's ends and the sign at the low one)
+bisectionModulus (d : Doubles Float64) : Modulus Bracket := {
+  need := fn b f { if not f.brackets then infeasible (outsideDomain unit)
+                   else if b < bisectionFloor d f then infeasible (belowFloor unit)
+                   else { n := halvings f.width (b / (1.0 + d.epsilon / 2.0) - 2.0 * stepRoom d f)
+                          sufficient { work := n, span := n, memory := 3 } } },
+  floor := bisectionFloor d,
+  domain := fn f { f.brackets },
+}
+-- the modulus is one (resources.lth §2)
+BisectionModulusIsAModulus (d : Doubles Float64) : Bool := Modulus Bracket (bisectionModulus d)
+
+-- ---------------------------------------------------------------- the laws of the algorithm
+
+-- the work a need promises, none when it promises nothing
+workNeeded (n : Need) : Nat := match n { sufficient r -> r.work ; _ -> 0 }
+
+-- The root within its bound: the final bracket's exact width is at most `b (1 + u)`, the midpoint off
+-- the exact one by `u (w / 2 + scale)`, and the root anywhere in the bracket up to the problem's blur;
+-- so within `b / 2 + floor + blur` (the floor is far above the rounding terms). A numerical law
+-- (laws.lth §5) with its bound a parameter: tested at a list of bounds, the tester records what each
+-- costs (tester.py's scaling record). Its range: a bracket, a bound at or above the floor.
+BisectionMeets (d : Doubles Float64) (p : Problem) (b : Bound) : Law :=
+  { f := featuresOf p
+    if f.brackets and bisectionFloor d f <= b then
+      Within Float64 absDistance (b / 2.0 + bisectionFloor d f + p.blur) (bisect p b).root p.root
+    else Case true }
+
+-- The modulus against the steps measured: where the modulus promises, the run takes no more halvings
+-- than it says (the audit's 6: a sufficient bound, measured use below it). `m` is a parameter so that a
+-- modulus that promises too little is refuted (the control `halvedModulus`).
+NeedsNoMoreThanItsModulus (m : Modulus Bracket) (p : Problem) (b : Bound) : Bool :=
+  if isSufficient (m.need b (featuresOf p)) then (bisect p b).steps <= workNeeded (m.need b (featuresOf p)) else true
+
+-- What bisection states of its scaling: the steps are `log2 (L / b)` to the first power, counted in
+-- whole steps, the count at least the rate and less than one step above it (the halvings rounded up,
+-- exactly so while the arithmetic is exact, as in the brackets the test lists).
+bisectionScaling (e : Elementary) : Scaling Bracket :=
+  { rate := fn b f { e.log (f.width / b) / e.log 2.0 }, exponent := 1.0, grain := 1.0 }
+
+stepsAt (p : Problem) (bs : List Bound) : List Float64 :=
+  match bs { nil -> nil ; cons b rest -> cons (toFloat64 (bisect p b).steps) (stepsAt p rest) }
+ratesAt (s : Scaling Bracket) (f : Bracket) (bs : List Bound) : List Float64 :=
+  match bs { nil -> nil ; cons b rest -> cons (s.rate b f) (ratesAt s f rest) }
+aboveTheFloor (d : Doubles Float64) (f : Bracket) (bs : List Bound) : Bool :=
+  match bs { nil -> true ; cons b rest -> bisectionFloor d f <= b and aboveTheFloor d f rest }
+
+-- The scaling law (resources.lth's `ScalesAs`, L9.17): the steps measured at the bounds of a list,
+-- their slope in log scale against the stated rate's equal to the stated exponent. `s` is a parameter
+-- so that a wrong exponent is refuted (the control `squaredScaling`); a modulus too small by a constant
+-- factor it cannot see, which `NeedsNoMoreThanItsModulus` does.
+BisectionScalesAsStated (e : Elementary) (d : Doubles Float64) (s : Scaling Bracket) (p : Problem) (bounds : List Bound) : Law :=
+  { f := featuresOf p
+    if f.brackets and aboveTheFloor d f bounds then ScalesAs e d s.exponent s.grain (stepsAt p bounds) (ratesAt s f bounds)
+    else Case true }

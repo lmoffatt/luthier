@@ -1,0 +1,60 @@
+-- tests/tester/bisection_laws.test.lut: the laws of examples/bisection.lut, the modulus of resources.lth
+-- at bisection, and their controls (execution.md C2: "bisection's modulus log2(L/tol) certified against
+-- measured steps and a wrong exponent refuted").
+-- Written 2026-10-26 by Claude Opus 5.5 (agent C2). The problems are listed: brackets whose midpoints
+-- are exact (dyadic ends of moderate size), one with an irrational root, one that brackets nothing (the
+-- modulus's domain), one wide. The bounds are listed, from a tenth down past the floor of the narrow
+-- brackets, so that every branch of the modulus is seen; the lists of bounds for the scaling law span
+-- three decades and more.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers_model.lut" doubles elementary
+import "resources.lth" Bound Modulus Scaling sufficient
+import "../../examples/bisection.lut" Problem Bracket bisectionModulus bisectionScaling bisectionFloor halvings stepRoom
+  BisectionModulusIsAModulus BisectionMeets NeedsNoMoreThanItsModulus BisectionScalesAsStated
+
+problems : List Problem := [
+  { f := fn x { x - 1.25 }, lo := 1.0, hi := 2.0, root := 1.25, blur := 0.0 },
+  { f := fn x { x * x - 2.0 }, lo := 1.0, hi := 2.0, root := elementary.sqrt 2.0, blur := 2.0 * doubles.epsilon * 1.5 },
+  { f := fn x { x - 1000.0 }, lo := -1024.0, hi := 3072.0, root := 1000.0, blur := 0.0 },
+  { f := fn x { x - 1.25 }, lo := 3.0, hi := 4.0, root := 1.25, blur := 0.0 } ]
+brackets : List Bracket := [
+  { width := 1.0, scale := 2.0, brackets := true }, { width := 4096.0, scale := 3072.0, brackets := true },
+  { width := 1.0, scale := 4.0, brackets := false } ]
+bounds : List Bound := [0.1, 1.0e-3, 1.0e-5, 1.0e-7, 1.0e-9, 1.0e-11, 1.0e-13, 1.0e-14, 1.0e-15, 3.0e-16, 2.0]
+boundLists : List (List Bound) := [[1.0e-2, 1.0e-4, 1.0e-6, 1.0e-8, 1.0e-10, 1.0e-12],
+  [0.00390625, 1.52587890625e-05, 5.9604644775390625e-08, 2.3283064365386963e-10, 9.094947017729282e-13]]
+moduli : List (Modulus Bracket) := [bisectionModulus doubles]
+scalings : List (Scaling Bracket) := [bisectionScaling elementary]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+models : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed } ]
+listed (m s : String) : List Binding := [bind "m" m, bind "s" s, bind "p" "problems", bind "f" "brackets", bind "b" "bounds",
+  bind "c" "bounds", bind "bounds" "boundLists"]
+
+-- the modulus is a modulus, on listed brackets and bounds
+test "BisectionModulusIsAModulus" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "scalings") (profile <- models)
+-- the root within its bound, at every bound of the list (the tester's scaling record: what each bound cost)
+test "BisectionMeets" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "scalings") (profile <- models)
+-- the steps measured, no more than the modulus says
+test "NeedsNoMoreThanItsModulus" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "scalings") (profile <- models)
+-- the steps scale as log2 (L / b) to the first power
+test "BisectionScalesAsStated" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "scalings") (profile <- models)
+
+-- the controls
+-- a modulus that promises half the halvings: log2 (sqrt (L / b)), the exponent one half inside the log
+halvedModulus : List (Modulus Bracket) := [{ need := fn b f { match (bisectionModulus doubles).need b f {
+    sufficient r -> sufficient { work := r.work / 2, span := r.span / 2, memory := r.memory } ; n -> n } },
+  floor := (bisectionModulus doubles).floor, domain := (bisectionModulus doubles).domain }]
+-- the scaling stated with the wrong exponent, (log2 (L / b))^2 (the acceptance's control)
+squaredScaling : List (Scaling Bracket) := [{ rate := (bisectionScaling elementary).rate, exponent := 2.0, grain := 1.0 }]
+-- and with exponent one half
+rootScaling : List (Scaling Bracket) := [{ rate := (bisectionScaling elementary).rate, exponent := 0.5, grain := 1.0 }]
+test "NeedsNoMoreThanItsModulus" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "halvedModulus" "scalings") (profile <- models) (control <- true)
+test "BisectionScalesAsStated" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "squaredScaling") (profile <- models) (control <- true)
+test "BisectionScalesAsStated" ExhaustiveMode (seed <- 20261026) (whereBindings <- listed "moduli" "rootScaling") (profile <- models) (control <- true)
