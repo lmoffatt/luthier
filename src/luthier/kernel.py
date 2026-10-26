@@ -11,6 +11,10 @@ remain values. This module neither translates surface trees nor calls the host.
 # Update: 66d5cae, user request v6; IotaConstructors; audit codex-6.md.
 # Update: fe3bdab, user request v4; audit codex-4.md.
 # Update: 23d23f4, 048cd55, 1c521a7, reference b1582ca; user request v5; codex-5.md.
+# Update: kernel 2026-10-27 (record/plan/after-core-2026-10-23/report-kernel-2026-10-27.md): free
+# names kept on each term, substitution skips subterms without the name and recurses to
+# RECURSION_DEPTH before its explicit stack, `step` takes the cases that demand nothing without
+# generators. Results identical: every test program's outcomes and case counts compared.
 # Update: bite 12 (prompt-12.md), from 69684d7: `step` memoizes the environment and constructor
 # table per program (by identity); substitution reads free names through a memo by identity.
 # No law, reduction order or result changes.
@@ -33,6 +37,7 @@ from .term import (
 
 _BINDERS = (Lam, Pi, Sigma, Subtype)
 _LEAVES = (Lit, Universe, World, Extern, Primitive, Axiom, Hole)
+_NO_STEP = _BINDERS + _LEAVES + (Pair, Inj, Sum, Data, Record, RecordValue)  # _step's values
 Env = tuple[tuple[str, str], ...]
 Bindings = tuple[tuple[str, Term], ...]
 
@@ -42,6 +47,15 @@ def _binder_parts(t: Term) -> tuple[str, Term, Term]:
         case Lam(x, a, b) | Pi(x, a, b) | Sigma(x, a, b) | Subtype(x, a, b):
             return x, a, b
     raise TypeError(f"not a binder: {type(t).__name__}")
+
+
+def _pattern_names(p: Pattern) -> tuple[str, ...]:
+    """`pattern_names(p)`, kept on the pattern (immutable, as a term) [kernel 2026-10-27]."""
+    d = p.__dict__
+    names = d.get("_kernel_pattern_names")
+    if names is None:
+        names = d["_kernel_pattern_names"] = pattern_names(p)
+    return names
 
 
 def pattern_names(p: Pattern) -> tuple[str, ...]:
@@ -344,9 +358,26 @@ def _subterms(node: Term) -> tuple[Term, ...]:
     raise TypeError(f"unknown term: {type(node).__name__}")
 
 
+def _union(a: frozenset[str], b: frozenset[str]) -> frozenset[str]:
+    return b if not a or a is b else a if not b else a | b
+
+
+def _without(a: frozenset[str], x: str) -> frozenset[str]:
+    return a - {x} if x in a else a
+
+
 def _free_names_of(node: Term, free) -> frozenset[str]:
     """free_names(node) from the free names `free(child)` of its immediate subterms: the same
     scopes as `free_names`, read one level at a time."""
+    # [kernel 2026-10-27] the commonest forms first, by their exact type, and a set shared, not
+    # copied, when a union or a removal leaves it as it is
+    kind = type(node)
+    if kind is App:
+        return _union(free(node.function), free(node.argument))
+    if kind is Var:
+        return frozenset((node.name,))
+    if kind is Lam:
+        return _union(free(node.type), _without(free(node.body), node.name))
     if isinstance(node, _BINDERS):
         x, a, b = _binder_parts(node)
         return free(a) | (free(b) - {x})
@@ -362,7 +393,7 @@ def _free_names_of(node: Term, free) -> frozenset[str]:
         case Match(a, arms):
             names = set(free(a))
             for p, b in arms:
-                names.update(free(b) - set(pattern_names(p)))
+                names.update(free(b) - set(_pattern_names(p)))
             return frozenset(names)
         case Record(kvs):
             names, labels = set(), set()
@@ -379,93 +410,181 @@ def _free_names_of(node: Term, free) -> frozenset[str]:
     raise TypeError(f"unknown term: {type(node).__name__}")
 
 
-def _memo_free_names(memo: dict[int, tuple[Term, frozenset[str]]]):
-    """`free_names`, with the free names of every subterm it reads kept in `memo` by identity
-    (record/IA/kernel-2026-10-13/prompt-12.md): within one substitution the same subterms are asked
-    again at each level it descends, and `s` at each binder it passes. The memo keeps each term
-    it keys, so no identity is reused while it lives."""
-    def lookup(u: Term) -> frozenset[str]:
-        return memo[id(u)][1]
-
-    def free(t: Term) -> frozenset[str]:
-        found = memo.get(id(t))
-        if found is not None:
-            return found[1]
-        pending = [(t, False)]
-        while pending:
-            node, ready = pending.pop()
-            if id(node) in memo:
-                continue
-            if ready:
-                memo[id(node)] = (node, _free_names_of(node, lookup))
-                continue
-            pending.append((node, True))
-            pending.extend((u, False) for u in _subterms(node) if id(u) not in memo)
-        return memo[id(t)][1]
-    return free
+# [kernel 2026-10-27] The free names of a term, and all its names, kept on the term the first time
+# they are asked (an entry of its __dict__, beside the dataclass fields: equality, hashing and
+# `fields` never read it). A term is immutable, so the set never goes stale, lives as long as the
+# term and needs no cap; the memo by identity this replaces was emptied every 4096 terms, and the
+# fresh terms each step makes emptied it before a definition's body was asked twice
+# (report-bite-12a.md, item 5). Only the time a substitution takes changes, never its result.
+_FREE = "_kernel_free_names"
+_NAMES = "_kernel_all_names"
 
 
-# The free names substitution has read, by identity, kept across substitutions: the bodies of a
-# program's definitions and arms are substituted into again and again, the same objects each time.
-# Emptied when it holds more than FREE_NAMES_MEMO_LIMIT terms (it keeps each alive); only the time
-# a substitution takes depends on the limit.
-FREE_NAMES_MEMO_LIMIT = 1 << 12
-_free_names_memo: dict[int, tuple[Term, frozenset[str]]] = {}
-_memo_free = _memo_free_names(_free_names_memo)
+def _lookup_free(u: Term) -> frozenset[str]:
+    return u.__dict__[_FREE]
+
+
+# [kernel 2026-10-27] How deep the substitution and the free names recurse on the Python stack
+# before they leave it for their explicit stacks (`_Deep`): a Python call costs a fifth of a
+# generator's step on `_run`, and almost every substitution is shallow. Only the time depends on it.
+RECURSION_DEPTH = 200
+
+
+class _Deep(Exception):
+    """A term deeper than RECURSION_DEPTH: the work is done again on an explicit stack."""
+
+
+def _cached_free_names(t: Term) -> frozenset[str]:
+    """`free_names(t)`, kept on `t` and on each subterm it reads: recursively, and on an explicit
+    stack for a deep term (what the recursion kept is kept)."""
+    found = t.__dict__.get(_FREE)
+    if found is not None:
+        return found
+    try:
+        return _free_recursive(t, 0)
+    except (_Deep, RecursionError):
+        return _free_iterative(t)
+
+
+def _free_recursive(t: Term, depth: int) -> frozenset[str]:
+    d = t.__dict__
+    found = d.get(_FREE)
+    if found is not None:
+        return found
+    if depth > RECURSION_DEPTH:
+        raise _Deep
+    found = d[_FREE] = _free_names_of(t, lambda u: _free_recursive(u, depth + 1))
+    return found
+
+
+def _free_iterative(t: Term) -> frozenset[str]:
+    pending = [t]
+    while pending:
+        node = pending[-1]
+        d = node.__dict__
+        if _FREE in d:
+            pending.pop()
+            continue
+        missing = [u for u in _subterms(node) if _FREE not in u.__dict__]
+        if missing:
+            pending.extend(missing)
+            continue
+        pending.pop()
+        d[_FREE] = _free_names_of(node, _lookup_free)
+    return t.__dict__[_FREE]
+
+
+def _names_of(node: Term, names) -> frozenset[str]:
+    """`_all_names(node)` from `names(child)` of its immediate subterms."""
+    own: set[str] = set()
+    if isinstance(node, _BINDERS):
+        own.add(node.name)
+    else:
+        match node:
+            case Let(x, _, _, _) | Var(x) | Data(x, _):
+                own.add(x)
+            case Match(_, arms):
+                for p, _ in arms:
+                    own.update(pattern_names(p))
+    for u in _subterms(node):
+        own |= names(u)
+    return frozenset(own)
+
+
+def _lookup_names(u: Term) -> frozenset[str]:
+    return u.__dict__[_NAMES]
+
+
+def _cached_all_names(t: Term) -> frozenset[str]:
+    """`_all_names(t)`, kept on `t` and on each subterm (binders, pattern names, every Var)."""
+    found = t.__dict__.get(_NAMES)
+    if found is not None:
+        return found
+    pending = [t]
+    while pending:
+        node = pending[-1]
+        d = node.__dict__
+        if _NAMES in d:
+            pending.pop()
+            continue
+        missing = [u for u in _subterms(node) if _NAMES not in u.__dict__]
+        if missing:
+            pending.extend(missing)
+            continue
+        pending.pop()
+        d[_NAMES] = _names_of(node, _lookup_names)
+    return t.__dict__[_NAMES]
 
 
 def substitute(x: str, s: Term, t: Term) -> Term:
     """Capture-avoiding substitution, matching the model's apostrophe freshening."""
-    if len(_free_names_memo) > FREE_NAMES_MEMO_LIMIT:
-        _free_names_memo.clear()
-    return _run(_substitute(x, s, t, _memo_free))
-
-
-def _substitute(x: str, s: Term, t: Term, free_names):
-    if x not in free_names(t):
+    if x not in _cached_free_names(t):
         return t
+    try:
+        return _substitute_recursive(x, s, t, 0)
+    except (_Deep, RecursionError):
+        return _run(_substitute(x, s, t))
+
+
+def _substitute_recursive(x: str, s: Term, t: Term, depth: int) -> Term:
+    """`_substitute` on the Python stack, to RECURSION_DEPTH: the same cases in the same order,
+    each `yield _substitute(...)` a call (test_kernel's test_both_substitutions_agree)."""
+    if depth > RECURSION_DEPTH:
+        raise _Deep
+    depth += 1
+    free_names = _cached_free_names
+    kind = type(t)
+    if kind is App:
+        a, b = t.function, t.argument
+        if x in free_names(a):
+            a = _substitute_recursive(x, s, a, depth)
+        if x in free_names(b):
+            b = _substitute_recursive(x, s, b, depth)
+        return App(a, b)
+    if kind is Var:
+        return s if x == t.name else t
     if isinstance(t, _BINDERS):
         y, a, b = _binder_parts(t)
         if x != y and x in free_names(b):
             if y in free_names(s):
-                z = _fresh_name(y, {x} | _all_names(s) | _all_names(b))
+                z = _fresh_name(y, {x} | _cached_all_names(s) | _cached_all_names(b))
                 b = swap(y, z, b)
                 y = z
-            b = yield _substitute(x, s, b, free_names)
-        a = yield _substitute(x, s, a, free_names)
+            b = _substitute_recursive(x, s, b, depth)
+        if x in free_names(a):
+            a = _substitute_recursive(x, s, a, depth)
         return type(t)(y, a, b)
     match t:
-        case Let(y, a, v, b):
-            if x != y and x in free_names(b):
-                if y in free_names(s):
-                    z = _fresh_name(y, {x} | _all_names(s) | _all_names(b))
-                    b = swap(y, z, b)
-                    y = z
-                b = yield _substitute(x, s, b, free_names)
-            a = yield _substitute(x, s, a, free_names)
-            v = yield _substitute(x, s, v, free_names)
-            return Let(y, a, v, b)
         case Var(y):
             return s if x == y else t
         case App(a, b) | Pair(a, b):
-            left = yield _substitute(x, s, a, free_names)
-            right = yield _substitute(x, s, b, free_names)
-            return type(t)(left, right)
+            if x in free_names(a):
+                a = _substitute_recursive(x, s, a, depth)
+            if x in free_names(b):
+                b = _substitute_recursive(x, s, b, depth)
+            return type(t)(a, b)
+        case Let(y, a, v, b):
+            if x != y and x in free_names(b):
+                if y in free_names(s):
+                    z = _fresh_name(y, {x} | _cached_all_names(s) | _cached_all_names(b))
+                    b = swap(y, z, b)
+                    y = z
+                b = _substitute_recursive(x, s, b, depth)
+            if x in free_names(a):
+                a = _substitute_recursive(x, s, a, depth)
+            if x in free_names(v):
+                v = _substitute_recursive(x, s, v, depth)
+            return Let(y, a, v, b)
         case Inj(l, a):
-            value = yield _substitute(x, s, a, free_names)
-            return Inj(l, value)
+            return Inj(l, _substitute_recursive(x, s, a, depth))
         case Proj(a, l):
-            value = yield _substitute(x, s, a, free_names)
-            return Proj(value, l)
+            return Proj(_substitute_recursive(x, s, a, depth), l)
         case Record(kvs):
-            # [proposed] (3.S31): a label binds in the later fields' types, as in `free_names`. A
-            # label is part of the term and cannot be renamed, so once x is a label the later
-            # fields are left alone; a label free in `s` is not avoided (it would be captured).
             result = []
             shadowed = False
             for k, b in kvs:
-                if not shadowed:
-                    b = yield _substitute(x, s, b, free_names)
+                if not shadowed and x in free_names(b):
+                    b = _substitute_recursive(x, s, b, depth)
                 result.append((k, b))
                 shadowed = shadowed or k == x
             return Record(tuple(result))
@@ -475,21 +594,22 @@ def _substitute(x: str, s: Term, t: Term, free_names):
                 if x == y:
                     return t
                 if y in free_names(s):
-                    avoid = {x} | _all_names(s)
+                    avoid = {x} | _cached_all_names(s)
                     for _, b in kvs:
-                        avoid.update(_all_names(b))
+                        avoid.update(_cached_all_names(b))
                     z = _fresh_name(y, avoid)
                     kvs = tuple((k, swap(y, z, b)) for k, b in kvs)
                     y = z
             result = []
             for k, b in kvs:
-                body = yield _substitute(x, s, b, free_names)
-                result.append((k, body))
+                if x in free_names(b):
+                    b = _substitute_recursive(x, s, b, depth)
+                result.append((k, b))
             return Data(y, tuple(result)) if isinstance(t, Data) else type(t)(tuple(result))
         case Match(a, arms):
             result = []
             for p, b in arms:
-                vs = pattern_names(p)
+                vs = _pattern_names(p)
                 if x not in vs and x in free_names(b):
                     seen: set[str] = set()
                     for y in vs:
@@ -497,14 +617,111 @@ def _substitute(x: str, s: Term, t: Term, free_names):
                             continue
                         seen.add(y)
                         if y in free_names(s):
-                            avoid = {x} | _all_names(s) | set(pattern_names(p)) | _all_names(b)
+                            avoid = {x} | _cached_all_names(s) | set(pattern_names(p)) | _cached_all_names(b)
                             z = _fresh_name(y, avoid)
                             p = _map_pattern(p, lambda n: z if n == y else y if n == z else n)
                             b = swap(y, z, b)
-                    b = yield _substitute(x, s, b, free_names)
+                    b = _substitute_recursive(x, s, b, depth)
                 result.append((p, b))
-            value = yield _substitute(x, s, a, free_names)
-            return Match(value, tuple(result))
+            if x in free_names(a):
+                a = _substitute_recursive(x, s, a, depth)
+            return Match(a, tuple(result))
+        case _ if isinstance(t, _LEAVES):
+            return t
+    raise TypeError(f"unknown term: {type(t).__name__}")
+
+
+def _substitute(x: str, s: Term, t: Term):
+    """`t` with `s` for the free `x`, `x` free in `t`. [kernel 2026-10-27] A subterm where `x` is
+    not free is kept as it is without a generator for it: the result is the one the walk into it
+    gave (it returned the subterm itself), only sooner."""
+    free_names = _cached_free_names
+    if isinstance(t, _BINDERS):
+        y, a, b = _binder_parts(t)
+        if x != y and x in free_names(b):
+            if y in free_names(s):
+                z = _fresh_name(y, {x} | _cached_all_names(s) | _cached_all_names(b))
+                b = swap(y, z, b)
+                y = z
+            b = yield _substitute(x, s, b)
+        if x in free_names(a):
+            a = yield _substitute(x, s, a)
+        return type(t)(y, a, b)
+    match t:
+        case Var(y):
+            return s if x == y else t
+        case App(a, b) | Pair(a, b):
+            if x in free_names(a):
+                a = yield _substitute(x, s, a)
+            if x in free_names(b):
+                b = yield _substitute(x, s, b)
+            return type(t)(a, b)
+        case Let(y, a, v, b):
+            if x != y and x in free_names(b):
+                if y in free_names(s):
+                    z = _fresh_name(y, {x} | _cached_all_names(s) | _cached_all_names(b))
+                    b = swap(y, z, b)
+                    y = z
+                b = yield _substitute(x, s, b)
+            if x in free_names(a):
+                a = yield _substitute(x, s, a)
+            if x in free_names(v):
+                v = yield _substitute(x, s, v)
+            return Let(y, a, v, b)
+        case Inj(l, a):
+            return Inj(l, (yield _substitute(x, s, a)))
+        case Proj(a, l):
+            return Proj((yield _substitute(x, s, a)), l)
+        case Record(kvs):
+            # [proposed] (3.S31): a label binds in the later fields' types, as in `free_names`. A
+            # label is part of the term and cannot be renamed, so once x is a label the later
+            # fields are left alone; a label free in `s` is not avoided (it would be captured).
+            result = []
+            shadowed = False
+            for k, b in kvs:
+                if not shadowed and x in free_names(b):
+                    b = yield _substitute(x, s, b)
+                result.append((k, b))
+                shadowed = shadowed or k == x
+            return Record(tuple(result))
+        case Sum(kvs) | RecordValue(kvs) | Data(_, kvs):
+            if isinstance(t, Data):
+                y = t.name
+                if x == y:
+                    return t
+                if y in free_names(s):
+                    avoid = {x} | _cached_all_names(s)
+                    for _, b in kvs:
+                        avoid.update(_cached_all_names(b))
+                    z = _fresh_name(y, avoid)
+                    kvs = tuple((k, swap(y, z, b)) for k, b in kvs)
+                    y = z
+            result = []
+            for k, b in kvs:
+                if x in free_names(b):
+                    b = yield _substitute(x, s, b)
+                result.append((k, b))
+            return Data(y, tuple(result)) if isinstance(t, Data) else type(t)(tuple(result))
+        case Match(a, arms):
+            result = []
+            for p, b in arms:
+                vs = _pattern_names(p)
+                if x not in vs and x in free_names(b):
+                    seen: set[str] = set()
+                    for y in vs:
+                        if y in seen:
+                            continue
+                        seen.add(y)
+                        if y in free_names(s):
+                            avoid = {x} | _cached_all_names(s) | set(pattern_names(p)) | _cached_all_names(b)
+                            z = _fresh_name(y, avoid)
+                            p = _map_pattern(p, lambda n: z if n == y else y if n == z else n)
+                            b = swap(y, z, b)
+                    b = yield _substitute(x, s, b)
+                result.append((p, b))
+            if x in free_names(a):
+                a = yield _substitute(x, s, a)
+            return Match(a, tuple(result))
         case _ if isinstance(t, _LEAVES):
             return t
     raise TypeError(f"unknown term: {type(t).__name__}")
@@ -876,6 +1093,71 @@ def _demand_parts(env: dict[str, Term | None], constructors: dict[str, frozenset
             return (yield _step(env, constructors, t))
 
 
+def _bind(b: Term, bs: Bindings) -> Term:
+    """The arm's body `b` with the pattern's bindings `bs` substituted at once: each name first
+    renamed to one fresh in the arm and the values, then each fresh name substituted."""
+    if not any(_cached_free_names(v) for _, v in bs):
+        # [kernel 2026-10-27] closed values (the Runner's are `Shared` leaves): no binder is
+        # renamed in either pass below, and a value holds no name of another binding, so one
+        # substitution each gives the same term
+        for x, v in bs:
+            b = substitute(x, v, b)
+        return b
+    fresh = []
+    avoid = set(_cached_all_names(b))
+    avoid.update(x for x, _ in bs)
+    for _, v in bs:
+        avoid.update(_cached_all_names(v))
+    for x, v in bs:
+        z = _fresh_name(x, avoid)
+        avoid.add(z)
+        b = substitute(x, Var(z), b)
+        fresh.append((z, v))
+    for z, v in fresh:
+        b = substitute(z, v, b)
+    return b
+
+
+def _quick(env: dict[str, Term | None], t: Term) -> tuple[bool, Term] | None:
+    """[kernel 2026-10-27] What `_step` gives on `t`, for its cases that demand nothing, without
+    its generator; None for the others. Beta at the head of a spine of applications (its other
+    arguments kept), Delta at the head of one (but `and` and `or`, which `_step` reads first),
+    Zeta, a projection of a record value, and a value's no step."""
+    kind = type(t)
+    if kind is App:
+        args = []
+        head = t
+        while type(head) is App:
+            args.append(head.argument)
+            head = head.function
+        if type(head) is Lam:
+            result = substitute(head.name, args[-1], head.body)
+            for a in reversed(args[:-1]):
+                result = App(result, a)
+            return True, result
+        if type(head) is Var and head.name not in ("and", "or"):
+            result = env.get(head.name)
+            if result is None:
+                return False, t
+            for a in reversed(args):
+                result = App(result, a)
+            return True, result
+        return None
+    if kind is Var:
+        body = env.get(t.name)
+        return (False, t) if body is None else (True, body)
+    if kind is Let:
+        return True, substitute(t.name, t.value, t.body)
+    if kind is Proj and isinstance(t.record, RecordValue):
+        for key, value in t.record.fields:
+            if key == t.label:
+                return True, value
+        return False, t
+    if isinstance(t, _NO_STEP):
+        return False, t
+    return None
+
+
 def _step(env: dict[str, Term | None], constructors: dict[str, frozenset[str]], t: Term) -> _Work:
     match t:
         case Let(x, _, v, b):
@@ -956,21 +1238,10 @@ def _step(env: dict[str, Term | None], constructors: dict[str, frozenset[str]], 
                 if isinstance(bs, _Demand):
                     return True, Match(bs.value, arms)
                 if bs is not None and _consistent(bs):
-                    fresh = []
-                    avoid = _all_names(b) | {x for x, _ in bs}
-                    for _, v in bs:
-                        avoid.update(_all_names(v))
-                    for x, v in bs:
-                        z = _fresh_name(x, avoid)
-                        avoid.add(z)
-                        b = substitute(x, Var(z), b)
-                        fresh.append((z, v))
-                    for z, v in fresh:
-                        b = substitute(z, v, b)
-                    return True, b
+                    return True, _bind(b, bs)
             changed, v = yield _step(env, constructors, s)
             return changed, Match(v, arms)
-        case _ if isinstance(t, _BINDERS + _LEAVES + (Pair, Inj, Sum, Data, Record, RecordValue)):
+        case _ if isinstance(t, _NO_STEP):
             return False, t
     raise TypeError(f"unknown term: {type(t).__name__}")
 
@@ -993,6 +1264,27 @@ def _program_tables(program: Program) -> tuple[dict[str, Term | None], _Construc
 def step(program: Program, t: Term) -> Term | None:
     """One weak-head transition; None means weak head normal form."""
     env, constructors = _program_tables(program)
+    # [kernel 2026-10-27] most of the Runner's calls step without a demand (`_quick`), or match a
+    # scrutinee it has already brought to the pattern's form: both are taken without `_step`'s
+    # generators, with the same result (report-kernel-2026-10-27.md)
+    quick = _quick(env, t)
+    if quick is not None:
+        return quick[1] if quick[0] else None
+    if type(t) is Match:
+        s, arms = t.value, t.arms
+        quick = _quick(env, s)
+        changed, value = quick if quick is not None else _run(_step(env, constructors, s))
+        if changed:
+            return Match(value, arms)
+        for p, b in arms:
+            bs = _run(_pattern(env, constructors, p, s))
+            if isinstance(bs, _Blocked):
+                return None
+            if isinstance(bs, _Demand):
+                return Match(bs.value, arms)
+            if bs is not None and _consistent(bs):
+                return _bind(b, bs)
+        return None  # `_step` steps the scrutinee again here, and it did not step above
     changed, value = _run(_step(env, constructors, t))
     return value if changed else None
 

@@ -1269,13 +1269,79 @@ def test_step_reads_each_program_by_its_own_acts():
 
 
 def test_memoized_free_names_are_free_names(samples):
-    # prompt-12.md: substitution reads free names through a memo by identity; it gives what
-    # free_names gives, for each term and, through one shared memo, for each of its subterms
-    from luthier.kernel import _memo_free_names, _subterms
-    free = _memo_free_names({})
+    # prompt-12.md, then kernel 2026-10-27: substitution reads free names, and all names, kept on
+    # each term; they are what free_names and _all_names give, for each term and each subterm,
+    # and keeping them changes neither equality nor hashing
+    from luthier.kernel import _all_names, _cached_all_names, _cached_free_names, _subterms
     for t in samples:
+        copy = deepcopy(t)
         pending = [t]
         while pending:
             u = pending.pop()
-            assert free(u) == free_names(u)
+            assert _cached_free_names(u) == free_names(u)
+            assert _cached_all_names(u) == _all_names(u)
             pending.extend(_subterms(u))
+        assert t == copy and hash(t) == hash(copy)
+
+
+def test_both_substitutions_agree(samples, rng):
+    # kernel 2026-10-27: the substitution recurses on the Python stack to RECURSION_DEPTH and is
+    # done again on its explicit stack past it; both give the same term, as substitute does with
+    # the recursion turned off
+    from luthier import kernel
+    from luthier.kernel import _run, _substitute, _substitute_recursive
+    for t in samples:
+        for _ in range(3):
+            x, s = rng.choice(NAMES), term(rng, 3)
+            if x not in free_names(t):
+                assert substitute(x, s, t) is t
+                continue
+            expected = _run(_substitute(x, s, t))
+            assert _substitute_recursive(x, s, t, 0) == expected
+            assert substitute(x, s, t) == expected
+    depth = kernel.RECURSION_DEPTH
+    try:
+        kernel.RECURSION_DEPTH = 0
+        for t in samples:
+            x, s = rng.choice(NAMES), term(rng, 3)
+            assert substitute(x, s, t) == _run(_substitute(x, s, t))
+    finally:
+        kernel.RECURSION_DEPTH = depth
+
+
+def test_a_deep_term_leaves_the_python_stack():
+    # past RECURSION_DEPTH (and Python's own limit) the free names and the substitution finish on
+    # their explicit stacks
+    t: Term = Var("x")
+    for _ in range(5000):
+        t = App(Var("f"), Lam("y", Universe(), t))
+    assert free_names(t) == {"f", "x"}
+    result = substitute("x", Lit(IntConst(1)), t)
+    while isinstance(result, App):
+        result = result.argument.body
+    assert result == Lit(IntConst(1))
+
+
+def test_the_step_shortcuts_agree_with_the_step(rng):
+    # kernel 2026-10-27: `step` takes Beta, Zeta, Delta, a record's projection, a value and a
+    # match without `_step`'s generators; each gives what `_step` gives
+    from luthier.kernel import _program_tables, _run, _step
+    for _ in range(400):
+        p = program(rng)
+        x, y = rng.choice(NAMES), rng.choice(NAMES)
+        s, t, u = term(rng, 3), term(rng, SIZE), term(rng, 4)
+        for v in (u, App(App(App(Lam(x, Universe(), Lam(y, Universe(), t)), s), u), s),
+                  App(App(Var(rng.choice(NAMES)), s), u), Let(x, Universe(), s, t),
+                  Match(Match(s, ((pattern(rng, 2), u),)), ((pattern(rng, 3), t),)),
+                  Proj(RecordValue(((rng.choice(LABELS), s), (rng.choice(LABELS), u))), rng.choice(LABELS))):
+            env, constructors = _program_tables(p)
+            try:
+                changed, value = _run(_step(env, constructors, v))
+                expected = value if changed else None
+            except TypeError as exc:
+                expected = exc.__class__
+            try:
+                got = step(p, v)
+            except TypeError as exc:
+                got = exc.__class__
+            assert got == expected
