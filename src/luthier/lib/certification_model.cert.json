@@ -1,5 +1,1438 @@
 [
  {
+  "law": "AnEntryAboutAnotherModelVetoesNothing",
+  "cone": "sha256:b37830e9004973190f51e516e5e287c20b99d14a0db43db49e447cc93e2712ea",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "certifyingModels (Listed)",
+    "fingerprint": "sha256:d6e330dbb3253696f43d61099e01ce809ba112d6763a8be68d8e2d769b36958e"
+   },
+   {
+    "parameter": "r",
+    "generator": "routings (Listed)",
+    "fingerprint": "sha256:e217d45d808d2865141e452ad3ec4eb3c52d277afef02ec6f30649046b63ff12"
+   },
+   {
+    "parameter": "d",
+    "generator": "routeds (Listed)",
+    "fingerprint": "sha256:030dd3de616d65bb3717208e04f30a6a4e276bafe1d0e8c3526e90e113c96a6b"
+   },
+   {
+    "parameter": "es",
+    "generator": "routeStores (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:9fd54b1a5935a3e18a50928ba41c97fd6190a86ca7d4d4501e4a89e498f4c355"
+   },
+   {
+    "parameter": "e",
+    "generator": "routeEntries (Listed)",
+    "fingerprint": "sha256:47874823e27ad308fd9b81b07791a24b06406c27b11745f410158753d796d944,sha256:6a150621a8870ebd8d4b43f49139c742e612aed878fce9251a1e576a8c84c18d,sha256:40d7a3d1ccddf58d123d90276c4820fb44394877254799071eaeec31ab92d6de,sha256:3c812d984ffe0b41cb5d254ba865a408f9ee20df12113719662e2119f48f33d3,sha256:0450b3ab411d306ddb147f8f452a60b91855637c831e8e56c66bde4c7ce19402,sha256:b54c6cbf676bee815622de8aebff84cc4cd1c445122f8d9cda1bfe4cf3c9c54e,sha256:5de3a18d6b8586b22a495cca68ea7df65eb003841a136211a4c2436e35fbc2db,sha256:376d97cbaf80ef6151cbad8c427ae7f70c472ec6da3a80b628bd1d19c56b518d"
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "routing"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := { law := \"Q\", cone := \"hQ\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"Q\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") nil)) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") ((cons \"R M\") nil))) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"P\") \"hP\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"L\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"N\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"N\") ((cons \"L\") nil))), conjuncts := nil }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "es",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons tpM) ((cons tqM) nil))"
+      },
+      {
+       "Printed": "((cons tpM) nil)"
+      },
+      {
+       "Printed": "((cons pM) nil)"
+      },
+      {
+       "Printed": "((cons lM) nil)"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons lM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpNFails) ((cons tpN) ((cons tqN) ((cons lM) nil)))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN2) ((cons lM) nil)))"
+      },
+      {
+       "Printed": "((cons lMFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lMDisagrees) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons tpMFails) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpMDisagrees) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons pM) ((cons tpMFails) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) ((cons lM) nil))))))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "tpM"
+      },
+      {
+       "Printed": "tqM"
+      },
+      {
+       "Printed": "tpMFails"
+      },
+      {
+       "Printed": "pM"
+      },
+      {
+       "Printed": "lM"
+      },
+      {
+       "Printed": "lNFails"
+      },
+      {
+       "Printed": "lMFails"
+      },
+      {
+       "Printed": "tpNFails"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1024,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported",
+    "held": 96
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T06:01:59+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.certify._text_head",
+    "sha256:4bb65734100ec18e0b33eecece4e7824719ee0901c1d7b3617a5a3e941ad7e5b"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "AFailureInASubjectVetoes",
+  "cone": "sha256:179dee49c12fb52ad4184459ff87d13011e27921e42fe751d9ff907ef8ae2bf0",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "certifyingModels (Listed)",
+    "fingerprint": "sha256:d6e330dbb3253696f43d61099e01ce809ba112d6763a8be68d8e2d769b36958e"
+   },
+   {
+    "parameter": "r",
+    "generator": "routings (Listed)",
+    "fingerprint": "sha256:e217d45d808d2865141e452ad3ec4eb3c52d277afef02ec6f30649046b63ff12"
+   },
+   {
+    "parameter": "d",
+    "generator": "routeds (Listed)",
+    "fingerprint": "sha256:030dd3de616d65bb3717208e04f30a6a4e276bafe1d0e8c3526e90e113c96a6b"
+   },
+   {
+    "parameter": "es",
+    "generator": "routeStores (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:9fd54b1a5935a3e18a50928ba41c97fd6190a86ca7d4d4501e4a89e498f4c355"
+   },
+   {
+    "parameter": "e",
+    "generator": "routeEntries (Listed)",
+    "fingerprint": "sha256:47874823e27ad308fd9b81b07791a24b06406c27b11745f410158753d796d944,sha256:6a150621a8870ebd8d4b43f49139c742e612aed878fce9251a1e576a8c84c18d,sha256:40d7a3d1ccddf58d123d90276c4820fb44394877254799071eaeec31ab92d6de,sha256:3c812d984ffe0b41cb5d254ba865a408f9ee20df12113719662e2119f48f33d3,sha256:0450b3ab411d306ddb147f8f452a60b91855637c831e8e56c66bde4c7ce19402,sha256:b54c6cbf676bee815622de8aebff84cc4cd1c445122f8d9cda1bfe4cf3c9c54e,sha256:5de3a18d6b8586b22a495cca68ea7df65eb003841a136211a4c2436e35fbc2db,sha256:376d97cbaf80ef6151cbad8c427ae7f70c472ec6da3a80b628bd1d19c56b518d"
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "routing"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := { law := \"Q\", cone := \"hQ\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"Q\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") nil)) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") ((cons \"R M\") nil))) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"P\") \"hP\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"L\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"N\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"N\") ((cons \"L\") nil))), conjuncts := nil }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "es",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons tpM) ((cons tqM) nil))"
+      },
+      {
+       "Printed": "((cons tpM) nil)"
+      },
+      {
+       "Printed": "((cons pM) nil)"
+      },
+      {
+       "Printed": "((cons lM) nil)"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons lM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpNFails) ((cons tpN) ((cons tqN) ((cons lM) nil)))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN2) ((cons lM) nil)))"
+      },
+      {
+       "Printed": "((cons lMFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lMDisagrees) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons tpMFails) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpMDisagrees) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons pM) ((cons tpMFails) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) ((cons lM) nil))))))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "tpM"
+      },
+      {
+       "Printed": "tqM"
+      },
+      {
+       "Printed": "tpMFails"
+      },
+      {
+       "Printed": "pM"
+      },
+      {
+       "Printed": "lM"
+      },
+      {
+       "Printed": "lNFails"
+      },
+      {
+       "Printed": "lMFails"
+      },
+      {
+       "Printed": "tpNFails"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1024,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T06:01:39+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.certify._text_head",
+    "sha256:4bb65734100ec18e0b33eecece4e7824719ee0901c1d7b3617a5a3e941ad7e5b"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "AConsequenceRefutesEveryModel",
+  "cone": "sha256:818769f2ec8ee5516212f4e49aef03cf2dfe4f7bdcd6d9dc90c5abe47fb18ae9",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "certifyingModels (Listed)",
+    "fingerprint": "sha256:d6e330dbb3253696f43d61099e01ce809ba112d6763a8be68d8e2d769b36958e"
+   },
+   {
+    "parameter": "r",
+    "generator": "routings (Listed)",
+    "fingerprint": "sha256:e217d45d808d2865141e452ad3ec4eb3c52d277afef02ec6f30649046b63ff12"
+   },
+   {
+    "parameter": "d",
+    "generator": "routeds (Listed)",
+    "fingerprint": "sha256:030dd3de616d65bb3717208e04f30a6a4e276bafe1d0e8c3526e90e113c96a6b"
+   },
+   {
+    "parameter": "es",
+    "generator": "routeStores (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:9fd54b1a5935a3e18a50928ba41c97fd6190a86ca7d4d4501e4a89e498f4c355"
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "routing"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := { law := \"Q\", cone := \"hQ\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"Q\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") nil)) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") ((cons \"R M\") nil))) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"P\") \"hP\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"L\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"N\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"N\") ((cons \"L\") nil))), conjuncts := nil }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "es",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons tpM) ((cons tqM) nil))"
+      },
+      {
+       "Printed": "((cons tpM) nil)"
+      },
+      {
+       "Printed": "((cons pM) nil)"
+      },
+      {
+       "Printed": "((cons lM) nil)"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons lM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpNFails) ((cons tpN) ((cons tqN) ((cons lM) nil)))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN2) ((cons lM) nil)))"
+      },
+      {
+       "Printed": "((cons lMFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lMDisagrees) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons tpMFails) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpMDisagrees) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons pM) ((cons tpMFails) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) ((cons lM) nil))))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 128,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T06:01:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.certify._text_head",
+    "sha256:4bb65734100ec18e0b33eecece4e7824719ee0901c1d7b3617a5a3e941ad7e5b"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "ADisagreementInASubjectVetoesFirst",
+  "cone": "sha256:950dd23d26cc2609b4df7998904f61fcd8bba66304a0ae9cccbaadaa44d7f884",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "certifyingModels (Listed)",
+    "fingerprint": "sha256:d6e330dbb3253696f43d61099e01ce809ba112d6763a8be68d8e2d769b36958e"
+   },
+   {
+    "parameter": "r",
+    "generator": "routings (Listed)",
+    "fingerprint": "sha256:e217d45d808d2865141e452ad3ec4eb3c52d277afef02ec6f30649046b63ff12"
+   },
+   {
+    "parameter": "d",
+    "generator": "routeds (Listed)",
+    "fingerprint": "sha256:030dd3de616d65bb3717208e04f30a6a4e276bafe1d0e8c3526e90e113c96a6b"
+   },
+   {
+    "parameter": "es",
+    "generator": "routeStores (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:9fd54b1a5935a3e18a50928ba41c97fd6190a86ca7d4d4501e4a89e498f4c355"
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "routing"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := { law := \"Q\", cone := \"hQ\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"Q\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") nil)) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") ((cons \"R M\") nil))) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"P\") \"hP\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"L\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"N\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"N\") ((cons \"L\") nil))), conjuncts := nil }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "es",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons tpM) ((cons tqM) nil))"
+      },
+      {
+       "Printed": "((cons tpM) nil)"
+      },
+      {
+       "Printed": "((cons pM) nil)"
+      },
+      {
+       "Printed": "((cons lM) nil)"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons lM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpNFails) ((cons tpN) ((cons tqN) ((cons lM) nil)))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN2) ((cons lM) nil)))"
+      },
+      {
+       "Printed": "((cons lMFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lMDisagrees) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons tpMFails) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpMDisagrees) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons pM) ((cons tpMFails) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) ((cons lM) nil))))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 128,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T06:01:18+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.certify._text_head",
+    "sha256:4bb65734100ec18e0b33eecece4e7824719ee0901c1d7b3617a5a3e941ad7e5b"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "AVetoNamesItsCause",
+  "cone": "sha256:6772d17e146c5c22587c062a18349c116f4a7d8f67db8fb511b163970dee6ba7",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "certifyingModels (Listed)",
+    "fingerprint": "sha256:d6e330dbb3253696f43d61099e01ce809ba112d6763a8be68d8e2d769b36958e"
+   },
+   {
+    "parameter": "r",
+    "generator": "routings (Listed)",
+    "fingerprint": "sha256:e217d45d808d2865141e452ad3ec4eb3c52d277afef02ec6f30649046b63ff12"
+   },
+   {
+    "parameter": "d",
+    "generator": "routeds (Listed)",
+    "fingerprint": "sha256:030dd3de616d65bb3717208e04f30a6a4e276bafe1d0e8c3526e90e113c96a6b"
+   },
+   {
+    "parameter": "es",
+    "generator": "routeStores (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:9fd54b1a5935a3e18a50928ba41c97fd6190a86ca7d4d4501e4a89e498f4c355"
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "routing"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := { law := \"Q\", cone := \"hQ\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"Q\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") nil)) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") ((cons \"R M\") nil))) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"P\") \"hP\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"L\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"N\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"N\") ((cons \"L\") nil))), conjuncts := nil }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "es",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons tpM) ((cons tqM) nil))"
+      },
+      {
+       "Printed": "((cons tpM) nil)"
+      },
+      {
+       "Printed": "((cons pM) nil)"
+      },
+      {
+       "Printed": "((cons lM) nil)"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons lM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpNFails) ((cons tpN) ((cons tqN) ((cons lM) nil)))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN2) ((cons lM) nil)))"
+      },
+      {
+       "Printed": "((cons lMFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lMDisagrees) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons tpMFails) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpMDisagrees) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons pM) ((cons tpMFails) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) ((cons lM) nil))))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 128,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T06:00:55+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.certify._text_head",
+    "sha256:4bb65734100ec18e0b33eecece4e7824719ee0901c1d7b3617a5a3e941ad7e5b"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "AnEntryForEveryObligationWitnesses",
+  "cone": "sha256:68faec2f9a5ae3ac02adc3a549412a5ecd7d89c423e2925950fcbf857fff8357",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "certifyingModels (Listed)",
+    "fingerprint": "sha256:d6e330dbb3253696f43d61099e01ce809ba112d6763a8be68d8e2d769b36958e"
+   },
+   {
+    "parameter": "r",
+    "generator": "routings (Listed)",
+    "fingerprint": "sha256:e217d45d808d2865141e452ad3ec4eb3c52d277afef02ec6f30649046b63ff12"
+   },
+   {
+    "parameter": "d",
+    "generator": "routeds (Listed)",
+    "fingerprint": "sha256:030dd3de616d65bb3717208e04f30a6a4e276bafe1d0e8c3526e90e113c96a6b"
+   },
+   {
+    "parameter": "es",
+    "generator": "routeStores (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:9fd54b1a5935a3e18a50928ba41c97fd6190a86ca7d4d4501e4a89e498f4c355"
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "routing"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := { law := \"Q\", cone := \"hQ\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"Q\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") nil)) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") ((cons \"R M\") nil))) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"P\") \"hP\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"L\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"N\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"N\") ((cons \"L\") nil))), conjuncts := nil }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "es",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons tpM) ((cons tqM) nil))"
+      },
+      {
+       "Printed": "((cons tpM) nil)"
+      },
+      {
+       "Printed": "((cons pM) nil)"
+      },
+      {
+       "Printed": "((cons lM) nil)"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons lM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpNFails) ((cons tpN) ((cons tqN) ((cons lM) nil)))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN2) ((cons lM) nil)))"
+      },
+      {
+       "Printed": "((cons lMFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lMDisagrees) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons tpMFails) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpMDisagrees) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons pM) ((cons tpMFails) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) ((cons lM) nil))))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 128,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T06:00:44+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.certify._text_head",
+    "sha256:4bb65734100ec18e0b33eecece4e7824719ee0901c1d7b3617a5a3e941ad7e5b"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "AWitnessIsOneEntryPerObligation",
+  "cone": "sha256:9235905a1c47c2568f85785adef4eb48a5523759b9e1f4af7d13d26301326a8b",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "certifyingModels (Listed)",
+    "fingerprint": "sha256:d6e330dbb3253696f43d61099e01ce809ba112d6763a8be68d8e2d769b36958e"
+   },
+   {
+    "parameter": "r",
+    "generator": "routings (Listed)",
+    "fingerprint": "sha256:e217d45d808d2865141e452ad3ec4eb3c52d277afef02ec6f30649046b63ff12"
+   },
+   {
+    "parameter": "d",
+    "generator": "routeds (Listed)",
+    "fingerprint": "sha256:030dd3de616d65bb3717208e04f30a6a4e276bafe1d0e8c3526e90e113c96a6b"
+   },
+   {
+    "parameter": "es",
+    "generator": "routeStores (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:9fd54b1a5935a3e18a50928ba41c97fd6190a86ca7d4d4501e4a89e498f4c355"
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "routing"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := { law := \"Q\", cone := \"hQ\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"Q\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") nil)) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") ((cons \"R M\") nil))) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"P\") \"hP\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"L\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"N\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"N\") ((cons \"L\") nil))), conjuncts := nil }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "es",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons tpM) ((cons tqM) nil))"
+      },
+      {
+       "Printed": "((cons tpM) nil)"
+      },
+      {
+       "Printed": "((cons pM) nil)"
+      },
+      {
+       "Printed": "((cons lM) nil)"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons lM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpNFails) ((cons tpN) ((cons tqN) ((cons lM) nil)))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN2) ((cons lM) nil)))"
+      },
+      {
+       "Printed": "((cons lMFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lMDisagrees) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons tpMFails) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpMDisagrees) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons pM) ((cons tpMFails) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) ((cons lM) nil))))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 128,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T06:00:38+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.certify._text_head",
+    "sha256:4bb65734100ec18e0b33eecece4e7824719ee0901c1d7b3617a5a3e941ad7e5b"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "AWitnessCoversEveryObligation",
+  "cone": "sha256:ba872a216c62d230551859c2ba01494a9220895ab366fbd54eee468b08b161ca",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "certifyingModels (Listed)",
+    "fingerprint": "sha256:d6e330dbb3253696f43d61099e01ce809ba112d6763a8be68d8e2d769b36958e"
+   },
+   {
+    "parameter": "r",
+    "generator": "routings (Listed)",
+    "fingerprint": "sha256:e217d45d808d2865141e452ad3ec4eb3c52d277afef02ec6f30649046b63ff12"
+   },
+   {
+    "parameter": "d",
+    "generator": "routeds (Listed)",
+    "fingerprint": "sha256:030dd3de616d65bb3717208e04f30a6a4e276bafe1d0e8c3526e90e113c96a6b"
+   },
+   {
+    "parameter": "es",
+    "generator": "routeStores (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:9fd54b1a5935a3e18a50928ba41c97fd6190a86ca7d4d4501e4a89e498f4c355"
+   }
+  ],
+  "seed": 20261022,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "routing"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ demand := { law := \"P\", cone := \"hP\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := { law := \"Q\", cone := \"hQ\", given := nil, accepts := Sampled }, byModel := true, models := nil, theory := (just ((theoryOn \"M\") ((cons \"Q\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") nil)) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"T\") \"hT\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := ((cons \"P M\") ((cons \"Q M\") ((cons \"R M\") nil))) }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"P\") \"hP\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"P\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"M\") ((cons \"L\") nil))), conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"M\"), byModel := false, models := ((cons \"m\") nil), theory := nothing, conjuncts := nil }"
+      },
+      {
+       "Printed": "{ demand := (((mDemand \"L\") \"hL\") \"N\"), byModel := false, models := ((cons \"m\") nil), theory := (just ((theoryOn \"N\") ((cons \"L\") nil))), conjuncts := nil }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "es",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons tpM) ((cons tqM) nil))"
+      },
+      {
+       "Printed": "((cons tpM) nil)"
+      },
+      {
+       "Printed": "((cons pM) nil)"
+      },
+      {
+       "Printed": "((cons lM) nil)"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons lM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpNFails) ((cons tpN) ((cons tqN) ((cons lM) nil)))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN2) ((cons lM) nil)))"
+      },
+      {
+       "Printed": "((cons lMFails) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons lMDisagrees) ((cons lM) nil))"
+      },
+      {
+       "Printed": "((cons tpMFails) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpMDisagrees) ((cons tpM) ((cons tqM) nil)))"
+      },
+      {
+       "Printed": "((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons pM) ((cons tpMFails) ((cons tpM) ((cons tqM) nil))))"
+      },
+      {
+       "Printed": "((cons lNFails) ((cons tpN) ((cons tqN) ((cons tpM) ((cons tqM) ((cons lM) nil))))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 128,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-26T06:00:31+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.certify._text_head",
+    "sha256:4bb65734100ec18e0b33eecece4e7824719ee0901c1d7b3617a5a3e941ad7e5b"
+   ]
+  ],
+  "regions": []
+ },
+ {
   "law": "LoweringLosesNothing",
   "cone": "sha256:a3ec26c88bd92bdbf6ea998974296b7f620926dfd324a473e2797c36f55555a0",
   "binding": [

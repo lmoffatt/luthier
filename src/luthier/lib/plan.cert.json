@@ -11,6 +11,1232 @@
    {
     "parameter": "h",
     "generator": "constants (Listed)",
+    "fingerprint": "sha256:73bbe859a93a4141d87e6cd3a8d415874af7dee167f1834c0f0977513c2070ef"
+   },
+   {
+    "parameter": "r",
+    "generator": "records (Listed)",
+    "fingerprint": "sha256:44cd696a653dd097db28e24ef6c029da8e3b7399c6d49722ea41f51fbe27750c"
+   },
+   {
+    "parameter": "s",
+    "generator": "seeds (Listed)",
+    "fingerprint": "sha256:3b6db60c08501eb6b298d319d6b20d6db85899437a9e73ec22b6d5b7edfd7eeb"
+   },
+   {
+    "parameter": "p",
+    "generator": "somePlans (Listed)",
+    "fingerprint": "sha256:d9dcaf2e34b8f20dfcf06e5e0801cdd9247ff3131bc9b9ab513bbe69882f6ec0"
+   },
+   {
+    "parameter": "cs",
+    "generator": "certLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:b59f09745215a51fdd627df25bac4b66fea95eb25f4b8f255a56d6c528eea537"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "constantRunKey"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((recorded ((((((((((((((((theDemand \"d\") Sampled) nil) nothing) nothing) ((cons (\"a\", (Number 1.0))) nil)) false) nothing) ForwardOnDemand) false) AssumedGrade) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"weakest\") 1.0) 0.05) \"cappedSumComposition\")) \"sha256:c1\")"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Number": 1.0
+      },
+      {
+       "Number": 2.0
+      },
+      {
+       "Number": 3.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ strategy := ForwardOnDemand, entry := \"d\", live := ((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") nil)))), schedule := ((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") nil)))) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "cs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons \"sha256:e1\") nil)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, h = constantRunKey, r = ((recorded ((((((((((((((((theDemand \"d\") Sampled) nil) nothing) nothing) ((cons (\"a\", (Number 1.0))) nil)) false) nothing) ForwardOnDemand) false) AssumedGrade) ((cons \"FileSystemKeeps\") ((cons \"SystemDelivers\") nil))) \"weakest\") 1.0) 0.05) \"cappedSumComposition\")) \"sha256:c1\"), s = 1, p = { strategy := ForwardOnDemand, entry := \"d\", live := ((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") nil)))), schedule := ((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") nil)))) }, cs = nil"
+  },
+  "date": "2026-10-26T06:01:37+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.run.memo_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ],
+   [
+    "python:luthier.run.record_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ]
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "s boundary"
+    },
+    "n": 2
+   }
+  ]
+ },
+ {
+  "law": "ActionConeIsNeverServed",
+  "cone": "sha256:9a6a7399c78915105cddf1cbee262df8f8d95814cb18848549ef4cfa09cb97a0",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:c30f95d60229207661c30588d2a10168c0515d5f0affe61e2f7f181e1469efab"
+   },
+   {
+    "parameter": "h",
+    "generator": "ignorers (Listed)",
+    "fingerprint": "sha256:0db9b62e43772360aef63b077bc66d8967cd65255b80e04bf33df351bf3d1c02"
+   },
+   {
+    "parameter": "stored",
+    "generator": "keys (Listed)",
+    "fingerprint": "sha256:ef993f996f96c980ffb8150adf03069bfa500a8c7b54de0479c874a108cea5fe,sha256:7a7f550f8f0dc198a5ea6be04bab09049ff3693b8b58b7f8ebbb98d2442584df"
+   },
+   {
+    "parameter": "asked",
+    "generator": "keys (Listed)",
+    "fingerprint": "sha256:ef993f996f96c980ffb8150adf03069bfa500a8c7b54de0479c874a108cea5fe,sha256:7a7f550f8f0dc198a5ea6be04bab09049ff3693b8b58b7f8ebbb98d2442584df"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "ignoresPurity"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "stored",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "key1"
+      },
+      {
+       "Printed": "key2"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "asked",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "key1"
+      },
+      {
+       "Printed": "key2"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, h = ignoresPurity, stored = key1, asked = key1"
+  },
+  "date": "2026-10-26T06:01:37+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.run.memo_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ],
+   [
+    "python:luthier.run.record_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "LookupComparesTheFullKey",
+  "cone": "sha256:44e1962b56973358344c82419597ffadea29634a9e23c7a2f8ee38c0b9fadf73",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:c30f95d60229207661c30588d2a10168c0515d5f0affe61e2f7f181e1469efab"
+   },
+   {
+    "parameter": "h",
+    "generator": "byDigests (Listed)",
+    "fingerprint": "sha256:72b9f43bb2221ec14848d4376397b016dd58bfa8350ef36f8018b3a66a5e9047"
+   },
+   {
+    "parameter": "stored",
+    "generator": "keys (Listed)",
+    "fingerprint": "sha256:ef993f996f96c980ffb8150adf03069bfa500a8c7b54de0479c874a108cea5fe,sha256:7a7f550f8f0dc198a5ea6be04bab09049ff3693b8b58b7f8ebbb98d2442584df"
+   },
+   {
+    "parameter": "asked",
+    "generator": "keys (Listed)",
+    "fingerprint": "sha256:ef993f996f96c980ffb8150adf03069bfa500a8c7b54de0479c874a108cea5fe,sha256:7a7f550f8f0dc198a5ea6be04bab09049ff3693b8b58b7f8ebbb98d2442584df"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "byDigestAlone"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "stored",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "key1"
+      },
+      {
+       "Printed": "key2"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "asked",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "key1"
+      },
+      {
+       "Printed": "key2"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, h = byDigestAlone, stored = key1, asked = key2"
+  },
+  "date": "2026-10-26T06:01:37+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.run.memo_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ],
+   [
+    "python:luthier.run.record_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "PlanDigestSeparatesTheSchedule",
+  "cone": "sha256:367811d824090955e1977b594dabb26562bbb1cf8a06c6ce790665d5b409cf99",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:c30f95d60229207661c30588d2a10168c0515d5f0affe61e2f7f181e1469efab"
+   },
+   {
+    "parameter": "h",
+    "generator": "blinds (Listed)",
+    "fingerprint": "sha256:c2427ec9b5fe212afd6da07355c626f5b7d526d6ba2cf2342e99794df9134db3"
+   },
+   {
+    "parameter": "p",
+    "generator": "somePlans (Listed)",
+    "fingerprint": "sha256:d9dcaf2e34b8f20dfcf06e5e0801cdd9247ff3131bc9b9ab513bbe69882f6ec0"
+   },
+   {
+    "parameter": "s",
+    "generator": "orders (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:52bdedf474d08b5ecec3a2b2497a24e61af4120c3fcff9e4099523167fa533b6"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blindToSchedule"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ strategy := ForwardOnDemand, entry := \"d\", live := ((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") nil)))), schedule := ((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") nil)))) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons \"a\") ((cons \"c\") ((cons \"b\") ((cons \"d\") nil))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 2
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, h = blindToSchedule, p = { strategy := ForwardOnDemand, entry := \"d\", live := ((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") nil)))), schedule := ((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") nil)))) }, s = nil"
+  },
+  "date": "2026-10-26T06:01:37+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.run.memo_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ],
+   [
+    "python:luthier.run.record_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "DigestSeparatesTheCertificates",
+  "cone": "sha256:a451a2297a417c0073654f2d53d34c62a165963bc16bde8403a4d18e0c6726ff",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:c30f95d60229207661c30588d2a10168c0515d5f0affe61e2f7f181e1469efab"
+   },
+   {
+    "parameter": "h",
+    "generator": "collidings (Listed)",
+    "fingerprint": "sha256:0de196bbd1238b07618dd1eed5ff93eb2b13d3cc1ed1bbbef29e9c6214ba562d"
+   },
+   {
+    "parameter": "k",
+    "generator": "keys (Listed)",
+    "fingerprint": "sha256:ef993f996f96c980ffb8150adf03069bfa500a8c7b54de0479c874a108cea5fe,sha256:7a7f550f8f0dc198a5ea6be04bab09049ff3693b8b58b7f8ebbb98d2442584df"
+   },
+   {
+    "parameter": "hs",
+    "generator": "certLists (Listed)",
+    "fingerprint": "sha256:b9f4e7951f22b6c07e92f2b47c34fbb42e17f2ef7db05d20b2b747449fca4167,sha256:b59f09745215a51fdd627df25bac4b66fea95eb25f4b8f255a56d6c528eea537"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "colliding"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "key1"
+      },
+      {
+       "Printed": "key2"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "hs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons \"sha256:e1\") nil)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 4
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, h = colliding, k = key1, hs = nil"
+  },
+  "date": "2026-10-26T06:01:37+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.run.memo_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ],
+   [
+    "python:luthier.run.record_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "DigestSeparatesThePlan",
+  "cone": "sha256:8eac58bbb604c948581ca8766a6979055e347bba10c7e0809d30245bdd43f8cf",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:c30f95d60229207661c30588d2a10168c0515d5f0affe61e2f7f181e1469efab"
+   },
+   {
+    "parameter": "h",
+    "generator": "collidings (Listed)",
+    "fingerprint": "sha256:0de196bbd1238b07618dd1eed5ff93eb2b13d3cc1ed1bbbef29e9c6214ba562d"
+   },
+   {
+    "parameter": "k",
+    "generator": "keys (Listed)",
+    "fingerprint": "sha256:ef993f996f96c980ffb8150adf03069bfa500a8c7b54de0479c874a108cea5fe,sha256:7a7f550f8f0dc198a5ea6be04bab09049ff3693b8b58b7f8ebbb98d2442584df"
+   },
+   {
+    "parameter": "p",
+    "generator": "planHashes (Listed)",
+    "fingerprint": "sha256:9e03f625dc1f84d6d2f336810b3b2dfb30df16c437e48af0d4cc14cb84c269db"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "colliding"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "key1"
+      },
+      {
+       "Printed": "key2"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:p1\""
+      },
+      {
+       "Printed": "\"sha256:p2\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 4
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, h = colliding, k = key1, p = \"sha256:p2\""
+  },
+  "date": "2026-10-26T06:01:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.run.memo_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ],
+   [
+    "python:luthier.run.record_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "DigestSeparatesTheSeed",
+  "cone": "sha256:2d1b002afed983726dd0c06e08e7297f9d3f7fbc231bbe3b9c520543b519da5a",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:c30f95d60229207661c30588d2a10168c0515d5f0affe61e2f7f181e1469efab"
+   },
+   {
+    "parameter": "h",
+    "generator": "collidings (Listed)",
+    "fingerprint": "sha256:0de196bbd1238b07618dd1eed5ff93eb2b13d3cc1ed1bbbef29e9c6214ba562d"
+   },
+   {
+    "parameter": "k",
+    "generator": "keys (Listed)",
+    "fingerprint": "sha256:ef993f996f96c980ffb8150adf03069bfa500a8c7b54de0479c874a108cea5fe,sha256:7a7f550f8f0dc198a5ea6be04bab09049ff3693b8b58b7f8ebbb98d2442584df"
+   },
+   {
+    "parameter": "s",
+    "generator": "seeds (Listed)",
+    "fingerprint": "sha256:3b6db60c08501eb6b298d319d6b20d6db85899437a9e73ec22b6d5b7edfd7eeb"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "colliding"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "key1"
+      },
+      {
+       "Printed": "key2"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Number": 1.0
+      },
+      {
+       "Number": 2.0
+      },
+      {
+       "Number": 3.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 6
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, h = colliding, k = key1, s = 2"
+  },
+  "date": "2026-10-26T06:01:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.run.memo_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ],
+   [
+    "python:luthier.run.record_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ]
+  ],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "s boundary"
+    },
+    "n": 2
+   }
+  ]
+ },
+ {
+  "law": "DigestSeparatesTheMode",
+  "cone": "sha256:f39cafff6aa363549342102dabbb9b24f0daac42dec8a2369a158e30bdc8a9b3",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:c30f95d60229207661c30588d2a10168c0515d5f0affe61e2f7f181e1469efab"
+   },
+   {
+    "parameter": "h",
+    "generator": "collidings (Listed)",
+    "fingerprint": "sha256:0de196bbd1238b07618dd1eed5ff93eb2b13d3cc1ed1bbbef29e9c6214ba562d"
+   },
+   {
+    "parameter": "k",
+    "generator": "keys (Listed)",
+    "fingerprint": "sha256:ef993f996f96c980ffb8150adf03069bfa500a8c7b54de0479c874a108cea5fe,sha256:7a7f550f8f0dc198a5ea6be04bab09049ff3693b8b58b7f8ebbb98d2442584df"
+   },
+   {
+    "parameter": "m",
+    "generator": "modes (Listed)",
+    "fingerprint": "sha256:01508afe701cb8789c4b00cb485bf887118a8d2475d1143abd9d2032573d7651"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "colliding"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "key1"
+      },
+      {
+       "Printed": "key2"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"plain\""
+      },
+      {
+       "Printed": "\"checked\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 4
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, h = colliding, k = key1, m = \"checked\""
+  },
+  "date": "2026-10-26T06:01:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.run.memo_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ],
+   [
+    "python:luthier.run.record_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "DigestSeparatesTheCone",
+  "cone": "sha256:8f5a7a5735a023e8f54bfe7cca8ce1d6cbe7d7740bbe9e77d48a2b09a02128b6",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:c30f95d60229207661c30588d2a10168c0515d5f0affe61e2f7f181e1469efab"
+   },
+   {
+    "parameter": "h",
+    "generator": "collidings (Listed)",
+    "fingerprint": "sha256:0de196bbd1238b07618dd1eed5ff93eb2b13d3cc1ed1bbbef29e9c6214ba562d"
+   },
+   {
+    "parameter": "k",
+    "generator": "keys (Listed)",
+    "fingerprint": "sha256:ef993f996f96c980ffb8150adf03069bfa500a8c7b54de0479c874a108cea5fe,sha256:7a7f550f8f0dc198a5ea6be04bab09049ff3693b8b58b7f8ebbb98d2442584df"
+   },
+   {
+    "parameter": "c",
+    "generator": "cones (Listed)",
+    "fingerprint": "sha256:efffa4d9ca164639c6d2a00dd88a38d84f1a8b4d7dc4ed6779000f8332d6557d"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "colliding"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "key1"
+      },
+      {
+       "Printed": "key2"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:c1\""
+      },
+      {
+       "Printed": "\"sha256:c2\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 4
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, h = colliding, k = key1, c = \"sha256:c2\""
+  },
+  "date": "2026-10-26T06:01:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.run.memo_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ],
+   [
+    "python:luthier.run.record_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "DigestSeparatesTheDemand",
+  "cone": "sha256:f83c7f2568368dba02d70dad5a80163cbbe23bd0584d846b823f39f285b4ba16",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:c30f95d60229207661c30588d2a10168c0515d5f0affe61e2f7f181e1469efab"
+   },
+   {
+    "parameter": "h",
+    "generator": "collidings (Listed)",
+    "fingerprint": "sha256:0de196bbd1238b07618dd1eed5ff93eb2b13d3cc1ed1bbbef29e9c6214ba562d"
+   },
+   {
+    "parameter": "k",
+    "generator": "keys (Listed)",
+    "fingerprint": "sha256:ef993f996f96c980ffb8150adf03069bfa500a8c7b54de0479c874a108cea5fe,sha256:7a7f550f8f0dc198a5ea6be04bab09049ff3693b8b58b7f8ebbb98d2442584df"
+   },
+   {
+    "parameter": "dk",
+    "generator": "demandKeys (Listed)",
+    "fingerprint": "sha256:91aa78432d9e01d788fc1639a59e089a8ec5fe62a591fab7151d6c7aefa7ae2b"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "colliding"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "key1"
+      },
+      {
+       "Printed": "key2"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "dk",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ decoration := nothing, values := nil }"
+      },
+      {
+       "Printed": "{ decoration := nothing, values := ((cons (\"a\", (Number 1.0))) nil) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted",
+    "held": 4
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, h = colliding, k = key1, dk = { decoration := nothing, values := ((cons (\"a\", (Number 1.0))) nil) }"
+  },
+  "date": "2026-10-26T06:01:36+00:00",
+  "interpreter": "v0.3",
+  "hosts": [
+   [
+    "python:luthier.run.memo_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ],
+   [
+    "python:luthier.run.record_digest",
+    "sha256:8928726ced47f5821e5c557a4c913959327c732670198d1013546ede7dd08298"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "KeyIsOfTheRecord",
+  "cone": "sha256:9fcd3f833cfa1d51011a76353a3e0b7323f1d5cd37fe40dc52e6a0f0cd930e4b",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:c30f95d60229207661c30588d2a10168c0515d5f0affe61e2f7f181e1469efab"
+   },
+   {
+    "parameter": "h",
+    "generator": "constants (Listed)",
     "fingerprint": "sha256:3df7af5cf7125a930fa7ca2ae6928941c1b53e61443e16d4d2d2b0b125bc35fc"
    },
    {

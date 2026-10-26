@@ -1,5 +1,479 @@
 [
  {
+  "law": "ExtendedIsAnObject",
+  "cone": "sha256:7caea38da3817c69d6ea0bf675eba7d4b89ac012807d603dc21e97329a7f5b0b",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "nothingEqual (Listed)",
+    "fingerprint": "sha256:5904c86d47b1192c3a1fa5b8c421ccc56724460dfc749578a286edea69a249c5"
+   },
+   {
+    "parameter": "x",
+    "generator": "errors (Listed)",
+    "fingerprint": "sha256:33bd92283590eccf9f032fafd30f9d94cc6c6e45c224c3ce8df6ca7aa8811dbb"
+   },
+   {
+    "parameter": "p",
+    "generator": "nothingPairs (Listed)",
+    "fingerprint": "sha256:74e3a7a799c42869099afbf8b29adb70cd4ad9cc2d4532a534c97653f3418992"
+   },
+   {
+    "parameter": "c",
+    "generator": "nothingChains (Listed)",
+    "fingerprint": "sha256:30a1f85a6c4ba1d7015476553103af9b535e0e8ceffe59044d83f696e62f0c7d"
+   }
+  ],
+  "seed": 20261025,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nothingEqual"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(finiteDistance 0.0)"
+      },
+      {
+       "Printed": "(finiteDistance 0.5)"
+      },
+      {
+       "Printed": "(finiteDistance 1.0)"
+      },
+      {
+       "Printed": "(finiteDistance 2.0)"
+      },
+      {
+       "Printed": "(infiniteDistance unit)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 5,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Reflexive { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq: model = nothingEqual, x = (finiteDistance 0.0)"
+  },
+  "date": "2026-10-26T05:42:10+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "ExtendedIsAnObject",
+  "cone": "sha256:7caea38da3817c69d6ea0bf675eba7d4b89ac012807d603dc21e97329a7f5b0b",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "nothingEqual (Listed)",
+    "fingerprint": "sha256:5904c86d47b1192c3a1fa5b8c421ccc56724460dfc749578a286edea69a249c5"
+   },
+   {
+    "parameter": "c",
+    "generator": "nothingChains (Listed)",
+    "fingerprint": "sha256:30a1f85a6c4ba1d7015476553103af9b535e0e8ceffe59044d83f696e62f0c7d"
+   }
+  ],
+  "seed": 20261025,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nothingEqual"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "the census nothingChains is empty"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "the census nothingChains is empty"
+  },
+  "date": "2026-10-26T05:42:10+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Transitive { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq",
+  "conjuncts": [
+   "Reflexive { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq",
+   "Symmetric { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq",
+   "Transitive { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq"
+  ],
+  "kind": "Control"
+ },
+ {
+  "law": "ExtendedIsAnObject",
+  "cone": "sha256:7caea38da3817c69d6ea0bf675eba7d4b89ac012807d603dc21e97329a7f5b0b",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "nothingEqual (Listed)",
+    "fingerprint": "sha256:5904c86d47b1192c3a1fa5b8c421ccc56724460dfc749578a286edea69a249c5"
+   },
+   {
+    "parameter": "p",
+    "generator": "nothingPairs (Listed)",
+    "fingerprint": "sha256:74e3a7a799c42869099afbf8b29adb70cd4ad9cc2d4532a534c97653f3418992"
+   }
+  ],
+  "seed": 20261025,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nothingEqual"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "the census nothingPairs is empty"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "the census nothingPairs is empty"
+  },
+  "date": "2026-10-26T05:42:10+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Symmetric { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq",
+  "conjuncts": [
+   "Reflexive { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq",
+   "Symmetric { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq",
+   "Transitive { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq"
+  ],
+  "kind": "Control"
+ },
+ {
+  "law": "ExtendedIsAnObject",
+  "cone": "sha256:7caea38da3817c69d6ea0bf675eba7d4b89ac012807d603dc21e97329a7f5b0b",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "nothingEqual (Listed)",
+    "fingerprint": "sha256:5904c86d47b1192c3a1fa5b8c421ccc56724460dfc749578a286edea69a249c5"
+   },
+   {
+    "parameter": "x",
+    "generator": "errors (Listed)",
+    "fingerprint": "sha256:33bd92283590eccf9f032fafd30f9d94cc6c6e45c224c3ce8df6ca7aa8811dbb"
+   },
+   {
+    "parameter": "p",
+    "generator": "leqPairs (Listed)",
+    "fingerprint": "sha256:630e4a88e8580c208df1c44dbd0eb34c0c33c779c569225bf69f20cb33d57ee7"
+   },
+   {
+    "parameter": "c",
+    "generator": "leqChains (Listed)",
+    "fingerprint": "sha256:f82b54820f10ece9798affd3e666f6a2ba034805d5820bcc39657e30e348577b"
+   }
+  ],
+  "seed": 20261025,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nothingEqual"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(finiteDistance 0.0)"
+      },
+      {
+       "Printed": "(finiteDistance 0.5)"
+      },
+      {
+       "Printed": "(finiteDistance 1.0)"
+      },
+      {
+       "Printed": "(finiteDistance 2.0)"
+      },
+      {
+       "Printed": "(infiniteDistance unit)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := (finiteDistance 0.0), y := (finiteDistance 1.0) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := (finiteDistance 0.0), y := (finiteDistance 0.5), z := (finiteDistance 1.0) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 5,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "Reflexive { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq: model = nothingEqual, x = (finiteDistance 0.0)"
+  },
+  "date": "2026-10-26T05:40:54+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "ExtendedIsAnObject",
+  "cone": "sha256:7caea38da3817c69d6ea0bf675eba7d4b89ac012807d603dc21e97329a7f5b0b",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "nothingEqual (Listed)",
+    "fingerprint": "sha256:5904c86d47b1192c3a1fa5b8c421ccc56724460dfc749578a286edea69a249c5"
+   },
+   {
+    "parameter": "c",
+    "generator": "leqChains (Listed)",
+    "fingerprint": "sha256:f82b54820f10ece9798affd3e666f6a2ba034805d5820bcc39657e30e348577b"
+   }
+  ],
+  "seed": 20261025,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nothingEqual"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := (finiteDistance 0.0), y := (finiteDistance 0.5), z := (finiteDistance 1.0) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "the census gives { x := (finiteDistance 0.0), y := (finiteDistance 0.5), z := (finiteDistance 1.0) }, a value outside ((Chain { finiteDistance : NonNegativeFloat || infiniteDistance : Unit }) (nothingEqual).eq) (7.S1)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "the census gives { x := (finiteDistance 0.0), y := (finiteDistance 0.5), z := (finiteDistance 1.0) }, a value outside ((Chain { finiteDistance : NonNegativeFloat || infiniteDistance : Unit }) (nothingEqual).eq) (7.S1)"
+  },
+  "date": "2026-10-26T05:40:54+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Transitive { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq",
+  "conjuncts": [
+   "Reflexive { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq",
+   "Symmetric { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq",
+   "Transitive { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq"
+  ],
+  "kind": "Control"
+ },
+ {
+  "law": "ExtendedIsAnObject",
+  "cone": "sha256:7caea38da3817c69d6ea0bf675eba7d4b89ac012807d603dc21e97329a7f5b0b",
+  "binding": [
+   {
+    "parameter": "model",
+    "generator": "nothingEqual (Listed)",
+    "fingerprint": "sha256:5904c86d47b1192c3a1fa5b8c421ccc56724460dfc749578a286edea69a249c5"
+   },
+   {
+    "parameter": "p",
+    "generator": "leqPairs (Listed)",
+    "fingerprint": "sha256:630e4a88e8580c208df1c44dbd0eb34c0c33c779c569225bf69f20cb33d57ee7"
+   }
+  ],
+  "seed": 20261025,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "fuel": 3000000,
+   "regionNumbers": 4000,
+   "regionEntries": 400,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "model",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nothingEqual"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ x := (finiteDistance 0.0), y := (finiteDistance 1.0) }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "the census gives { x := (finiteDistance 0.0), y := (finiteDistance 1.0) }, a value outside ((Related { finiteDistance : NonNegativeFloat || infiniteDistance : Unit }) (nothingEqual).eq) (7.S1)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "the census gives { x := (finiteDistance 0.0), y := (finiteDistance 1.0) }, a value outside ((Related { finiteDistance : NonNegativeFloat || infiniteDistance : Unit }) (nothingEqual).eq) (7.S1)"
+  },
+  "date": "2026-10-26T05:40:54+00:00",
+  "interpreter": "v0.3",
+  "hosts": [],
+  "conjunct": "Symmetric { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq",
+  "conjuncts": [
+   "Reflexive { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq",
+   "Symmetric { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq",
+   "Transitive { finiteDistance : NonNegativeFloat || infiniteDistance : Unit } (model).eq"
+  ],
+  "kind": "Control"
+ },
+ {
   "law": "KernelFiniteQuantifiers",
   "cone": "sha256:c3f3dd0b2bf7ff2aae6fc0cddb01b0693fefcd55d6f96436bd9f0d053a2f7569",
   "binding": [
