@@ -37,3 +37,5 @@ pytest over test_run, test_session, test_modes, test_result_store, test_file_kin
 A run refused at its first action has already acted (the liar's lines are on stdout), but by the existing rule nothing is recorded. Should a refused run whose action reached the world be recorded, as a run that did not finish?
 
 Coordinator's answer (2026-10-26): yes. What reached the world is evidence (P3 keeps the original evidence; L4: an action is recorded), so the run is recorded as not finished, with what it printed and why it was refused.
+
+Implemented 2026-10-26 by agent P (cc36845): run.py's `RefusedAfterActing`, a `Refused` and a `Cut`, raised when a refusal comes after an action was applied to the token (the Runner counts them, `acted`); `luthier run` records it with `finished` false, reason "refused", `output` the bytes accepted and `refusals`. The liar's test fails before and passes after; tests/test_run.py passes but for the known stale `test_a_bound_maximize_runs_once`. The comment at core/structures/algebraic.lth:134 now names the roots (5b20e73).
