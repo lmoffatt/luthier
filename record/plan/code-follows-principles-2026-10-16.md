@@ -168,7 +168,11 @@ decision-assistant fork, now luthier-8c), in this order after j2a:
   count the reason; `MaximizerStationary`'s `else true` and `QuadraticConverges`'s
   `if s.maxIter < budget then true` go; convergence as a domain plus a step bound derived from the
   theory (Newton 1, LM a handful, gradient about kappa log(1/tol)), never a constant; a `Reason` why
-  an algorithm stopped; the step count recorded.
+  an algorithm stopped; the step count recorded. Done 2026-10-26 (night Agent V, bc4e274, c450af7;
+  vacuity by wave A's A3, 7e06717): belief.lth's `MaxResult` is `{ x, reason, steps }`, `Maximizer`
+  declares `quadraticSteps`, `QuadraticConverges` owes convergence on `quadraticReachable` within
+  it, `MaximizerStationary` checks every reason; optimization.lth §4 derives LM's count and tests
+  it (`LMStepsOnQuadratic`). Report: record/plan/after-core-2026-10-23/report-night-V.md.
 - the rest of D-2026-10-16-k and -l: a host action validated once per hash of the model's cone, its
   arguments kept as evidence (item 9); `Bounded n` a domain, exhaustive on its box `Exhaustive`,
   `ForallOnPoints` following (item 17); per-law cutoffs a typed field of `Demand` (item 20); the most
