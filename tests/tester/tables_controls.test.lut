@@ -95,3 +95,25 @@ test "TableIsIndexed" ExhaustiveMode (seed <- 20261021) (whereBindings <- [bind 
   bind "model" "noRows", bind "o" "tableEquality", bind "a" "rowEquality", bind "c" "ofOneSchema", bind "d" "ofOneSchema"]) (control <- true)
 test "TableIsAnObject" ExhaustiveMode (seed <- 20261021) (whereBindings <- [bind "model" "neverEqual", bind "x" "ofOneSchema",
   bind "p" "tablePairs", bind "c" "tableChains"]) (control <- true)
+
+-- [2026-10-26, Claude Sonnet 5.5, record/plan/audit-algebras-2026-10-22/prompt-controls.md] The
+-- conjuncts of TableIsAnObject that `neverEqual` does not reach (L9.14): it refutes only the
+-- reflexive one, since no pair is related by it. Two equalities that relate some pairs: one table
+-- is equal to another when it has no more rows (reflexive and transitive, not symmetric), and when
+-- the row counts differ by at most one (reflexive and symmetric, not transitive). The pairs and
+-- the chain are drawn from tables of 0, 1 and 2 rows, inside each equality's relation.
+noMoreRows : Table -> Table -> Bool := fn t u { t.nRows <= u.nRows }
+nearRows : Table -> Table -> Bool := fn t u { t.nRows <= u.nRows + 1 and u.nRows <= t.nRows + 1 }
+noRowsOfK : Table := { nRows := 0, names := ["k"], kinds := ["int"], cell := fn c r { nothing } }
+twoRowsOfK : Table := { nRows := 2, names := ["k"], kinds := ["int"], cell := fn c r { if c == "k" then just (int r) else nothing } }
+ofRowCounts : List Table := [noRowsOfK, oneOfK, twoRowsOfK]
+lessRowsEquality : List (Object Table) := [{ eq := noMoreRows }]
+nearRowsEquality : List (Object Table) := [{ eq := nearRows }]
+lessRowsPairs : List (Related Table noMoreRows) := [{ x := oneOfK, y := twoRowsOfK }]
+nearRowsChains : List (Chain Table nearRows) := [{ x := noRowsOfK, y := oneOfK, z := twoRowsOfK }]
+noChains : List (Chain Table noMoreRows) := [{ x := oneOfK, y := oneOfK, z := oneOfK }]
+noPairs : List (Related Table nearRows) := [{ x := oneOfK, y := oneOfK }]
+test "TableIsAnObject" ExhaustiveMode (seed <- 20261021) (whereBindings <- [bind "model" "lessRowsEquality", bind "x" "ofRowCounts",
+  bind "p" "lessRowsPairs", bind "c" "noChains"]) (control <- true)
+test "TableIsAnObject" ExhaustiveMode (seed <- 20261021) (whereBindings <- [bind "model" "nearRowsEquality", bind "x" "ofRowCounts",
+  bind "p" "noPairs", bind "c" "nearRowsChains"]) (control <- true)
