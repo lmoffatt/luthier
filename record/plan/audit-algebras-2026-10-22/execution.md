@@ -19,6 +19,16 @@ section 3: 9b the `Within` form, 9c ε̂ recorded, 9d the budget law's mode) are
 no execution document; the audit's numerical gaps are theirs, so they appear here as B1, C1 and C2
 with that report as a source [mine: the folding].
 
+## Status, 2026-10-26 morning (coordinator)
+
+Luciano answered the five questions (D-2026-10-25-a), all as recommended, with question 1's
+addition: the evidence composition is a parameter, any reasonable choice definable, none that can
+loop. Done since: B2 (report-B2.md), C1 (report-C1.md), B1, B3, D1 and the tester's assumed grade
+(report-b1-b3-d1.md), each re-certified with the suite green; the principles carry the answers
+(L10.2, L10.3, L10.5, L10.8, L6.15, L9.14, L13.3, L13.4, L5.22, O13). D1 found 162 conjuncts across
+56 laws with no refuted model (uncontrolled-2026-10-26.tsv); three agents write their controls now
+(prompt-controls.md). Next: C2 (after C1), C3, then wave E with the planner.
+
 ## Status, 2026-10-23 evening (coordinator)
 
 Wave A done: A1 (03723fa, b395a05), A8 (ac2c7b8), A2 and A7 (report-wave-a-2.md), A4, A5, A6 and the
