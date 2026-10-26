@@ -2116,7 +2116,10 @@ def test_a_control_runs_every_conjunct_and_writes_an_entry_for_each(tmp_path):
 def test_the_tape_example_lists_its_controls_per_conjunct():
     """Bite D1's acceptance: of the four conjuncts of `Tape` and the five of `MarkIsAMetric`, those with a
     refuted model in the tape's store; `hooked` now runs every conjunct, so `ReadingSteps` is refuted
-    too, and `MetresWithin t` is controlled by `noRoom`, its own law's control."""
+    too, and `MetresWithin t` is controlled by `noRoom`, its own law's control. Since
+    report-controls-E.md (2026-10-26) every conjunct has its own: `lopsided` refutes
+    `ReadingSymmetric t` alone, and `flatMetric`, `oneWayMetric`, `squaredMetric` and
+    `negativeMetric` cover `MarkIsAMetric`'s four that were uncontrolled."""
     lines, claims = tester.line_claims(TAPE)
     entries = certify.read_stores(claims)
     controls = [e for e in entries if certify.is_control(e)]
@@ -2126,5 +2129,5 @@ def test_the_tape_example_lists_its_controls_per_conjunct():
         if not control and parts.get(law):
             found[law] = certify.uncontrolled_conjuncts(controls, law, cone, [c for c, _, _ in parts[law]],
                                                         {c: (h, k) for c, h, k in parts[law]}, entries)
-    assert [c for c, _ in found["Tape"]] == ["ReadingSymmetric t"]
-    assert len(found["MarkIsAMetric"]) == 4 and not any(c.startswith("MetricZeroOnEqual") for c, _ in found["MarkIsAMetric"])
+    assert {law: len(parts[law]) for law in found} == {"Tape": 4, "MarkIsAMetric": 5}
+    assert found == {"Tape": [], "MarkIsAMetric": []}
