@@ -933,12 +933,26 @@ def worse_ratio(r, s):
 MEASURES = "within_measures"  # the runner's attribute `evaluate` appends a numerical law's measures to
 
 
+def on_its_box(runner, loaded, outcome):
+    """laws.lth's `ForallOnPoints` under `Bounded n` (D-2026-10-16-k item 17): a run over every value
+    of a box, each holding, nothing raised, is confirmed on that box and graded exhaustive (test.lth's
+    `grade`), the box its domain; `run_spec` gives such a run "Supported", as any coverage short of
+    the whole type, and its source is kept as it was, since it is hashed into the identity of every
+    sampled entry (`drawing_revision`) and draws nothing differently for this."""
+    if (outcome.verdict == "Supported" and isinstance(outcome.evidence, Points) and not outcome.raised
+            and outcome.refuting is None and _base(outcome.evidence.coverage) == "Bounded"):
+        return replace(outcome, verdict="Confirmed",
+                       grade=grade_of(runner, "Confirmed", outcome.evidence.coverage, loaded))
+    return outcome
+
+
 def run_measured(runner, spec, fuel, loaded=None, start=None):
     """`run_spec`, and for a numerical law (laws.lth §5) its measures: the worst ratio overall and per
-    region (`measured_record`) in the outcome's `measured`."""
+    region (`measured_record`) in the outcome's `measured`; a run over a box confirmed on it
+    (`on_its_box`)."""
     law = _as_called(loaded, spec.law)
     if not is_within(runner, law):
-        return run_spec(runner, spec, fuel, loaded, start)
+        return on_its_box(runner, loaded, run_spec(runner, spec, fuel, loaded, start))
     setattr(runner, MEASURES, [])
     try:
         outcome = run_spec(runner, spec, fuel, loaded, start)
@@ -953,7 +967,7 @@ def run_measured(runner, spec, fuel, loaded=None, start=None):
     scaling = scaling_record(runner, law, measures)
     if scaling is not None:
         measured["scaling"] = scaling
-    return replace(outcome, measured=measured)
+    return on_its_box(runner, loaded, replace(outcome, measured=measured))
 
 
 # [bite C2, record/plan/audit-algebras-2026-10-22/execution.md; L9.17, D-2026-10-18-d; the audit of
@@ -1374,14 +1388,13 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
             regions, labels = regions_record(found), labels_record(named, len(points))
         except _RAISES:
             pass
-    # laws.lth's ForallOnPoints; a case that raised settles nothing (its evidence is NotRun); every
-    # value of a box (`Bounded n`) confirms on that box, the box the domain (D-2026-10-16-k item 17)
+    # laws.lth's ForallOnPoints; a case that raised settles nothing (its evidence is NotRun)
     if refuting is not None:
         verdict = "Refuted"
     elif raised:
         verdict = "Unsettled"
     else:
-        verdict = "Confirmed" if _base(coverage) in ("Exhaustive", "Bounded") else "Supported"
+        verdict = "Confirmed" if _base(coverage) == "Exhaustive" else "Supported"
     # a refutation stands at any fuel; a run cut by its fuel otherwise settles nothing (D-2026-10-15-g)
     return Outcome(spec, evidence, verdict, grade_of(runner, verdict, coverage, loaded), len(points), refuting,
                    raised, names, out_of_fuel=spent if verdict != "Refuted" else None, regions=regions,
