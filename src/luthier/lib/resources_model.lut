@@ -1,0 +1,18 @@
+-- resources_model.lut: the resources of resources.lth composed as its laws state, part by part, and the
+-- claim that they are a `ResourceAlgebra`.
+--
+-- Written 2026-10-26 by Claude Opus 5.5 (agent C2), bite C2 of record/plan/audit-algebras-2026-10-22/
+-- execution.md, on record/plan/after-core-2026-10-23/prompt-night-2026-10-26.md. Sources: resources.lth
+-- §1; the coordinator's correction to D-2026-10-18-i (2026-10-23). Its laws run in
+-- tests/tester/resources_laws.test.lut, with a control per conjunct.
+
+import "resources.lth" Resources ResourceAlgebra largerCount
+
+-- work adds in both; the span adds in sequence and takes the larger in parallel; the peak memory takes
+-- the larger in sequence and adds in parallel; nothing spent is zero in every part
+workSpanMemory : ResourceAlgebra := {
+  none := { work := 0, span := 0, memory := 0 },
+  sequence := fn r s { { work := r.work + s.work, span := r.span + s.span, memory := largerCount r.memory s.memory } },
+  parallel := fn r s { { work := r.work + s.work, span := largerCount r.span s.span, memory := r.memory + s.memory } },
+}
+WorkSpanMemoryIsAResourceAlgebra (model : ResourceAlgebra <- workSpanMemory) : Bool := ResourceAlgebra model

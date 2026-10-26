@@ -20,7 +20,8 @@
 --      does, or nothing known; its laws (the audit's list).                                done
 --   §3 Scaling: the least-squares slope of the log of what was spent on the log of the
 --      stated rate, within the bound the spread of a count allows.                         done
--- No consumer reads these yet (the planner's bite, L6.3); the first is examples/bisection.lut.
+-- The model of §1 is resources_model.lut's. No planner reads these yet (L6.3); the first consumer is
+-- examples/bisection.lut.
 
 import "numbers.lth" Elementary Doubles abs
 import "laws.lth" Law Within Case
@@ -63,12 +64,7 @@ ResourceAlgebra (m : ResourceAlgebra) :=
   & Preserving Resources Nat (structural Nat) m.sequence largerCount memoryOf
   & Preserving Resources Nat (structural Nat) m.parallel addCounts memoryOf
 
--- the model: the compositions the laws state, part by part
-workSpanMemory : ResourceAlgebra := {
-  none := { work := 0, span := 0, memory := 0 },
-  sequence := fn r s { { work := r.work + s.work, span := r.span + s.span, memory := largerCount r.memory s.memory } },
-  parallel := fn r s { { work := r.work + s.work, span := largerCount r.span s.span, memory := r.memory + s.memory } },
-}
+-- the model, `workSpanMemory`, is resources_model.lut's
 
 -- what is spent is no more than what is spent elsewhere, part by part (the order a sufficient amount
 -- is compared in)
