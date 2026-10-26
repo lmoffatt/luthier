@@ -439,14 +439,16 @@ models, `structural`), the arguments of `==`, `and`, `or` and of an operation th
 commutative exactly are sorted, those it claims associative exactly flattened (floating-point
 `+` is sorted and never flattened), its variables are named by first occurrence, and the result is
 matched against the same form of each property of `core/properties/` and of the structures' single
-laws (`src/luthier/normal.py`). An exact property at an operation the core claims it of only
+laws (`src/luthier/normal.py`), each parameter's term of the parameter's type and the property's
+last parameter the law's last; a property whose body is any application (`Least`'s `leq bottom
+x`) is left out of that dictionary. An exact property at an operation the core claims it of only
 within a bound (`Associative` at float `+`, or at `d.plus` when `Doubles` claims
 `PlusAssociativeWithin d`) is not reported. The notice changes no cone, store, grade or result.
 Its limit: it recognizes what the order decides and claims nothing on a law it does not list.
 Equality of programs is undecidable (Richardson's theorem for the elementary functions);
 equations other than commutativity and associativity would need completion (Knuth-Bendix), which
 may not terminate; and a law that is one of the claims the order used (an integer associativity
-written out) becomes `X == X` and is no instance.
+written out, or `x + y == y + x` at `Int`) becomes `X == X` and is no instance.
 
 ## Open
 
