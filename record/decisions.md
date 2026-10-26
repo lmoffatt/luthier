@@ -3468,4 +3468,4 @@ D-2026-10-26-a  An integer literal takes the other operand's numeric type, in ar
 Author:     the coordinator (one commit undoes it; Luciano told the next morning)
 Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-26 night)
 Kind:       elaborate.py (`comparison`, `operator_use`), spec 4.R9
-Status:     current
+Status:     current; comparisons in 444973f, arithmetic in 6142e9d (`numeric_literals`, 2026-10-27)
