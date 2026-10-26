@@ -1189,6 +1189,26 @@ def test_equality_on_the_labels_of_a_sum():
     assert step((maybe_data(),), bin_("==", lab("int", num(1)), lab("int", num(1)))) is None
 
 
+def test_equality_on_a_unit_label_applied_to_unit():
+    # night bite T (report-B2.md): a label whose part is `Unit` is written applied to `unit`
+    # (core.lut's `infiniteDistance unit`) as well as bare; both are its injection, so
+    # `finiteDistance 0.0 == infiniteDistance unit` steps to false
+    unit_data = Define("Unit", Universe(), Data("Unit", (("unit", Var("Unit")),)))
+    extended = Sum((("finiteDistance", Var("Float64")), ("infiniteDistance", Var("Unit"))))
+    p = (unit_data, Define("Extended", Universe(), extended))
+    lab = lambda l, v: App(Var(l), v)
+    finite, infinite = lab("finiteDistance", flt(0.0)), lab("infiniteDistance", Var("unit"))
+    assert reduce(p, 30, bin_("==", finite, infinite)) == truth(False)
+    assert reduce(p, 30, bin_("==", infinite, finite)) == truth(False)
+    assert reduce(p, 30, bin_("/=", finite, infinite)) == truth(True)
+    assert reduce(p, 30, bin_("==", infinite, infinite)) == truth(True)
+    assert reduce(p, 30, bin_("==", infinite, Var("infiniteDistance"))) == truth(True)
+    assert reduce(p, 30, bin_("==", finite, lab("finiteDistance", flt(0.0)))) == truth(True)
+    assert reduce(p, 30, bin_("==", finite, lab("finiteDistance", flt(1.0)))) == truth(False)
+    # a label applied to more than its part is no value
+    assert step(p, bin_("==", App(infinite, Var("unit")), infinite)) is None
+
+
 # 3.S31 [proposed]: a record type's label binds in the later fields' types.
 def _mat():
     from luthier.term import Pi

@@ -688,11 +688,13 @@ def _constructor(t: Term) -> tuple[str, tuple[Term, ...]] | None:
 
 
 class _Constructors(dict):
-    """A constructor's name to the constructors of its data; `arity` counts its type's Pis."""
+    """A constructor's name to the constructors of its data; `arity` counts its type's Pis.
+    `unit_labels` the labels of a sum whose part is `Unit`: written bare or applied to `unit`."""
 
     def __init__(self) -> None:
         super().__init__()
         self.arity: dict[str, int] = {}
+        self.unit_labels: set[str] = set()
 
 
 def _concrete(constructors: _Constructors, t: Term) -> bool:
@@ -715,7 +717,8 @@ def _concrete(constructors: _Constructors, t: Term) -> bool:
                 pending.append(v)
             case _:
                 view = _constructor(node)
-                if view is None or view[0] not in constructors or len(view[1]) != constructors.arity[view[0]]:
+                if view is None or view[0] not in constructors or len(view[1]) != constructors.arity[view[0]] and not (
+                        view[0] in constructors.unit_labels and len(view[1]) == 1):
                     return False
                 pending.extend(view[1])
     return True
@@ -1033,6 +1036,10 @@ def _build_tables(program: Program) -> tuple[dict[str, Term | None], _Constructo
             for k, v in labels:
                 constructors[k] = names
                 constructors.arity[k] = 0 if v == Var("Unit") else 1
+                if v == Var("Unit"):
+                    # [night bite T, report-B2.md] `infiniteDistance unit` as well as `infiniteDistance`:
+                    # its one part, when written, is compared as any part (`_equal` zips the parts)
+                    constructors.unit_labels.add(k)
         if isinstance(node, tuple):
             pending.extend(node)
         elif is_dataclass(node):
