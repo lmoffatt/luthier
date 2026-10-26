@@ -816,11 +816,13 @@ def test_certify_lists_the_laws_of_tables_with_their_controls(capsys):
     # core bite 11 added TableIsIndexed and TableIsAnObject, each with its control
     assert out[0] == f"{laws}: 10 laws, 10 lines ran, 0 known"
     assert "  CellsOfTheirKind: cases; controlled (refuted on its control at t = holeT)" in out
-    assert all("; controlled (refuted on its control at " in line for line in out[1:11])
-    assert out[11] == f"{controls}: 0 laws, 10 controls, 10 lines ran, 0 known"
+    # TableIsAnObject has three controls (5ca7e15 added two): its line says "controls"
+    assert all("; controlled (refuted on its control at " in line for line in out[1:10])
+    assert "  TableIsAnObject: cases; controlled (refuted on its controls at " in out[10]
+    assert out[11] == f"{controls}: 0 laws, 12 controls, 12 lines ran, 0 known"
     assert out[12] == ("  control of CellsOfTheirKind on holes (Listed): refuted at t = holeT: "
                        "the control passed")
-    assert all(line.endswith(": the control passed") for line in out[12:22])
+    assert all(line.endswith(": the control passed") for line in out[12:24])
 
 
 # the laws and the functions live in a library (a test program is never imported, 12.R2), whose
