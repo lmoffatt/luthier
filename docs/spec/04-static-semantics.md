@@ -228,7 +228,9 @@ its binding's domain, and a projection names a field its record has. The two ope
 comparison of the kernel (`==`, `/=`, `<`, `<=`, `>`, `>=`) are of one type, the right one walked
 at the left one's; an integer literal compared with a `Float64` is the `Float64` it denotes
 (`x < 0` is `x < 0.0`), since the kernel compares constants of one type (3.S17). [proposed, night
-bite T, 2026-10-26; tests/test_check.py, tests/test_elaborate.py] A type fits through its
+bite T, 2026-10-26; tests/test_check.py, tests/test_elaborate.py] So is one beside a `Float64` in
+arithmetic (`+`, `-`, `*`, `/`, `mod`): `x + 0` is `x + 0.0`, on either side (D-2026-10-26-a;
+tests/test_elaborate.py). A type fits through its
 definition and a subtype at its base (a value crossing into a subtype is checked where it crosses,
 4.R5, or owes its predicate, 4.R11); a sum by its shape (3.R2); a record as the named product of
 its fields, and one written with its labels by them. An argument refines its domain one way through
