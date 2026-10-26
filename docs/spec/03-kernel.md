@@ -154,7 +154,10 @@ the matching branch with pattern variables substituted. Programs: `k_sum.accept.
 compared, `tests/eval/data.lut` (2) and `tests/eval/factorial.lut` (24).
 
 **3.S17. Prim.** [implemented] Arithmetic and comparisons on literals of `Int`, `Float64` and
-`String`, and `==` on values of structures with structural equality (`spec 4.R8`). Program with
+`String`, and `==` on values of structures with structural equality (`spec 4.R8`). A label of a
+sum met in the program compares as its injection; one whose part is `Unit` is the same value
+written bare or applied to `unit` (`infiniteDistance unit`). [proposed, night bite T, 2026-10-26;
+tests/test_kernel.py] Program with
 its value compared: `tests/eval/arithmetic.lut` (19); `k_union.accept.lut` (arithmetic on
 `Float64`) and `k_dependent_product.accept.lut` (comparisons on `Int`) are only checked.
 
